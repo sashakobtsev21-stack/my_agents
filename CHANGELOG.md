@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-alpha.80] - 2025-01-30
+
+### ✨ New Features
+- **Real Token Usage Tracking**: Track actual Claude API token consumption instead of simulated data
+  - Integrates with Claude Code's OpenTelemetry metrics
+  - Accurate cost calculations based on Anthropic pricing
+  - Agent-level token breakdown showing usage by agent type
+  - CSV export for detailed billing and analysis reports
+  - Smart optimization recommendations to reduce costs
+
+- **Enhanced Analytics Command**: 
+  - `claude-flow analysis token-usage --breakdown --cost-analysis`
+  - Real-time token consumption metrics
+  - Cost projections with current Anthropic pricing
+  - Filter by agent type with `--agent <type>`
+
+- **Optional Monitoring During Init**:
+  - `claude-flow init --monitoring` sets up token tracking
+  - Creates `.claude-flow/` directory with tracking configuration
+  - Generates environment setup script for telemetry
+  - Adds token tracking hooks to Claude settings
+
+### 🔧 Technical Improvements
+- **Token Tracking Implementation**: Real metrics integration in `analysis.js`
+- **Init Command Enhancement**: Added `setupMonitoring()` function
+- **Help Text Updates**: Added monitoring options to init and analysis commands
+- **Documentation**: Comprehensive guide in `/docs/REAL_TOKEN_TRACKING.md`
+
+### 📊 Monitoring Features
+- Supports multiple data sources:
+  - OpenTelemetry metrics (when `CLAUDE_CODE_ENABLE_TELEMETRY=1`)
+  - Local Claude Code metrics (`~/.claude/metrics/usage.json`)
+  - Project-specific tracking (`.claude-flow/token-usage.json`)
+- Automatic fallback between data sources
+- Monthly rotation for tracking data
+
 ## [2.0.0-alpha.79] - 2025-01-30
 
 ### 🚀 Major Improvements
