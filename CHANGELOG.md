@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - CSV export for detailed billing and analysis reports
   - Smart optimization recommendations to reduce costs
 
+- **Real Performance Analytics**: ALL analysis commands now use real data
+  - `claude-flow analysis performance-report` - Real task execution metrics
+  - `claude-flow analysis bottleneck-detect` - Actual system bottleneck detection
+  - Automatic performance tracking for all commands
+  - System resource monitoring (CPU, memory)
+  - Agent performance metrics by type
+  - Trend analysis comparing periods
+
 - **Enhanced Analytics Command**: 
   - `claude-flow analysis token-usage --breakdown --cost-analysis`
   - Real-time token consumption metrics
@@ -28,16 +36,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Adds token tracking hooks to Claude settings
 
 ### 🔧 Technical Improvements
+- **Performance Metrics System**: Complete real-time metrics collection in `performance-metrics.js`
+- **Performance Hooks**: Automatic tracking integration for all commands
 - **Token Tracking Implementation**: Real metrics integration in `analysis.js`
 - **Init Command Enhancement**: Added `setupMonitoring()` function
 - **Help Text Updates**: Added monitoring options to init and analysis commands
-- **Documentation**: Comprehensive guide in `/docs/REAL_TOKEN_TRACKING.md`
+- **Documentation**: 
+  - Token tracking guide in `/docs/REAL_TOKEN_TRACKING.md`
+  - Performance tracking guide in `/docs/REAL_PERFORMANCE_TRACKING.md`
 
 ### 📊 Monitoring Features
-- Supports multiple data sources:
+- **Token Usage Tracking**:
   - OpenTelemetry metrics (when `CLAUDE_CODE_ENABLE_TELEMETRY=1`)
   - Local Claude Code metrics (`~/.claude/metrics/usage.json`)
   - Project-specific tracking (`.claude-flow/token-usage.json`)
+- **Performance Tracking**:
+  - Task execution metrics (duration, success rate)
+  - Agent performance by type
+  - System resource monitoring
+  - Bottleneck detection and recommendations
+  - HTML/JSON/CSV export formats
 - Automatic fallback between data sources
 - Monthly rotation for tracking data
 
