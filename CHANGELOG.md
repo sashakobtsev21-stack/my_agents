@@ -5,6 +5,80 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-alpha.79] - 2025-01-30
+
+### 🚀 Major Improvements
+- **Removed Deno Dependency**: Complete migration to pure Node.js implementation (#521)
+  - Eliminated all Deno runtime references
+  - Simplified installation and deployment
+  - Fixed TypeScript compilation issues
+  - Improved cross-platform compatibility
+
+- **TBench Integration**: Added comprehensive Terminal Bench support
+  - Created `ClaudeFlowInstalledAgent` implementation
+  - Added installation script for TBench containers
+  - Integrated with TBench evaluation framework
+  - Support for both swarm and hive execution modes
+
+- **Headless Mode Support**: Fixed non-interactive execution (#510)
+  - Claude CLI now works in headless/production environments
+  - Improved CI/CD pipeline compatibility
+  - Better error handling in non-TTY environments
+
+### 🐛 Bug Fixes
+- **Commander Dependency**: Fixed missing commander module error
+- **GitHub CLI Timeout**: Resolved timeout issues with special characters (#514, #522)
+- **Memory System**: Addressed memory persistence issues (#530)
+- **Windows Compatibility**: Continued improvements from alpha 75
+- **Hook Execution**: Stable hook system from previous alphas
+
+### 📚 Documentation
+- **TBench Guide**: Added comprehensive integration documentation
+- **Alpha Test Report**: Created detailed testing documentation
+- **README Updates**: Fixed inaccuracies identified in #478
+- **Maestro Workflow Guide**: Added comprehensive guide (#512)
+
+### 🔧 Technical Improvements
+- **Build System**: Cleaned up TypeScript compilation warnings
+- **Package Size**: Optimized to ~46.3MB including binary
+- **Test Suite**: Identified configuration issues (non-blocking)
+- **MCP Tools**: Verified all 87 tools functioning correctly
+
+### 🎯 Known Issues
+- Test suite configuration needs adjustment (development only)
+- Some TypeScript warnings remain (don't affect runtime)
+- MCP process proliferation in some scenarios (#527)
+
+### 📦 Dependencies
+- Updated all dependencies to latest stable versions
+- Added explicit commander dependency
+- Maintained compatibility with Node.js 20+
+
+## [2.0.0-alpha.78] - 2025-01-28
+
+### 🚀 Features
+- **Agent System Fix**: Dynamic loading from .claude/agents/ (#485)
+- **SPARC Experience**: Cleaned up legacy warnings
+- **GitHub Safe Utilities**: Added timeout protection (#514)
+
+### 🐛 Bug Fixes
+- **Hooks Pre-task**: Enhanced exit with timeout protection
+- **Legacy Warnings**: Removed Deno-related warnings
+
+## [2.0.0-alpha.77] - 2025-01-26
+
+### 🔧 Improvements
+- Native Hive Mind Maestro Implementation
+- Complete Maestro cleanup and consolidation
+- Enhanced agent type system
+
+## [2.0.0-alpha.75] - 2025-01-24
+
+### 🚀 Windows Compatibility
+- Major Windows compatibility overhaul
+- Fixed path handling issues
+- Improved cross-platform support
+
 ## [2.0.0-alpha.70] - 2025-01-22
 
 ### 🔧 Critical Quote Handling Fix
