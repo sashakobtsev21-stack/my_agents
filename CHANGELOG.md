@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0-alpha.89] - 2025-08-12
 
+> **Highlights**: Real Claude Code stream chaining, enhanced help system with emojis, working pipeline execution, and complete removal of simulation mode in training.
+
 ### ✨ New Features
 
 #### 🔗 Stream Chain Command - Real Claude Code Execution
