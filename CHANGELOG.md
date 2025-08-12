@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ New Features
 
-#### 🔗 Stream Chain Command
+#### 🔗 Stream Chain Command - Real Claude Code Execution
 - **Complete Implementation**: Fixed missing `stream-chain` command (Issue #642)
   - Added full command handler in `/src/cli/simple-commands/stream-chain.js`
   - Registered in command registry with all subcommands
@@ -17,6 +17,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added background execution support with `--background` or `--bg` flags
   - Process tracking in `.claude-flow/stream-chains.json`
   - Full integration with Claude Code's background command system
+
+- **Real Claude Code Integration**: Stream-chain now uses actual Claude Code execution
+  - Fixed stream-json format compatibility with Claude Code
+  - Proper context preservation between chained steps
+  - Extracts assistant responses from stream-json output
+  - Transforms output into context for next step
+  - Handles system message filtering automatically
+  - ~10-30s per step with full context preservation
+
+- **Enhanced Help System**: Comprehensive documentation with emoji formatting
+  - Brief help via `--help` with expanded details section
+  - Full documentation via `stream-chain help` subcommand
+  - Emoji section headers for better readability (📚 SUBCOMMANDS, ⚙️ OPTIONS, etc.)
+  - Added pipeline subcommand with 4 predefined workflows:
+    - `analysis` - Code analysis and improvement pipeline
+    - `refactor` - Automated refactoring workflow
+    - `test` - Comprehensive test generation
+    - `optimize` - Performance optimization pipeline
+
+- **Working Implementation Details**:
+  - Uses `claude -p --output-format stream-json --verbose` for proper execution
+  - Context injection via prompts (workaround for `--input-format` limitations)
+  - Timeout handling with configurable `--timeout` flag (default 30s)
+  - Verbose mode shows command execution and content preview
+  - Test suite validates context preservation between steps
 
 #### 🧠 Real Training Pipeline
 - **Removed Simulation Mode**: Training now exclusively uses real code execution
