@@ -107,6 +107,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Background execution properly tracked
   - Monitor and kill commands functional
 
+- **Claude Code Integration Fixed**: Resolved multiple issues with real execution
+  - Fixed "Expected message type 'user' got 'system'" error
+  - Implemented proper stream-json message filtering
+  - Fixed timeout issues with Claude Code execution
+  - Resolved `--input-format` and `--output-format` compatibility
+  - Working context preservation between chained steps
+
 #### Training Pipeline
 - **Fixed Simulation Issues**:
   - Removed `Math.random()` simulation that showed 0% improvement
