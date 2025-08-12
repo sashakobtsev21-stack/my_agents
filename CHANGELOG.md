@@ -258,7 +258,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.claude/commands/truth/README.md` - Truth metrics documentation
 
 #### Modified Files
-- `/src/cli/command-registry.js` - Added stream-chain command registration
+- `/src/cli/command-registry.js` - Updated pair command to use new pair.js
 - `/src/cli/simple-commands/training-pipeline.js` - Removed simulation mode
 - `/src/cli/simple-commands/verification.js` - Enhanced verification features
 - `/.claude-flow/agents/profiles.json` - Updated with real execution metrics
