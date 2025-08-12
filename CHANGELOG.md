@@ -223,6 +223,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/claude-flow-wiki/Stream-Chain-Command.md` - Wiki documentation
 - `/docs/training-pipeline-real-only.md` - Real training documentation
 - `/performance-validation.md` - Performance validation report
+- `.claude/commands/stream-chain/README.md` - Stream chain main documentation
+- `.claude/commands/stream-chain/pipeline.md` - Pipeline documentation
+- `.claude/commands/stream-chain/run.md` - Run command documentation
+- `.claude/commands/pair/README.md` - Pair programming overview
+- `.claude/commands/pair/start.md` - Starting sessions guide
+- `.claude/commands/pair/modes.md` - Collaboration modes guide
+- `.claude/commands/pair/session.md` - Session management guide
+- `.claude/commands/pair/config.md` - Configuration reference
+- `.claude/commands/pair/commands.md` - Command reference
+- `.claude/commands/pair/examples.md` - Real-world examples
+- `.claude/commands/verify/README.md` - Verification documentation
+- `.claude/commands/truth/README.md` - Truth metrics documentation
 
 #### Modified Files
 - `/src/cli/command-registry.js` - Added stream-chain command registration
@@ -230,6 +242,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/src/cli/simple-commands/verification.js` - Enhanced verification features
 - `/.claude-flow/agents/profiles.json` - Updated with real execution metrics
 - `/CLAUDE.md` - Updated with stream chain examples
+- `/CHANGELOG.md` - Updated with alpha-89 release notes
 
 ### 🚀 Migration Notes
 
