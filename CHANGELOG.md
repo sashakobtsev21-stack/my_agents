@@ -240,6 +240,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### New Files
 - `/src/cli/simple-commands/stream-chain.js` - Stream chain command implementation
 - `/src/cli/simple-commands/train-and-stream.js` - Integrated training/streaming
+- `/src/cli/simple-commands/pair.js` - Interactive pair programming implementation
 - `/claude-flow-wiki/Stream-Chain-Command.md` - Wiki documentation
 - `/docs/training-pipeline-real-only.md` - Real training documentation
 - `/performance-validation.md` - Performance validation report
