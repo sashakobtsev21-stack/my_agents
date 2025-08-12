@@ -157,6 +157,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📚 Documentation
 
 #### New Documentation
+- **Command Documentation System**: Complete docs in `.claude/commands/`
+  - Stream chain with background execution integration
+  - Pair programming with 7 comprehensive guides
+  - Verification system documentation
+  - Truth metrics documentation
+  - All commands now have structured documentation
+
 - **Stream Chain Command Wiki**: Created `/claude-flow-wiki/Stream-Chain-Command.md`
   - Complete command reference with all subcommands
   - Background execution guide
