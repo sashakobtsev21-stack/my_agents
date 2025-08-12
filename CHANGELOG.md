@@ -66,12 +66,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Pair programming mode with real-time verification
 
 #### 👥 Pair Programming Features
-- **Interactive Pair Programming**: New `pair` command
+- **Interactive Pair Programming**: New `pair` command with full documentation
   - Real-time code review and verification
   - Automated truth enforcement
   - Integration testing capabilities
   - Quality gates and thresholds
   - Collaborative development workflow
+  - Three collaboration modes: driver, navigator, and switch
+  - Session persistence and recovery
+  - Background session support
+  - Comprehensive metrics tracking
+
+#### 📚 Command Documentation System
+- **Complete Documentation Structure**: Created comprehensive docs in `.claude/commands/`
+  - **Stream Chain Documentation** (`/stream-chain/`):
+    - `README.md` - Overview with background execution integration
+    - `pipeline.md` - Predefined pipeline documentation
+    - `run.md` - Custom chain execution guide
+    - Background commands approach from wiki integrated
+  - **Pair Programming Documentation** (`/pair/`):
+    - `README.md` - Complete overview and quick start
+    - `start.md` - Starting sessions with all options
+    - `modes.md` - Driver, navigator, switch, and specialized modes
+    - `session.md` - Session lifecycle and management
+    - `config.md` - Full configuration reference
+    - `commands.md` - Complete command reference (100+ commands)
+    - `examples.md` - 10 real-world scenarios with workflows
+  - **Verification Documentation** (`/verify/`):
+    - Complete verification system documentation
+  - **Truth Metrics Documentation** (`/truth/`):
+    - Truth scoring and reliability metrics
 
 ### 🛠️ Technical Improvements
 
