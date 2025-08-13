@@ -15,10 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Complete Implementation**: Fixed missing `stream-chain` command (Issue #642)
   - Added full command handler in `/src/cli/simple-commands/stream-chain.js`
   - Registered in command registry with all subcommands
-  - Implemented `run`, `demo`, `pipeline`, `test`, `monitor`, and `kill` subcommands
-  - Added background execution support with `--background` or `--bg` flags
-  - Process tracking in `.claude-flow/stream-chains.json`
-  - Full integration with Claude Code's background command system
+  - Implemented `run`, `demo`, `pipeline`, and `test` subcommands
+  - Four pipeline types: `analysis`, `refactor`, `test`, `optimize`
+  - Full integration with Claude Code's stream-json output format
 
 - **Real Claude Code Integration**: Stream-chain now uses actual Claude Code execution
   - Fixed stream-json format compatibility with Claude Code
