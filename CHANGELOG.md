@@ -149,6 +149,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 100% context preservation between agents
   - O(1) memory usage via streaming
 
+#### Pair Programming System
+- **Performance Optimizations** (2025-08-13):
+  - **Resource Usage**: Reduced from 10-17% CPU to <1% idle
+    - Removed 30-second verification interval loop
+    - Added 60-second cooldown for auto-verify
+    - Manual verification control with `/verify` command
+  - **Intelligent Fix Chains**: Targeted fix application
+    - Only runs fixes for failing checks
+    - Parallel fix application where possible
+    - Caches verification results between iterations
+  - **Guidance Mode Performance**:
+    - Expert mode: Minimal overhead, fastest execution
+    - Beginner mode: Educational value with reasonable performance
+    - Strict mode: Highest quality with 0.99 threshold
+
 #### Training System
 - **Real Execution Metrics**:
   - Conservative strategy: 49.9% success, 1909ms avg time
