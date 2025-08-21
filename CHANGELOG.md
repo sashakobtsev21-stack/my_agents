@@ -5,6 +5,88 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-alpha.91] - 2025-08-21
+
+> **🚀 Claude Code Task Tool Integration Update**: Enhanced integration with Claude Code's Task tool for concurrent agent execution. Clear separation between MCP coordination tools and Claude Code's execution capabilities, with comprehensive documentation and examples for parallel agent spawning.
+
+### ✨ New Features
+
+#### 🎯 Claude Code Task Tool Integration
+- **Enhanced CLAUDE.md Templates**: Updated initialization templates with clear guidance
+  - Explicit instructions that Claude Code's Task tool spawns agents for actual work
+  - MCP tools clearly marked as coordination-only, not for execution
+  - Step-by-step workflow: Optional MCP setup → Required Task tool execution
+  - Comprehensive examples of concurrent agent spawning patterns
+
+- **Improved Swarm Prompts**: Updated swarm command prompts for better clarity
+  - Prominent header emphasizing Task tool usage for agent execution
+  - Clear visual separation between coordination and execution tools
+  - Concrete examples showing ALL agents spawned in ONE message
+  - Warning boxes highlighting critical concurrent execution patterns
+
+- **Enhanced Hive Mind Prompts**: Restructured hive-mind spawn prompts
+  - Three-step process clearly documented in prompts
+  - Step 1: Optional MCP coordination setup
+  - Step 2: REQUIRED Claude Code Task tool for agent spawning
+  - Step 3: Batch ALL todos in single TodoWrite call (8-10 todos)
+
+#### 📋 Batch Operation Emphasis
+- **TodoWrite Batching**: Strong emphasis on batching 5-10+ todos in ONE call
+  - Clear examples showing proper todo batching patterns
+  - Visual warnings against sequential todo updates
+  - Concrete todo examples with priorities and statuses
+
+- **Task Tool Concurrency**: Comprehensive examples of parallel agent execution
+  - Full-stack development swarm examples (6-8 agents)
+  - Research coordination patterns
+  - Distributed system agent spawning
+  - All with proper coordination hooks
+
+#### 📚 Documentation Improvements
+- **Clear Separation of Concerns**:
+  - ✅ Claude Code handles: Task tool, file operations, code generation, execution
+  - ❌ MCP tools handle: Coordination setup, memory, performance tracking only
+  - Visual formatting with emojis and boxes for clarity
+
+- **Concrete Code Examples**:
+  ```javascript
+  // CORRECT Pattern - Single Message
+  Task("Researcher", "Analyze patterns...", "researcher")
+  Task("Coder", "Implement features...", "coder")
+  Task("Tester", "Create tests...", "tester")
+  TodoWrite { todos: [8-10 todos ALL in ONE call] }
+  ```
+
+### 🔧 Technical Improvements
+
+#### Prompt Generation Updates
+- **generateHiveMindPrompt()**: Restructured to emphasize Task tool usage
+  - Added getWorkerTypeInstructions() integration for agent-specific guidance
+  - Clear step-by-step execution protocol
+  - Visual examples of concurrent patterns
+
+- **Swarm Prompt Updates**: Enhanced swarm initialization guidance
+  - Separated MCP coordination from Task execution
+  - Added critical execution reminders
+  - Updated batch operation examples
+
+### 📈 Version Updates
+- Updated version to `2.0.0-alpha.91` across all files
+- Updated `package.json`, `version.js`, `version.ts`
+- New release notes in `--version` command output
+
+### 🎯 Key Takeaways for Users
+
+1. **Always use Claude Code's Task tool** to spawn agents that do actual work
+2. **MCP tools are ONLY** for coordination setup, not execution
+3. **Batch everything**: Spawn ALL agents in ONE message
+4. **TodoWrite must batch**: Always include 5-10+ todos in ONE call
+5. **Use coordination hooks**: Every agent must use claude-flow hooks
+
+This release ensures users understand the critical distinction between:
+- **MCP tools**: Coordinate and plan (the "brain")
+- **Claude Code Task tool**: Execute and implement (the "hands")
+
 ## [2.0.0-alpha.90] - 2025-08-16
 
 > **🚀 Major MCP Implementation & Quality Update**: Delivered >95% functionality with 15+ real MCP tools, critical bug fixes, WASM neural networks, and reduced mock rate from 40% to <5%. This release represents our commitment to community feedback and real, working tools.
