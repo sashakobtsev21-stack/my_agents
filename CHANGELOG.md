@@ -75,6 +75,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `package.json`, `version.js`, `version.ts`
 - New release notes in `--version` command output
 
+### 📁 Files Modified
+
+#### Core Files Updated
+- `src/cli/simple-commands/init/templates/claude-md.js` - CLAUDE.md template generation
+- `src/cli/simple-commands/hive-mind.js` - generateHiveMindPrompt() function
+- `src/cli/simple-commands/swarm.js` - swarm prompt generation
+- `package.json` - Version bump to 2.0.0-alpha.91
+- `src/core/version.js` - Fallback version update
+- `src/core/version.ts` - TypeScript version update
+- `bin/claude-flow.js` - Version display and release notes
+
 ### 🎯 Key Takeaways for Users
 
 1. **Always use Claude Code's Task tool** to spawn agents that do actual work
