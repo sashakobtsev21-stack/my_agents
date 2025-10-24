@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.8] - 2025-10-24
+
+> **🐛 Critical Bug Fix**: MCP Server Stdio Mode - FULLY FIXED stdout corruption (Issue #835)
+
+### Summary
+This release COMPLETELY resolves the MCP stdio mode stdout corruption issue. The server now outputs ONLY clean JSON-RPC messages on stdout, with all diagnostic logs going to stderr as required by the MCP protocol specification.
+
+### 🐛 Bug Fixes
+
+#### **Complete Stdio Mode Fix** - Issue #835
+- **Fixed remaining stdout pollution sources**:
+  1. Removed startup message that appeared before spawning MCP server
+  2. Changed `console.log()` to `console.error()` in initialization error handlers
+  3. Fixed object output by stringifying JSON in server startup logs
+
+- **Files Changed**:
+  - `src/cli/simple-commands/mcp.js` - Removed all output before server spawn
+  - `src/mcp/mcp-server.js` - Fixed initialization logs and stringified JSON output
+
+### ✅ Verification
+- **Local testing**: ✅ stdout contains ONLY JSON-RPC, stderr contains all logs
+- **Clean protocol stream**: ✅ No console messages pollute stdout
+- **Docker test ready**: Ready for clean environment verification
+
+### 📝 Technical Details
+```bash
+# Before v2.7.8 - stdout was corrupted:
+$ npx claude-flow@2.7.7 mcp start
+✅ Starting Claude Flow MCP server...  # <- ON STDOUT (BAD!)
+{"jsonrpc":"2.0",...}
+
+# After v2.7.8 - stdout is clean:
+$ npx claude-flow@2.7.8 mcp start
+{"jsonrpc":"2.0",...}  # <- ONLY JSON-RPC (GOOD!)
+# All startup messages go to stderr
+```
+
 ## [2.7.7] - 2025-10-24
 
 > **🐛 Critical Bug Fix**: MCP Server Stdio Mode - Fixed stdout corruption + Updated version banner
