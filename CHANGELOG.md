@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.7] - 2025-10-24
+
+> **🐛 Critical Bug Fix**: MCP Server Stdio Mode - Fixed stdout corruption + Updated version banner
+
+### Changes
+- Updated version banner to reflect v2.7.6 changes
+- Added Docker test script for stdio mode verification
+- Published with correct build artifacts
+
 ## [2.7.6] - 2025-10-24
 
 > **🐛 Critical Bug Fix**: MCP Server Stdio Mode - Fixed stdout corruption in stdio mode (build artifacts)
