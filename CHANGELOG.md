@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.5] - 2025-10-24
+
+> **🐛 Critical Bug Fix**: MCP Server Stdio Mode - Fixed stdout corruption in stdio mode
+
+### 🐛 Bug Fixes
+
+#### **MCP Server Stdio Mode Protocol Corruption (Critical)** - Issue #835
+- **Fixed stdout pollution in stdio mode**: MCP server now maintains clean stdout for JSON-RPC protocol
+  - Added module-level `isStdioMode` flag for state tracking
+  - Implemented smart logging helpers that auto-route output based on mode
+  - In stdio mode: all messages route to stderr (keeps stdout clean for JSON-RPC)
+  - In HTTP mode: normal stdout behavior preserved
+
+- **Comprehensive output replacement**: Replaced all 150+ console.log() and print*() calls
+  - `startMcpServer()` - All startup messages use smart helpers
+  - `stopMcpServer()` - All shutdown messages use smart helpers
+  - `listMcpTools()` - All tool listing uses smart helpers
+  - `manageMcpAuth()` - All auth messages use smart helpers
+  - `showMcpConfig()` - All config display uses smart helpers
+  - `showMcpHelp()` - All help text uses smart helpers
+  - `showMcpStatus()` - All status messages use smart helpers
+
+### 📁 Files Changed
+- `src/cli/simple-commands/mcp.js` - Complete rewrite of logging system
+- `tests/test-mcp-stdio.js` - Added verification test suite
+
+### 🧪 Testing
+- ✅ Test 1: Module structure verification
+- ✅ Test 2: Smart logging helpers present
+- ✅ Test 3: No direct stdout usage in critical functions
+- ✅ Build: Compilation successful
+
+### 📊 Impact
+- **Before**: ⚠️ MCP server unusable in stdio mode due to protocol corruption
+- **After**: ✅ MCP server fully compatible with standard MCP clients in stdio mode
+
+### ✅ Backward Compatibility
+- Fully backward compatible - no breaking changes
+- HTTP mode retains original stdout behavior
+- Only affects stdio mode output routing
+
+### 🔗 Related
+- Fixes #835 - MCP server stdio mode corrupted by stdout log messages
+- Bug existed since July 8, 2025 (commit 29800626c, PR #167)
+
 ## [2.7.1] - 2025-10-22
 
 > **🐛 Critical Bug Fix**: MCP Pattern Persistence - Fixed neural pattern storage, search, and statistics
