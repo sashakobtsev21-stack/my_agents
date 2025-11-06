@@ -5,6 +5,99 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.29] - 2025-11-06
+
+> **🔴 CRITICAL FIX**: Removed non-existent dependencies blocking installation
+
+### Summary
+Fixed critical installation blocker by removing `@xenova/transformers@^3.2.0` and `onnxruntime-node` from optionalDependencies. Version 3.2.0 of transformers doesn't exist (latest is 2.17.2), causing npm install failures for all users on v2.7.24-v2.7.28.
+
+### 🐛 Bug Fixed
+
+**Issue**: Users unable to install claude-flow due to non-existent dependency
+```
+npm error Could not resolve dependency:
+npm error optional @xenova/transformers@"^3.2.0"
+```
+
+**Root Cause**: `package.json` specified `@xenova/transformers@^3.2.0`, but only version 2.17.2 exists on npm.
+
+### 🔧 Changes Made
+
+**Removed Dependencies** (`package.json`):
+```diff
+  "optionalDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+-   "@xenova/transformers": "^3.2.0",  // ❌ Version doesn't exist
+    "agentdb": "^1.3.9",
+    "better-sqlite3": "^12.2.0",
+    "diskusage": "^1.1.3",
+-   "node-pty": "^1.0.0",
+-   "onnxruntime-node": "^1.23.0"     // ❌ Also removed
++   "node-pty": "^1.0.0"
+  }
+```
+
+### ✅ Impact
+
+**Before v2.7.29** (Broken):
+- ❌ v2.7.24-v2.7.28: Installation fails
+- Users forced to use v2.0.0-alpha.2 or pre-v2.7.24
+
+**After v2.7.29** (Fixed):
+- ✅ npm install works correctly
+- ✅ All features functional
+- ✅ No code changes needed (deps were optional)
+
+### 📋 Testing
+
+**Docker Validation** (`tests/docker/Dockerfile.v2.7.29-test`):
+```bash
+# Build and test
+docker build -f tests/docker/Dockerfile.v2.7.29-test -t claude-flow-v2.7.29-test .
+docker run --rm claude-flow-v2.7.29-test
+
+✅ Test 1: Version is v2.7.29
+✅ Test 2: @xenova/transformers removed
+✅ Test 3: onnxruntime-node removed
+✅ Test 4: Dependencies installed (726 modules)
+✅ Test 5: CLI executes successfully
+✅ Test 6: Removed deps not in node_modules
+```
+
+### 🚀 Installation
+
+```bash
+# NPX users (recommended)
+npx claude-flow@latest init
+
+# Global installation
+npm install -g claude-flow@latest
+
+# Verify
+claude-flow --version  # v2.7.29
+```
+
+### 📝 Affected Versions
+
+**Broken** (DO NOT USE):
+- v2.7.24 - v2.7.28
+
+**Fixed**:
+- v2.7.29 (this release)
+- v2.0.0-alpha.2 (older, still works)
+
+### 🔗 Related Issues
+
+- **Fixes #858**: Critical: Invalid @xenova/transformers dependency blocks installation
+- **Related to v2.7.24**: commit `aef451661` introduced the bug
+
+### 💡 Why This Happened
+
+The transformers dependency was added in v2.7.24 for local semantic search but used a non-existent version number (`3.2.0` instead of `2.17.2`). Since it was in `optionalDependencies`, npm still tried to resolve it, causing installation to fail.
+
+---
+
 ## [2.7.28] - 2025-11-06
 
 > **🎯 Enhancement Release**: Removed automatic installation of agentic-payments MCP server - payment integrations now opt-in
