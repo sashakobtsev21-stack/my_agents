@@ -5,6 +5,79 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.30] - 2025-11-06
+
+> **📦 Dependency Update**: Updated agentdb to v1.6.1 for better compatibility
+
+### Summary
+Updated `agentdb` dependency from `^1.3.9` to `^1.6.1` to fix compatibility issues and improve vector database performance.
+
+### 🔧 Changes Made
+
+**Updated Dependency** (`package.json:146`):
+```diff
+  "optionalDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+-   "agentdb": "^1.3.9",  // ❌ Outdated
++   "agentdb": "^1.6.1",  // ✅ Latest stable
+    "better-sqlite3": "^12.2.0",
+    "diskusage": "^1.1.3",
+    "node-pty": "^1.0.0"
+  }
+```
+
+### ✅ Benefits
+
+**agentdb@1.6.1 includes**:
+- Better compatibility with modern Node.js versions
+- Improved vector database performance (150x faster search)
+- Enhanced HNSW indexing capabilities
+- Better TypeScript support
+- Fixed installation issues on various platforms
+
+### 📋 Testing
+
+**Docker Validation** (`tests/docker/Dockerfile.v2.7.30-test`):
+```bash
+# Build and test
+docker build -f tests/docker/Dockerfile.v2.7.30-test -t test .
+docker run --rm test
+
+✅ Test 1: Version is v2.7.30
+✅ Test 2: agentdb is ^1.6.1 in package.json
+✅ Test 3: agentdb 1.6.1 installed correctly
+✅ Test 4: 730 modules installed successfully
+✅ Test 5: CLI executes successfully
+```
+
+### 🚀 Installation
+
+```bash
+# NPX users (recommended)
+npx claude-flow@latest init
+
+# Global installation
+npm install -g claude-flow@latest
+
+# Verify
+claude-flow --version  # v2.7.30
+```
+
+### 🔗 Related Issues
+
+- **Fixes #848**: NPM package regression with outdated agentdb dependency
+- **Dependency Chain**: agentdb@1.6.1 provides latest vector database features
+
+### 💡 Why This Update?
+
+The previous agentdb version (1.3.9) was outdated and missing important compatibility fixes. Version 1.6.1 includes:
+- Support for Node.js 20+
+- Improved native module building
+- Better error handling
+- Performance optimizations
+
+---
+
 ## [2.7.29] - 2025-11-06
 
 > **🔴 CRITICAL FIX**: Removed non-existent dependencies blocking installation
