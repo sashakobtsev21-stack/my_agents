@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.32] - 2025-11-10
+
+### Fixed
+- **memory stats command** - Fixed bug where `memory stats` always returned zeros instead of showing ReasoningBank data
+  - Now shows unified statistics for both JSON and ReasoningBank storage backends
+  - Added intelligent mode detection (auto, basic, reasoningbank)
+  - Displays database size, confidence scores, and embedding counts
+  - Maintains backward compatibility with JSON-only mode
+  - Resolves GitHub issue #865
+
+### Changed
+- Enhanced `showMemoryStats()` function to support ReasoningBank mode detection
+- Improved stats output with clear separation between JSON and ReasoningBank storage
+- Added helpful tips for users to switch between storage modes
+
+### Documentation
+- Added `docs/BUG_REPORT_MEMORY_STATS.md` - Detailed bug analysis and root cause
+- Added `docs/FIX_VERIFICATION_MEMORY_STATS.md` - Comprehensive test results and verification
+
 ## [2.7.31] - 2025-11-06
 
 > **📦 Dependency Update**: Updated agentic-flow to v1.9.4 with new enterprise features
