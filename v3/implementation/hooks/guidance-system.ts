@@ -14,7 +14,7 @@
 
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
 import { join, basename, extname } from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
 // =============================================================================
 // Types
@@ -171,24 +171,26 @@ export function generateSessionContext(): string {
     '- Typed interfaces for all public APIs',
   ];
 
-  // Add git status
+  // Add git status (using execFileSync to avoid shell injection)
   try {
-    const uncommitted = execSync('git status --porcelain 2>/dev/null | wc -l', {
+    const gitOutput = execFileSync('git', ['status', '--porcelain'], {
       encoding: 'utf-8',
-    }).trim();
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    const uncommitted = gitOutput.split('\n').filter(line => line.trim()).length;
     lines.push('', `**Git Status**: ${uncommitted} uncommitted files`);
   } catch {
     // Ignore git errors
   }
 
-  // Add patterns count
+  // Add patterns count (using execFileSync to avoid shell injection)
   const patternsPath = join(CONFIG.projectRoot, CONFIG.patternsDb);
   if (existsSync(patternsPath)) {
     try {
-      const count = execSync(
-        `sqlite3 "${patternsPath}" "SELECT COUNT(*) FROM short_term_patterns" 2>/dev/null`,
-        { encoding: 'utf-8' }
-      ).trim();
+      const count = execFileSync('sqlite3', [patternsPath, 'SELECT COUNT(*) FROM short_term_patterns'], {
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+      }).trim();
       lines.push(`**Learned Patterns**: ${count} available`);
     } catch {
       // Ignore db errors
