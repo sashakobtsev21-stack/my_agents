@@ -471,19 +471,43 @@ const reasoningBank = createReasoningBank({
 
 ```
 v3/
+├── @claude-flow/hooks/src/
+│   ├── types.ts                    # Hook type definitions
+│   ├── index.ts                    # Module exports
+│   ├── registry/
+│   │   └── index.ts                # Hook registration
+│   ├── executor/
+│   │   └── index.ts                # Hook execution engine
+│   ├── reasoningbank/
+│   │   ├── index.ts                # ReasoningBank learning engine
+│   │   └── guidance-provider.ts    # Claude-visible output generator
+│   ├── swarm/
+│   │   └── index.ts                # Swarm communication hub
+│   ├── daemons/
+│   │   └── index.ts                # Background daemon processes
+│   ├── statusline/
+│   │   └── index.ts                # Status line generation
+│   ├── cli/
+│   │   └── guidance-cli.ts         # CLI commands
+│   ├── bridge/
+│   │   └── official-hooks-bridge.ts # Official hooks bridge
+│   ├── mcp/
+│   │   └── index.ts                # MCP tools
+│   └── __tests__/
+│       ├── reasoningbank.test.ts   # ReasoningBank tests
+│       └── guidance-provider.test.ts # GuidanceProvider tests
 ├── @claude-flow/shared/src/hooks/
-│   ├── types.ts           # Hook type definitions
-│   ├── registry.ts        # Hook registration
-│   ├── executor.ts        # Hook execution engine
-│   ├── hooks.test.ts      # Unit tests
-│   └── index.ts           # Module exports
-├── @claude-flow/cli/src/commands/
-│   └── hooks.ts           # CLI hook commands
+│   ├── types.ts                    # Shared hook types
+│   ├── registry.ts                 # Hook registry (shared)
+│   └── index.ts                    # Shared exports
 ├── mcp/tools/
-│   ├── hooks-tools.ts     # MCP hook tools
-│   └── v2-compat-tools.ts # V2 compatibility layer
+│   ├── hooks-tools.ts              # MCP hook tools
+│   └── v2-compat-tools.ts          # V2 compatibility layer
 └── implementation/hooks/
-    └── README.md          # This documentation
+    ├── README.md                   # This documentation
+    ├── CLI-REFERENCE.md            # CLI command reference
+    ├── MCP-TOOLS.md                # MCP tools documentation
+    └── STATUSLINE-DAEMONS.md       # Daemon documentation
 ```
 
 ## Usage Examples
