@@ -151,6 +151,215 @@ enum HookPriority {
 }
 ```
 
+## Swarm Communication Hooks
+
+V3 introduces **SwarmCommunication** for agent-to-agent coordination within swarms.
+
+### Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                        Swarm Communication Hub                           │
+├───────────────────┬──────────────────┬──────────────────┬───────────────┤
+│ Agent Messaging   │ Pattern Broadcast│ Consensus Engine │ Task Handoff  │
+│ (send/receive)    │ (share learning) │ (reach agreement)│ (delegation)  │
+└─────────┬─────────┴────────┬─────────┴────────┬─────────┴───────┬───────┘
+          │                  │                  │                 │
+          └──────────────────┴────────┬─────────┴─────────────────┘
+                                      │
+                              ┌───────▼───────┐
+                              │ ReasoningBank │
+                              │   (learning)  │
+                              └───────────────┘
+```
+
+### 1. Agent-to-Agent Messaging
+
+Agents can share context and coordinate in real-time:
+
+```typescript
+import { swarmComm } from '@claude-flow/hooks';
+
+await swarmComm.initialize();
+
+// Send to specific agent
+await swarmComm.sendMessage('security-auditor', 'Found auth vulnerability', {
+  type: 'context',
+  priority: 'high',
+});
+
+// Broadcast to all
+await swarmComm.broadcastContext('Switching to security focus');
+
+// Get messages for this agent
+const messages = swarmComm.getMessages({ limit: 10, type: 'context' });
+```
+
+**CLI Usage:**
+```bash
+# Send message
+npx @claude-flow/hooks swarm-send security-auditor "Found vulnerability" context high
+
+# Broadcast to all
+npx @claude-flow/hooks swarm-broadcast "Switching to security focus"
+
+# Get messages
+npx @claude-flow/hooks swarm-messages 10
+```
+
+### 2. Pattern Broadcasting
+
+Share learned patterns across the swarm so all agents benefit:
+
+```typescript
+// Broadcast high-quality pattern
+const pattern = await reasoningBank.searchPatterns('HNSW optimization', 1);
+if (pattern[0].pattern.quality >= 0.7) {
+  await swarmComm.broadcastPattern(pattern[0].pattern);
+}
+
+// Import patterns from other agents
+const broadcasts = swarmComm.getPatternBroadcasts({ minQuality: 0.8 });
+for (const bc of broadcasts) {
+  await swarmComm.importBroadcastPattern(bc.id);
+}
+```
+
+**CLI Usage:**
+```bash
+# Broadcast a new pattern
+npx @claude-flow/hooks swarm-pattern-broadcast "Use HNSW for 150x faster search" memory
+
+# List recent broadcasts
+npx @claude-flow/hooks swarm-patterns memory 0.8
+
+# Import a broadcast pattern
+npx @claude-flow/hooks swarm-import-pattern bc_1234567890_abc123
+```
+
+### 3. Consensus Guidance
+
+Help agents reach agreement on approach decisions:
+
+```typescript
+// Initiate consensus
+const consensus = await swarmComm.initiateConsensus(
+  'Which authentication method should we use?',
+  ['JWT', 'OAuth2', 'Session'],
+  30000 // 30 second timeout
+);
+
+// Vote
+swarmComm.voteConsensus(consensus.id, 'JWT');
+
+// Get guidance text
+const guidance = swarmComm.generateConsensusGuidance(consensus.id);
+console.log(guidance);
+// **Consensus: Which authentication method?**
+// Status: RESOLVED
+// **Result**: JWT
+// Confidence: 75%
+// Participation: 100%
+```
+
+**CLI Usage:**
+```bash
+# Start consensus
+npx @claude-flow/hooks swarm-consensus "Which auth method?" "JWT,OAuth2,Session" 30000
+
+# Vote
+npx @claude-flow/hooks swarm-vote cons_1234567890_abc "JWT"
+
+# Check status
+npx @claude-flow/hooks swarm-consensus-status cons_1234567890_abc
+```
+
+### 4. Task Handoff
+
+Coordinate task delegation between agents:
+
+```typescript
+// Agent 1: Hand off task
+const handoff = await swarmComm.initiateHandoff(
+  'test-architect',
+  'Write security tests for auth module',
+  {
+    filesModified: ['src/auth/login.ts', 'src/auth/session.ts'],
+    patternsUsed: ['Use parameterized queries', 'Add rate limiting'],
+    decisions: ['Chose JWT over sessions for stateless auth'],
+    blockers: [],
+    nextSteps: ['Write unit tests', 'Add integration tests'],
+  }
+);
+
+// Agent 2: Accept handoff
+swarmComm.acceptHandoff(handoff.id);
+const context = swarmComm.generateHandoffContext(handoff.id);
+// ## Task Handoff from security-auditor
+// **Task**: Write security tests for auth module
+// **Files Modified**: src/auth/login.ts, src/auth/session.ts
+// **Patterns Used**: Use parameterized queries, Add rate limiting
+// **Decisions Made**: Chose JWT over sessions for stateless auth
+// **Next Steps**: [ ] Write unit tests, [ ] Add integration tests
+
+// Agent 2: Complete handoff
+swarmComm.completeHandoff(handoff.id, { testsWritten: 15 });
+```
+
+**CLI Usage:**
+```bash
+# Initiate handoff
+npx @claude-flow/hooks swarm-handoff test-architect "Write auth tests" \
+  '{"filesModified":["src/auth/login.ts"],"nextSteps":["Write unit tests"]}'
+
+# Accept handoff
+npx @claude-flow/hooks swarm-accept-handoff ho_1234567890_abc
+
+# Complete handoff
+npx @claude-flow/hooks swarm-complete-handoff ho_1234567890_abc '{"testsWritten":15}'
+
+# List pending handoffs
+npx @claude-flow/hooks swarm-handoffs
+```
+
+### Swarm Communication Events
+
+| Event | Description | Data |
+|-------|-------------|------|
+| `message:sent` | Message sent | SwarmMessage |
+| `message:delivered` | Message delivered | SwarmMessage |
+| `pattern:broadcast` | Pattern broadcast | PatternBroadcast |
+| `pattern:acknowledged` | Broadcast acknowledged | { broadcastId, agentId } |
+| `consensus:initiated` | Consensus started | ConsensusRequest |
+| `consensus:voted` | Vote cast | { consensusId, agentId, vote } |
+| `consensus:resolved` | Consensus resolved | ConsensusRequest |
+| `handoff:initiated` | Handoff started | TaskHandoff |
+| `handoff:accepted` | Handoff accepted | TaskHandoff |
+| `handoff:completed` | Handoff completed | TaskHandoff |
+| `agent:registered` | Agent joined | SwarmAgentState |
+
+### Swarm Statistics
+
+```bash
+npx @claude-flow/hooks swarm-stats
+# {
+#   "agentId": "agent_1234567890_abc",
+#   "agentCount": 5,
+#   "metrics": {
+#     "messagesSent": 42,
+#     "messagesReceived": 38,
+#     "patternsBroadcast": 12,
+#     "consensusInitiated": 3,
+#     "consensusResolved": 3,
+#     "handoffsInitiated": 8,
+#     "handoffsCompleted": 7
+#   },
+#   "pendingMessages": 2,
+#   "pendingHandoffs": 1,
+#   "pendingConsensus": 0
+# }
+```
+
 ## ReasoningBank Integration
 
 The hooks system integrates with **ReasoningBank** for adaptive learning:
