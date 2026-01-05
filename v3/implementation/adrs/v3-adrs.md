@@ -21,6 +21,8 @@
 | ADR-008 | Vitest Over Jest | Proposed | 2026-01-03 |
 | ADR-009 | Hybrid Memory Backend as Default | Proposed | 2026-01-03 |
 | ADR-010 | Remove Deno Support | Proposed | 2026-01-03 |
+| ADR-011 | LLM Provider System | **Implemented** ✅ | 2026-01-05 |
+| ADR-012 | MCP Security Features | Proposed | 2026-01-05 |
 
 ---
 
@@ -917,5 +919,5 @@ Links to other ADRs
 ---
 
 **Document Maintained By:** Architecture Team
-**Last Updated:** 2026-01-03
+**Last Updated:** 2026-01-05
 **Next Review:** After Sprint 4 (2026-02-01)
