@@ -294,11 +294,11 @@ This implementation satisfies:
 
 ## Statistics
 
-- **Total Lines**: 2,800
-- **Total Tools**: 13 (4 agent + 3 swarm + 3 memory + 3 config)
-- **Categories**: 4 (agent, swarm, memory, config)
+- **Total Lines**: 2,800+ (core) + 600+ (hooks)
+- **Total Tools**: 26 (4 agent + 3 swarm + 3 memory + 3 config + 13 hooks)
+- **Categories**: 5 (agent, swarm, memory, config, hooks)
 - **Utility Functions**: 6
-- **Cacheable Tools**: 10 (77%)
+- **Cacheable Tools**: 10 (77% of core tools)
 - **Deprecated Tools**: 0
 - **Test Coverage**: 0% (to be implemented)
 
@@ -385,11 +385,39 @@ This implementation satisfies:
 - ⬜ Interactive documentation
 - ⬜ Video tutorials
 
+## Extension: Hooks MCP Tools (2026-01-06)
+
+Added hooks-related MCP tools in `@claude-flow/cli/src/mcp-tools/hooks-tools.ts`:
+
+### Additional Tools (13 total hooks tools)
+
+| Tool Name | Purpose | Category |
+|-----------|---------|----------|
+| `hooks/pre-edit` | Pre-edit context and suggestions | hooks |
+| `hooks/post-edit` | Record edit outcome | hooks |
+| `hooks/route` | Route task to optimal agent | hooks |
+| `hooks/metrics` | Query learning metrics | hooks |
+| `hooks/pre-command` | Command risk assessment | hooks |
+| `hooks/post-command` | Record command outcome | hooks |
+| `hooks/daemon-status` | Get daemon status | hooks |
+| `hooks/statusline` | Get statusline data | hooks |
+| `hooks/worker-list` | List 12 background workers | hooks/worker |
+| `hooks/worker-dispatch` | Dispatch worker by trigger | hooks/worker |
+| `hooks/worker-status` | Get running worker status | hooks/worker |
+| `hooks/worker-detect` | Detect triggers from prompt | hooks/worker |
+| `hooks/worker-cancel` | Cancel running worker | hooks/worker |
+
+**Total MCP Tools**: 26 (13 core + 13 hooks)
+
+See [ADR-014](./ADR-014-workers-system.md) for worker system details.
+
+---
+
 ## Conclusion
 
 Successfully implemented ADR-005: MCP-First API Design with:
 
-- **13 production-ready MCP tools** across 4 categories
+- **26 production-ready MCP tools** across 5 categories (agent, swarm, memory, config, hooks)
 - **Comprehensive input validation** using Zod
 - **Stub implementations** ready for service integration
 - **Performance optimizations** (caching, timeouts)
@@ -398,7 +426,7 @@ Successfully implemented ADR-005: MCP-First API Design with:
 
 The implementation provides a solid foundation for CLI commands, web interfaces, and API gateways to call MCP tools rather than implementing functionality directly, ensuring consistency, reusability, and maintainability across the entire V3 architecture.
 
-**Total Implementation Time**: ~2 hours
+**Total Implementation Time**: ~2 hours (core) + 1 hour (hooks extension)
 **Code Quality**: Production-ready with stub implementations
-**Architecture Compliance**: 100% (ADR-005, ADR-006, ADR-002, ADR-007)
+**Architecture Compliance**: 100% (ADR-005, ADR-006, ADR-002, ADR-007, ADR-014)
 **Ready for**: CLI integration, testing, service integration

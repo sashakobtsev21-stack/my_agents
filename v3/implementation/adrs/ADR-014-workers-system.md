@@ -1,13 +1,13 @@
 # ADR-014: Cross-Platform Workers System
 
 ## Status
-**Implemented** ✅
+**Implemented** ✅ (Extended with CLI Integration 2026-01-06)
 
 ## Date
 2026-01-05
 
 ## Last Updated
-2026-01-05
+2026-01-06
 
 ## Context
 
@@ -256,5 +256,97 @@ console.log(formatSessionStartOutput(result));
 
 ---
 
+## Extension: CLI Integration (2026-01-06)
+
+### CLI Hooks Worker Subcommand
+
+Extended the worker system with CLI integration via `hooks worker` command in `@claude-flow/cli`.
+
+#### New Worker Types (12 Total)
+
+In addition to the original system workers, the CLI exposes 12 trigger-based workers:
+
+| Worker | Priority | Est. Time | Description |
+|--------|----------|-----------|-------------|
+| `ultralearn` | normal | 60s | Deep knowledge acquisition and learning |
+| `optimize` | high | 30s | Performance optimization and tuning |
+| `consolidate` | low | 20s | Memory consolidation and cleanup |
+| `predict` | normal | 15s | Predictive preloading and anticipation |
+| `audit` | critical | 45s | Security analysis and vulnerability scanning |
+| `map` | normal | 30s | Codebase mapping and architecture analysis |
+| `preload` | low | 10s | Resource preloading and cache warming |
+| `deepdive` | normal | 60s | Deep code analysis and examination |
+| `document` | normal | 45s | Auto-documentation generation |
+| `refactor` | normal | 30s | Code refactoring suggestions |
+| `benchmark` | normal | 60s | Performance benchmarking |
+| `testgaps` | normal | 30s | Test coverage analysis |
+
+#### CLI Commands
+
+```bash
+# List all available workers
+claude-flow hooks worker list
+
+# Detect triggers from prompt text (<5ms target)
+claude-flow hooks worker detect --prompt "optimize performance"
+
+# Auto-dispatch when triggers match (confidence ≥0.6)
+claude-flow hooks worker detect --prompt "deep dive" --auto-dispatch --min-confidence 0.6
+
+# Manually dispatch a worker
+claude-flow hooks worker dispatch --trigger refactor --context "auth module"
+
+# Check worker status
+claude-flow hooks worker status
+
+# Cancel a running worker
+claude-flow hooks worker cancel --id worker_refactor_1_abc123
+```
+
+#### MCP Tools Added
+
+5 new MCP tools in `@claude-flow/cli/src/mcp-tools/hooks-tools.ts`:
+- `hooks/worker-list` - List all 12 background workers
+- `hooks/worker-dispatch` - Dispatch a worker by trigger type
+- `hooks/worker-status` - Get status of running workers
+- `hooks/worker-detect` - Detect worker triggers from prompt text
+- `hooks/worker-cancel` - Cancel a running worker
+
+#### UserPromptSubmit Integration
+
+Workers are automatically triggered via the `UserPromptSubmit` hook in `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "timeout": 6000,
+        "command": "claude-flow hooks worker detect --prompt \"$USER_PROMPT\" --auto-dispatch --min-confidence 0.6"
+      }]
+    }]
+  }
+}
+```
+
+#### Parser Enhancement
+
+Fixed nested subcommand routing in `parser.ts` to support 3 levels of subcommands:
+- Level 1: `hooks`
+- Level 2: `worker`
+- Level 3: `list`, `dispatch`, `status`, `detect`, `cancel`
+
+#### Performance Targets
+
+| Metric | Target | Status |
+|--------|--------|--------|
+| Trigger detection | <5ms | ✅ |
+| Worker spawn | <50ms | ✅ |
+| Max concurrent | 10 | ✅ |
+
+---
+
 **Document Maintained By:** Architecture Team
-**Last Updated:** 2026-01-05
+**Last Updated:** 2026-01-06
