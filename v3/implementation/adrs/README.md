@@ -423,3 +423,130 @@ claude-flow agent spawn -t security-analyst  # One of 66 types
 @claude-flow/agents    # From agentic-flow's 66 agents
 @claude-flow/transport # QUIC + HTTP + WebSocket
 ```
+
+---
+
+## ruvector Integration Analysis
+
+### Package Overview
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| `ruvector` | 0.1.95 | Main CLI + unified interface |
+| `@ruvector/core` | 0.1.30 | Rust-native vector DB (52K+ inserts/sec) |
+| `@ruvector/attention` | 0.1.4 | Flash Attention mechanisms |
+| `@ruvector/sona` | 0.1.5 | Self-Optimizing Neural Architecture (LoRA, EWC++) |
+| `@ruvector/gnn` | 0.1.22 | Graph Neural Networks |
+
+### Feature Overlap Analysis
+
+**claude-flow ALREADY HAS** (via @claude-flow/embeddings):
+| Feature | claude-flow | ruvector | Status |
+|---------|-------------|----------|--------|
+| ONNX Embeddings | ✅ agentic-flow (~3ms) | ✅ @ruvector/core | **Equivalent** |
+| Local Embeddings | ✅ all-MiniLM-L6-v2 | ✅ all-MiniLM-L6-v2 | **Equivalent** |
+| HNSW Indexing | ✅ @claude-flow/memory | ✅ @ruvector/core | **Equivalent** |
+| Persistent Cache | ✅ SQLite + LRU | ✅ Memory cache | **Equivalent** |
+| Hyperbolic Embeddings | ✅ Poincaré ball | ❌ | **claude-flow ahead** |
+| Document Chunking | ✅ 4 strategies | ❌ | **claude-flow ahead** |
+| Normalization | ✅ L2, L1, min-max, z-score | ❌ | **claude-flow ahead** |
+| Neural Substrate | ✅ Drift, memory physics | ❌ | **claude-flow ahead** |
+
+### Unique ruvector Features (Integration Candidates)
+
+#### 🔴 Tier 1: High Value (claude-flow lacks these)
+
+| Feature | ruvector Source | Integration Target | Value |
+|---------|-----------------|-------------------|-------|
+| Q-Learning Agent Router | `hooks_route` | `hooks route --task` | 80%+ accuracy, learns patterns |
+| AST Analysis | `hooks_ast_analyze` | `analyze --ast` | Symbol extraction, complexity |
+| Diff Classification | `hooks_diff_analyze` | `analyze --diff --risk` | Change risk scoring |
+| Coverage Routing | `hooks_coverage_route` | `hooks route --coverage-aware` | Test-aware agent selection |
+
+#### 🟡 Tier 2: Medium Value
+
+| Feature | ruvector Source | Integration Target |
+|---------|-----------------|-------------------|
+| Co-edit Prediction | Git history analysis | `predict --coedits` |
+| Security Patterns | `hooks_security_scan` | `security scan --patterns` |
+
+#### 🟢 Tier 3: Nice to Have
+
+| Feature | ruvector Source | Use Case |
+|---------|-----------------|----------|
+| MinCut Boundaries | `hooks_graph_mincut` | Code organization |
+| Louvain Communities | `hooks_graph_cluster` | Module detection |
+| GNN Layers | `@ruvector/gnn` | Graph analysis |
+
+*Note: Flash Attention, SONA Learning, HNSW, and ONNX embeddings are already in claude-flow via agentic-flow.*
+
+### MCP Tools from ruvector (Unique Only)
+
+```bash
+# Add ruvector MCP server (for unique features)
+claude mcp add ruvector-mcp -- npx ruvector mcp-server
+```
+
+**Unique Tools Worth Integrating:**
+- `hooks_route`, `hooks_route_enhanced` — Q-Learning agent routing (80%+ accuracy) ✅
+- `hooks_ast_analyze`, `hooks_ast_complexity` — Code structure analysis ✅
+- `hooks_diff_analyze`, `hooks_diff_classify` — Change classification ✅
+- `hooks_coverage_route`, `hooks_coverage_suggest` — Test-aware routing ✅
+- `hooks_graph_mincut`, `hooks_graph_cluster` — Code boundaries ✅
+
+**Already in claude-flow (skip):**
+- `hooks_rag_context` — Use @claude-flow/memory instead
+- `hooks_attention_info` — Use @claude-flow/neural instead
+- Embeddings tools — Use @claude-flow/embeddings instead
+
+### Integration Approach
+
+**Recommended: Option A - Add as Optional Dependency (for unique features only)**
+```json
+// @claude-flow/cli/package.json
+{
+  "optionalDependencies": {
+    "ruvector": "^0.1.95"
+  }
+}
+```
+
+**CLI Wrappers (unique ruvector features):**
+```bash
+# Q-Learning agent routing (unique to ruvector)
+claude-flow route "task" --q-learning          # Uses hooks_route
+
+# AST analysis (unique to ruvector)
+claude-flow analyze ast src/                   # Uses hooks_ast_analyze
+
+# Diff classification (unique to ruvector)
+claude-flow analyze diff --risk                # Uses hooks_diff_analyze
+
+# Coverage-aware routing (unique to ruvector)
+claude-flow route "task" --coverage-aware      # Uses hooks_coverage_route
+```
+
+**Already in claude-flow (DO NOT import from ruvector):**
+```bash
+claude-flow embeddings generate --local        # Uses @claude-flow/embeddings (ONNX)
+claude-flow memory search --semantic "query"   # Uses @claude-flow/memory (HNSW)
+```
+
+### ruvector Integration Roadmap
+
+#### Phase 1: Q-Learning Router (1-2 days)
+- [ ] Add ruvector as optional dependency
+- [ ] Implement `hooks route --q-learning` wrapper
+- [ ] Add `info --ruvector` command for capability detection
+
+#### Phase 2: Code Intelligence (1 week)
+- [ ] Integrate AST analysis commands (`analyze ast`)
+- [ ] Implement diff classification (`analyze diff --risk`)
+- [ ] Add coverage-aware routing (`route --coverage-aware`)
+
+#### Phase 3: Graph Analysis (2 weeks)
+- [ ] Implement MinCut boundaries (`analyze --boundaries`)
+- [ ] Add Louvain community detection (`analyze --modules`)
+- [ ] Integrate GNN layers for dependency graphs
+
+*Note: SONA, Flash Attention, HNSW already in claude-flow - no need to import.*
