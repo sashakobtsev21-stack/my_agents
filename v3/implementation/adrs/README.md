@@ -77,9 +77,29 @@ All ADRs consider security:
 
 **Last Updated:** 2026-01-07
 **Project:** Claude-Flow V3
-**Version:** 3.0.0-alpha.11
+**Version:** 3.0.0-alpha.15
 
 ### Recent Updates (2026-01-07)
+
+#### Release: @claude-flow/cli@3.0.0-alpha.15 (Latest)
+
+**Doctor Command Enhancements**:
+- **Claude Code CLI Check**: Verifies `@anthropic-ai/claude-code` installation
+- **Auto-Install**: `--install` flag to auto-install missing Claude Code CLI
+- **Fixed Package Paths**: Corrected `dist/src/` paths for proper npm resolution
+
+```bash
+# Check system health including Claude Code CLI
+npx claude-flow@v3alpha doctor
+
+# Auto-install Claude Code CLI if missing
+npx claude-flow@v3alpha doctor --install
+
+# Check only Claude Code CLI
+npx claude-flow@v3alpha doctor -c claude
+```
+
+**Package Resolution Fix**: Fixed Windows module resolution issue where `@claude-flow/cli` exports pointed to wrong paths (`dist/index.js` → `dist/src/index.js`).
 
 #### Release: @claude-flow/cli@3.0.0-alpha.7
 - **Hive-Mind CLI**: All MCP tools now exposed via CLI subcommands:
