@@ -16,6 +16,21 @@ This directory contains all Architecture Decision Records for Claude-Flow v3.
 | ADR-008 | Vitest Over Jest | ✅ Implemented | [ADR-008-VITEST.md](./ADR-008-VITEST.md) |
 | ADR-009 | Hybrid Memory Backend as Default | ✅ Implemented | [ADR-009-IMPLEMENTATION.md](./ADR-009-IMPLEMENTATION.md) |
 | ADR-010 | Remove Deno Support | ✅ Implemented | [ADR-010-NODE-ONLY.md](./ADR-010-NODE-ONLY.md) |
+| ADR-011 | LLM Provider System | ✅ Implemented | [ADR-011-llm-provider-system.md](./ADR-011-llm-provider-system.md) |
+| ADR-012 | MCP Security Features | ✅ Implemented | [ADR-012-mcp-security-features.md](./ADR-012-mcp-security-features.md) |
+| ADR-013 | Core Security Module | ✅ Implemented | [ADR-013-core-security-module.md](./ADR-013-core-security-module.md) |
+| ADR-014 | Workers System | ✅ Implemented | [ADR-014-workers-system.md](./ADR-014-workers-system.md) |
+| ADR-015 | Unified Plugin System | ✅ Implemented | [ADR-015-unified-plugin-system.md](./ADR-015-unified-plugin-system.md) |
+| ADR-016 | Collaborative Issue Claims | ✅ Implemented | [ADR-016-collaborative-issue-claims.md](./ADR-016-collaborative-issue-claims.md) |
+
+## Implementation Progress
+
+| Component | Status | Details |
+|-----------|--------|---------|
+| DDD Modules | ✅ 100% | 16 modules, 833 files, ~240K lines |
+| Test Coverage | ● In Progress | 85+ test files, target: >90% (ADR-008) |
+| Service Integration | ✅ Complete | agentic-flow@alpha integration |
+| Performance Benchmarks | ✅ Complete | Full benchmark suite in @claude-flow/performance |
 
 ## Quick Summary
 
@@ -60,5 +75,6 @@ All ADRs consider security:
 
 ---
 
-**Last Updated:** 2026-01-05
+**Last Updated:** 2026-01-07
 **Project:** Claude-Flow V3
+**Version:** 3.0.2
