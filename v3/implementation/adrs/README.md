@@ -125,19 +125,73 @@ All commands include subcommand help and "Created with ❤️ by ruv.io" brandin
 | `deployment` | Deployment management, environments, rollbacks | deploy, status, rollback, history, environments, logs |
 | `claims` | Claims-based authorization, access control | list, check, grant, revoke, roles, policies |
 | `embeddings` | Vector embeddings, semantic search | generate, search, compare, collections, index, providers |
+| `doctor` | System diagnostics | Node version, config, daemon, memory, API keys, MCP, disk |
+| `completions` | Shell completions | bash, zsh, fish, powershell |
+
+### P0 Features Completed (alpha.12)
+
+**Smart Error Suggestions**: Typo detection with Levenshtein distance
+```bash
+$ claude-flow swram
+[ERROR] Unknown command: swram
+  Did you mean one of these?
+  - swarm
+  - neural
+  - start
+
+$ claude-flow memroy
+[ERROR] Unknown command: memroy
+  Did you mean "memory"?
+```
+
+**Doctor Command**: System health diagnostics
+```bash
+$ claude-flow doctor
+Claude Flow Doctor
+──────────────────────────────────────────────────
+✓ Node.js Version: v22.21.1 (>= 20 required)
+✓ npm Version: v10.9.4
+✓ Git: v2.52.0
+✓ Git Repository: In a git repository
+⚠ Config File: No config file (using defaults)
+⚠ Daemon Status: Not running
+⚠ Memory Database: Not initialized
+⚠ API Keys: No API keys found
+⚠ MCP Servers: No MCP config found
+✓ Disk Space: 73G available
+✓ TypeScript: v5.9.3
+──────────────────────────────────────────────────
+Summary: 6 passed, 5 warnings
+```
+
+**Shell Completions**: Tab completion for all shells
+```bash
+# Install bash completions
+claude-flow completions bash > ~/.bash_completion.d/claude-flow
+
+# Install zsh completions
+claude-flow completions zsh > ~/.zfunc/_claude-flow
+
+# Install fish completions
+claude-flow completions fish > ~/.config/fish/completions/claude-flow.fish
+
+# Install PowerShell completions
+claude-flow completions powershell >> $PROFILE
+```
 
 ## CLI Roadmap
 
 ### Priority Recommendations
 
-| Priority | Recommendation | Description |
-|----------|----------------|-------------|
-| 🔴 P0 | Add `doctor` command | System diagnostics, dependency checks, config validation |
-| 🔴 P0 | Add `completions` command | Shell completions for bash, zsh, fish, powershell |
-| 🟡 P1 | Resolve provider config overlap | Unify provider configs across embeddings/providers commands |
-| 🟡 P1 | Add unified `logs` command | Centralized log viewing across daemon, agents, swarms |
-| 🟢 P2 | Add `upgrade` command | Self-update CLI to latest version |
-| 🟢 P2 | Add interactive shell/REPL mode | `claude-flow shell` for interactive command execution |
+| Priority | Recommendation | Status | Description |
+|----------|----------------|--------|-------------|
+| 🔴 P0 | Add `doctor` command | ✅ Done | System diagnostics, dependency checks, config validation |
+| 🔴 P0 | Add `completions` command | ✅ Done | Shell completions for bash, zsh, fish, powershell |
+| 🔴 P0 | Add smart error suggestions | ✅ Done | Levenshtein distance for typo corrections |
+| 🟡 P1 | Resolve provider config overlap | Pending | Unify provider configs across embeddings/providers commands |
+| 🟡 P1 | Add unified `logs` command | Pending | Centralized log viewing across daemon, agents, swarms |
+| 🟢 P2 | Add `upgrade` command | Pending | Self-update CLI to latest version |
+| 🟢 P2 | Add interactive shell/REPL mode | Pending | `claude-flow shell` for interactive command execution |
 
 ### Implementation Plan
 
