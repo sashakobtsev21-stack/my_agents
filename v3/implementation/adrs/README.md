@@ -22,6 +22,7 @@ This directory contains all Architecture Decision Records for Claude-Flow v3.
 | ADR-014 | Workers System | ✅ Implemented | [ADR-014-workers-system.md](./ADR-014-workers-system.md) (Node.js Daemon 2026-01-07) |
 | ADR-015 | Unified Plugin System | ✅ Implemented | [ADR-015-unified-plugin-system.md](./ADR-015-unified-plugin-system.md) |
 | ADR-016 | Collaborative Issue Claims | ✅ Implemented | [ADR-016-collaborative-issue-claims.md](./ADR-016-collaborative-issue-claims.md) |
+| ADR-017 | RuVector Integration | ✅ Implemented | [ADR-017-ruvector-integration.md](./ADR-017-ruvector-integration.md) |
 
 ## Implementation Progress
 
