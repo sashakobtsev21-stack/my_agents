@@ -77,7 +77,7 @@ All ADRs consider security:
 
 **Last Updated:** 2026-01-07
 **Project:** Claude-Flow V3
-**Version:** 3.0.0-alpha.7
+**Version:** 3.0.0-alpha.11
 
 ### Recent Updates (2026-01-07)
 
@@ -108,4 +108,71 @@ All ADRs consider security:
 #### Install
 ```bash
 npx @claude-flow/cli@v3alpha --help
+```
+
+### Release: @claude-flow/cli@3.0.0-alpha.11 (2026-01-07)
+
+#### New V3 Advanced CLI Commands
+All commands include subcommand help and "Created with ❤️ by ruv.io" branding.
+
+| Command | Description | Subcommands |
+|---------|-------------|-------------|
+| `neural` | Neural pattern training, MoE, Flash Attention | train, status, patterns, predict, optimize |
+| `security` | Security scanning, CVE detection, threat modeling | scan, cve, threats, audit, secrets |
+| `performance` | Performance profiling, benchmarking, optimization | benchmark, profile, metrics, optimize, bottleneck |
+| `providers` | AI provider management, models, configurations | list, configure, test, models, usage |
+| `plugins` | Plugin management, installation, lifecycle | list, install, uninstall, toggle, info, create |
+| `deployment` | Deployment management, environments, rollbacks | deploy, status, rollback, history, environments, logs |
+| `claims` | Claims-based authorization, access control | list, check, grant, revoke, roles, policies |
+| `embeddings` | Vector embeddings, semantic search | generate, search, compare, collections, index, providers |
+
+## CLI Roadmap
+
+### Priority Recommendations
+
+| Priority | Recommendation | Description |
+|----------|----------------|-------------|
+| 🔴 P0 | Add `doctor` command | System diagnostics, dependency checks, config validation |
+| 🔴 P0 | Add `completions` command | Shell completions for bash, zsh, fish, powershell |
+| 🟡 P1 | Resolve provider config overlap | Unify provider configs across embeddings/providers commands |
+| 🟡 P1 | Add unified `logs` command | Centralized log viewing across daemon, agents, swarms |
+| 🟢 P2 | Add `upgrade` command | Self-update CLI to latest version |
+| 🟢 P2 | Add interactive shell/REPL mode | `claude-flow shell` for interactive command execution |
+
+### Implementation Plan
+
+**P0 - Critical (Next Release)**
+```bash
+# Doctor command - diagnose system health
+claude-flow doctor              # Full system check
+claude-flow doctor --fix        # Auto-fix issues where possible
+claude-flow doctor --component mcp  # Check specific component
+
+# Shell completions
+claude-flow completions bash > ~/.bash_completion.d/claude-flow
+claude-flow completions zsh > ~/.zfunc/_claude-flow
+claude-flow completions fish > ~/.config/fish/completions/claude-flow.fish
+```
+
+**P1 - High Priority**
+```bash
+# Unified logs command
+claude-flow logs                # All logs
+claude-flow logs --follow       # Tail logs
+claude-flow logs --component daemon
+claude-flow logs --level error
+```
+
+**P2 - Nice to Have**
+```bash
+# Self-update
+claude-flow upgrade             # Upgrade to latest
+claude-flow upgrade --check     # Check for updates
+claude-flow upgrade --version 3.1.0
+
+# Interactive shell
+claude-flow shell               # Enter REPL
+> swarm init mesh
+> agent spawn coder
+> memory search "patterns"
 ```
