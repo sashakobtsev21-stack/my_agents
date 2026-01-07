@@ -19,7 +19,7 @@ This directory contains all Architecture Decision Records for Claude-Flow v3.
 | ADR-011 | LLM Provider System | ✅ Implemented | [ADR-011-llm-provider-system.md](./ADR-011-llm-provider-system.md) |
 | ADR-012 | MCP Security Features | ✅ Implemented | [ADR-012-mcp-security-features.md](./ADR-012-mcp-security-features.md) |
 | ADR-013 | Core Security Module | ✅ Implemented | [ADR-013-core-security-module.md](./ADR-013-core-security-module.md) |
-| ADR-014 | Workers System | ✅ Implemented | [ADR-014-workers-system.md](./ADR-014-workers-system.md) |
+| ADR-014 | Workers System | ✅ Implemented | [ADR-014-workers-system.md](./ADR-014-workers-system.md) (Node.js Daemon 2026-01-07) |
 | ADR-015 | Unified Plugin System | ✅ Implemented | [ADR-015-unified-plugin-system.md](./ADR-015-unified-plugin-system.md) |
 | ADR-016 | Collaborative Issue Claims | ✅ Implemented | [ADR-016-collaborative-issue-claims.md](./ADR-016-collaborative-issue-claims.md) |
 
@@ -77,4 +77,10 @@ All ADRs consider security:
 
 **Last Updated:** 2026-01-07
 **Project:** Claude-Flow V3
-**Version:** 3.0.2
+**Version:** 3.0.3
+
+### Recent Updates (2026-01-07)
+- **ADR-014**: Added Node.js Worker Daemon extension - cross-platform TypeScript daemon replaces shell helpers
+- **CLI**: New `daemon` command with start/stop/status/trigger/enable subcommands
+- **Session Integration**: Auto-start daemon on SessionStart, auto-stop on SessionEnd
+- **Package**: `claude-flow@v3alpha` now uses V3 CLI via root `bin` configuration
