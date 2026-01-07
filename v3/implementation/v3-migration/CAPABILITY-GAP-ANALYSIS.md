@@ -248,52 +248,45 @@ V3 represents a major architectural overhaul with significant improvements acros
 
 ## 4. CLI Commands
 
-### Implemented in V3 ✅ (7 commands)
+### Implemented in V3 ✅ (28 commands - 100% Complete)
 
-| Command | V3 Location |
-|---------|-------------|
-| agent | `v3/@claude-flow/cli/src/commands/agent.ts` |
-| memory | `v3/@claude-flow/cli/src/commands/memory.ts` |
-| swarm | `v3/@claude-flow/cli/src/commands/swarm.ts` |
-| hooks | `v3/@claude-flow/cli/src/commands/hooks.ts` |
-| mcp | `v3/@claude-flow/cli/src/commands/mcp.ts` |
-| config | `v3/@claude-flow/cli/src/commands/config.ts` |
-| migrate | `v3/@claude-flow/cli/src/commands/migrate.ts` |
+| Category | Command | Subcommands | Description |
+|----------|---------|-------------|-------------|
+| **Core** | `init` | wizard, presets, skills, hooks | Project initialization |
+| | `start` | daemon, mcp, quick | Service startup |
+| | `status` | system, agents, watch | System monitoring |
+| | `agent` | spawn, list, status, stop, metrics, pool, health, logs | Agent lifecycle |
+| | `swarm` | init, status, spawn, stop, scale, topology | Swarm orchestration |
+| | `task` | create, list, status, complete, cancel, assign | Task management |
+| | `session` | save, restore, list, delete, export, info | Session management |
+| **Memory** | `memory` | store, retrieve, search, delete, list, stats, export | Memory operations |
+| | `embeddings` | generate, search, compare, collections, index | Vector embeddings |
+| **Workflow** | `workflow` | create, execute, list, status, pause, resume | Workflow management |
+| | `hooks` | 20 subcommands | Self-learning hooks |
+| | `hive-mind` | init, join, leave, consensus, broadcast, memory | Hive coordination |
+| **Dev Tools** | `mcp` | start, stop, tools, resources, config | MCP server |
+| | `config` | get, set, list, reset, export, import | Configuration |
+| | `migrate` | status, run, rollback, verify | V2→V3 migration |
+| | `analyze` | diff, ast, coverage, boundaries, risk | Code analysis |
+| | `route` | task, explain, coverage-aware | Q-Learning routing |
+| **Advanced** | `neural` | train, status, patterns, predict, optimize | Neural training |
+| | `security` | scan, cve, threats, audit, secrets | Security scanning |
+| | `performance` | benchmark, profile, metrics, optimize | Performance |
+| | `providers` | list, configure, test, models | AI providers |
+| | `plugins` | list, install, uninstall, toggle, info | Plugin management |
+| | `deployment` | deploy, status, rollback, environments | Deployment |
+| | `claims` | list, check, grant, revoke | Authorization |
+| **Utilities** | `daemon` | start, stop, status, trigger, enable | Background daemon |
+| | `process` | list, kill, logs, clean | Process management |
+| | `doctor` | health checks, --fix, --install | System diagnostics |
+| | `completions` | bash, zsh, fish, powershell | Shell completions |
 
-### Missing in V3 ❌ (18 commands)
+### CLI Architecture
 
-#### Priority 1 - Core
-
-| Command | Subcommands | Description |
-|---------|-------------|-------------|
-| **init** | - | Initialize project |
-| **start** | - | Start orchestrator |
-| **status** | - | System status |
-| **task** | create, list, status, cancel, assign | Task management |
-| **session** | list, save, restore, delete, export | Session management |
-
-#### Priority 2 - Features
-
-| Command | Description |
-|---------|-------------|
-| **hive** | Hive-mind coordination |
-| **sparc** | SPARC methodology |
-| **monitor** | Live dashboard |
-| **github** | GitHub integration |
-| **workflow** | Workflow management |
-
-#### Priority 3 - Utilities
-
-| Command | Description |
-|---------|-------------|
-| neural | Neural module init |
-| goal | GOAP module init |
-| claude | Claude instance spawn |
-| repl | Interactive mode |
-| version | Version info |
-| completion | Shell completion |
-| help | Help system |
-| enterprise | Enterprise features |
+- **28 commands** with **140+ subcommands**
+- All commands exported from `@claude-flow/cli/src/commands/index.ts`
+- Consistent Command interface with options, examples, and action handlers
+- Smart error suggestions via Levenshtein distance
 
 ---
 
