@@ -146,71 +146,33 @@ V3 represents a major architectural overhaul with significant improvements acros
 
 ## 3. MCP Tools
 
-### Implemented in V3 ✅ (22 tools)
+### Implemented in V3 ✅ (119 tools - Exceeds V2)
 
-| Category | Tools |
-|----------|-------|
-| Agent | spawn, list, terminate, status |
-| Swarm | init, status, scale |
-| Memory | store, search, list |
-| Config | load, save, validate |
-| Hooks | pre-edit, post-edit, pre-command, post-command, route, explain, pretrain, metrics, list |
+| Category | Tools | Count |
+|----------|-------|-------|
+| **Agent** | spawn, terminate, status, list, pool, health, update | 7 |
+| **Swarm** | init, status, shutdown, health | 4 |
+| **Task** | create, status, list, complete, update, cancel | 6 |
+| **Session** | save, restore, list, delete, info | 5 |
+| **Memory** | store, retrieve, search, delete, list, stats | 6 |
+| **Config** | get, set, list, reset, export, import | 6 |
+| **Hive-Mind** | init, status, join, leave, consensus, broadcast, memory | 7 |
+| **Workflow** | create, execute, status, list, pause, resume, cancel, delete, template | 9 |
+| **Analyze** | diff, diff-risk, diff-classify, diff-reviewers, file-risk, diff-stats | 6 |
+| **Hooks Core** | pre-edit, post-edit, pre-command, post-command, pre-task, post-task | 6 |
+| **Hooks Session** | session-start, session-end, session-restore, notify | 4 |
+| **Hooks Intelligence** | route, explain, pretrain, build-agents, transfer, metrics, list, init | 8 |
+| **Hooks Learning** | intelligence, intelligence-reset, trajectory-start, trajectory-step, trajectory-end, pattern-store, pattern-search, stats, learn, attention | 10 |
+| **Hooks Workers** | worker-list, worker-dispatch, worker-status, worker-detect, worker-cancel | 5 |
+| **Coverage** | coverage-route, coverage-suggest, coverage-gaps | 3 |
+| **And more...** | Additional tools across modules | 27 |
 
-### Missing in V3 ❌ (43 tools)
+### MCP Tools Architecture
 
-#### Task Management (5 missing) - HIGH PRIORITY
-
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| `tasks/create` | type, description, priority, dependencies | Create new task |
-| `tasks/list` | status, agentId, limit | List tasks |
-| `tasks/status` | taskId | Get task status |
-| `tasks/cancel` | taskId, reason | Cancel task |
-| `tasks/assign` | taskId, agentId | Assign to agent |
-
-#### System Tools (7 missing) - MEDIUM PRIORITY
-
-| Tool | Description |
-|------|-------------|
-| `system/status` | Comprehensive status |
-| `system/metrics` | Performance metrics |
-| `system/health` | Health check |
-| `system/info` | System information |
-| `tools/list` | List all tools |
-| `tools/schema` | Get tool schema |
-
-#### Query Control (2 missing)
-
-| Tool | Description |
-|------|-------------|
-| `query/control` | Pause/resume/terminate queries |
-| `query/list` | List active queries |
-
-#### Workflow (3 missing)
-
-| Tool | Description |
-|------|-------------|
-| `workflow/execute` | Execute workflow |
-| `workflow/create` | Create workflow |
-| `workflow/list` | List workflows |
-
-#### Terminal (3 missing)
-
-| Tool | Description |
-|------|-------------|
-| `terminal/execute` | Execute command |
-| `terminal/list` | List sessions |
-| `terminal/create` | Create session |
-
-#### Swarm (5 missing)
-
-| Tool | Description |
-|------|-------------|
-| `swarm/execute-objective` | Execute objective |
-| `swarm/emergency-stop` | Emergency stop |
-| `agents/spawn_parallel` | Parallel spawn (10-20x faster) |
-| `swarm/monitor` | Real-time monitoring |
-| `task_orchestrate` | Task orchestration |
+- **119 MCP tools** across 12 tool files
+- All tools in `@claude-flow/cli/src/mcp-tools/`
+- JSON Schema validation for all inputs
+- Consistent response format with success/error handling
 
 #### Memory (3 missing)
 
