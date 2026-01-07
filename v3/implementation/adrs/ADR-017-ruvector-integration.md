@@ -1005,3 +1005,56 @@ describe('Route Command', () => {
 | `hooks_diff_classify` | `analyze diff --risk` | `ruvector/analyze-diff` |
 | `hooks_graph_mincut` | `analyze boundaries -a mincut` | `ruvector/analyze-boundaries` |
 | `hooks_graph_cluster` | `analyze boundaries -a louvain` | `ruvector/analyze-boundaries` |
+
+---
+
+## Implementation Notes
+
+**Implementation completed: 2026-01-07**
+
+### Modules Created (8 modules, 2888 lines)
+
+| Module | Path | Lines | Description |
+|--------|------|-------|-------------|
+| `availability.ts` | `/ruvector/availability.ts` | ~120 | Package detection and feature checking |
+| `errors.ts` | `/ruvector/errors.ts` | ~50 | Custom error types for graceful fallback |
+| `types.ts` | `/ruvector/types.ts` | ~180 | TypeScript interfaces for all adapters |
+| `index.ts` | `/ruvector/index.ts` | ~80 | Lazy loader and re-exports |
+| `router-adapter.ts` | `/ruvector/adapters/router-adapter.ts` | ~350 | Q-Learning and coverage routing |
+| `ast-adapter.ts` | `/ruvector/adapters/ast-adapter.ts` | ~400 | AST analysis and complexity metrics |
+| `diff-adapter.ts` | `/ruvector/adapters/diff-adapter.ts` | ~320 | Diff classification and risk scoring |
+| `graph-adapter.ts` | `/ruvector/adapters/graph-adapter.ts` | ~280 | Graph-based boundary detection |
+| `ruvector-tools.ts` | `/mcp-tools/ruvector-tools.ts` | ~450 | MCP tool definitions |
+| `route.ts` | `/commands/route.ts` | ~350 | CLI route command |
+| `analyze.ts` | `/commands/analyze.ts` | ~308 | CLI analyze command with subcommands |
+
+**Total: 2888 lines of code**
+
+### CLI Commands Added (2 commands)
+
+1. **`route`** - ML-based task routing
+   - `--task, -t` - Task description (required)
+   - `--q-learning, -q` - Use Q-Learning model
+   - `--coverage-aware, -c` - Use test coverage data
+   - `--explain, -e` - Include explanation
+   - `--max-agents, -m` - Maximum recommendations (default: 3)
+
+2. **`analyze`** - Code analysis with 3 subcommands
+   - `analyze ast` - AST symbols and complexity
+   - `analyze diff` - Diff classification and risk
+   - `analyze boundaries` - Graph-based module detection
+
+### Graceful Fallback Behavior
+
+When `ruvector` is not installed:
+- Commands display helpful installation instructions
+- Fall back to default agent routing (rule-based)
+- No build failures or runtime crashes
+- Clear error messages with documentation links
+
+### Testing Coverage
+
+- Unit tests for availability detection
+- Integration tests for command handlers
+- Mock tests for ruvector unavailable scenarios
+- Fallback behavior verification
