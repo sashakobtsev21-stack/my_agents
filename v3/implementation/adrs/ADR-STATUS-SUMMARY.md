@@ -54,13 +54,13 @@
 |-----|-------|--------|-------|
 | ADR-014 | Workers System | ✅ Complete | 12 workers, daemon, CLI integration |
 | ADR-015 | Unified Plugin System | ✅ Complete | Plugin lifecycle management |
-| ADR-016 | Collaborative Issue Claims | 🔄 In Progress | Claims-based authorization |
+| ADR-016 | Collaborative Issue Claims | ✅ Complete | Claims service + issues CLI command |
 
 ### Performance & Intelligence
 
 | ADR | Title | Status | Notes |
 |-----|-------|--------|-------|
-| ADR-017 | RuVector Integration | ✅ Quick Wins Complete | 5/5 optimizations done, route/analyze pending |
+| ADR-017 | RuVector Integration | ✅ Complete | Route (678 lines) + Analyze (2114 lines) commands |
 
 ---
 
