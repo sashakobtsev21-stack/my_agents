@@ -1,9 +1,10 @@
 # ADR-017: RuVector Integration Architecture
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-01-07
+**Completion Date:** 2026-01-07
 **Author:** System Architecture Designer
-**Version:** 1.0.0
+**Version:** 1.1.0
 
 ## Context
 
