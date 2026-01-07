@@ -174,37 +174,15 @@ V3 represents a major architectural overhaul with significant improvements acros
 - JSON Schema validation for all inputs
 - Consistent response format with success/error handling
 
-#### Memory (3 missing)
+### Remaining MCP Tool Opportunities (Future Enhancements)
 
-| Tool | Description |
-|------|-------------|
-| `memory/delete` | Delete entry |
-| `memory/export` | Export to file |
-| `memory/import` | Import from file |
+| Category | Potential Tools | Priority |
+|----------|-----------------|----------|
+| Resource Management | resource/register, resource/get-statistics | LOW |
+| Message Queue | message/send, message/get-metrics | LOW |
+| Monitor Dashboard | monitor/get-alerts, monitor/dashboard | LOW |
 
-#### Resource & Message (4 missing)
-
-| Tool | Description |
-|------|-------------|
-| `resource/register` | Register resource |
-| `resource/get-statistics` | Resource stats |
-| `message/send` | Send message |
-| `message/get-metrics` | Message metrics |
-
-#### Monitor (2 missing)
-
-| Tool | Description |
-|------|-------------|
-| `monitor/get-metrics` | System metrics |
-| `monitor/get-alerts` | Active alerts |
-
-#### Neural (3 missing)
-
-| Tool | Description |
-|------|-------------|
-| `neural_status` | Neural status |
-| `neural_patterns` | Cognitive patterns |
-| `benchmark_run` | Run benchmarks |
+*Note: These are enhancements, not gaps. V3 exceeds V2 tool coverage.*
 
 ---
 
