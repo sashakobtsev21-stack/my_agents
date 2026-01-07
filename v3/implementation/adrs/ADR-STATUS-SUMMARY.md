@@ -199,5 +199,18 @@
 
 ---
 
+## Optional Future Enhancements
+
+| Item | Priority | ADR | Notes |
+|------|----------|-----|-------|
+| GitHub sync for issues | Low | ADR-016 | Sync claims with GitHub Issues API |
+| MCP tools for claims | Low | ADR-016 | Expose claim operations via MCP |
+| Coverage-aware routing | Low | ADR-017 | Route based on test coverage data |
+| More tests | Medium | All | Increase test coverage across packages |
+
+These are enhancements, not blockers for V3 production readiness.
+
+---
+
 **Document Maintained By:** Architecture Team
 **Status:** ✅ V3 All ADRs Complete (17/17)
