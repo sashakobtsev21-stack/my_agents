@@ -1636,6 +1636,155 @@ const verification = await mcp__claude_flow__transfer_verify({
 
 ---
 
+## Cross-Platform MCP Configuration
+
+### Windows Requirements
+
+On Windows, MCP servers require a `cmd /c` wrapper to execute npx commands. Without this wrapper, Claude Code will display the warning:
+
+```
+[Warning] [claude-flow] mcpServers.claude-flow: Windows requires 'cmd /c' wrapper to execute npx
+```
+
+### Platform-Specific .mcp.json Configuration
+
+#### Windows Configuration
+
+```json
+{
+  "mcpServers": {
+    "claude-flow": {
+      "command": "cmd",
+      "args": ["/c", "npx", "@claude-flow/cli@latest", "mcp", "start"],
+      "env": {
+        "CLAUDE_FLOW_LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+#### macOS/Linux Configuration
+
+```json
+{
+  "mcpServers": {
+    "claude-flow": {
+      "command": "npx",
+      "args": ["@claude-flow/cli@latest", "mcp", "start"],
+      "env": {
+        "CLAUDE_FLOW_LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+### Cross-Platform Configuration (Recommended)
+
+The `init` command automatically detects the platform and generates the correct configuration:
+
+```bash
+# Auto-detects platform and generates correct .mcp.json
+npx @claude-flow/cli@latest init --force
+
+# Or use the wizard for more options
+npx @claude-flow/cli@latest init wizard
+```
+
+### MCP Server Auto-Configuration
+
+The init command generates platform-aware MCP configuration:
+
+```typescript
+// v3/@claude-flow/cli/src/init/mcp-generator.ts
+
+function generateMcpConfig(): MCPConfig {
+  const isWindows = process.platform === 'win32';
+
+  if (isWindows) {
+    return {
+      mcpServers: {
+        'claude-flow': {
+          command: 'cmd',
+          args: ['/c', 'npx', '@claude-flow/cli@latest', 'mcp', 'start'],
+          env: {
+            CLAUDE_FLOW_LOG_LEVEL: 'info'
+          }
+        }
+      }
+    };
+  }
+
+  return {
+    mcpServers: {
+      'claude-flow': {
+        command: 'npx',
+        args: ['@claude-flow/cli@latest', 'mcp', 'start'],
+        env: {
+          CLAUDE_FLOW_LOG_LEVEL: 'info'
+        }
+      }
+    }
+  };
+}
+```
+
+### Transfer Tool MCP Registration (Platform-Aware)
+
+```json
+{
+  "mcpServers": {
+    "claude-flow": {
+      "command": "cmd",
+      "args": ["/c", "npx", "@claude-flow/cli@latest", "mcp", "start"],
+      "tools": [
+        "transfer/export",
+        "transfer/import",
+        "transfer/anonymize",
+        "transfer/detect-pii",
+        "transfer/ipfs-upload",
+        "transfer/ipfs-download",
+        "transfer/ipfs-pin",
+        "transfer/ipfs-resolve",
+        "transfer/store-search",
+        "transfer/store-info",
+        "transfer/store-install",
+        "transfer/store-publish",
+        "transfer/store-rate",
+        "transfer/verify",
+        "transfer/sign",
+        "transfer/generate-keypair"
+      ]
+    }
+  }
+}
+```
+
+### Platform Detection for CLI
+
+```bash
+# Windows PowerShell
+cmd /c npx @claude-flow/cli@latest hooks transfer export --output patterns.cfp
+
+# Windows CMD
+npx @claude-flow/cli@latest hooks transfer export --output patterns.cfp
+
+# macOS/Linux
+npx @claude-flow/cli@latest hooks transfer export --output patterns.cfp
+```
+
+### Troubleshooting
+
+| Issue | Platform | Solution |
+|-------|----------|----------|
+| `'npx' is not recognized` | Windows | Use `cmd /c` wrapper or install Node.js globally |
+| `EACCES permission denied` | Linux/macOS | Use `npx --yes` or fix npm permissions |
+| MCP server won't start | Windows | Ensure `cmd /c` wrapper is in .mcp.json |
+| Path issues with spaces | Windows | Use quoted paths: `"C:\Program Files\..."` |
+
+---
+
 ## References
 
 - ADR-017: RuVector Integration Architecture
