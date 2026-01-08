@@ -83,7 +83,7 @@
 | Package | Version | Published |
 |---------|---------|-----------|
 | claude-flow | 3.0.0-alpha.18 | 2026-01-07 |
-| @claude-flow/cli | 3.0.0-alpha.25 | 2026-01-07 |
+| @claude-flow/cli | 3.0.0-alpha.56 | 2026-01-08 |
 | @claude-flow/memory | 3.0.0-alpha.2 | 2026-01-07 |
 | @claude-flow/mcp | 3.0.0-alpha.8 | 2026-01-07 |
 | @claude-flow/neural | 3.0.0-alpha.2 | 2026-01-06 |
@@ -185,7 +185,7 @@
 | Package | Version | Published |
 |---------|---------|-----------|
 | claude-flow | 3.0.0-alpha.18 | 2026-01-07 |
-| @claude-flow/cli | 3.0.0-alpha.25 | 2026-01-07 |
+| @claude-flow/cli | 3.0.0-alpha.56 | 2026-01-08 |
 | @claude-flow/memory | 3.0.0-alpha.2 | 2026-01-07 |
 | @claude-flow/mcp | 3.0.0-alpha.8 | 2026-01-07 |
 | @claude-flow/neural | 3.0.0-alpha.2 | 2026-01-06 |
