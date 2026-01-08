@@ -2007,6 +2007,9 @@ CLI Commands:         Wired to real store modules ✅
 - [x] MCP Tools Integration (11 transfer tools)
 - [x] Plugin Store (IPFS-based plugin marketplace)
 - [x] CLI Integration (wired to real modules)
+- [x] **Intelligence stats wired to real memory queries** (trajectories, patterns, routing decisions)
+- [x] **Session restore reads actual memory entry counts**
+- [x] **Transfer hook reads patterns from source project memory**
 
 ### To Enable Real IPFS Network
 
