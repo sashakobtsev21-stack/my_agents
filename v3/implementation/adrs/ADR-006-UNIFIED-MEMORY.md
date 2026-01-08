@@ -142,6 +142,45 @@ async bulkDelete(ids: string[]): Promise<Map<string, boolean>>;
 
 ---
 
+## Updates (2026-01-08)
+
+### CLI Memory Init Command
+
+Added `memory init` command to CLI (`@claude-flow/cli@3.0.0-alpha.56`) using **sql.js** (WASM SQLite) for cross-platform compatibility without native compilation.
+
+```bash
+# Initialize memory database
+npx @claude-flow/cli@latest memory init
+
+# Options
+npx @claude-flow/cli@latest memory init --backend sqlite  # Default
+npx @claude-flow/cli@latest memory init --path ./data/custom.db
+npx @claude-flow/cli@latest memory init --force  # Overwrite existing
+```
+
+**Schema (6 tables):**
+
+| Table | Schema |
+|-------|--------|
+| `memory_entries` | `id, namespace, key, value, metadata, created_at, updated_at, ttl` |
+| `vectors` | `id, entry_id, embedding (768-dim), norm` |
+| `patterns` | `id, name, pattern_data, confidence, created_at, updated_at` |
+| `sessions` | `id, session_data, started_at, ended_at, status` |
+| `trajectories` | `id, session_id, step, state, action, reward, next_state, created_at` |
+| `metadata` | `key, value, updated_at` |
+
+**Why sql.js:**
+- ✅ Cross-platform (WASM, no native compilation)
+- ✅ Works in GitHub Codespaces, Docker, CI
+- ✅ No `better-sqlite3` native binding issues
+- ✅ Persistent storage via file sync
+
+**Locations:**
+- `.swarm/memory.db` - Primary database
+- `.claude/memory.db` - Sync location for Claude Code hooks
+
+---
+
 **Implementation Date:** 2026-01-04
-**Last Updated:** 2026-01-07
-**Status:** ✅ Complete (with optimizations)
+**Last Updated:** 2026-01-08
+**Status:** ✅ Complete (with CLI init)
