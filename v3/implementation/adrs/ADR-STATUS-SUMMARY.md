@@ -199,6 +199,36 @@
 
 ---
 
+## CLI Enhancements (alpha.54-56) - Completed (2026-01-08)
+
+| Version | Feature | Implementation |
+|---------|---------|----------------|
+| alpha.54 | Dynamic swarm status | `swarm.ts:getSwarmStatus()` reads from `.swarm/state.json`, agents, tasks |
+| alpha.55 | Hooks statusline command | `hooks.ts:statuslineCommand` with --json, --compact, --no-color |
+| alpha.56 | Memory init with sql.js | `memory.ts:initMemoryCommand` - 6 tables, WASM SQLite |
+| alpha.56 | Init --start-all flag | `init.ts` - auto-starts daemon, memory, swarm |
+
+### Memory Init Schema (sql.js)
+
+| Table | Purpose |
+|-------|---------|
+| `memory_entries` | Key-value store with namespace, ttl |
+| `vectors` | 768-dim embeddings for semantic search |
+| `patterns` | Learned neural patterns |
+| `sessions` | Session state persistence |
+| `trajectories` | RL trajectory tracking |
+| `metadata` | System metadata |
+
+### Hooks Statusline Command
+
+```bash
+npx @claude-flow/cli@latest hooks statusline           # Full colored output
+npx @claude-flow/cli@latest hooks statusline --json    # JSON format
+npx @claude-flow/cli@latest hooks statusline --compact # Single-line format
+```
+
+---
+
 ## Optional Future Enhancements
 
 | Item | Priority | ADR | Notes |
