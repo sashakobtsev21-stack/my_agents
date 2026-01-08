@@ -656,5 +656,35 @@ interface AskUserQuestionInput {
 
 ---
 
+---
+
+## Updates (2026-01-08)
+
+### One-Command Project Setup (`init --start-all`)
+
+Added `--start-all` flag to `init` command for complete project initialization:
+
+```bash
+# Initialize project AND start all services
+npx @claude-flow/cli@latest init --start-all
+
+# Equivalent to running:
+# 1. npx @claude-flow/cli@latest init
+# 2. npx @claude-flow/cli@latest memory init
+# 3. npx @claude-flow/cli@latest daemon start
+# 4. npx @claude-flow/cli@latest swarm init --topology hierarchical
+```
+
+**Flags added:**
+- `--start-all` - Initialize memory, start daemon, start swarm
+- `--start-daemon` - Just start the daemon after init
+
+This simplifies the Claude Code integration setup from multiple commands to a single invocation.
+
+**CLI Version:** `@claude-flow/cli@3.0.0-alpha.56`
+
+---
+
 **Status:** ✅ Complete
 **Completed:** 2026-01-07
+**Last Updated:** 2026-01-08
