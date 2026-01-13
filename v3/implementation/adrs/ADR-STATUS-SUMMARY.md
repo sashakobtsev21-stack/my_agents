@@ -358,10 +358,45 @@ npx claude-flow update clear-cache # Clear check cache
 
 ---
 
+## Known Gaps - V2 to V3 Migration
+
+### MCP Tools Gap
+
+V3 currently implements **27 MCP tools**. V2 had additional tools and resources that are not yet ported:
+
+| Category | V2 Status | V3 Status | Priority |
+|----------|-----------|-----------|----------|
+| Core swarm tools | ✅ Full | ✅ 27 tools | - |
+| Memory resources | ✅ Full | ⚠️ Partial | Medium |
+| Agent templates | ✅ Full | ⚠️ Missing | Low |
+| Workflow resources | ✅ Full | ⚠️ Missing | Low |
+
+**V3 MCP Tools (27 implemented):**
+- Swarm: init, status, spawn, stop, list
+- Memory: store, search, delete, list
+- Task: create, assign, status, complete
+- Agent: spawn, list, metrics, health
+- Config: get, set, list
+- Neural: train, predict, status
+- Embeddings: embed, search, batch
+
+**To Be Ported from V2:**
+- MCP Resources (listable/subscribable)
+- Workflow templates resource
+- Agent definition resources
+- Session state resources
+
+### Recommendation
+
+The 27 tools cover core functionality. Additional V2 tools/resources can be added incrementally post-beta.
+
+---
+
 ## Optional Future Enhancements
 
 | Item | Priority | ADR | Notes |
 |------|----------|-----|-------|
+| Port V2 MCP resources | Medium | ADR-005 | Add missing resources from V2 |
 | GitHub sync for issues | Low | ADR-016 | Sync claims with GitHub Issues API |
 | Coverage-aware routing | Low | ADR-017 | Route based on test coverage data |
 | More tests | Medium | All | Increase test coverage across packages |
