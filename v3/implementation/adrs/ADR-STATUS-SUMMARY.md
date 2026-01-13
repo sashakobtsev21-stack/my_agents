@@ -294,12 +294,66 @@ npx @claude-flow/cli@latest hooks statusline --compact # Single-line format
 
 ---
 
+## Alpha.84 Release - Audit Fixes (2026-01-13)
+
+### Performance Command Real Metrics
+
+```typescript
+// Before: Hardcoded values
+const profile = { cpuPercent: 23, heapUsedMB: 145 };
+
+// After: Real system metrics
+const startCpu = process.cpuUsage();
+const startMem = process.memoryUsage();
+// ... profile work ...
+const endCpu = process.cpuUsage(startCpu);
+const cpuPercent = ((endCpu.user + endCpu.system) / 1000 / elapsedMs * 100);
+const heapUsedMB = (endMem.heapUsed / 1024 / 1024);
+```
+
+### Security Scanner Example Labels
+
+```typescript
+output.writeln(output.warning('⚠ No real CVE database configured. Showing example data.'));
+output.writeln(output.dim('Run "npm audit" or "claude-flow security scan" for real vulnerability detection.'));
+```
+
+### Transfer Fallback Warnings
+
+```typescript
+console.warn(`⚠ [IPFS] DEMO MODE - No IPFS credentials configured`);
+console.warn(`⚠ [Discovery] OFFLINE MODE - Could not resolve IPNS: ${ipnsName}`);
+```
+
+---
+
+## Auto-Update System (ADR-025)
+
+| Component | File | Description |
+|-----------|------|-------------|
+| Rate Limiter | `src/update/rate-limiter.ts` | 24h file-based cache |
+| Checker | `src/update/checker.ts` | npm registry queries |
+| Validator | `src/update/validator.ts` | Compatibility checks |
+| Executor | `src/update/executor.ts` | Install with rollback |
+| Commands | `src/commands/update.ts` | check, all, history, rollback |
+
+### Update CLI Commands
+
+```bash
+npx claude-flow update check      # Check for updates
+npx claude-flow update all        # Update all packages
+npx claude-flow update history    # View update history
+npx claude-flow update rollback   # Rollback last update
+npx claude-flow update clear-cache # Clear check cache
+```
+
+---
+
 ## Optional Future Enhancements
 
 | Item | Priority | ADR | Notes |
 |------|----------|-----|-------|
 | GitHub sync for issues | Low | ADR-016 | Sync claims with GitHub Issues API |
-| MCP tools for claims | Low | ADR-016 | Expose claim operations via MCP |
 | Coverage-aware routing | Low | ADR-017 | Route based on test coverage data |
 | More tests | Medium | All | Increase test coverage across packages |
 
@@ -308,4 +362,5 @@ These are enhancements, not blockers for V3 production readiness.
 ---
 
 **Document Maintained By:** Architecture Team
-**Status:** ✅ V3 All ADRs Complete (17/17)
+**Status:** ✅ V3 All ADRs Complete (22/22) - **BETA READY**
+**Next Milestone:** 3.0.0-beta.1
