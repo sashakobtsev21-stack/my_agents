@@ -517,4 +517,12 @@ node bin/cli.js hive-mind broadcast -m "Hello"  # ✅ Works
 - **File Persistence**: 6 storage domains
 - **Architecture Compliance**: 100%
 
-**Published**: `@claude-flow/cli@3.0.0-alpha.7` with `v3alpha` tag
+**Published**: `@claude-flow/cli@3.0.0-alpha.90` with `v3alpha` tag (latest)
+
+#### Version History
+
+| Version | Date | Key Changes |
+|---------|------|-------------|
+| alpha.7 | 2026-01-07 | Initial CLI MCP tool integration |
+| alpha.89 | 2026-01-13 | Mac settings validation fix |
+| alpha.90 | 2026-01-13 | Init path calculation fix (empty folders bug) |
