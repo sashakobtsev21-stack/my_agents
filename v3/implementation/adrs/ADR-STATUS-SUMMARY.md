@@ -87,7 +87,7 @@
 | Claims MCP tools | ✅ |
 | Production hardening | ✅ |
 | Windows validated | ✅ |
-| MCP server working | ✅ (27 tools, 1.55ms startup) |
+| MCP server working | ✅ (171 tools, 19 categories) |
 | Version freshness check | ✅ (doctor -c version) |
 | npx cache fix | ✅ (pinned versions) |
 
