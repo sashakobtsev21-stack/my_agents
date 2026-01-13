@@ -139,8 +139,8 @@
 
 | Package | Version | Published |
 |---------|---------|-----------|
+| @claude-flow/cli | **3.0.0-alpha.84** | 2026-01-13 |
 | claude-flow | 3.0.0-alpha.18 | 2026-01-07 |
-| @claude-flow/cli | 3.0.0-alpha.56 | 2026-01-08 |
 | @claude-flow/memory | 3.0.0-alpha.2 | 2026-01-07 |
 | @claude-flow/mcp | 3.0.0-alpha.8 | 2026-01-07 |
 | @claude-flow/neural | 3.0.0-alpha.2 | 2026-01-06 |
@@ -151,6 +151,14 @@
 | @claude-flow/providers | 3.0.0-alpha.1 | 2026-01-04 |
 | @claude-flow/embeddings | 3.0.0-alpha.12 | 2026-01-05 |
 | @claude-flow/shared | 3.0.0-alpha.1 | 2026-01-03 |
+
+### npm dist-tags (as of 2026-01-13)
+
+| Tag | Version |
+|-----|---------|
+| `latest` | 3.0.0-alpha.84 |
+| `v3alpha` | 3.0.0-alpha.84 |
+| `alpha` | 3.0.0-alpha.84 |
 
 ---
 
