@@ -124,11 +124,33 @@ All ADRs consider security:
 
 ---
 
-**Last Updated:** 2026-01-07
+**Last Updated:** 2026-01-13
 **Project:** Claude-Flow V3
-**Version:** 3.0.0-alpha.15
+**Version:** 3.0.0-alpha.84 (Beta Ready)
 
-### Recent Updates (2026-01-07)
+### Recent Updates (2026-01-13)
+
+#### Release: @claude-flow/cli@3.0.0-alpha.84 (Beta Ready)
+
+**All Audit Issues Resolved:**
+
+| Fix | Before | After |
+|-----|--------|-------|
+| Profile metrics | Hardcoded 23%, 145MB | Real: process.memoryUsage(), process.cpuUsage() |
+| CVE data | Unmarked fake data | Labeled as examples with warnings |
+| Demo mode warnings | Silent fallback | ⚠ DEMO MODE / OFFLINE MODE warnings |
+
+**Auto-Update System (ADR-025):**
+```bash
+npx claude-flow update check      # Check for updates
+npx claude-flow update all        # Update all packages
+npx claude-flow update history    # View update history
+npx claude-flow update rollback   # Rollback last update
+```
+
+---
+
+### Previous Updates (2026-01-07)
 
 #### Release: @claude-flow/cli@3.0.0-alpha.15 (Latest)
 
