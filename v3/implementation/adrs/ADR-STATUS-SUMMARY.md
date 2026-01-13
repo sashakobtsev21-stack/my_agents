@@ -267,8 +267,8 @@
 
 | Package | Version | Published | Status |
 |---------|---------|-----------|--------|
-| @claude-flow/cli | **3.0.0-alpha.84** | 2026-01-13 | ✅ Beta Ready |
-| claude-flow | 3.0.0-alpha.18 | 2026-01-07 | ✅ |
+| @claude-flow/cli | **3.0.0-alpha.86** | 2026-01-13 | ✅ Beta Ready |
+| claude-flow | **3.0.0-alpha.33** | 2026-01-13 | ✅ Beta Ready |
 | @claude-flow/memory | 3.0.0-alpha.2 | 2026-01-07 | ✅ |
 | @claude-flow/mcp | 3.0.0-alpha.8 | 2026-01-07 | ✅ |
 | @claude-flow/neural | 3.0.0-alpha.2 | 2026-01-06 | ✅ |
