@@ -36,7 +36,7 @@
 | Component | Status |
 |-----------|--------|
 | CLI Commands | 100% ✅ |
-| MCP Tools | 27 tools ✅ |
+| MCP Tools | **171 tools** ✅ (V2 compatibility complete) |
 | Hooks | 100% ✅ |
 | DDD Structure | 100% ✅ |
 
