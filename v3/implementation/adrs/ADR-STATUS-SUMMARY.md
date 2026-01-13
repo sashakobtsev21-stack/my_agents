@@ -105,7 +105,7 @@
 | ADR-002 | Domain-Driven Design Structure | ✅ Complete | 15 bounded context modules |
 | ADR-003 | Single Coordination Engine | ✅ Complete | UnifiedSwarmCoordinator canonical |
 | ADR-004 | Plugin Architecture | ✅ Complete | @claude-flow/plugins |
-| ADR-005 | MCP-First API Design | ✅ Complete | 27 MCP tools (V2 had more - see Known Gaps) |
+| ADR-005 | MCP-First API Design | ✅ Complete | **171 MCP tools** - V2 compatibility complete |
 
 ### Memory & Data
 
