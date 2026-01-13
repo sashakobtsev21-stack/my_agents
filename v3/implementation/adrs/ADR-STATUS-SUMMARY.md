@@ -459,30 +459,42 @@ V3 now implements **171 MCP tools** with full V2 backward compatibility:
 | **Coordination (V2)** | ✅ Full | ✅ **NEW** | 7 tools |
 | Hooks system | ✅ Full | ✅ Full | 45 tools |
 
-### New V2 Compatibility Tools (alpha.87)
+### New V2 Compatibility Tools (alpha.88+)
 
-⚠️ **IMPORTANT**: These tools provide **LOCAL STATE MANAGEMENT** for V2 API compatibility.
-They do NOT make external API calls or execute real commands. They are useful for:
-- Workflow orchestration and coordination
-- State tracking across agent sessions
-- Local development and testing
+**Updated 2026-01-13**: V2 tools now use **REAL** capabilities where possible:
 
-| Tool File | Persistence | External API | Notes |
-|-----------|-------------|--------------|-------|
-| system-tools.ts | ✅ File-based | ❌ None | Illustrative metrics |
-| terminal-tools.ts | ✅ File-based | ❌ None | Records commands, doesn't execute |
-| github-tools.ts | ✅ File-based | ❌ None | Local state only, no GitHub API |
-| neural-tools.ts | ✅ File-based | ❌ None | Simulated training |
-| performance-tools.ts | ✅ File-based | Partial | Some real process metrics |
-| daa-tools.ts | ✅ File-based | ❌ None | Local agent coordination |
-| coordination-tools.ts | ✅ File-based | ❌ None | Local topology state |
+| Tool File | Persistence | Real Data | Notes |
+|-----------|-------------|-----------|-------|
+| system-tools.ts | ✅ File-based | ✅ **REAL** | Real CPU, memory via os/process APIs |
+| performance-tools.ts | ✅ File-based | ✅ **REAL** | Real benchmarks with actual timing |
+| neural-tools.ts | ✅ File-based | ✅ **REAL** | Real embeddings via @claude-flow/embeddings |
+| terminal-tools.ts | ✅ File-based | ❌ State only | Records commands, doesn't execute |
+| github-tools.ts | ✅ File-based | ❌ State only | Local state, no GitHub API |
+| daa-tools.ts | ✅ File-based | ❌ State only | Local agent coordination |
+| coordination-tools.ts | ✅ File-based | ❌ State only | Local topology state |
 
-**system-tools.ts** (5 tools) - ⚠️ Illustrative metrics:
-- `system/status` - Get overall system status (simulated)
-- `system/metrics` - Get system metrics (illustrative values)
+**system-tools.ts** (5 tools) - ✅ **REAL METRICS**:
+- `system/status` - Get overall system status (real health based on metrics)
+- `system/metrics` - **REAL**: os.loadavg(), os.cpus(), process.memoryUsage()
 - `system/health` - Perform system health check
 - `system/info` - Get system information (real Node.js info)
 - `system/reset` - Reset system state
+
+**performance-tools.ts** (6 tools) - ✅ **REAL BENCHMARKS**:
+- `performance/report` - **REAL**: CPU %, memory MB from process/os APIs
+- `performance/bottleneck` - Detect bottlenecks (based on real metrics)
+- `performance/benchmark` - **REAL**: Actual timed benchmarks with ops/sec
+- `performance/profile` - Profile component (simulated hotspots)
+- `performance/optimize` - Apply optimizations (state only)
+- `performance/metrics` - **REAL**: CPU/memory with statistics from history
+
+**neural-tools.ts** (6 tools) - ✅ **REAL EMBEDDINGS**:
+- `neural/train` - Track training progress (state)
+- `neural/predict` - **REAL**: embeddings via @claude-flow/embeddings (agentic-flow)
+- `neural/patterns` - **REAL**: Store patterns with real embeddings, cosine similarity search
+- `neural/compress` - Compression info (illustrative)
+- `neural/status` - **REAL**: Shows embedding provider status
+- `neural/optimize` - Optimization suggestions (illustrative)
 
 **terminal-tools.ts** (5 tools) - ⚠️ State tracking only:
 - `terminal/create` - Create a new terminal session record
@@ -490,22 +502,6 @@ They do NOT make external API calls or execute real commands. They are useful fo
 - `terminal/list` - List all terminal session records
 - `terminal/close` - Close a terminal session record
 - `terminal/history` - Get command history
-
-**neural-tools.ts** (6 tools) - ⚠️ Simulated training:
-- `neural/train` - Simulate training a neural model
-- `neural/predict` - Make simulated predictions
-- `neural/patterns` - Get or manage local patterns
-- `neural/compress` - Simulate compression
-- `neural/status` - Get neural system status
-- `neural/optimize` - Simulate optimization
-
-**performance-tools.ts** (6 tools) - ⚠️ Mostly illustrative:
-- `performance/report` - Generate performance report
-- `performance/bottleneck` - Detect bottlenecks (simulated)
-- `performance/benchmark` - Run benchmarks (simulated results)
-- `performance/profile` - Profile component (simulated)
-- `performance/optimize` - Apply optimizations (state only)
-- `performance/metrics` - Get metrics (illustrative)
 
 **github-tools.ts** (5 tools) - ⚠️ Local state only, no GitHub API:
 - `github/repo_analyze` - Store local repo analysis record
