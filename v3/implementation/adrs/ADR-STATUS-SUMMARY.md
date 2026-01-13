@@ -61,6 +61,9 @@
 | Claims MCP tools | ✅ |
 | Production hardening | ✅ |
 | Windows validated | ✅ |
+| MCP server working | ✅ (27 tools, 1.55ms startup) |
+| Version freshness check | ✅ (doctor -c version) |
+| npx cache fix | ✅ (pinned versions) |
 
 **Recommendation:** ✅ Ready for 3.0.0-beta.1
 
