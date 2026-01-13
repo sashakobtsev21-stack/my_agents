@@ -245,22 +245,22 @@
 
 ---
 
-## Final Package Versions
+## Final Package Versions (Beta Ready)
 
-| Package | Version | Published |
-|---------|---------|-----------|
-| claude-flow | 3.0.0-alpha.18 | 2026-01-07 |
-| @claude-flow/cli | 3.0.0-alpha.56 | 2026-01-08 |
-| @claude-flow/memory | 3.0.0-alpha.2 | 2026-01-07 |
-| @claude-flow/mcp | 3.0.0-alpha.8 | 2026-01-07 |
-| @claude-flow/neural | 3.0.0-alpha.2 | 2026-01-06 |
-| @claude-flow/security | 3.0.0-alpha.1 | 2026-01-05 |
-| @claude-flow/swarm | 3.0.0-alpha.1 | 2026-01-04 |
-| @claude-flow/hooks | 3.0.0-alpha.2 | 2026-01-06 |
-| @claude-flow/plugins | 3.0.0-alpha.2 | 2026-01-06 |
-| @claude-flow/providers | 3.0.0-alpha.1 | 2026-01-04 |
-| @claude-flow/embeddings | 3.0.0-alpha.12 | 2026-01-05 |
-| @claude-flow/shared | 3.0.0-alpha.1 | 2026-01-03 |
+| Package | Version | Published | Status |
+|---------|---------|-----------|--------|
+| @claude-flow/cli | **3.0.0-alpha.84** | 2026-01-13 | ✅ Beta Ready |
+| claude-flow | 3.0.0-alpha.18 | 2026-01-07 | ✅ |
+| @claude-flow/memory | 3.0.0-alpha.2 | 2026-01-07 | ✅ |
+| @claude-flow/mcp | 3.0.0-alpha.8 | 2026-01-07 | ✅ |
+| @claude-flow/neural | 3.0.0-alpha.2 | 2026-01-06 | ✅ |
+| @claude-flow/security | 3.0.0-alpha.1 | 2026-01-05 | ✅ |
+| @claude-flow/swarm | 3.0.0-alpha.1 | 2026-01-04 | ✅ |
+| @claude-flow/hooks | 3.0.0-alpha.2 | 2026-01-06 | ✅ |
+| @claude-flow/plugins | 3.0.0-alpha.2 | 2026-01-06 | ✅ |
+| @claude-flow/providers | 3.0.0-alpha.1 | 2026-01-04 | ✅ |
+| @claude-flow/embeddings | 3.0.0-alpha.12 | 2026-01-05 | ✅ |
+| @claude-flow/shared | 3.0.0-alpha.1 | 2026-01-03 | ✅ |
 
 ---
 
