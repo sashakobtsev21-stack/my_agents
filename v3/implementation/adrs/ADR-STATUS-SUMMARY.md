@@ -106,6 +106,19 @@
 |-----|-------|--------|-------|
 | ADR-017 | RuVector Integration | ✅ Complete | Route (678 lines) + Analyze (2114 lines) commands |
 
+### Advanced Features (ADR-018 to ADR-025)
+
+| ADR | Title | Status | Notes |
+|-----|-------|--------|-------|
+| ADR-018 | Claude Code Integration | ✅ Complete | Deep Claude Code hooks and tooling |
+| ADR-019 | Headless Runtime Package | ✅ Complete | @claude-flow/headless for CI/CD |
+| ADR-020 | Headless Worker Integration | ✅ Complete | Background workers in headless mode |
+| ADR-021 | Transfer Hook IPFS Pattern Sharing | ✅ Complete | Decentralized pattern registry |
+| ADR-022 | AIDefence Integration | ✅ Complete | AI security scanning |
+| ADR-023 | ONNX Hyperbolic Embeddings Init | ✅ Complete | Real ONNX model initialization |
+| ADR-024 | Embeddings MCP Tools | ✅ Complete | MCP tools for embeddings |
+| ADR-025 | Auto-Update System | ✅ Complete | Rate-limited package updates on startup |
+
 ---
 
 ## Performance Targets - Status
