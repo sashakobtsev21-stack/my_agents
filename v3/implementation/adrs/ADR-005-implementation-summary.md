@@ -526,3 +526,96 @@ node bin/cli.js hive-mind broadcast -m "Hello"  # ✅ Works
 | alpha.7 | 2026-01-07 | Initial CLI MCP tool integration |
 | alpha.89 | 2026-01-13 | Mac settings validation fix |
 | alpha.90 | 2026-01-13 | Init path calculation fix (empty folders bug) |
+| alpha.91-92 | 2026-01-13 | `hierarchical-mesh` topology validation + CLAUDE.md template update |
+| alpha.93 | 2026-01-13 | README.md sync with prepublishOnly script |
+| alpha.94-95 | 2026-01-13 | MCP auto-restart for stdio transport |
+
+---
+
+## Bug Fixes (2026-01-13 Continued)
+
+### Bug Fix #5: `hierarchical-mesh` Topology Validation (alpha.91-92)
+
+**Issue:** `swarm init --topology hierarchical-mesh` returned "Invalid value for --topology"
+
+**Root Cause:** `hierarchical-mesh` wasn't included in the valid topology union types across multiple files
+
+**Fix:** Added `hierarchical-mesh` to 4 files:
+- `types.ts:104` - SwarmConfig topology union type
+- `swarm.ts` - TOPOLOGIES array
+- `coordination-tools.ts` - TopologyConfig interface/enum
+- `config-adapter.ts` - normalizeTopology/denormalizeTopology functions
+
+**CLAUDE.md Template Update:** Updated generated CLAUDE.md to document all 6 valid topologies:
+- `hierarchical` - Queen controls workers (anti-drift for small teams)
+- `hierarchical-mesh` - V3 queen + peer communication (recommended for 10+ agents)
+- `mesh` - Fully connected peer network
+- `ring` - Circular communication pattern
+- `star` - Central coordinator with spokes
+- `hybrid` - Dynamic topology switching
+
+### Bug Fix #6: README.md npm Sync (alpha.93)
+
+**Issue:** npm package README showed outdated CLI-specific README instead of root README
+
+**Root Cause:** npm doesn't follow symlinks when packing
+
+**Fix:** Added `prepublishOnly` script to `package.json`:
+```json
+"prepublishOnly": "cp ../../../README.md ./README.md"
+```
+
+This automatically copies the root README.md (51.9kB) before every `npm publish`.
+
+### Bug Fix #7: MCP Auto-Restart for stdio Transport (alpha.94-95)
+
+**Issue:** MCP server showed "already running (PID: xxxx)" error even when the process was stale/unresponsive, preventing restart
+
+**Root Cause:**
+1. For stdio transport, health check only verified process existence (not responsiveness)
+2. Flag defaults weren't being applied correctly (used `as` instead of `??`)
+
+**Fix (2 parts):**
+
+1. **Default value handling** - Changed flag access to use nullish coalescing:
+```typescript
+// Before (broken):
+const transport = ctx.flags.transport as 'stdio' | 'http' | 'websocket';
+
+// After (fixed):
+const transport = (ctx.flags.transport as 'stdio' | 'http' | 'websocket') ?? 'stdio';
+```
+
+2. **Auto-restart for stdio** - For stdio transport, always force restart since we can't verify health:
+```typescript
+const shouldForceRestart = force || transport === 'stdio';
+if (existingStatus.running && shouldForceRestart) {
+  // Kill existing process and restart
+  process.kill(existingStatus.pid, 'SIGKILL');
+  await manager.stop();
+}
+```
+
+**Result:** MCP server now auto-restarts stale servers for stdio transport:
+```
+[WARN] MCP Server (PID: 6549) - restarting...
+  Cleaned up existing server
+[OK] MCP Server started (PID: 300044)
+```
+
+### Updated Publish Script
+
+Added automatic dist-tag updates to `scripts/publish.sh`:
+```bash
+# Update all tags to point to the new version
+npm dist-tag add @claude-flow/cli@$VERSION alpha
+npm dist-tag add @claude-flow/cli@$VERSION latest
+npm dist-tag add @claude-flow/cli@$VERSION v3alpha
+npm dist-tag add claude-flow@$VERSION alpha
+npm dist-tag add claude-flow@$VERSION latest
+npm dist-tag add claude-flow@$VERSION v3alpha
+```
+
+This ensures `npx claude-flow@alpha` always gets the latest version.
+
+**Published**: `@claude-flow/cli@3.0.0-alpha.95`, `claude-flow@3.0.0-alpha.46`
