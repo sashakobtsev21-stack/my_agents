@@ -36,9 +36,18 @@
 | Component | Status |
 |-----------|--------|
 | CLI Commands | 100% ✅ |
-| MCP Tools | 100% ✅ |
+| MCP Tools | 27 tools ✅ |
 | Hooks | 100% ✅ |
 | DDD Structure | 100% ✅ |
+
+### MCP Server Status (Confirmed 2026-01-13)
+
+| Command | Version | MCP Server |
+|---------|---------|------------|
+| `npx @claude-flow/cli@3.0.0-alpha.86` | v3.0.0-alpha.86 | 27 tools, started in 1.55ms |
+| `npx claude-flow@alpha` | v3.0.0-alpha.86 | 27 tools, started in 1.61ms |
+
+**Fix Applied:** Pinned exact CLI version in wrapper package to avoid semver resolution to buggy 3.0.x versions. Deprecated versions 3.0.0, 3.0.1, 3.0.2.
 
 ### Beta Readiness Checklist
 
