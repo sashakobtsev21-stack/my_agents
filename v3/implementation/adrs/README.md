@@ -2,7 +2,13 @@
 
 This directory contains all Architecture Decision Records for Claude-Flow v3.
 
+**Status:** ✅ **BETA READY** (22 ADRs Complete)
+**Version:** 3.0.0-alpha.84
+**Last Updated:** 2026-01-13
+
 ## ADR Index
+
+### Core Architecture (ADR-001 to ADR-010)
 
 | ADR | Title | Status | File |
 |-----|-------|--------|------|
@@ -16,13 +22,31 @@ This directory contains all Architecture Decision Records for Claude-Flow v3.
 | ADR-008 | Vitest Over Jest | ✅ Implemented | [ADR-008-VITEST.md](./ADR-008-VITEST.md) |
 | ADR-009 | Hybrid Memory Backend as Default | ✅ Implemented | [ADR-009-IMPLEMENTATION.md](./ADR-009-IMPLEMENTATION.md) |
 | ADR-010 | Remove Deno Support | ✅ Implemented | [ADR-010-NODE-ONLY.md](./ADR-010-NODE-ONLY.md) |
+
+### Providers & Security (ADR-011 to ADR-017)
+
+| ADR | Title | Status | File |
+|-----|-------|--------|------|
 | ADR-011 | LLM Provider System | ✅ Implemented | [ADR-011-llm-provider-system.md](./ADR-011-llm-provider-system.md) |
 | ADR-012 | MCP Security Features | ✅ Implemented | [ADR-012-mcp-security-features.md](./ADR-012-mcp-security-features.md) |
 | ADR-013 | Core Security Module | ✅ Implemented | [ADR-013-core-security-module.md](./ADR-013-core-security-module.md) |
-| ADR-014 | Workers System | ✅ Implemented | [ADR-014-workers-system.md](./ADR-014-workers-system.md) (Node.js Daemon 2026-01-07) |
+| ADR-014 | Workers System | ✅ Implemented | [ADR-014-workers-system.md](./ADR-014-workers-system.md) |
 | ADR-015 | Unified Plugin System | ✅ Implemented | [ADR-015-unified-plugin-system.md](./ADR-015-unified-plugin-system.md) |
 | ADR-016 | Collaborative Issue Claims | ✅ Implemented | [ADR-016-collaborative-issue-claims.md](./ADR-016-collaborative-issue-claims.md) |
 | ADR-017 | RuVector Integration | ✅ Implemented | [ADR-017-ruvector-integration.md](./ADR-017-ruvector-integration.md) |
+
+### Advanced Features (ADR-018 to ADR-025)
+
+| ADR | Title | Status | File |
+|-----|-------|--------|------|
+| ADR-018 | Claude Code Integration | ✅ Implemented | [ADR-018-claude-code-integration.md](./ADR-018-claude-code-integration.md) |
+| ADR-019 | Headless Runtime Package | ✅ Implemented | [ADR-019-headless-runtime-package.md](./ADR-019-headless-runtime-package.md) |
+| ADR-020 | Headless Worker Integration | ✅ Implemented | [ADR-020-headless-worker-integration.md](./ADR-020-headless-worker-integration.md) |
+| ADR-021 | Transfer Hook IPFS Pattern Sharing | ✅ Implemented | [ADR-021-transfer-hook-ipfs-pattern-sharing.md](./ADR-021-transfer-hook-ipfs-pattern-sharing.md) |
+| ADR-022 | AIDefence Integration | ✅ Implemented | [ADR-022-aidefence-integration.md](./ADR-022-aidefence-integration.md) |
+| ADR-023 | ONNX Hyperbolic Embeddings Init | ✅ Implemented | [ADR-023-onnx-hyperbolic-embeddings-init.md](./ADR-023-onnx-hyperbolic-embeddings-init.md) |
+| ADR-024 | Embeddings MCP Tools | ✅ Implemented | [ADR-024-embeddings-mcp-tools.md](./ADR-024-embeddings-mcp-tools.md) |
+| ADR-025 | Auto-Update System | ✅ Implemented | [ADR-025-auto-update-system.md](./ADR-025-auto-update-system.md) |
 
 ## Implementation Progress
 
