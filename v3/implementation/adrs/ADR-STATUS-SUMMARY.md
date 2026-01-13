@@ -345,6 +345,39 @@ console.warn(`⚠ [Discovery] OFFLINE MODE - Could not resolve IPNS: ${ipnsName}
 
 ---
 
+## Alpha.85-86 Release - MCP Fix & Version Check (2026-01-13)
+
+### MCP Server Fix
+
+**Problem:** `npx claude-flow@alpha mcp start` failed with "Cannot read properties of undefined (reading 'split')"
+
+**Root Cause:** npm resolved `^3.0.0-alpha.84` to buggy version `3.0.2` (semver: `3.0.2 > 3.0.0-alpha.84`)
+
+**Solution:**
+1. Pinned exact version in wrapper: `"@claude-flow/cli": "3.0.0-alpha.86"` (no caret)
+2. Deprecated buggy versions: 3.0.0, 3.0.1, 3.0.2
+3. Published claude-flow@3.0.0-alpha.33 with fix
+
+### Doctor Version Freshness Check (alpha.86)
+
+Added `checkVersionFreshness()` to doctor command:
+- Detects if running via npx (checks process paths)
+- Queries npm registry for latest alpha version
+- Compares versions including prerelease numbers
+- Warns if stale npx cache detected
+- Provides fix command: `rm -rf ~/.npm/_npx/* && npx -y @claude-flow/cli@latest`
+
+```bash
+# Check version freshness
+npx @claude-flow/cli@alpha doctor -c version
+
+# Example output when outdated:
+⚠ Version Freshness: v3.0.0-alpha.84 (latest: v3.0.0-alpha.86) [npx cache stale]
+  Fix: rm -rf ~/.npm/_npx/* && npx -y @claude-flow/cli@latest
+```
+
+---
+
 ## Auto-Update System (ADR-025)
 
 | Component | File | Description |
