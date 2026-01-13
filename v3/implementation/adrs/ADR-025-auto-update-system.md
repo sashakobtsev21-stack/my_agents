@@ -1,7 +1,20 @@
 # ADR-025: Auto-Update System for @claude-flow Packages
 
 ## Status
-**Accepted** - 2026-01-13
+**Implemented** - 2026-01-13
+
+### Implementation Details
+
+| Component | File | Lines |
+|-----------|------|-------|
+| Rate Limiter | `src/update/rate-limiter.ts` | ~100 |
+| Checker | `src/update/checker.ts` | ~180 |
+| Validator | `src/update/validator.ts` | ~150 |
+| Executor | `src/update/executor.ts` | ~200 |
+| CLI Commands | `src/commands/update.ts` | ~340 |
+| Startup Integration | `src/index.ts` | ~20 |
+
+**Published:** @claude-flow/cli@3.0.0-alpha.83
 
 ## Context
 
