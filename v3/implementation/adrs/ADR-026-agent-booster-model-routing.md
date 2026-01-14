@@ -1,9 +1,9 @@
 # ADR-026: Agent Booster AST-Based Dynamic Model Routing
 
-**Status:** Proposed
+**Status:** Implemented ✅
 **Date:** 2026-01-14
 **Author:** System Architecture Designer
-**Version:** 1.0.0
+**Version:** 1.1.0
 
 ## Context
 
