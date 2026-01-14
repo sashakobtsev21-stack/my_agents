@@ -263,16 +263,16 @@ Stats handler (`hooks/intelligence/stats`) pulls from actual implementations:
 | @claude-flow/embeddings | 3.0.0-alpha.12 | 2026-01-05 |
 | @claude-flow/shared | 3.0.0-alpha.1 | 2026-01-03 |
 
-### npm dist-tags (as of 2026-01-13)
+### npm dist-tags (as of 2026-01-14)
 
 | Tag | Version |
 |-----|---------|
-| `latest` (cli) | 3.0.0-alpha.87 |
-| `v3alpha` (cli) | 3.0.0-alpha.87 |
-| `alpha` (cli) | 3.0.0-alpha.87 |
-| `latest` (wrapper) | 3.0.0-alpha.34 |
-| `v3alpha` (wrapper) | 3.0.0-alpha.34 |
-| `alpha` (wrapper) | 3.0.0-alpha.34 |
+| `latest` (cli) | 3.0.0-alpha.117 |
+| `v3alpha` (cli) | 3.0.0-alpha.117 |
+| `alpha` (cli) | 3.0.0-alpha.117 |
+| `latest` (wrapper) | 3.0.0-alpha.76 |
+| `v3alpha` (wrapper) | 3.0.0-alpha.76 |
+| `alpha` (wrapper) | 3.0.0-alpha.76 |
 
 ### Deprecated Versions
 
