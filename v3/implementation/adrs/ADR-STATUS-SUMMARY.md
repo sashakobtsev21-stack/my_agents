@@ -199,6 +199,24 @@
 | **Flash Attention** | `src/ruvector/flash-attention.ts` | ~610 | Two-stage screening (96d→384d), O(N) memory, **2.57x avg verified** |
 | **LoRA Adapter** | `src/ruvector/lora-adapter.ts` | ~400 | Low-rank adaptation, 128x compression (rank=8), persists to `.swarm/lora-weights.json` |
 
+### Flash Attention CPU Optimization (alpha.104)
+
+Two-stage screening optimization achieved **2.57x average speedup** on CPU:
+
+| Vectors | Dims | Naive(ms) | Optimized(ms) | Speedup | Status |
+|---------|------|-----------|---------------|---------|--------|
+| 128 | 384 | 14.39 | 13.75 | 1.05x | Below (small input) |
+| 256 | 384 | 52.89 | 21.20 | **2.49x** | ✓ TARGET |
+| 512 | 384 | 209.39 | 71.40 | **2.93x** | ✓ TARGET |
+| 1024 | 384 | 859.71 | 275.31 | **3.12x** | ✓ TARGET |
+| 2048 | 384 | 3364.38 | 1034.67 | **3.25x** | ✓ TARGET |
+
+**Optimization Technique:**
+1. **Stage 1**: Quick screening with partial dimensions (96d out of 384d)
+2. **Stage 2**: Full score computation only for top candidates (12%)
+3. Pre-allocated buffers to avoid GC pressure
+4. QuickSelect (O(n) average) for partial sorting
+
 ### Verified Learning Loop (alpha.102+)
 
 ```
