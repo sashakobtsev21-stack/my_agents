@@ -283,8 +283,23 @@ Stats handler (`hooks/intelligence/stats`) pulls from actual implementations:
 | CVE-3 | Critical | ✅ Fixed | Secure credential generation |
 | HIGH-1 | High | ✅ Fixed | Shell injection prevention |
 | HIGH-2 | High | ✅ Fixed | Path traversal validation |
+| Command Injection | Critical | ✅ Fixed (alpha.104) | auto-install.ts: regex validation + spawnSync |
+| Weak Session IDs | High | ✅ Fixed (alpha.104) | Replaced Math.random() with crypto.randomUUID() |
+| hono JWT CVE | High | ✅ Fixed (alpha.104) | npm override to hono>=4.11.4 |
+| Unpinned deps | Medium | ✅ Fixed (alpha.104) | Pinned agentdb to exact version |
 
-**Security Score:** 10/10 (previously 7.5/10)
+**Security Score:** 10/10
+
+### Alpha.104 Security Fixes (2026-01-14)
+
+| File | Issue | Fix |
+|------|-------|-----|
+| `src/mcp-tools/auto-install.ts` | Command injection via package name | Regex validation + spawnSync with shell:false |
+| `bin/cli.js` | Weak Math.random() session IDs | crypto.randomUUID().slice(0, 8) |
+| `bin/mcp-server.js` | Weak Math.random() session IDs | crypto.randomUUID().slice(0, 8) |
+| `src/mcp-server.ts` | Weak Math.random() session IDs | crypto.randomUUID().slice(0, 8) |
+| `package.json` (umbrella) | hono@4.11.3 vulnerable | npm override to >=4.11.4 |
+| `package.json` (umbrella) | Unpinned agentdb | Pinned to 2.0.0-alpha.3.4 |
 
 ---
 
