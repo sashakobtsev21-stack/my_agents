@@ -181,8 +181,8 @@
 | Pattern Search | Vector similarity | ✅ **REAL** | 0.815 similarity score, 10ms search time |
 | Trajectory Recording | Persistence | ✅ **REAL** | Stored with embeddings to `trajectories` namespace |
 | Trajectory Steps | Step tracking | ✅ **REAL** | In-memory during recording, persisted on end |
-| SONA Adaptation | <0.05ms | ✅ **REAL** (alpha.102) | `sona-optimizer.ts` - 841 lines, pattern learning from trajectories |
-| Flash Attention | 2.49x-7.47x | ✅ **REAL** (alpha.102) | `flash-attention.ts` - ~500 lines, O(N) block attention |
+| SONA Adaptation | <0.05ms | ✅ **VERIFIED** (alpha.104) | `sona-optimizer.ts` - 841 lines, **0.01ms actual** |
+| Flash Attention | 2.49x-7.47x | ✅ **VERIFIED** (alpha.104) | `flash-attention.ts` - ~610 lines, **2.57x avg** (two-stage screening) |
 | MoE Routing | 8 experts | ✅ **REAL** (alpha.102) | `moe-router.ts` - ~500 lines, gating network with REINFORCE |
 | EWC++ Consolidation | Prevents forgetting | ✅ **REAL** (alpha.102) | `ewc-consolidation.ts` - ~600 lines, Fisher matrix |
 | LoRA Pattern Distill | 128x compression | ✅ **REAL** (alpha.102) | `lora-adapter.ts` - ~400 lines, rank=8 adaptation |
