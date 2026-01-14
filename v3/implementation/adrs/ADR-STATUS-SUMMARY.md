@@ -171,35 +171,58 @@
 
 ## ⚠️ Neural Features - Honest Implementation Status
 
-**Updated 2026-01-14 (alpha.100)**
+**Updated 2026-01-14 (alpha.101)**
 
 | Feature | Claimed | Actual Status | Notes |
 |---------|---------|---------------|-------|
-| SONA Adaptation | <0.05ms | ⚠️ Partial | Trajectory recording works; self-optimization NOT implemented |
+| Pattern Store | HNSW-indexed | ✅ **REAL** (alpha.101) | 384-dim ONNX embeddings, persisted to SQLite + HNSW |
+| Pattern Search | Vector similarity | ✅ **REAL** (alpha.101) | 0.815 similarity score, 10ms search time |
+| Trajectory Recording | Persistence | ✅ **REAL** (alpha.101) | Stored with embeddings to `trajectories` namespace |
+| Trajectory Steps | Step tracking | ✅ **REAL** (alpha.101) | In-memory during recording, persisted on end |
+| SONA Adaptation | <0.05ms | ⚠️ Partial | Trajectory recording works; **self-optimization loop NOT implemented** |
 | Flash Attention | 2.49x-7.47x | ❌ Disabled | Disabled in feature flags |
 | MoE Routing | 80%+ accuracy | ❌ Placeholder | Returns placeholder weights, no real routing |
-| EWC++ Consolidation | Prevents forgetting | ❌ Not implemented | 0 actual consolidations |
+| EWC++ Consolidation | Prevents forgetting | ❌ Not implemented | Handler returns `ewcConsolidation: false` |
 | LoRA Pattern Distill | Pattern extraction | ❌ Not implemented | No model distillation |
-| Real Neural Training | ML training | ❌ Not implemented | No model training happening |
-| Pattern Search | Vector similarity | ✅ REAL (alpha.100) | Uses HNSW/SQLite with real ONNX embeddings |
+| Real Neural Training | ML training | ❌ Not implemented | No actual model training happening |
 
-### What IS Real (alpha.100)
+### What IS Real (alpha.101) - Verified Working
 
-- ✅ **Pattern Search**: Real HNSW vector search with ONNX embeddings (all-MiniLM-L6-v2)
-- ✅ **Memory Store**: SQLite with sql.js (WASM), persistent to disk
-- ✅ **Embeddings**: 384-dim ONNX embeddings via @claude-flow/embeddings
-- ✅ **Trajectory Recording**: Stores trajectories in memory (learning from them is NOT implemented)
-- ✅ **Claims System**: Full issue claim/handoff system
-- ✅ **Swarm Coordination**: Real agent spawn/coordinate via Task tool
+| Feature | Test Result | Implementation |
+|---------|-------------|----------------|
+| **Pattern Store** | `indexed: true, hnswIndexed: true` | `storeEntry()` → SQLite + HNSW |
+| **Pattern Search** | `similarity: 0.815, backend: real-vector-search` | `searchEntries()` → HNSW/SQLite |
+| **Trajectory Start** | `implementation: real-trajectory-tracking` | `activeTrajectories` Map |
+| **Trajectory Step** | `implementation: real-step-recording` | Steps added to trajectory |
+| **Trajectory End** | `persisted: true, implementation: real-persistence` | `storeEntry()` with embeddings |
+| **HNSW Index** | 32+ entries in `.swarm/hnsw.index` | `@ruvector/core.VectorDb` |
+| **SQLite DB** | 27+ entries in `.swarm/memory.db` | `sql.js` (WASM) |
 
-### What is NOT Real (Marketing Claims)
+### What is NOT Real (Still Placeholders)
 
-- ❌ **SONA self-optimization**: Infrastructure exists, self-optimization logic not implemented
-- ❌ **EWC++ consolidation**: Returns placeholder data, no actual consolidation
-- ❌ **Flash Attention**: Disabled, returns simulated speedup numbers
-- ❌ **MoE expert routing**: Returns placeholder weights, no real expert selection
-- ❌ **LoRA pattern distillation**: Not implemented
-- ❌ **Real neural training**: No actual model training, just state tracking
+| Feature | Current Behavior | What's Missing |
+|---------|-----------------|----------------|
+| **SONA self-optimization** | Records trajectories, stores patterns | Learning loop that updates routing based on outcomes |
+| **EWC++ consolidation** | Handler returns `false` | Elastic Weight Consolidation algorithm |
+| **Flash Attention** | Returns simulated numbers | Actual attention kernel optimization |
+| **MoE expert routing** | Returns static placeholder weights | Dynamic expert selection based on input |
+| **LoRA pattern distillation** | Not implemented | Low-rank adaptation for pattern extraction |
+| **Neural training** | Updates timestamps only | Actual gradient descent / backpropagation |
+
+### Next Steps for Full Neural Implementation
+
+1. **SONAOptimizer class** (designed by planner agent):
+   - Extracts patterns from successful trajectories
+   - Updates routing confidence based on outcomes
+   - Integrates with Q-learning router
+
+2. **EWC++ Implementation**:
+   - Fisher information matrix computation
+   - Penalty term for weight changes
+
+3. **MoE Real Routing**:
+   - Gating network for expert selection
+   - Load balancing across experts
 
 ---
 
