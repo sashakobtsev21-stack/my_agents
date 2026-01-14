@@ -173,7 +173,7 @@
 
 ## ✅ Neural Features - FULLY IMPLEMENTED (alpha.102+)
 
-**Updated 2026-01-14 (alpha.103)**
+**Updated 2026-01-14 (alpha.104) - Flash Attention & SONA VERIFIED**
 
 | Feature | Claimed | Actual Status | Notes |
 |---------|---------|---------------|-------|
