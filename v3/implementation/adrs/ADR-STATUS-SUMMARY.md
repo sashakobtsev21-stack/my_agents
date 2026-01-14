@@ -231,7 +231,7 @@ Stats handler (`hooks/intelligence/stats`) pulls from actual implementations:
 | Package | Version | Published |
 |---------|---------|-----------|
 | @claude-flow/cli | **3.0.0-alpha.104** | 2026-01-14 |
-| claude-flow | **3.0.0-alpha.52** | 2026-01-14 |
+| claude-flow | **3.0.0-alpha.65** | 2026-01-14 |
 | @claude-flow/memory | 3.0.0-alpha.2 | 2026-01-07 |
 | @claude-flow/mcp | 3.0.0-alpha.8 | 2026-01-07 |
 | @claude-flow/neural | 3.0.0-alpha.2 | 2026-01-06 |
