@@ -196,7 +196,7 @@
 | **SONA Optimizer** | `src/memory/sona-optimizer.ts` | 841 | Pattern learning, confidence routing, Q-learning integration, persists to `.swarm/sona-patterns.json` |
 | **EWC++ Consolidation** | `src/memory/ewc-consolidation.ts` | ~600 | Fisher Information Matrix, prevents catastrophic forgetting, persists to `.swarm/ewc-fisher.json` |
 | **MoE Router** | `src/ruvector/moe-router.ts` | ~500 | 8 experts (coder, tester, reviewer, architect, security, performance, researcher, coordinator), gating network, REINFORCE learning |
-| **Flash Attention** | `src/ruvector/flash-attention.ts` | ~500 | Block-wise attention, O(N) memory, 2.49x-7.47x speedup |
+| **Flash Attention** | `src/ruvector/flash-attention.ts` | ~610 | Two-stage screening (96d→384d), O(N) memory, **2.57x avg verified** |
 | **LoRA Adapter** | `src/ruvector/lora-adapter.ts` | ~400 | Low-rank adaptation, 128x compression (rank=8), persists to `.swarm/lora-weights.json` |
 
 ### Verified Learning Loop (alpha.102+)
