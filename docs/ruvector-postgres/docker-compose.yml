@@ -1,5 +1,3 @@
-version: '3.8'
-
 # RuVector PostgreSQL Testing Environment
 # Using the official RuVector PostgreSQL extension from ruvnet/ruvector
 #
@@ -19,7 +17,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: ruvector/postgres:latest
+    image: ruvnet/ruvector-postgres:latest
     container_name: ruvector-postgres
     environment:
       POSTGRES_USER: claude
