@@ -1,211 +1,295 @@
--- RuVector PostgreSQL Basic Queries
--- Optimized for Claude-Flow V3
+-- ============================================
+-- RUVECTOR POSTGRESQL BASIC QUERIES
+-- ============================================
 --
--- These queries demonstrate fundamental vector operations
--- with HNSW indexing for 150x-12,500x faster search
+-- Basic vector operations using RuVector PostgreSQL extension
+-- from ruvnet/ruvector (77+ SQL functions)
+--
+-- Features demonstrated:
+-- - Vector storage and retrieval
+-- - HNSW indexed similarity search
+-- - Local embedding generation (fastembed)
+-- - Metadata filtering
+-- - SIMD-accelerated distance calculations
+
+-- Set search path
+SET search_path TO claude_flow, ruvector, public;
 
 -- ============================================
--- 1. INSERT EMBEDDINGS WITH METADATA
+-- 1. INSERT EMBEDDINGS
 -- ============================================
 
--- Insert a single embedding (384-dimensional for MiniLM)
+-- Insert with local embedding generation (no API calls)
 INSERT INTO claude_flow.embeddings (content, embedding, metadata)
 VALUES (
-    'Implementing secure authentication with JWT tokens',
-    array_fill(0.1, ARRAY[384])::vector,  -- Replace with actual embedding
-    '{"category": "security", "language": "typescript", "agent": "coder-1"}'::jsonb
+    'Introduction to machine learning algorithms',
+    ruvector.fastembed('Introduction to machine learning algorithms', 'all-MiniLM-L6-v2'),
+    '{"category": "tutorial", "language": "english", "level": "beginner"}'::jsonb
 );
 
--- Batch insert for better performance (recommended for >100 embeddings)
+-- Insert multiple embeddings
 INSERT INTO claude_flow.embeddings (content, embedding, metadata)
 SELECT
-    'Sample content ' || i,
-    (SELECT array_agg(random())::vector(384) FROM generate_series(1, 384)),
-    jsonb_build_object(
-        'batch_id', 'batch-001',
-        'index', i,
-        'created_by', 'v3-memory-specialist'
-    )
-FROM generate_series(1, 100) AS i;
+    title,
+    ruvector.fastembed(title, 'all-MiniLM-L6-v2'),
+    jsonb_build_object('category', category, 'agent', agent)
+FROM (VALUES
+    ('Building REST APIs with Node.js', 'backend', 'coder'),
+    ('Deep learning fundamentals', 'ai', 'researcher'),
+    ('PostgreSQL performance optimization', 'database', 'perf-engineer'),
+    ('Secure authentication patterns', 'security', 'security-architect'),
+    ('Test-driven development practices', 'testing', 'tester')
+) AS data(title, category, agent);
 
 
 -- ============================================
--- 2. BASIC SIMILARITY SEARCH (Cosine Distance)
+-- 2. SIMILARITY SEARCH (HNSW Indexed)
 -- ============================================
 
--- Find top 10 similar embeddings using cosine distance
--- The <=> operator uses HNSW index for sub-millisecond search
+-- Basic similarity search (~61µs latency with HNSW)
 SELECT
     id,
     content,
-    1 - (embedding <=> $1::vector) AS similarity,
-    metadata
+    ruvector.cosine_similarity(
+        embedding,
+        ruvector.fastembed('machine learning', 'all-MiniLM-L6-v2')
+    ) AS similarity
 FROM claude_flow.embeddings
 WHERE embedding IS NOT NULL
-ORDER BY embedding <=> $1::vector
-LIMIT 10;
+ORDER BY embedding <-> ruvector.fastembed('machine learning', 'all-MiniLM-L6-v2')
+LIMIT 5;
 
--- With similarity threshold (only return matches > 0.7 similarity)
+-- Search with minimum similarity threshold
 SELECT
     id,
     content,
-    1 - (embedding <=> $1::vector) AS similarity,
+    ruvector.cosine_similarity(embedding, query_emb) AS similarity,
     metadata
-FROM claude_flow.embeddings
+FROM claude_flow.embeddings,
+     LATERAL (SELECT ruvector.fastembed('API development', 'all-MiniLM-L6-v2') AS query_emb) q
 WHERE embedding IS NOT NULL
-  AND 1 - (embedding <=> $1::vector) > 0.7
-ORDER BY embedding <=> $1::vector
+  AND ruvector.cosine_similarity(embedding, query_emb) > 0.5
+ORDER BY embedding <-> query_emb
 LIMIT 10;
 
 
 -- ============================================
--- 3. PATTERN STORAGE AND RETRIEVAL
+-- 3. DISTANCE CALCULATIONS
 -- ============================================
 
--- Store a learned pattern from SONA
-INSERT INTO claude_flow.patterns (name, description, embedding, pattern_type, confidence, metadata)
-VALUES (
-    'authentication-flow',
-    'JWT-based authentication pattern with refresh tokens',
-    array_fill(0.1, ARRAY[384])::vector,
-    'code-pattern',
-    0.92,
-    '{
-        "learned_from": ["session-001", "session-002"],
-        "agent_type": "security-architect",
-        "success_rate": 0.95,
-        "contexts": ["api", "web", "mobile"]
-    }'::jsonb
-);
-
--- Search patterns by type and minimum confidence
+-- Cosine similarity (most common for text)
 SELECT
-    id,
-    name,
-    description,
-    confidence,
-    pattern_type,
-    1 - (embedding <=> $1::vector) AS similarity
-FROM claude_flow.patterns
-WHERE pattern_type = 'code-pattern'
-  AND confidence >= 0.8
-  AND embedding IS NOT NULL
-ORDER BY embedding <=> $1::vector
+    a.content AS content_a,
+    b.content AS content_b,
+    ruvector.cosine_similarity(a.embedding, b.embedding) AS cosine_sim
+FROM claude_flow.embeddings a
+CROSS JOIN claude_flow.embeddings b
+WHERE a.id < b.id
+  AND a.embedding IS NOT NULL
+  AND b.embedding IS NOT NULL
+LIMIT 10;
+
+-- Euclidean distance
+SELECT
+    content,
+    ruvector.euclidean_distance(
+        embedding,
+        ruvector.fastembed('database optimization', 'all-MiniLM-L6-v2')
+    ) AS l2_distance
+FROM claude_flow.embeddings
+WHERE embedding IS NOT NULL
+ORDER BY l2_distance
+LIMIT 5;
+
+-- Dot product (for normalized vectors)
+SELECT
+    content,
+    ruvector.dot_product(embedding, query_emb) AS dot_product
+FROM claude_flow.embeddings,
+     LATERAL (SELECT ruvector.fastembed('security', 'all-MiniLM-L6-v2') AS query_emb) q
+WHERE embedding IS NOT NULL
+ORDER BY dot_product DESC
 LIMIT 5;
 
 
 -- ============================================
--- 4. AGENT MEMORY OPERATIONS
+-- 4. METADATA FILTERING + VECTOR SEARCH
 -- ============================================
 
--- Register an agent with initial memory state
+-- Filter by category, then search
+SELECT
+    content,
+    metadata->>'category' AS category,
+    ruvector.cosine_similarity(embedding, query_emb) AS similarity
+FROM claude_flow.embeddings,
+     LATERAL (SELECT ruvector.fastembed('best practices', 'all-MiniLM-L6-v2') AS query_emb) q
+WHERE embedding IS NOT NULL
+  AND metadata->>'category' = 'testing'
+ORDER BY embedding <-> query_emb
+LIMIT 5;
+
+-- Filter by multiple metadata fields
+SELECT
+    content,
+    metadata,
+    ruvector.cosine_similarity(embedding, query_emb) AS similarity
+FROM claude_flow.embeddings,
+     LATERAL (SELECT ruvector.fastembed('development', 'all-MiniLM-L6-v2') AS query_emb) q
+WHERE embedding IS NOT NULL
+  AND metadata @> '{"agent": "coder"}'::jsonb
+ORDER BY embedding <-> query_emb
+LIMIT 5;
+
+
+-- ============================================
+-- 5. PATTERN OPERATIONS
+-- ============================================
+
+-- Store a learned pattern
+INSERT INTO claude_flow.patterns (name, description, embedding, pattern_type, confidence)
+VALUES (
+    'api-error-handling',
+    'Standard error handling pattern for REST APIs',
+    ruvector.fastembed('REST API error handling with proper status codes and error messages', 'all-MiniLM-L6-v2'),
+    'code-pattern',
+    0.85
+);
+
+-- Search patterns by type and similarity
+SELECT
+    name,
+    description,
+    confidence,
+    ruvector.cosine_similarity(embedding, query_emb) AS match_score
+FROM claude_flow.patterns,
+     LATERAL (SELECT ruvector.fastembed('handling errors in APIs', 'all-MiniLM-L6-v2') AS query_emb) q
+WHERE embedding IS NOT NULL
+  AND pattern_type = 'code-pattern'
+  AND confidence >= 0.7
+ORDER BY embedding <-> query_emb
+LIMIT 5;
+
+-- Update pattern confidence based on success/failure
+UPDATE claude_flow.patterns
+SET
+    confidence = LEAST(1.0, confidence + 0.05),
+    success_count = success_count + 1
+WHERE name = 'api-error-handling';
+
+
+-- ============================================
+-- 6. AGENT MEMORY OPERATIONS
+-- ============================================
+
+-- Register/update agent with memory embedding
 INSERT INTO claude_flow.agents (agent_id, agent_type, state, memory_embedding)
 VALUES (
     'coder-v3-001',
     'coder',
-    '{
-        "current_task": null,
-        "completed_tasks": 0,
-        "specializations": ["typescript", "react", "node"],
-        "performance_score": 0.0
-    }'::jsonb,
-    array_fill(0.0, ARRAY[384])::vector
+    '{"specializations": ["typescript", "node"], "tasks_completed": 0}'::jsonb,
+    ruvector.fastembed('TypeScript Node.js backend development', 'all-MiniLM-L6-v2')
 )
 ON CONFLICT (agent_id) DO UPDATE SET
     state = EXCLUDED.state,
+    memory_embedding = EXCLUDED.memory_embedding,
     last_active = NOW();
 
--- Update agent memory embedding after task completion
-UPDATE claude_flow.agents
-SET
-    memory_embedding = $1::vector,
-    state = state || '{"completed_tasks": 1}'::jsonb,
-    last_active = NOW()
-WHERE agent_id = 'coder-v3-001';
-
--- Find agents with similar memory (for knowledge transfer)
+-- Find agents with similar expertise
 SELECT
     agent_id,
     agent_type,
-    state,
-    1 - (memory_embedding <=> $1::vector) AS memory_similarity,
-    last_active
-FROM claude_flow.agents
+    state->>'specializations' AS specializations,
+    ruvector.cosine_similarity(memory_embedding, query_emb) AS expertise_match
+FROM claude_flow.agents,
+     LATERAL (SELECT ruvector.fastembed('React frontend development', 'all-MiniLM-L6-v2') AS query_emb) q
 WHERE memory_embedding IS NOT NULL
-  AND agent_id != 'coder-v3-001'
-ORDER BY memory_embedding <=> $1::vector
+ORDER BY memory_embedding <-> query_emb
 LIMIT 3;
 
 
 -- ============================================
--- 5. METADATA FILTERING WITH VECTOR SEARCH
+-- 7. BATCH EMBEDDING GENERATION
 -- ============================================
 
--- Combined metadata and vector search (V3 optimized)
+-- Generate embeddings for multiple texts at once
 SELECT
-    id,
-    content,
-    1 - (embedding <=> $1::vector) AS similarity,
-    metadata
-FROM claude_flow.embeddings
-WHERE embedding IS NOT NULL
-  AND metadata->>'category' = 'security'
-  AND (metadata->>'language')::text = ANY(ARRAY['typescript', 'javascript'])
-ORDER BY embedding <=> $1::vector
-LIMIT 10;
+    text_content,
+    ruvector.fastembed(text_content, 'all-MiniLM-L6-v2') AS embedding
+FROM unnest(ARRAY[
+    'First document about databases',
+    'Second document about APIs',
+    'Third document about testing'
+]) AS text_content;
 
--- JSONB path query with vector search
+-- Update existing records with embeddings
+UPDATE claude_flow.embeddings
+SET embedding = ruvector.fastembed(content, 'all-MiniLM-L6-v2')
+WHERE embedding IS NULL;
+
+
+-- ============================================
+-- 8. INDEX MANAGEMENT
+-- ============================================
+
+-- Check HNSW index status
 SELECT
-    id,
-    content,
-    1 - (embedding <=> $1::vector) AS similarity,
-    metadata
-FROM claude_flow.embeddings
-WHERE embedding IS NOT NULL
-  AND metadata @> '{"agent": "coder-1"}'::jsonb
-ORDER BY embedding <=> $1::vector
-LIMIT 10;
+    indexname,
+    indexdef
+FROM pg_indexes
+WHERE schemaname = 'claude_flow'
+  AND indexdef LIKE '%ruvector_hnsw%';
+
+-- Check index usage statistics
+SELECT
+    schemaname,
+    relname,
+    indexrelname,
+    idx_scan,
+    idx_tup_read
+FROM pg_stat_user_indexes
+WHERE schemaname = 'claude_flow';
+
+-- Trigger self-learning optimization
+SELECT ruvector.learn_optimize('claude_flow.embeddings', 'embedding');
 
 
 -- ============================================
--- 6. AGGREGATIONS AND ANALYTICS
+-- 9. AGGREGATIONS
 -- ============================================
 
--- Count embeddings by category
+-- Count by category with average similarity to a topic
 SELECT
     metadata->>'category' AS category,
     COUNT(*) AS count,
-    AVG(1 - (embedding <=> (
-        SELECT AVG(embedding) FROM claude_flow.embeddings
-    ))) AS avg_centroid_similarity
+    AVG(ruvector.cosine_similarity(embedding, query_emb)) AS avg_relevance
+FROM claude_flow.embeddings,
+     LATERAL (SELECT ruvector.fastembed('software development', 'all-MiniLM-L6-v2') AS query_emb) q
+WHERE embedding IS NOT NULL
+  AND metadata->>'category' IS NOT NULL
+GROUP BY metadata->>'category'
+ORDER BY avg_relevance DESC;
+
+-- Find centroid of embeddings by category
+SELECT
+    metadata->>'category' AS category,
+    COUNT(*) AS count
 FROM claude_flow.embeddings
 WHERE metadata->>'category' IS NOT NULL
-GROUP BY metadata->>'category'
-ORDER BY count DESC;
-
--- Agent performance summary
-SELECT
-    agent_type,
-    COUNT(*) AS agent_count,
-    AVG((state->>'completed_tasks')::int) AS avg_completed_tasks,
-    MAX(last_active) AS most_recent_activity
-FROM claude_flow.agents
-GROUP BY agent_type
-ORDER BY agent_count DESC;
+GROUP BY metadata->>'category';
 
 
 -- ============================================
--- 7. CLEANUP AND MAINTENANCE
+-- 10. MAINTENANCE
 -- ============================================
 
--- Delete old embeddings (keep last 30 days)
+-- Delete old embeddings
 DELETE FROM claude_flow.embeddings
 WHERE created_at < NOW() - INTERVAL '30 days';
 
--- Vacuum and analyze for optimal HNSW performance
+-- Vacuum and analyze for optimal performance
 VACUUM ANALYZE claude_flow.embeddings;
 VACUUM ANALYZE claude_flow.patterns;
 VACUUM ANALYZE claude_flow.agents;
 
--- Reindex HNSW for optimal search performance
+-- Reindex HNSW (if needed after many updates)
 REINDEX INDEX CONCURRENTLY claude_flow.idx_embeddings_hnsw;
