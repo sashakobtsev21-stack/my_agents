@@ -285,39 +285,49 @@ SELECT ruvector_version(), ruvector_simd_info();
 
 To migrate from Claude-Flow's sql.js/JSON storage to RuVector PostgreSQL:
 
-### 1. Export current memory
+### Option 1: Use CLI Import Tool (Recommended)
 
 ```bash
-# Export memory entries to JSON
-npx claude-flow@alpha memory list --format json > memory-export.json
-```
+# Export current memory to JSON
+npx claude-flow memory list --format json > memory-export.json
 
-### 2. Generate SQL import
+# Import directly to PostgreSQL
+npx claude-flow ruvector import --input memory-export.json
 
-```bash
-# Create SQL from JSON (manual process currently)
-# For each entry, create an INSERT statement
-cat memory-export.json | jq -r '.[] | "INSERT INTO claude_flow.embeddings (content, metadata) VALUES (\047\(.value | tostring)\047, \047\(.metadata | tojson)\047::jsonb);"'
-```
-
-### 3. Import to PostgreSQL
-
-```bash
+# Or generate SQL file first (dry-run)
+npx claude-flow ruvector import --input memory-export.json --output import.sql
 docker exec -i ruvector-postgres psql -U claude -d claude_flow < import.sql
 ```
 
-### 4. Generate embeddings
+The import tool:
+- Supports JSON arrays or objects
+- Handles namespaces and metadata
+- Uses upsert (ON CONFLICT) for safe re-imports
+- Shows import statistics
 
-Embeddings need to be generated externally (via Claude-Flow MCP) and updated:
+### Option 2: Manual Migration
+
+```bash
+# Export memory entries to JSON
+npx claude-flow memory list --format json > memory-export.json
+
+# Create SQL from JSON using jq
+cat memory-export.json | jq -r '.[] | "INSERT INTO claude_flow.memory_entries (key, value, namespace, metadata) VALUES (\047\(.key)\047, \047\(.value | tostring)\047, \047\(.namespace // "default")\047, \047\(.metadata // {} | tojson)\047::jsonb);"' > import.sql
+
+# Import to PostgreSQL
+docker exec -i ruvector-postgres psql -U claude -d claude_flow < import.sql
+```
+
+### Generate Embeddings
+
+Embeddings can be generated via Claude-Flow MCP and updated:
 
 ```sql
 -- After generating embedding via MCP
-UPDATE claude_flow.embeddings
+UPDATE claude_flow.memory_entries
 SET embedding = '[...]'::ruvector(384)
-WHERE id = 'uuid-here';
+WHERE key = 'my-key' AND namespace = 'my-namespace';
 ```
-
-> **Note**: A dedicated migration tool (`npx claude-flow@alpha ruvector import`) is planned for future releases.
 
 ## pgAdmin (Optional)
 
