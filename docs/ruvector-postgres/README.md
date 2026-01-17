@@ -1,6 +1,6 @@
 # RuVector PostgreSQL Testing Environment
 
-A Docker-based testing environment for the **RuVector PostgreSQL extension** from [ruvnet/ruvector](https://github.com/ruvnet/ruvector).
+A Docker-based testing environment for the **RuVector PostgreSQL extension** from [ruvnet/ruvector-postgres](https://hub.docker.com/r/ruvnet/ruvector-postgres).
 
 > **Note**: This uses the official RuVector PostgreSQL extension, not pgvector. RuVector provides 77+ SQL functions with advanced AI capabilities.
 
@@ -10,13 +10,11 @@ A Docker-based testing environment for the **RuVector PostgreSQL extension** fro
 |---------|-------------|
 | **77+ SQL Functions** | Comprehensive vector operations in SQL |
 | **HNSW/IVFFlat Indexing** | ~61µs search latency, 16,400 QPS |
-| **39 Attention Mechanisms** | Self, multi-head, cross-attention in SQL |
-| **GNN Operations** | Graph neural network layers (GAT, message passing) |
-| **Hyperbolic Embeddings** | Poincaré and Lorentz space implementations |
-| **Sparse Vectors** | BM25/TF-IDF for hybrid search |
-| **SPARQL Support** | 50+ RDF functions (W3C SPARQL 1.1) |
-| **Local Embeddings** | 6 fastembed models for offline generation |
-| **Self-Learning Indices** | Continuous optimization through GNN layers |
+| **Hyperbolic Embeddings** | Poincaré ball model for hierarchical data |
+| **Graph Operations** | GNN message passing, Cypher queries |
+| **SPARQL Support** | RDF triple store functions |
+| **Agent Routing** | Pattern-based task routing |
+| **Self-Learning** | Continuous optimization |
 | **SIMD Acceleration** | AVX-512/AVX2/NEON (~2x faster) |
 
 ## Quick Start
@@ -46,45 +44,11 @@ ruvector-postgres   running (healthy)   0.0.0.0:5432->5432/tcp
 ### 3. Test the connection
 
 ```bash
-# Using psql
-docker exec -it ruvector-postgres psql -U claude -d claude_flow -c "SELECT ruvector.version();"
+# Check RuVector version
+docker exec ruvector-postgres psql -U claude -d claude_flow -c "SELECT ruvector_version();"
 
-# Or run our test script
-./scripts/test-connection.sh
-```
-
-### 4. Initialize RuVector CLI
-
-```bash
-# Run from project root
-npx claude-flow@alpha ruvector status \
-  --host localhost \
-  --port 5432 \
-  --database claude_flow \
-  --user claude
-```
-
-When prompted for password, enter: `claude-flow-test`
-
-## Directory Structure
-
-```
-docs/ruvector-postgres/
-├── README.md                 # This file
-├── docker-compose.yml        # Docker services configuration
-├── scripts/
-│   ├── init-db.sql          # Database initialization (runs on container start)
-│   ├── test-connection.sh   # Connection test script
-│   ├── run-migrations.sh    # Run RuVector migrations
-│   └── cleanup.sh           # Remove all data and reset
-├── examples/
-│   ├── basic-queries.sql    # Basic vector operations
-│   ├── similarity-search.sql # HNSW semantic search examples
-│   ├── attention-ops.sql    # Attention mechanism examples
-│   └── v3-demo.sql          # Complete V3 demo with all features
-└── tests/
-    ├── test-vectors.ts      # TypeScript test suite
-    └── benchmark.sh         # Performance benchmarks
+# Expected output:
+# 2.0.0
 ```
 
 ## Connection Details
@@ -98,23 +62,252 @@ docs/ruvector-postgres/
 | Password | `claude-flow-test` |
 | Schema | `claude_flow` |
 
-## Available Services
+## RuVector SQL Syntax
 
-### RuVector PostgreSQL
+### Important: Extension Installation
 
-- **Container**: `ruvector-postgres`
-- **Image**: `ruvector/postgres:latest`
-- **Port**: 5432
+The RuVector extension requires an explicit version when installing:
 
-Pre-configured with:
-- RuVector extension enabled (77+ functions)
-- `claude_flow` schema created
-- Core tables (embeddings, patterns, agents, trajectories, hyperbolic_embeddings, graph_nodes, graph_edges)
-- HNSW indices for fast similarity search (~61µs)
-- Sample test data
-- Self-learning optimization enabled
+```sql
+-- CORRECT: Use explicit version
+CREATE EXTENSION IF NOT EXISTS ruvector VERSION '0.1.0';
 
-### pgAdmin (Optional)
+-- INCORRECT: Will fail without version
+-- CREATE EXTENSION IF NOT EXISTS ruvector;
+```
+
+### Vector Type
+
+RuVector uses its own `ruvector` type, not `vector`:
+
+```sql
+-- CORRECT: RuVector type
+CREATE TABLE embeddings (
+    id UUID PRIMARY KEY,
+    embedding ruvector(384)  -- 384 dimensions
+);
+
+-- INCORRECT: pgvector syntax
+-- embedding vector(384)
+-- embedding ruvector.vector(384)
+```
+
+### Distance Operators
+
+| Operator | Description | Index Support |
+|----------|-------------|---------------|
+| `<=>` | Cosine distance | HNSW |
+| `<->` | L2 (Euclidean) distance | HNSW |
+| `<#>` | Negative inner product | HNSW |
+
+```sql
+-- Cosine similarity search
+SELECT * FROM embeddings
+ORDER BY embedding <=> '[0.1, 0.2, ...]'::ruvector(384)
+LIMIT 10;
+
+-- Convert distance to similarity
+SELECT (1 - (a.embedding <=> b.embedding)) AS similarity
+FROM embeddings a, embeddings b;
+```
+
+### HNSW Index
+
+```sql
+-- Create HNSW index for cosine distance
+CREATE INDEX idx_embeddings_hnsw
+ON embeddings
+USING hnsw (embedding ruvector_cosine_ops)
+WITH (m = 16, ef_construction = 100);
+
+-- For L2 distance
+-- USING hnsw (embedding ruvector_l2_ops)
+```
+
+### Hyperbolic Embeddings
+
+Hyperbolic functions use `real[]` arrays, not ruvector type:
+
+```sql
+-- Poincaré distance
+SELECT ruvector_poincare_distance(
+    ARRAY[0.1, 0.2, 0.0]::real[],  -- point A
+    ARRAY[0.3, 0.1, 0.0]::real[],  -- point B
+    -1.0                            -- curvature
+) AS distance;
+
+-- Exponential map (Euclidean to Poincaré)
+SELECT ruvector_exp_map(
+    ARRAY[0.0, 0.0, 0.0]::real[],  -- origin
+    ARRAY[0.1, 0.2, 0.3]::real[],  -- tangent vector
+    -1.0                            -- curvature
+);
+
+-- Möbius addition
+SELECT ruvector_mobius_add(
+    ARRAY[0.1, 0.0]::real[],
+    ARRAY[0.0, 0.1]::real[],
+    -1.0
+);
+```
+
+### Array-Based Distance Functions
+
+```sql
+-- Cosine similarity for arrays
+SELECT cosine_similarity_arr(
+    ARRAY[1.0, 0.0, 0.0]::real[],
+    ARRAY[0.7, 0.7, 0.0]::real[]
+);
+
+-- L2 distance for arrays
+SELECT l2_distance_arr(
+    ARRAY[1.0, 0.0, 0.0]::real[],
+    ARRAY[0.0, 1.0, 0.0]::real[]
+);
+```
+
+## Available Tables (Claude-Flow Schema)
+
+The init script creates these tables:
+
+| Table | Description |
+|-------|-------------|
+| `embeddings` | Content with vector embeddings |
+| `patterns` | Learned patterns (ReasoningBank) |
+| `agents` | Multi-agent memory coordination |
+| `trajectories` | SONA reinforcement learning |
+| `hyperbolic_embeddings` | Hierarchical data embeddings |
+| `graph_nodes` | GNN node data |
+| `graph_edges` | GNN edge relationships |
+
+## Custom Functions
+
+The init script creates these helper functions:
+
+```sql
+-- Semantic similarity search
+SELECT * FROM claude_flow.search_similar(
+    '[...]'::ruvector(384),  -- query embedding
+    10,                       -- limit
+    0.5                       -- min similarity
+);
+
+-- Pattern search with type filtering
+SELECT * FROM claude_flow.search_patterns(
+    '[...]'::ruvector(384),
+    'security',               -- pattern type
+    10,                       -- limit
+    0.5                       -- min confidence
+);
+
+-- Find agents by expertise
+SELECT * FROM claude_flow.find_agents(
+    '[...]'::ruvector(384),
+    'coder',                  -- agent type
+    5                         -- limit
+);
+
+-- Hyperbolic search
+SELECT * FROM claude_flow.hyperbolic_search(
+    '[...]'::ruvector(384),
+    10,                       -- limit
+    -1.0                      -- curvature
+);
+
+-- Cosine similarity helper
+SELECT claude_flow.cosine_similarity(a, b);
+
+-- L2 distance helper
+SELECT claude_flow.l2_distance(a, b);
+
+-- Get RuVector info
+SELECT * FROM claude_flow.ruvector_info();
+```
+
+## Common Operations
+
+### Insert embedding
+
+```bash
+docker exec ruvector-postgres psql -U claude -d claude_flow -c "
+INSERT INTO claude_flow.embeddings (content, embedding, metadata)
+VALUES (
+    'Example content',
+    '[0.1,0.2,...]'::ruvector(384),
+    '{\"category\": \"test\"}'::jsonb
+);
+"
+```
+
+### Similarity search
+
+```bash
+docker exec ruvector-postgres psql -U claude -d claude_flow -c "
+SELECT id, content, (1 - (embedding <=> '[0.1,0.2,...]'::ruvector(384))) AS similarity
+FROM claude_flow.embeddings
+WHERE embedding IS NOT NULL
+ORDER BY embedding <=> '[0.1,0.2,...]'::ruvector(384)
+LIMIT 5;
+"
+```
+
+### Check HNSW indices
+
+```bash
+docker exec ruvector-postgres psql -U claude -d claude_flow -c "
+SELECT indexname FROM pg_indexes
+WHERE schemaname = 'claude_flow' AND indexdef LIKE '%hnsw%';
+"
+```
+
+### Check RuVector SIMD status
+
+```bash
+docker exec ruvector-postgres psql -U claude -d claude_flow -c "
+SELECT ruvector_version(), ruvector_simd_info();
+"
+```
+
+## Migration from sql.js/JSON
+
+To migrate from Claude-Flow's sql.js/JSON storage to RuVector PostgreSQL:
+
+### 1. Export current memory
+
+```bash
+# Export memory entries to JSON
+npx claude-flow@alpha memory list --format json > memory-export.json
+```
+
+### 2. Generate SQL import
+
+```bash
+# Create SQL from JSON (manual process currently)
+# For each entry, create an INSERT statement
+cat memory-export.json | jq -r '.[] | "INSERT INTO claude_flow.embeddings (content, metadata) VALUES (\047\(.value | tostring)\047, \047\(.metadata | tojson)\047::jsonb);"'
+```
+
+### 3. Import to PostgreSQL
+
+```bash
+docker exec -i ruvector-postgres psql -U claude -d claude_flow < import.sql
+```
+
+### 4. Generate embeddings
+
+Embeddings need to be generated externally (via Claude-Flow MCP) and updated:
+
+```sql
+-- After generating embedding via MCP
+UPDATE claude_flow.embeddings
+SET embedding = '[...]'::ruvector(384)
+WHERE id = 'uuid-here';
+```
+
+> **Note**: A dedicated migration tool (`npx claude-flow@alpha ruvector import`) is planned for future releases.
+
+## pgAdmin (Optional)
 
 For visual database management:
 
@@ -127,190 +320,16 @@ Access at: http://localhost:5050
 - Email: `admin@claude-flow.local`
 - Password: `admin`
 
-## Common Tasks
-
-### Generate embeddings locally
-
-```bash
-docker exec -it ruvector-postgres psql -U claude -d claude_flow -c \
-  "SELECT claude_flow.embed_text('Hello, world!', 'all-MiniLM-L6-v2');"
-```
-
-### Run similarity search
-
-```bash
-docker exec -it ruvector-postgres psql -U claude -d claude_flow -c \
-  "SELECT * FROM claude_flow.search_similar(
-    claude_flow.embed_text('authentication security'),
-    5,
-    0.3
-  );"
-```
-
-### Run multi-head attention
-
-```bash
-docker exec -it ruvector-postgres psql -U claude -d claude_flow -c \
-  "SELECT * FROM claude_flow.multihead_attention(
-    claude_flow.embed_text('query text'),
-    8,  -- number of heads
-    5   -- limit
-  );"
-```
-
-### Hyperbolic search (for hierarchical data)
-
-```bash
-docker exec -it ruvector-postgres psql -U claude -d claude_flow -c \
-  "SELECT * FROM claude_flow.hyperbolic_search(
-    claude_flow.embed_text('parent concept'),
-    10,
-    -1.0  -- curvature
-  );"
-```
-
-### Check HNSW indices
-
-```bash
-docker exec -it ruvector-postgres psql -U claude -d claude_flow -c \
-  "SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = 'claude_flow';"
-```
-
-### Run self-learning optimization
-
-```bash
-docker exec -it ruvector-postgres psql -U claude -d claude_flow -c \
-  "SELECT claude_flow.optimize_indices();"
-```
-
-### Reset everything
-
-```bash
-./scripts/cleanup.sh
-docker-compose down -v
-docker-compose up -d
-```
-
-## Testing with Claude-Flow CLI
-
-### Check status
-
-```bash
-npx claude-flow@alpha ruvector status \
-  --host localhost \
-  --database claude_flow \
-  --user claude \
-  --verbose
-```
-
-### Run migrations
-
-```bash
-npx claude-flow@alpha ruvector migrate \
-  --host localhost \
-  --database claude_flow \
-  --user claude \
-  --up
-```
-
-### Run benchmarks
-
-```bash
-npx claude-flow@alpha ruvector benchmark \
-  --host localhost \
-  --database claude_flow \
-  --user claude \
-  --iterations 100
-```
-
-### Optimize indices
-
-```bash
-npx claude-flow@alpha ruvector optimize \
-  --host localhost \
-  --database claude_flow \
-  --user claude \
-  --analyze
-```
-
-## Environment Variables
-
-You can use environment variables instead of CLI flags:
-
-```bash
-export PGHOST=localhost
-export PGPORT=5432
-export PGDATABASE=claude_flow
-export PGUSER=claude
-export PGPASSWORD=claude-flow-test
-
-# RuVector specific
-export RUVECTOR_SIMD=auto
-export RUVECTOR_CACHE_SIZE=256MB
-export RUVECTOR_LEARN_ENABLED=true
-
-# Then run without connection flags
-npx claude-flow@alpha ruvector status --verbose
-```
-
-## RuVector SQL Functions Reference
-
-### Vector Operations
-| Function | Description |
-|----------|-------------|
-| `ruvector.cosine_similarity(a, b)` | Cosine similarity between vectors |
-| `ruvector.euclidean_distance(a, b)` | L2 distance |
-| `ruvector.dot_product(a, b)` | Inner product |
-| `a <-> b` | Distance operator (uses index) |
-| `a <=> b` | Cosine distance operator |
-
-### Attention Mechanisms
-| Function | Description |
-|----------|-------------|
-| `ruvector.softmax_attention(q, k, temp)` | Softmax attention score |
-| `ruvector.multihead_attention_scores(q, k, heads)` | Per-head attention scores |
-| `ruvector.multihead_attention_aggregate(q, k, heads)` | Aggregated attention |
-| `ruvector.cross_attention_score(q, kv, temp)` | Cross-attention weight |
-
-### GNN Operations
-| Function | Description |
-|----------|-------------|
-| `ruvector.gnn_aggregate(embeddings[], method)` | Aggregate embeddings (mean/sum/max) |
-| `ruvector.gat_score(source, target)` | Graph attention score |
-
-### Hyperbolic Operations
-| Function | Description |
-|----------|-------------|
-| `ruvector.exp_map_poincare(euclidean, curvature)` | Map to Poincaré ball |
-| `ruvector.hyperbolic_distance(a, b, model, curvature)` | Geodesic distance |
-| `ruvector.mobius_add(a, b, curvature)` | Möbius addition |
-
-### Sparse/Hybrid Search
-| Function | Description |
-|----------|-------------|
-| `ruvector.bm25_score(sparse, query_text)` | BM25 ranking score |
-| `ruvector.tfidf_score(sparse, query_text)` | TF-IDF score |
-
-### Local Embeddings
-| Function | Description |
-|----------|-------------|
-| `ruvector.fastembed(text, model)` | Generate embedding locally |
-
-### Self-Learning
-| Function | Description |
-|----------|-------------|
-| `ruvector.learn_optimize(table, column)` | Optimize index through learning |
-
-## Performance Benchmarks
-
-| Metric | Value |
-|--------|-------|
-| HNSW Search Latency | ~61µs (k=10, 384-dim) |
-| Throughput | 16,400 QPS |
-| Memory (1M vectors) | 200MB (PQ8 compression) |
-| Index Build | ~10 min for 1M vectors |
-
 ## Troubleshooting
+
+### Extension creation fails
+
+If you see: `extension 'ruvector' has no installation script nor update path for version "2.0.0"`
+
+**Solution**: Use explicit version:
+```sql
+CREATE EXTENSION IF NOT EXISTS ruvector VERSION '0.1.0';
+```
 
 ### Container won't start
 
@@ -320,34 +339,47 @@ docker-compose logs postgres
 
 # Check if port 5432 is in use
 lsof -i :5432
-```
 
-### RuVector extension missing
-
-```bash
-# Manually enable
-docker exec -it ruvector-postgres psql -U claude -d claude_flow -c \
-  "CREATE EXTENSION IF NOT EXISTS ruvector;"
-```
-
-### Permission denied errors
-
-```bash
-# Reset permissions
-docker exec -it ruvector-postgres psql -U claude -d claude_flow -c \
-  "GRANT ALL ON SCHEMA claude_flow TO claude;
-   GRANT USAGE ON SCHEMA ruvector TO claude;"
-```
-
-### Reset to clean state
-
-```bash
+# Reset completely
 docker-compose down -v
 docker-compose up -d
 ```
 
+### HNSW warnings
+
+Warnings like `HNSW: Could not extract query vector` during COUNT queries are benign and can be ignored.
+
+### Type mismatch errors
+
+Ensure you're using:
+- `ruvector(384)` for vector columns
+- `real[]` for hyperbolic function arguments
+- `::ruvector(384)` for casting string vectors
+
+## Performance Benchmarks
+
+| Metric | Value |
+|--------|-------|
+| HNSW Search Latency | ~61µs (k=10, 384-dim) |
+| Throughput | 16,400 QPS |
+| SIMD | AVX2 (8 floats/op) |
+
+## Directory Structure
+
+```
+docs/ruvector-postgres/
+├── README.md                 # This file
+├── docker-compose.yml        # Docker services
+├── scripts/
+│   ├── init-db.sql          # Database initialization
+│   └── test-connection.sh   # Connection test script
+├── examples/
+│   └── basic-queries.sql    # Example queries
+└── tests/
+    └── benchmark.sh         # Performance benchmarks
+```
+
 ## Learn More
 
-- [RuVector Repository](https://github.com/ruvnet/ruvector)
-- [RuVector PostgreSQL Bridge Documentation](https://github.com/ruvnet/claude-flow/issues/963)
-- [ADR-027: RuVector PostgreSQL Integration](../../v3/implementation/adrs/ADR-027-ruvector-postgresql-integration.md)
+- [RuVector PostgreSQL Docker Hub](https://hub.docker.com/r/ruvnet/ruvector-postgres)
+- [Claude-Flow Documentation](https://github.com/ruvnet/claude-flow)
