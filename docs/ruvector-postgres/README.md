@@ -19,7 +19,18 @@ A Docker-based testing environment for the **RuVector PostgreSQL extension** fro
 
 ## Quick Start
 
-### 1. Start the RuVector PostgreSQL container
+### Option 1: Use CLI Setup Command (Recommended)
+
+```bash
+# Generate Docker files and SQL in any directory
+npx claude-flow ruvector setup --output ./my-ruvector
+
+# Start the container
+cd my-ruvector
+docker-compose up -d
+```
+
+### Option 2: Use Existing Files
 
 ```bash
 # From this directory
