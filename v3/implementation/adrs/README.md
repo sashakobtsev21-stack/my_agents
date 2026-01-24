@@ -48,6 +48,32 @@ This directory contains all Architecture Decision Records for Claude-Flow v3.
 | ADR-024 | Embeddings MCP Tools | ✅ Implemented | [ADR-024-embeddings-mcp-tools.md](./ADR-024-embeddings-mcp-tools.md) |
 | ADR-025 | Auto-Update System | ✅ Implemented | [ADR-025-auto-update-system.md](./ADR-025-auto-update-system.md) |
 
+### Neural & Integration (ADR-026 to ADR-031)
+
+| ADR | Title | Status | File |
+|-----|-------|--------|------|
+| ADR-026 | Agent Booster Model Routing | ✅ Implemented | [ADR-026-agent-booster-model-routing.md](./ADR-026-agent-booster-model-routing.md) |
+| ADR-027 | RuVector PostgreSQL Integration | ✅ Implemented | [ADR-027-ruvector-postgresql-integration.md](./ADR-027-ruvector-postgresql-integration.md) |
+| ADR-028 | Neural Attention Mechanisms | ✅ Implemented | [ADR-028-neural-attention-mechanisms.md](./ADR-028-neural-attention-mechanisms.md) |
+| ADR-029 | GNN Integration | ✅ Implemented | [ADR-029-gnn-integration.md](./ADR-029-gnn-integration.md) |
+| ADR-030 | Agentic QE Integration | ✅ Implemented | [ADR-030-agentic-qe-integration.md](./ADR-030-agentic-qe-integration.md) |
+| ADR-031 | Prime Radiant Integration | ✅ Implemented | [ADR-031-prime-radiant-integration.md](./ADR-031-prime-radiant-integration.md) |
+
+### RuVector WASM Plugin Architecture (ADR-032 to ADR-041)
+
+| ADR | Title | Category | Status | File |
+|-----|-------|----------|--------|------|
+| ADR-032 | Healthcare Clinical Decision Support | Practical | Proposed | [ADR-032-healthcare-clinical-plugin.md](./ADR-032-healthcare-clinical-plugin.md) |
+| ADR-033 | Financial Risk Analysis | Practical | Proposed | [ADR-033-financial-risk-plugin.md](./ADR-033-financial-risk-plugin.md) |
+| ADR-034 | Legal Contract Analysis | Practical | Proposed | [ADR-034-legal-contract-plugin.md](./ADR-034-legal-contract-plugin.md) |
+| ADR-035 | Advanced Code Intelligence | Advanced | Proposed | [ADR-035-code-intelligence-plugin.md](./ADR-035-code-intelligence-plugin.md) |
+| ADR-036 | Test Intelligence | Advanced | Proposed | [ADR-036-test-intelligence-plugin.md](./ADR-036-test-intelligence-plugin.md) |
+| ADR-037 | Performance Optimization | Advanced | Proposed | [ADR-037-performance-optimization-plugin.md](./ADR-037-performance-optimization-plugin.md) |
+| ADR-038 | Multi-Agent Neural Coordination | Cutting-Edge | Proposed | [ADR-038-multi-agent-coordination-plugin.md](./ADR-038-multi-agent-coordination-plugin.md) |
+| ADR-039 | Cognitive Kernel | Cutting-Edge | Proposed | [ADR-039-cognitive-kernel-plugin.md](./ADR-039-cognitive-kernel-plugin.md) |
+| ADR-040 | Quantum-Inspired Optimization | Exotic SOTA | Proposed | [ADR-040-quantum-inspired-plugin.md](./ADR-040-quantum-inspired-plugin.md) |
+| ADR-041 | Hyperbolic Reasoning | Exotic SOTA | Proposed | [ADR-041-hyperbolic-reasoning-plugin.md](./ADR-041-hyperbolic-reasoning-plugin.md) |
+
 ## Implementation Progress
 
 **Last Updated:** 2026-01-13 (Beta Ready Audit)

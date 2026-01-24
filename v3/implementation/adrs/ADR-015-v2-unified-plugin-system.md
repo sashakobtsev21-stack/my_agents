@@ -452,9 +452,9 @@ class SecurePluginContext implements PluginContext {
 - [x] State persistence
 
 ### Phase 3: Advanced Features (Week 3)
-- [ ] Hot reload support
-- [ ] Conflict resolution
-- [ ] Permission model
+- [x] Hot reload support (in EnhancedPluginRegistry)
+- [x] Conflict resolution (namespace strategy)
+- [ ] Permission model (types defined, enforcement TBD)
 - [ ] Worker thread isolation
 
 ### Phase 4: Testing & Documentation (Week 4)
@@ -462,6 +462,13 @@ class SecurePluginContext implements PluginContext {
 - [x] Integration tests
 - [x] Performance benchmarks
 - [x] Migration guide
+
+### Phase 5: CLI Integration (2026-01-24)
+- [x] PluginManager for CLI (real npm installation)
+- [x] Persist to `.claude-flow/plugins/installed.json`
+- [x] Install, uninstall, upgrade, toggle commands
+- [x] Local plugin installation support
+- [x] Discovery service with npm fallback (IPFS demo mode)
 
 ## Consequences
 
@@ -556,10 +563,58 @@ await collectionManager.loadCollection(myCollection);
 - **ADR-005**: MCP-first API design
 - **ADR-006**: Unified memory service
 
+## Implementation Notes (2026-01-24)
+
+### What Works
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| `plugins install --name <pkg>` | Working | Installs from npm, persists to manifest |
+| `plugins list --installed` | Working | Reads from persisted manifest |
+| `plugins uninstall --name <pkg>` | Working | Removes from npm and manifest |
+| `plugins toggle --name <pkg>` | Working | Enable/disable persists to manifest |
+| `plugins upgrade --name <pkg>` | Working | Upgrades via npm |
+| `plugins list` (registry) | Working | Shows available plugins (demo + real npm stats) |
+| `plugins search` | Working | Searches plugin registry |
+| `plugins info` | Working | Shows detailed plugin info |
+| Local plugin install | Working | `plugins install --name ./path/to/plugin` |
+
+### Demo Mode (Not Yet Production)
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| IPFS Registry | Demo | CIDs are placeholders, falls back to hardcoded list |
+| IPNS Resolution | Demo | Returns demo registry, npm stats are real |
+| Plugin Signature Verification | Demo | Checks format only, no real crypto verification |
+| Dynamic CLI Command Registration | TBD | Plugins can't yet add new CLI commands at runtime |
+| Hook Integration | TBD | Plugin hooks not yet loaded by CLI |
+
+### Architecture
+
+```
+CLI Commands (plugins.ts)
+    │
+    └── PluginManager (manager.ts)
+            │
+            ├── InstalledPlugins manifest (.claude-flow/plugins/installed.json)
+            ├── npm install/uninstall
+            └── PluginDiscoveryService (discovery.ts)
+                    │
+                    ├── Demo Registry (hardcoded, with real npm stats)
+                    └── IPFS/IPNS (demo mode, returns demo registry)
+```
+
+### Migration Path
+
+1. **Current**: Plugins install via npm, persist state locally
+2. **Next**: Dynamic command/hook registration from installed plugins
+3. **Future**: Real IPFS registry with signature verification
+
 ## References
 
 - [Plugin Interface](../../@claude-flow/plugins/src/core/plugin-interface.ts)
 - [Plugin Registry](../../@claude-flow/plugins/src/registry/plugin-registry.ts)
+- [Plugin Manager (CLI)](../../@claude-flow/cli/src/plugins/manager.ts)
 - [Collection Manager](../../@claude-flow/plugins/src/collections/collection-manager.ts)
 - [Dependency Graph](../../@claude-flow/plugins/src/registry/dependency-graph.ts)
 - [Official Collections](../../@claude-flow/plugins/src/collections/official/index.ts)
