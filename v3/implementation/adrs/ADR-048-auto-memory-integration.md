@@ -533,9 +533,134 @@ Add to `.claude/settings.json`:
 - [ ] Dashboard/status command for auto memory health
 - [ ] Performance benchmarks for sync operations
 
+## Appendix A: Undocumented Claude Code Memory Capabilities
+
+The following capabilities were discovered through binary analysis of Claude Code v2.1.37 (`/home/codespace/.local/share/claude/versions/2.1.37`). These are implementation details that may change between versions but are important for deep integration.
+
+### A.1 Three-Scope Agent Memory System
+
+Claude Code supports three distinct memory scopes for agents, beyond the project-level auto memory:
+
+| Scope | Path | Shared via VCS | Use Case |
+|-------|------|----------------|----------|
+| `project` | `.claude/agent-memory/<agent-name>/` | Yes (committed) | Team-shared agent knowledge |
+| `local` | `.claude/agent-memory-local/<agent-name>/` | No (gitignored) | Machine-specific agent state |
+| `user` | `~/.claude/agent-memory/<agent-name>/` | No (global) | Cross-project agent knowledge |
+
+Each scope has its own `MEMORY.md` entrypoint. Scope is selected via agent definition frontmatter:
+
+```yaml
+---
+memory: "project"  # or "local" or "user"
+---
+# Agent instructions here
+```
+
+When `memory` is set in an agent's `.md` definition file, Claude Code automatically adds Read/Write/Edit tools to the agent's toolset for its memory directory. The scope-specific path is resolved by internal function `B7A(agentName, scope)`.
+
+**Integration opportunity for AutoMemoryBridge:** Support agent-scoped memory directories in addition to the project-level auto memory directory. This would allow per-agent persistent learning across sessions.
+
+### A.2 Session Memory System
+
+Separate from auto memory, Claude Code has a **session memory** system for within-session context tracking:
+
+| Feature Flag | Purpose |
+|-------------|---------|
+| `tengu_session_memory` | Enable session memory |
+| `tengu_sm_compact` | Enable session memory compaction |
+| `tengu_sm_config` | Session memory configuration |
+
+Session memory is loaded as a **static** system prompt block (`Id("session_memory", ...)`), unlike auto memory which is a **dynamic** block (`Dd("auto_memory", ...)`) re-read from disk each turn. This means:
+
+- **Auto memory**: MEMORY.md is re-read from disk on every model turn — edits are immediately visible
+- **Session memory**: Loaded once and cached — tracks within-session context, compacted for efficiency
+
+Environment variable `CLAUDE_CODE_SM_COMPACT` controls session memory compaction behavior.
+
+### A.3 Memory Telemetry Events
+
+Claude Code emits telemetry events for memory directory operations:
+
+| Event | Trigger |
+|-------|---------|
+| `tengu_memdir_accessed` | Memory directory is accessed |
+| `tengu_memdir_file_edit` | A memory file is edited |
+| `tengu_memdir_file_read` | A memory file is read |
+| `tengu_memdir_file_write` | A memory file is written |
+| `tengu_memdir_loaded` | Memory directory is loaded at session start |
+| `tengu_agent_memory_loaded` | Agent-scoped memory is loaded |
+
+These events can be used for monitoring bridge sync health and detecting when auto memory files are modified outside of the bridge.
+
+### A.4 Auto Memory Feature Flag & Control
+
+| Mechanism | Value | Effect |
+|-----------|-------|--------|
+| Feature flag `tengu_oboe` | enabled/disabled | Server-side toggle for auto memory |
+| Env var `CLAUDE_CODE_DISABLE_AUTO_MEMORY` | `1` / `0` | Client-side override |
+| Function `PG()` | boolean | Runtime check combining both |
+
+The 200-line limit for MEMORY.md is defined as constant `iRH=200` in the compiled source.
+
+### A.5 Nested Memory Attachment Triggers
+
+Claude Code maintains a `nestedMemoryAttachmentTriggers` Set that tracks file read operations which trigger memory context attachment. When a file within a memory directory is read, additional memory context may be automatically attached to the conversation.
+
+### A.6 Dynamic vs Static System Prompt Blocks
+
+Claude Code uses two loading mechanisms for memory in the system prompt:
+
+```
+Auto memory:    Dd("auto_memory", ...)  → Dynamic block, re-read from disk each turn
+Session memory: Id("session_memory", ...) → Static block, loaded once per session
+```
+
+This is significant for the bridge: any writes to MEMORY.md or topic files are visible to the model on the very next turn, without requiring a session restart.
+
+### A.7 MEMORY.md Case Migration
+
+Claude Code includes an automatic migration function `IP9()` that renames `memory.md` to `MEMORY.md` (lowercase to uppercase). This migration runs on agent memory load, ensuring consistent casing across all memory directories.
+
+The bridge should always create files as `MEMORY.md` (uppercase) to match Claude Code's expected convention.
+
+### A.8 Memory-Related Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `CLAUDE_CODE_DISABLE_AUTO_MEMORY` | Disable auto memory entirely |
+| `CLAUDE_CODE_SM_COMPACT` | Session memory compaction |
+| `CLAUDE_CODE_AGENT_NAME` | Agent name for memory scoping |
+| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | Enable agent teams (affects shared task lists) |
+| `CLAUDE_CODE_ENABLE_TASKS` | Enable task list feature |
+| `CLAUDE_CODE_TEAM_NAME` | Team name for coordination |
+| `CLAUDE_CODE_TASK_LIST_ID` | Task list identifier |
+| `CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING` | Disable file history snapshots |
+| `CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING` | Enable SDK-level file checkpointing |
+
+### A.9 File Checkpointing System
+
+Claude Code has a file history/checkpointing system that creates snapshots of files before modifications. Related environment variables:
+
+- `CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING` — Disable the feature
+- `CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING` — Enable for SDK consumers
+
+This system provides rewind/backup capabilities and emits telemetry events for tracking file changes. The AutoMemoryBridge could leverage this to recover from failed sync operations.
+
+### A.10 Integration Implications for AutoMemoryBridge
+
+Based on these discoveries, the following enhancements should be considered for future phases:
+
+1. **Agent-scoped bridge instances**: Create per-agent AutoMemoryBridge instances that sync to agent memory directories (project/local/user scope)
+2. **Session memory coordination**: Avoid duplicating information between auto memory and session memory
+3. **Telemetry-driven sync**: Use `tengu_memdir_*` events to trigger incremental syncs instead of full-directory scans
+4. **Dynamic block awareness**: Leverage the fact that MEMORY.md edits are visible on the next turn for real-time knowledge injection
+5. **Case migration compatibility**: Always use uppercase `MEMORY.md` to match Claude Code's migration behavior
+6. **File checkpointing integration**: Use checkpoints for atomic sync operations with rollback capability
+
 ## References
 
 - [Claude Code Auto Memory Documentation](https://code.claude.com/docs/en/memory)
 - ADR-006: Unified Memory Service
 - ADR-018: Claude Code Deep Integration Architecture
 - ADR-017: RuVector Integration
+- Claude Code v2.1.37 binary analysis (2026-02-08)
