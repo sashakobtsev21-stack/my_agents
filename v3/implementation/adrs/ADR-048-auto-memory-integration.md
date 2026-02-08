@@ -513,6 +513,22 @@ Add to `.claude/settings.json`:
 - [x] `CATEGORY_LABELS` module-level constant (deduplicated)
 - [x] `pruneStrategy` config wired into pruning logic
 - [x] Error handling in `getStatus()` with try/catch
+- [x] Monotonic `insightCounter` for unique keys (prevents same-ms collision)
+- [x] `syncedInsightKeys` capped at 10k entries (prevents memory leak)
+- [x] Pre-computed line count in `pruneSectionsToFit()` (decrement vs recount)
+- [x] 73 unit tests passing (305ms runtime)
+
+### Phase 1c: Claude Code Binary Analysis -- COMPLETED
+- [x] Discovered three-scope agent memory system (project/local/user)
+- [x] Documented agent `.md` frontmatter `memory` field
+- [x] Identified session memory system (separate from auto memory)
+- [x] Catalogued memory telemetry events (`tengu_memdir_*`)
+- [x] Found auto memory feature flag (`tengu_oboe`) and controls
+- [x] Documented dynamic vs static system prompt block loading
+- [x] Identified MEMORY.md case migration (`memory.md` → `MEMORY.md`)
+- [x] Catalogued memory-related environment variables
+- [x] Identified file checkpointing system for rollback capability
+- [x] Documented in Appendix A of this ADR
 
 ### Phase 2: Hooks Integration (Pending)
 - [ ] Wire `session-end` hook to trigger sync
