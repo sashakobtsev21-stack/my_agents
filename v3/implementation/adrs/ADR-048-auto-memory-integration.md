@@ -499,7 +499,7 @@ Add to `.claude/settings.json`:
 - [x] `hasSummaryLine()` exact bullet-prefix dedup check
 - [x] `pruneTopicFile()` for topic file line management
 - [x] `formatInsightLine()` for markdown formatting
-- [x] 58 unit tests passing (291ms runtime)
+- [x] 73 unit tests passing (305ms runtime)
 - [x] Exported from `@claude-flow/memory` index
 
 ### Phase 1b: Optimizations -- COMPLETED
