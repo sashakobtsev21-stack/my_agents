@@ -487,27 +487,47 @@ Add to `.claude/settings.json`:
 | Staleness | Content hash comparison on import; skip unchanged entries |
 | Duplication | AgentDB entries link to auto memory source via `contentHash` |
 
-## Implementation Plan
+## Implementation Status
 
-### Phase 1: Foundation (Week 1)
-- [ ] Implement `resolveAutoMemoryDir()` path resolution
-- [ ] Create `AutoMemoryBridge` class with basic read/write
-- [ ] Add `memory sync-auto` CLI command
-- [ ] Unit tests for path resolution and file parsing
+### Phase 1: Foundation -- COMPLETED
+- [x] Implement `resolveAutoMemoryDir()` path resolution
+- [x] Create `AutoMemoryBridge` class with full read/write/sync
+- [x] `findGitRoot()` utility for git root detection
+- [x] `parseMarkdownEntries()` for structured markdown parsing
+- [x] `extractSummaries()` with metadata annotation stripping
+- [x] `hashContent()` SHA-256 truncated dedup
+- [x] `hasSummaryLine()` exact bullet-prefix dedup check
+- [x] `pruneTopicFile()` for topic file line management
+- [x] `formatInsightLine()` for markdown formatting
+- [x] 58 unit tests passing (291ms runtime)
+- [x] Exported from `@claude-flow/memory` index
 
-### Phase 2: Hooks Integration (Week 2)
+### Phase 1b: Optimizations -- COMPLETED
+- [x] Static `createDefaultEntry` import (was dynamic per-call)
+- [x] `syncedInsightKeys` Set prevents double-write race condition
+- [x] Atomic buffer clearing via `splice(0, length)`
+- [x] `node:fs/promises` for async write I/O
+- [x] `fetchExistingContentHashes()` single-query batch lookup
+- [x] `bulkInsert()` for import batching
+- [x] `pruneSectionsToFit()` prune-before-build (eliminates O(n^2))
+- [x] `CATEGORY_LABELS` module-level constant (deduplicated)
+- [x] `pruneStrategy` config wired into pruning logic
+- [x] Error handling in `getStatus()` with try/catch
+
+### Phase 2: Hooks Integration (Pending)
 - [ ] Wire `session-end` hook to trigger sync
 - [ ] Wire `session-start` hook to trigger import
 - [ ] Wire `post-task` hook for insight recording
 - [ ] Integration tests with mock hook context
 
-### Phase 3: Curation & MCP (Week 3)
-- [ ] Implement MEMORY.md curation (confidence-weighted pruning)
+### Phase 3: Curation & MCP (Pending)
+- [ ] Add `memory sync-auto` CLI command
+- [ ] Add `memory import-auto` CLI command
+- [ ] Add `memory auto-status` CLI command
 - [ ] Add MCP tools (`memory_auto_sync`, `memory_auto_record`)
-- [ ] Add topic file management with 500-line limit
 - [ ] End-to-end tests with real AgentDB
 
-### Phase 4: Swarm Integration (Week 4)
+### Phase 4: Swarm Integration (Pending)
 - [ ] Add swarm result → auto memory pipeline
 - [ ] Semantic deduplication for swarm learnings
 - [ ] Dashboard/status command for auto memory health
