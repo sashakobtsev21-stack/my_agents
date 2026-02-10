@@ -297,8 +297,10 @@ function createHashEmbedding(text, dimensions = 768) {
 | Chunk + extract summaries | 200ms | ~30ms |
 | Generate hash embeddings | 100ms | <1ms total |
 | Content hash (SHA-256) | 100ms | <5ms |
-| Store to JsonFileBackend | 500ms | ~50ms |
-| **Total (PreCompact)** | **5000ms** | **~170ms** |
+| Store to SQLite (WAL) | 500ms | ~20ms |
+| Store to RuVector PG | 500ms | ~100ms (network) |
+| **Total (UserPromptSubmit)** | **5000ms** | **~50ms (incremental)** |
+| **Total (PreCompact)** | **5000ms** | **~20ms (mostly deduped)** |
 | Query + build context | 500ms | ~30ms |
 | **Total (SessionStart)** | **6000ms** | **~40ms** |
 
@@ -306,23 +308,32 @@ function createHashEmbedding(text, dimensions = 768) {
 
 1. **No credentials in transcript**: Tool inputs may contain file paths but not secrets
    (Claude Code already redacts sensitive content before tool execution)
-2. **Local storage only**: JsonFileBackend writes to `.claude-flow/data/` which is
-   gitignored. No network calls in the hook path.
-3. **No SQL injection risk**: JsonFileBackend uses file I/O, not SQL. When AgentDB
-   is used, it's an in-memory database with typed APIs.
+2. **Local storage default**: SQLite writes to `.claude-flow/data/` which is
+   gitignored. No network calls unless RuVector PostgreSQL is configured.
+3. **Parameterized queries**: SQLite uses prepared statements, RuVector uses `$N`
+   parameterized queries -- no SQL injection risk.
 4. **Content hashing**: Uses `crypto.createHash('sha256')` for dedup -- standard Node.js
 5. **Graceful failure**: All operations wrapped in try/catch. Hook failures produce
    empty output -- compaction always proceeds normally.
+6. **RuVector credentials**: Read from `RUVECTOR_*` or `PG*` env vars only.
+   Never hardcoded. Connection uses SSL when `RUVECTOR_SSL=true`.
 
 ## Migration Path
 
-### Phase 1: JsonFileBackend (Immediate)
-- Zero dependencies, works everywhere
-- Stores transcript chunks as JSON
-- Retrieval by namespace + metadata filter
-- No semantic search (recency-based only)
+### Phase 1: SQLite + Proactive Archiving (Current - Implemented)
+- better-sqlite3 with WAL mode, indexed queries, ACID transactions
+- Proactive archiving on every user prompt via UserPromptSubmit hook
+- PreCompact as safety net, SessionStart for restoration
+- Dedup via SHA-256 content hash + indexed lookup
 
-### Phase 2: AgentDB Integration (When built)
+### Phase 2: RuVector PostgreSQL (When configured)
+- Set `RUVECTOR_HOST`, `RUVECTOR_DATABASE`, `RUVECTOR_USER`, `RUVECTOR_PASSWORD`
+- pgvector extension for 768-dim embedding storage and similarity search
+- TB-scale storage with connection pooling (max 3 connections)
+- GNN-enhanced retrieval using code dependency graphs
+- Automatic fallback to SQLite if PostgreSQL connection fails
+
+### Phase 3: AgentDB Integration (When built)
 - If `@claude-flow/memory` dist exists, use `AgentDBBackend`
 - HNSW-indexed embeddings enable semantic search across archived transcripts
 - Cross-session retrieval: "What did we discuss about auth?" finds relevant chunks
