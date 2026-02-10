@@ -444,20 +444,19 @@ This matches what Claude Code reports as context usage (e.g., "Context left unti
 auto-compact: 8%" corresponds to ~92% usage). Falls back to character-based estimation
 (`chars / 3.5`) only when API usage data is unavailable.
 
-### Compaction Control
+### Context Management Strategy
 
-| Trigger | Autopilot Behavior | Exit Code |
-|---------|-------------------|-----------|
-| `auto` (context full) | **BLOCKED** — archives turns, returns exit 2 | 2 |
-| `manual` (`/compact`) | **ALLOWED** — archives turns, resets autopilot state, proceeds | 0 |
+| Layer | Mechanism | Effect |
+|-------|-----------|--------|
+| **SDK patch** | `_aggressiveTextPrune()` | Truncates old text every query (prevents growth) |
+| **SDK native** | `Vd()` micro-compact | Prunes old tool results every query |
+| **SDK native** | `CT2()` auto-compact | Full compaction at threshold (fallback only) |
+| **Hook** | `UserPromptSubmit` | Archives all turns proactively to SQLite |
+| **Hook** | `PreCompact` | Safety-net archive + custom compact instructions |
+| **Hook** | `SessionStart` | Restores importance-ranked context after compact/clear |
 
-The shell wrapper in settings.json preserves exit code 2:
-```bash
-/bin/bash -c 'node ... pre-compact 2>/dev/null; RC=$?; if [ $RC -eq 2 ]; then exit 2; fi; exit 0'
-```
-
-This ensures hook crashes (exit 1) don't accidentally block compaction, while
-intentional blocking (exit 2) always propagates to Claude Code.
+With aggressive text pruning + low `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, full
+compaction rarely fires. When it does, the archive+restore system makes it lossless.
 
 ### Statusline Integration (ADR-052)
 
