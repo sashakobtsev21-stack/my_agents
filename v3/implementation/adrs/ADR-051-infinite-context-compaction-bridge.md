@@ -458,9 +458,13 @@ State is persisted to `.claude-flow/data/autopilot-state.json`:
 |---------------------|---------|-------------|
 | `CLAUDE_FLOW_COMPACT_RESTORE_BUDGET` | `4000` | Max chars for restored context in SessionStart |
 | `CLAUDE_FLOW_COMPACT_INSTRUCTION_BUDGET` | `2000` | Max chars for custom compact instructions |
-| `CLAUDE_FLOW_BLOCK_COMPACTION` | `false` | Set `true` to block auto-compaction (exit code 2) |
+| `CLAUDE_FLOW_BLOCK_COMPACTION` | `false` | Legacy: set `true` to block auto-compaction (superseded by autopilot) |
 | `CLAUDE_FLOW_AUTO_OPTIMIZE` | `true` | Enable importance ranking, pruning, RuVector sync |
 | `CLAUDE_FLOW_RETENTION_DAYS` | `30` | Auto-prune never-accessed entries older than N days |
+| `CLAUDE_FLOW_CONTEXT_AUTOPILOT` | `true` | Enable Context Autopilot (blocks auto-compact, allows manual) |
+| `CLAUDE_FLOW_CONTEXT_WINDOW` | `200000` | Context window size in tokens for percentage calculation |
+| `CLAUDE_FLOW_AUTOPILOT_WARN` | `0.70` | Warning threshold (70%) — flag approaching limit |
+| `CLAUDE_FLOW_AUTOPILOT_PRUNE` | `0.85` | Prune threshold (85%) — actively optimize and prune |
 | `RUVECTOR_HOST` | - | PostgreSQL host for RuVector backend |
 | `RUVECTOR_DATABASE` | - | PostgreSQL database name |
 | `RUVECTOR_USER` | - | PostgreSQL username |
