@@ -80,28 +80,92 @@ bridge retrieves and injects the most relevant archived context.
 8. **Aggressive Pruning**: SDK patch truncates old conversation text automatically
    on every query, keeping context lean so compaction rarely or never fires
 
-## SDK Compaction Mechanics (Discovered via Deep Review)
+## SDK Compaction Mechanics (Decompiled from cli.js v2.0.76)
 
-The Claude Code SDK (`cli.js`) processes PreCompact hooks with three exit code behaviors:
+### Full Compaction Pipeline
 
-| Exit Code | SDK Behavior |
-|-----------|-------------|
-| **0** | stdout is appended as **custom compact instructions** (guides preservation) |
-| **2** | **Blocks compaction entirely** (hook can prevent compaction) |
-| Other | stderr shown to user, compaction continues normally |
+The Claude Code SDK has two compaction mechanisms, decompiled from `cli.js`:
 
-The `_H0` function (line 4700) executes all PreCompact hooks, collecting
-`newCustomInstructions` from exit code 0 hooks. The `NJ1` function (line 1769)
-performs actual compaction, using these instructions to guide the summary.
+```
+Every query (ew function):
+│
+├─ Vd() — MICRO-COMPACT (runs every query, invisible to user)
+│  │  Targets: Read, Bash, Grep, Glob, WebSearch, WebFetch, Edit, Write
+│  │  Keeps last 3 tool results intact (Ly5=3)
+│  │  Replaces older results with "[Old tool result content cleared]"
+│  │  Only activates when: tokens > warningThreshold AND savings >= 20K
+│  │  Hardcoded thresholds: Ny5=40000, qy5=20000, Ly5=3
+│  │  DOES NOT prune text content (user/assistant messages)
+│  │
+│  └─ OUR PATCH: _aggressiveTextPrune() inserted after Vd()
+│     Truncates old text blocks to 80 chars + "[earlier context pruned]"
+│     Keeps last 4 turns intact, starts at 20K tokens
+│     Configurable via: CLAUDE_TEXT_PRUNE_KEEP, _THRESHOLD, _MAX_CHARS
+│
+├─ CT2() — AUTO-COMPACT (only when above threshold)
+│  │  Gate 1: DISABLE_COMPACT env → skip entirely
+│  │  Gate 2: autoCompactEnabled setting → skip if false
+│  │  Gate 3: Sy5() → skip if tokens < threshold
+│  │  Threshold: zT2() = min(maxTokens × PCT_OVERRIDE/100, maxTokens - 13000)
+│  │  Default: 93% of context window (~187K tokens)
+│  │  Override: CLAUDE_AUTOCOMPACT_PCT_OVERRIDE env var
+│  │
+│  │  First tries TJ1() — session-memory compact (no LLM, instant)
+│  │  Falls back to NJ1() — full LLM compaction (slow, "Compacting..." UI)
+│  └─ NJ1 calls _H0 (executePreCompactHooks) before compacting
+│
+└─ NO OTHER PRUNING MECHANISM EXISTS in Claude Code
+```
 
-This enables our **Smart Compaction Gate**:
-- **Default mode**: Exit code 0 with custom instructions listing archived files,
-  tools, decisions, and recent turns -- Claude's compaction summary preserves
-  the most important details
-- **Block mode** (Context Autopilot, enabled by default): Exit code 2 on auto-trigger
-  to prevent compaction; manual `/compact` is allowed and resets autopilot state
-- **Legacy block mode** (`CLAUDE_FLOW_BLOCK_COMPACTION=true`): Exit code 2 on auto-trigger
-  via environment variable (superseded by Context Autopilot)
+### Key SDK Functions (Decompiled)
+
+```javascript
+// Hd() — Is auto-compact enabled?
+function Hd() {
+  if (process.env.DISABLE_COMPACT) return false;
+  return localSettings.autoCompactEnabled;  // default: true
+}
+
+// zT2() — Auto-compact threshold (tokens)
+function zT2() {
+  let max = effectiveMaxTokens();          // ~200K
+  let threshold = max - 13000;             // ~187K (93%)
+  let override = process.env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE;
+  if (override) {
+    let pct = parseFloat(override);
+    if (pct > 0 && pct <= 100)
+      threshold = Math.min(Math.floor(max * pct / 100), threshold);
+  }
+  return threshold;
+}
+
+// T9A() — Context health check
+function T9A(tokens) {
+  let threshold = zT2();
+  let ref = Hd() ? threshold : effectiveMaxTokens();
+  return {
+    isAboveWarningThreshold:     tokens >= ref - 20000,  // micro-compact activates
+    isAboveErrorThreshold:       tokens >= ref - 20000,
+    isAboveAutoCompactThreshold: Hd() && tokens >= threshold  // full compact fires
+  };
+}
+```
+
+### PreCompact Exit Code 2: NOT IMPLEMENTED
+
+**Critical finding**: The SDK documentation (line 4140) states "Exit code 2 - block
+compaction" for PreCompact hooks. However, this is **not implemented** in v2.0.76.
+
+- `_H0` (executePreCompactHooks) uses `executeHooksOutsideREPL` (`NM0`)
+- `NM0` returns `{command, succeeded: status===0, output}` — no blocking field
+- Exit code 2 is treated as a failed hook (succeeded: false), not a blocking signal
+- Compare: REPL-based hooks (PreToolUse, Stop) DO handle exit code 2 via the
+  streaming executor (`ms`) which yields `{blockingError, outcome: "blocking"}`
+- The `NJ1` compaction function ALWAYS proceeds after collecting hook outputs
+
+**Consequence**: Compaction cannot be blocked via hooks. Our system uses
+archive+restore (lossless compaction) and SDK patching (aggressive pruning)
+instead of blocking.
 
 ## Architecture
 
