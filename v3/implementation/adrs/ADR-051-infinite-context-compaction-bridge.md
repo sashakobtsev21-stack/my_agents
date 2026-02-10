@@ -78,7 +78,9 @@ bridge retrieves and injects the most relevant archived context.
    budget (default 4000 chars) to avoid overwhelming the new context window
 6. **Non-Blocking**: Hook failures are silently caught -- compaction always proceeds
 7. **Smart Compaction Gate**: PreCompact exit code 0 outputs custom instructions
-   guiding what Claude preserves; exit code 2 optionally blocks compaction entirely
+   guiding what Claude preserves; exit code 2 blocks auto-compaction entirely
+8. **Context Autopilot**: Real-time token tracking via API usage data, automatic
+   optimization at configurable thresholds, compaction prevention with manual override
 
 ## SDK Compaction Mechanics (Discovered via Deep Review)
 
