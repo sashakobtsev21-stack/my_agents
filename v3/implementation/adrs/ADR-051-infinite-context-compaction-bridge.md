@@ -637,8 +637,8 @@ All capabilities confirmed working (2026-02-10):
 | Confidence decay | PASS | 38 entries decayed per cycle |
 | Confidence boost | PASS | +3% per access on restore |
 | Smart pruning | PASS | Prune at confidence ≤15% |
-| Embedding generation | PASS | 38/38 entries embedded (768-dim) |
-| Semantic search | PASS | 3 results, top score 0.542 |
+| ONNX embedding generation | PASS | 38/38 entries embedded (384-dim, all-MiniLM-L6-v2) |
+| Semantic search | PASS | 5 results, top score 0.471 (true semantic matching) |
 | Auto-compaction block | PASS | Exit code 2 on auto trigger |
 | Manual compact | PASS | Exit code 0 on manual trigger |
 | Cross-session search | PASS | Finds turns from other sessions |
