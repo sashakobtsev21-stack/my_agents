@@ -650,18 +650,23 @@ All core functions are exported from the hook module:
 ### Hook Wiring (settings.json)
 
 ```json
-// PreCompact (manual + auto matchers)
+// PreCompact (manual + auto matchers) — preserves exit code 2 for compaction blocking
 { "type": "command", "timeout": 5000,
-  "command": "node .claude/helpers/context-persistence-hook.mjs pre-compact 2>/dev/null || true" }
+  "command": "/bin/bash -c 'node ... pre-compact 2>/dev/null; RC=$?; if [ $RC -eq 2 ]; then exit 2; fi; exit 0'" }
 
 // SessionStart
 { "type": "command", "timeout": 6000,
   "command": "node .claude/helpers/context-persistence-hook.mjs session-start 2>/dev/null || true" }
 
-// UserPromptSubmit (proactive archiving)
+// UserPromptSubmit (proactive archiving + autopilot)
 { "type": "command", "timeout": 5000,
   "command": "node .claude/helpers/context-persistence-hook.mjs user-prompt-submit 2>/dev/null || true" }
 ```
+
+**Critical**: PreCompact hooks must NOT use `|| true` as that swallows exit code 2.
+The bash wrapper `RC=$?; if [ $RC -eq 2 ]; then exit 2; fi; exit 0` preserves
+exit code 2 (block compaction) while converting other errors to exit 0 (allow
+compaction on hook failure).
 
 ### Operational Notes
 
