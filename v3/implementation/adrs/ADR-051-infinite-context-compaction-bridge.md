@@ -76,6 +76,29 @@ bridge retrieves and injects the most relevant archived context.
 5. **Budget-Constrained**: Restored context fits within a configurable character
    budget (default 4000 chars) to avoid overwhelming the new context window
 6. **Non-Blocking**: Hook failures are silently caught -- compaction always proceeds
+7. **Smart Compaction Gate**: PreCompact exit code 0 outputs custom instructions
+   guiding what Claude preserves; exit code 2 optionally blocks compaction entirely
+
+## SDK Compaction Mechanics (Discovered via Deep Review)
+
+The Claude Code SDK (`cli.js`) processes PreCompact hooks with three exit code behaviors:
+
+| Exit Code | SDK Behavior |
+|-----------|-------------|
+| **0** | stdout is appended as **custom compact instructions** (guides preservation) |
+| **2** | **Blocks compaction entirely** (hook can prevent compaction) |
+| Other | stderr shown to user, compaction continues normally |
+
+The `_H0` function (line 4700) executes all PreCompact hooks, collecting
+`newCustomInstructions` from exit code 0 hooks. The `NJ1` function (line 1769)
+performs actual compaction, using these instructions to guide the summary.
+
+This enables our **Smart Compaction Gate**:
+- **Default mode**: Exit code 0 with custom instructions listing archived files,
+  tools, decisions, and recent turns -- Claude's compaction summary preserves
+  the most important details
+- **Block mode** (`CLAUDE_FLOW_BLOCK_COMPACTION=true`): Exit code 2 on auto-trigger
+  to prevent compaction when proactive archiving has captured everything
 
 ## Architecture
 
