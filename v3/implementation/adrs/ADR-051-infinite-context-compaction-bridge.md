@@ -323,9 +323,24 @@ function createHashEmbedding(text, dimensions = 768) {
 | Store to SQLite (WAL) | 500ms | ~20ms |
 | Store to RuVector PG | 500ms | ~100ms (network) |
 | **Total (UserPromptSubmit)** | **5000ms** | **~50ms (incremental)** |
-| **Total (PreCompact)** | **5000ms** | **~20ms (mostly deduped)** |
+| Build compact instructions | 100ms | ~5ms |
+| **Total (PreCompact)** | **5000ms** | **~25ms (mostly deduped)** |
 | Query + build context | 500ms | ~30ms |
 | **Total (SessionStart)** | **6000ms** | **~40ms** |
+
+## Configuration
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `CLAUDE_FLOW_COMPACT_RESTORE_BUDGET` | `4000` | Max chars for restored context in SessionStart |
+| `CLAUDE_FLOW_COMPACT_INSTRUCTION_BUDGET` | `2000` | Max chars for custom compact instructions |
+| `CLAUDE_FLOW_BLOCK_COMPACTION` | `false` | Set `true` to block auto-compaction (exit code 2) |
+| `RUVECTOR_HOST` | - | PostgreSQL host for RuVector backend |
+| `RUVECTOR_DATABASE` | - | PostgreSQL database name |
+| `RUVECTOR_USER` | - | PostgreSQL username |
+| `RUVECTOR_PASSWORD` | - | PostgreSQL password |
+| `RUVECTOR_PORT` | `5432` | PostgreSQL port |
+| `RUVECTOR_SSL` | `false` | Enable SSL for PostgreSQL connection |
 
 ## Security Considerations
 
