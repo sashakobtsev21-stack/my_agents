@@ -515,17 +515,32 @@ State is persisted to `.claude-flow/data/autopilot-state.json`:
 
 ## Configuration
 
+### SDK Patch (Aggressive Text Pruning)
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `CLAUDE_TEXT_PRUNE_KEEP` | `4` | Number of recent turns to keep fully intact |
+| `CLAUDE_TEXT_PRUNE_THRESHOLD` | `20000` | Start pruning text above this token count |
+| `CLAUDE_TEXT_PRUNE_MAX_CHARS` | `80` | Max chars for old text blocks (truncated beyond) |
+| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | `30` | Auto-compact threshold (% of context window) |
+
+### Hook System
+
 | Environment Variable | Default | Description |
 |---------------------|---------|-------------|
 | `CLAUDE_FLOW_COMPACT_RESTORE_BUDGET` | `4000` | Max chars for restored context in SessionStart |
 | `CLAUDE_FLOW_COMPACT_INSTRUCTION_BUDGET` | `2000` | Max chars for custom compact instructions |
-| `CLAUDE_FLOW_BLOCK_COMPACTION` | `false` | Legacy: set `true` to block auto-compaction (superseded by autopilot) |
 | `CLAUDE_FLOW_AUTO_OPTIMIZE` | `true` | Enable importance ranking, pruning, RuVector sync |
 | `CLAUDE_FLOW_RETENTION_DAYS` | `30` | Auto-prune never-accessed entries older than N days |
-| `CLAUDE_FLOW_CONTEXT_AUTOPILOT` | `true` | Enable Context Autopilot (blocks auto-compact, allows manual) |
-| `CLAUDE_FLOW_CONTEXT_WINDOW` | `200000` | Context window size in tokens for percentage calculation |
-| `CLAUDE_FLOW_AUTOPILOT_WARN` | `0.70` | Warning threshold (70%) — flag approaching limit |
-| `CLAUDE_FLOW_AUTOPILOT_PRUNE` | `0.85` | Prune threshold (85%) — actively optimize and prune |
+| `CLAUDE_FLOW_CONTEXT_AUTOPILOT` | `true` | Enable Context Autopilot tracking |
+| `CLAUDE_FLOW_CONTEXT_WINDOW` | `200000` | Context window size in tokens |
+| `CLAUDE_FLOW_AUTOPILOT_WARN` | `0.70` | Warning threshold (70%) |
+| `CLAUDE_FLOW_AUTOPILOT_PRUNE` | `0.85` | Critical threshold (85%) — session rotation advised |
+
+### RuVector PostgreSQL (Optional)
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
 | `RUVECTOR_HOST` | - | PostgreSQL host for RuVector backend |
 | `RUVECTOR_DATABASE` | - | PostgreSQL database name |
 | `RUVECTOR_USER` | - | PostgreSQL username |
