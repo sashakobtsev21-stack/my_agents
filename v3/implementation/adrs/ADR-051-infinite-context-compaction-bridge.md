@@ -651,9 +651,11 @@ All capabilities confirmed working (2026-02-10):
 5. **Non-invasive**: Uses official SDK hooks -- no patches, no internal API dependencies
 6. **Composable**: Transcript entries are searchable alongside patterns,
    learnings, and other memory types
-7. **Self-optimizing**: Importance scoring, access tracking, and auto-pruning ensure
-   retrieval quality improves over time without manual tuning
-8. **Auto-sync**: SQLite → RuVector migration happens automatically when configured
+7. **Self-learning**: Confidence decay + access boosting creates a reinforcement loop
+   where frequently useful entries survive and irrelevant entries naturally fade
+8. **Semantic search**: 768-dim hash embeddings enable cross-session similarity search
+   — "What did we discuss about X?" finds relevant turns from any archived session
+9. **Auto-sync**: SQLite → RuVector migration happens automatically when configured
 
 ### Negative
 
