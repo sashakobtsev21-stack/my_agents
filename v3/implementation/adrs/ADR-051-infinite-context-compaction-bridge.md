@@ -1,10 +1,11 @@
 # ADR-051: Infinite Context via Compaction-to-Memory Bridge
 
-**Status:** Proposed
+**Status:** Implemented
 **Date:** 2026-02-10
 **Authors:** RuvNet, Claude Flow Team
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Related:** ADR-006 (Unified Memory), ADR-009 (Hybrid Memory Backend), ADR-027 (RuVector PostgreSQL), ADR-048 (Auto Memory Integration), ADR-049 (Self-Learning Memory GNN)
+**Implementation:** `.claude/helpers/context-persistence-hook.mjs` (1420 lines)
 
 ## Context
 
