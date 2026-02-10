@@ -622,7 +622,7 @@ search capabilities.
 
 | File | Lines | Purpose |
 |------|-------|---------|
-| `.claude/helpers/context-persistence-hook.mjs` | 1420 | Core hook script (all 4 backends, all commands) |
+| `.claude/helpers/context-persistence-hook.mjs` | ~1560 | Core hook script (all 4 backends, autopilot, all commands) |
 | `.claude/settings.json` | +9 | Hook wiring: PreCompact, SessionStart, UserPromptSubmit |
 | `tests/context-persistence-hook.test.mjs` | ~150 | Unit tests for parsing, chunking, dedup, retrieval |
 | `v3/implementation/adrs/ADR-051-infinite-context-compaction-bridge.md` | this file | Architecture decision record |
