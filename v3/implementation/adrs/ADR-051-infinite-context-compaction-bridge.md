@@ -67,20 +67,18 @@ bridge retrieves and injects the most relevant archived context.
 
 ### Design Principles
 
-1. **Hook-Native**: Uses Claude Code's official PreCompact and SessionStart hooks --
-   no monkey-patching, no SDK modifications
-2. **Backend-Agnostic**: Works with JsonFileBackend (zero dependencies), AgentDB
-   (HNSW vectors), or RuVector PostgreSQL (TB-scale) -- graceful degradation
-3. **Timeout-Safe**: All operations complete within the 5-second hook timeout using
+1. **Hook-Native**: Uses Claude Code's official PreCompact and SessionStart hooks
+2. **SDK-Patched**: Extends Claude Code's micro-compaction (`Vd()`) to also prune
+   old conversation text, not just tool results -- the only way to prevent compaction
+3. **Backend-Agnostic**: Works with SQLite, RuVector PostgreSQL, AgentDB, or JSON
+4. **Timeout-Safe**: All operations complete within the 5-second hook timeout using
    local I/O and hash-based embeddings (no LLM calls, no network)
-4. **Dedup-Aware**: Content hashing prevents re-storing on repeated compactions
-5. **Budget-Constrained**: Restored context fits within a configurable character
+5. **Dedup-Aware**: Content hashing prevents re-storing on repeated compactions
+6. **Budget-Constrained**: Restored context fits within a configurable character
    budget (default 4000 chars) to avoid overwhelming the new context window
-6. **Non-Blocking**: Hook failures are silently caught -- compaction always proceeds
-7. **Smart Compaction Gate**: PreCompact exit code 0 outputs custom instructions
-   guiding what Claude preserves; exit code 2 blocks auto-compaction entirely
-8. **Context Autopilot**: Real-time token tracking via API usage data, automatic
-   optimization at configurable thresholds, compaction prevention with manual override
+7. **Non-Blocking**: Hook failures are silently caught -- compaction always proceeds
+8. **Aggressive Pruning**: SDK patch truncates old conversation text automatically
+   on every query, keeping context lean so compaction rarely or never fires
 
 ## SDK Compaction Mechanics (Discovered via Deep Review)
 
