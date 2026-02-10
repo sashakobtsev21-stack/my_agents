@@ -335,6 +335,8 @@ function createHashEmbedding(text, dimensions = 768) {
 | `CLAUDE_FLOW_COMPACT_RESTORE_BUDGET` | `4000` | Max chars for restored context in SessionStart |
 | `CLAUDE_FLOW_COMPACT_INSTRUCTION_BUDGET` | `2000` | Max chars for custom compact instructions |
 | `CLAUDE_FLOW_BLOCK_COMPACTION` | `false` | Set `true` to block auto-compaction (exit code 2) |
+| `CLAUDE_FLOW_AUTO_OPTIMIZE` | `true` | Enable importance ranking, pruning, RuVector sync |
+| `CLAUDE_FLOW_RETENTION_DAYS` | `30` | Auto-prune never-accessed entries older than N days |
 | `RUVECTOR_HOST` | - | PostgreSQL host for RuVector backend |
 | `RUVECTOR_DATABASE` | - | PostgreSQL database name |
 | `RUVECTOR_USER` | - | PostgreSQL username |
