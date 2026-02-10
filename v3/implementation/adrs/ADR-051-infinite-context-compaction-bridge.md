@@ -723,38 +723,39 @@ All capabilities confirmed working (2026-02-10):
 
 ### Positive
 
-1. **No more context cliff**: Conversation details survive compaction as structured
+1. **Automatic text pruning**: SDK patch prunes old conversation text on every query,
+   keeping context lean without user intervention
+2. **No more context cliff**: Conversation details survive compaction as structured
    memory entries persisted BEFORE compaction fires
-2. **Proactive, not reactive**: UserPromptSubmit archives on every prompt, so
-   context is always persisted before it can be lost to compaction
-3. **Cross-session recall**: Archived transcripts accumulate across sessions, enabling
+3. **Proactive, not reactive**: UserPromptSubmit archives on every prompt, so
+   context is always persisted before it can be lost
+4. **Cross-session recall**: Archived transcripts accumulate across sessions, enabling
    "What did we do last time?" queries
-4. **4-tier scaling**: SQLite (local, fast) -> RuVector PostgreSQL (TB-scale,
+5. **4-tier scaling**: SQLite (local, fast) -> RuVector PostgreSQL (TB-scale,
    vector search) -> AgentDB (HNSW) -> JSON (zero deps)
-5. **Non-invasive**: Uses official SDK hooks -- no patches, no internal API dependencies
-6. **Composable**: Transcript entries are searchable alongside patterns,
-   learnings, and other memory types
-7. **Self-learning**: Confidence decay + access boosting creates a reinforcement loop
+6. **Self-learning**: Confidence decay + access boosting creates a reinforcement loop
    where frequently useful entries survive and irrelevant entries naturally fade
-8. **ONNX semantic search**: 384-dim ONNX embeddings (all-MiniLM-L6-v2) enable true
-   semantic cross-session search — "What did we discuss about auth?" finds relevant
-   turns from any archived session with real natural language understanding
-9. **Auto-sync**: SQLite → RuVector migration happens automatically when configured
+7. **ONNX semantic search**: 384-dim ONNX embeddings (all-MiniLM-L6-v2) enable true
+   semantic cross-session search with real NLU
+8. **Session rotation support**: SessionStart restores context after `/clear`,
+   enabling manual session rotation as an alternative to compaction
 
 ### Negative
 
-1. **Storage growth**: Long sessions produce many chunks. Mitigation: auto-retention
+1. **SDK patch fragility**: `_aggressiveTextPrune()` is injected into `cli.js`
+   which is overwritten on npm updates. Mitigation: `patch-aggressive-prune.mjs`
+   with `--revert` and `--check` flags; backup at `cli.js.backup`
+2. **Text truncation**: Old turns are truncated to 80 chars. Mitigation: full content
+   is archived in SQLite and restorable via SessionStart hook
+3. **Storage growth**: Long sessions produce many chunks. Mitigation: auto-retention
    prunes never-accessed entries after configurable retention period
-2. **Summary quality**: Extractive summarization is fast but imprecise. Mitigation:
-   full content is stored; summaries are just for the restoration preview
-3. **RuVector network latency**: PostgreSQL adds ~100ms per archive operation.
-   Mitigation: connection pooling, timeout safety, automatic SQLite fallback
 
 ### Neutral
 
-1. **Hook timeout pressure**: 5s budget is generous for local I/O operations
-2. **Embedding quality**: Hash embeddings are deterministic approximations. When real
-   ONNX embeddings are available, they can replace hash embeddings transparently
+1. **Exit code 2 not implemented**: PreCompact hooks cannot block compaction in
+   Claude Code v2.0.76 despite documentation claiming otherwise. This is an SDK
+   limitation, not a bug in our system.
+2. **Hook timeout pressure**: 5s budget is generous for local I/O operations
 
 ## Future Enhancements
 
