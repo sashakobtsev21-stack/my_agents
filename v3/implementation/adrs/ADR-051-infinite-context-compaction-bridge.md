@@ -644,8 +644,9 @@ All core functions are exported from the hook module:
 - **Storage**: `buildEntry`, `storeChunks`, `hashContent`, `createHashEmbedding`
 - **Retrieval**: `retrieveContext`, `retrieveContextSmart`, `computeImportance`
 - **Optimization**: `autoOptimize`, `buildCompactInstructions`
+- **Autopilot**: `estimateContextTokens`, `runAutopilot`, `loadAutopilotState`, `saveAutopilotState`, `buildAutopilotReport`, `buildProgressBar`, `formatTokens`
 - **I/O**: `readStdin`
-- **Constants**: `NAMESPACE`, `ARCHIVE_DB_PATH`, `ARCHIVE_JSON_PATH`, `COMPACT_INSTRUCTION_BUDGET`, `RETENTION_DAYS`, `AUTO_OPTIMIZE`
+- **Constants**: `NAMESPACE`, `ARCHIVE_DB_PATH`, `ARCHIVE_JSON_PATH`, `COMPACT_INSTRUCTION_BUDGET`, `RETENTION_DAYS`, `AUTO_OPTIMIZE`, `AUTOPILOT_ENABLED`, `CONTEXT_WINDOW_TOKENS`, `AUTOPILOT_WARN_PCT`, `AUTOPILOT_PRUNE_PCT`
 
 ### Hook Wiring (settings.json)
 
