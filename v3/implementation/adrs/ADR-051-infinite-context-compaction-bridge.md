@@ -338,23 +338,26 @@ function createHashEmbedding(text, dimensions = 768) {
 - HNSW-indexed embeddings enable semantic search across archived transcripts
 - Cross-session retrieval: "What did we discuss about auth?" finds relevant chunks
 
-### Phase 3: RuVector PostgreSQL (When configured)
-- TB-scale transcript archives
-- GNN-enhanced retrieval using code dependency graphs
-- Self-learning query optimizer tunes retrieval over time
-- Multi-user/multi-session search across team archives
+### Phase 4: JsonFileBackend (Fallback)
+- Zero dependencies, works everywhere
+- Used only when better-sqlite3 is not available
+- Stores transcript chunks as JSON
+- No indexed queries, linear scan for retrieval
 
 ## Consequences
 
 ### Positive
 
 1. **No more context cliff**: Conversation details survive compaction as structured
-   memory entries with semantic embeddings
-2. **Cross-session recall**: Archived transcripts accumulate across sessions, enabling
+   memory entries persisted BEFORE compaction fires
+2. **Proactive, not reactive**: UserPromptSubmit archives on every prompt, so
+   context is always persisted before it can be lost to compaction
+3. **Cross-session recall**: Archived transcripts accumulate across sessions, enabling
    "What did we do last time?" queries
-3. **Tiered scaling**: Works with zero dependencies (JSON) up to TB-scale (RuVector)
-4. **Non-invasive**: Uses official SDK hooks -- no patches, no internal API dependencies
-5. **Composable**: Transcript entries in AgentDB are searchable alongside patterns,
+4. **4-tier scaling**: SQLite (local, fast) -> RuVector PostgreSQL (TB-scale,
+   vector search) -> AgentDB (HNSW) -> JSON (zero deps)
+5. **Non-invasive**: Uses official SDK hooks -- no patches, no internal API dependencies
+6. **Composable**: Transcript entries are searchable alongside patterns,
    learnings, and other memory types
 
 ### Negative
@@ -363,8 +366,8 @@ function createHashEmbedding(text, dimensions = 768) {
    retention policy, namespace-level cleanup
 2. **Summary quality**: Extractive summarization is fast but imprecise. Mitigation:
    full content is stored; summaries are just for the restoration preview
-3. **No semantic search in Tier 1**: JsonFileBackend can only filter by metadata.
-   Mitigation: AgentDB upgrade enables real vector search
+3. **RuVector network latency**: PostgreSQL adds ~100ms per archive operation.
+   Mitigation: connection pooling, timeout safety, automatic SQLite fallback
 
 ### Neutral
 
