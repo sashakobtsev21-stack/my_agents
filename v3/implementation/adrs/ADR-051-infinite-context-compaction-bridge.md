@@ -87,38 +87,53 @@ bridge retrieves and injects the most relevant archived context.
 |                                                                   |
 |  Context Window: [system prompt] [messages...] [new messages]     |
 |                                                                   |
-|  +----------------------+                                         |
-|  | Context Window Full  |                                         |
-|  | PreCompact fires     |-----------------------------+           |
-|  +----------------------+                             |           |
+|  +--------------------------+                                     |
+|  | Every User Prompt        |                                     |
+|  | UserPromptSubmit fires   |-------------------------+           |
+|  +--------------------------+                         |           |
 |                                                       v           |
 |  +-----------------------------------------------------------+   |
-|  |           context-persistence-hook.mjs                     |   |
+|  |  context-persistence-hook.mjs (proactive archive)          |   |
 |  |                                                            |   |
 |  |  1. Read transcript_path (JSONL)                           |   |
 |  |  2. Parse -> filter -> chunk by turns                      |   |
-|  |  3. Extract summaries + metadata                           |   |
-|  |  4. Generate hash embeddings (768-dim)                     |   |
-|  |  5. Store as episodic MemoryEntry[]                        |   |
-|  |     namespace: 'transcript-archive'                        |   |
+|  |  3. Dedup: skip already-archived chunks (hash check)       |   |
+|  |  4. Store NEW chunks only (incremental)                    |   |
+|  |  -> Context is ALWAYS persisted BEFORE it can be lost      |   |
+|  +---------------------------+--------------------------------+   |
+|                              |                                    |
+|  +----------------------+    |                                    |
+|  | Context Window Full  |    |                                    |
+|  | PreCompact fires     |----+---+                                |
+|  +----------------------+        |                                |
+|                                  v                                |
+|  +-----------------------------------------------------------+   |
+|  |  context-persistence-hook.mjs (safety net)                 |   |
+|  |                                                            |   |
+|  |  1. Final pass: archive any remaining unarchived turns     |   |
+|  |  2. Most turns already archived by proactive hook          |   |
+|  |  3. Typically 0-2 new entries (dedup handles the rest)     |   |
 |  +---------------------------+--------------------------------+   |
 |                              |                                    |
 |                              v                                    |
 |  +-----------------------------------------------------------+   |
 |  |              Memory Backend (tiered)                        |   |
 |  |                                                            |   |
-|  |  Tier 1: JsonFileBackend                                   |   |
-|  |    -> .claude-flow/data/transcript-archive.json            |   |
-|  |    -> Zero dependencies, always available                  |   |
+|  |  Tier 1: SQLite (better-sqlite3)                           |   |
+|  |    -> .claude-flow/data/transcript-archive.db              |   |
+|  |    -> WAL mode, indexed queries, ACID transactions         |   |
 |  |                                                            |   |
-|  |  Tier 2: AgentDB + HNSW  (if @claude-flow/memory built)   |   |
+|  |  Tier 2: RuVector PostgreSQL (if RUVECTOR_* env set)       |   |
+|  |    -> TB-scale storage, pgvector embeddings                |   |
+|  |    -> GNN-enhanced retrieval, self-learning optimizer       |   |
+|  |                                                            |   |
+|  |  Tier 3: AgentDB + HNSW  (if @claude-flow/memory built)   |   |
 |  |    -> 150x-12,500x faster semantic search                  |   |
 |  |    -> Vector-indexed retrieval                             |   |
 |  |                                                            |   |
-|  |  Tier 3: RuVector PostgreSQL (if configured)               |   |
-|  |    -> TB-scale storage                                     |   |
-|  |    -> GNN-enhanced retrieval                               |   |
-|  |    -> Self-learning query optimizer                        |   |
+|  |  Tier 4: JsonFileBackend                                   |   |
+|  |    -> .claude-flow/data/transcript-archive.json            |   |
+|  |    -> Zero dependencies, always available                  |   |
 |  +-----------------------------------------------------------+   |
 |                                                                   |
 |  +----------------------+                                         |
@@ -128,7 +143,7 @@ bridge retrieves and injects the most relevant archived context.
 |  +----------------------+                             v           |
 |                                                                   |
 |  +-----------------------------------------------------------+   |
-|  |           context-persistence-hook.mjs                     |   |
+|  |  context-persistence-hook.mjs (restore)                    |   |
 |  |                                                            |   |
 |  |  1. Detect source === 'compact'                            |   |
 |  |  2. Query transcript-archive for session_id                |   |
@@ -140,6 +155,27 @@ bridge retrieves and injects the most relevant archived context.
 |                      [new messages continue...]                   |
 +-------------------------------------------------------------------+
 ```
+
+### Proactive Archiving Strategy
+
+The key insight is that waiting for PreCompact to fire is too late -- by then,
+the context window is already full and compaction is imminent. Instead, we
+archive **proactively on every user prompt** via the `UserPromptSubmit` hook:
+
+1. **UserPromptSubmit** (every prompt): Reads transcript, chunks, dedup-checks,
+   stores only NEW turns. Cost: ~50ms for incremental archive (most turns
+   already stored). This means context is ALWAYS persisted before it can be lost.
+
+2. **PreCompact** (safety net): Runs the same archive logic as a final pass.
+   Because proactive archiving already stored most turns, this typically
+   stores 0-2 new entries. Ensures nothing slips through.
+
+3. **SessionStart** (restore): After compaction, queries the archive and injects
+   the most relevant turns back into the new context window.
+
+Result: Compaction becomes invisible. The "Context left until auto-compact: 11%"
+warning is no longer a threat because all information is already persisted in
+the SQLite/RuVector database and will be restored after compaction.
 
 ### Transcript Parsing
 
