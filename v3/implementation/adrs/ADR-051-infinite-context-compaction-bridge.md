@@ -806,11 +806,11 @@ All core functions are exported from the hook module:
 ### Hook Wiring (settings.json)
 
 ```json
-// PreCompact (manual + auto matchers) — preserves exit code 2 for compaction blocking
+// PreCompact (manual + auto matchers)
 { "type": "command", "timeout": 5000,
-  "command": "/bin/bash -c 'node ... pre-compact 2>/dev/null; RC=$?; if [ $RC -eq 2 ]; then exit 2; fi; exit 0'" }
+  "command": "node .claude/helpers/context-persistence-hook.mjs pre-compact 2>/dev/null || true" }
 
-// SessionStart
+// SessionStart (restores after compact OR /clear for session rotation)
 { "type": "command", "timeout": 6000,
   "command": "node .claude/helpers/context-persistence-hook.mjs session-start 2>/dev/null || true" }
 
@@ -819,10 +819,28 @@ All core functions are exported from the hook module:
   "command": "node .claude/helpers/context-persistence-hook.mjs user-prompt-submit 2>/dev/null || true" }
 ```
 
-**Critical**: PreCompact hooks must NOT use `|| true` as that swallows exit code 2.
-The bash wrapper `RC=$?; if [ $RC -eq 2 ]; then exit 2; fi; exit 0` preserves
-exit code 2 (block compaction) while converting other errors to exit 0 (allow
-compaction on hook failure).
+**Note**: PreCompact hooks use `|| true` because exit code 2 blocking is not
+implemented in Claude Code v2.0.76 (see SDK analysis above). The hook archives
+turns and outputs custom compact instructions via exit code 0.
+
+### SDK Patch Application
+
+```bash
+# Apply aggressive text pruning patch
+node .claude/helpers/patch-aggressive-prune.mjs
+
+# Check if patched
+node .claude/helpers/patch-aggressive-prune.mjs --check
+
+# Revert to original
+node .claude/helpers/patch-aggressive-prune.mjs --revert
+```
+
+The patch inserts `_aggressiveTextPrune()` into the query loop in
+`node_modules/@anthropic-ai/claude-agent-sdk/cli.js`, between the native
+micro-compaction (`Vd()`) and the auto-compact check (`CT2()`). A backup
+is saved at `cli.js.backup` before patching. Must be re-applied after
+`npm install` or SDK updates.
 
 ### Operational Notes
 
