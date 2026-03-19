@@ -289,7 +289,7 @@ export class SecurityDomainService {
       permissions,
       allowedPaths: customPaths ?? ['./src', './tests', './docs'],
       blockedPaths: ['/etc', '/var', '~/', '../'],
-      allowedCommands: ['npm', 'npx', 'node', 'git', 'vitest'],
+      allowedCommands: ['npm', 'node', 'git', 'vitest'],
       blockedCommands: ['rm -rf /', 'dd', 'mkfs', 'format'],
     });
   }

@@ -34,7 +34,7 @@ const security = createSecurityModule({
   projectRoot: '/workspaces/project',
   hmacSecret: process.env.HMAC_SECRET!,
   bcryptRounds: 12,
-  allowedCommands: ['git', 'npm', 'npx', 'node']
+  allowedCommands: ['git', 'npm', 'node']
 });
 
 // Hash a password

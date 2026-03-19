@@ -141,7 +141,7 @@ export interface SecurityModuleConfig {
 
   /**
    * Allowed commands for safe executor
-   * Default: ['git', 'npm', 'npx', 'node']
+   * Default: ['git', 'npm', 'node']
    */
   allowedCommands?: string[];
 }
@@ -187,7 +187,7 @@ export function createSecurityModule(config: SecurityModuleConfig): SecurityModu
     }),
     credentialGenerator: new CredentialGenerator(),
     safeExecutor: new SafeExecutor({
-      allowedCommands: config.allowedCommands ?? ['git', 'npm', 'npx', 'node'],
+      allowedCommands: config.allowedCommands ?? ['git', 'npm', 'node'],
     }),
     pathValidator: new PathValidator({
       allowedPrefixes: [config.projectRoot],
