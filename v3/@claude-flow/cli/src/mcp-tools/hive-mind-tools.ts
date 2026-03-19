@@ -356,13 +356,17 @@ export const hiveMindTools: MCPTool[] = [
           electedAt: state.queen.electedAt,
           term: state.queen.term,
         } : { id: 'N/A', status: 'offline', load: 0, tasksQueued: 0 },
-        workers: state.workers.map(w => ({
-          id: w,
-          type: 'worker',
-          status: 'idle',
-          currentTask: null,
-          tasksCompleted: 0,
-        })),
+        workers: state.workers.map(w => {
+          const agentStore = loadAgentStore();
+          const agent = agentStore.agents[w] as Record<string, unknown> | undefined;
+          return {
+            id: w,
+            type: (agent?.agentType as string) || 'worker',
+            status: (agent?.status as string) || 'unknown',
+            currentTask: (agent?.currentTask as string) || null,
+            tasksCompleted: (agent?.taskCount as number) || 0,
+          };
+        }),
         metrics: {
           totalTasks: state.consensus.history.length + state.consensus.pending.length,
           completedTasks: state.consensus.history.length,
