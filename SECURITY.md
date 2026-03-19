@@ -12,7 +12,7 @@
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Please report vulnerabilities by emailing **security@ruv.io**. Include the following in your report:
+Please report vulnerabilities by emailing **security@cognitum.one**. Include the following in your report:
 
 - A clear description of the vulnerability
 - Steps to reproduce the issue
