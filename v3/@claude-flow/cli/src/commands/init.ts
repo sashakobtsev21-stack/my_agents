@@ -812,6 +812,8 @@ const hooksCommand: Command = {
             stop: false,
             preCompact: false,
             notification: false,
+            teammateIdle: false,
+            taskCompleted: false,
             timeout: 5000,
             continueOnError: true,
           }

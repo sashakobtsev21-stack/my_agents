@@ -32,8 +32,12 @@ export interface InitComponents {
 
 /**
  * Hook configuration options
- * Valid hook types: PreToolUse, PostToolUse, Notification, UserPromptSubmit,
- * SessionStart, SessionEnd, Stop, SubagentStop, PreCompact
+ * Valid Claude Code hook events (23 total):
+ *   PreToolUse, PostToolUse, PostToolUseFailure, UserPromptSubmit,
+ *   SessionStart, SessionEnd, Stop, SubagentStart, SubagentStop,
+ *   PreCompact, PostCompact, Notification, ConfigChange,
+ *   InstructionsLoaded, PermissionRequest, WorktreeCreate, WorktreeRemove,
+ *   TeammateIdle, TaskCompleted, Elicitation, ElicitationResult
  */
 export interface HooksConfig {
   /** Enable PreToolUse hooks */
@@ -50,6 +54,10 @@ export interface HooksConfig {
   preCompact: boolean;
   /** Enable Notification hooks */
   notification: boolean;
+  /** Enable TeammateIdle hooks (agent teams auto-assign) */
+  teammateIdle: boolean;
+  /** Enable TaskCompleted hooks (agent teams pattern learning) */
+  taskCompleted: boolean;
   /** Hook timeout in milliseconds */
   timeout: number;
   /** Continue on hook error */
@@ -330,6 +338,8 @@ export const DEFAULT_INIT_OPTIONS: InitOptions = {
     stop: true,
     preCompact: true,
     notification: true,
+    teammateIdle: true,
+    taskCompleted: true,
     timeout: 5000,
     continueOnError: true,
   },
@@ -426,6 +436,8 @@ export const MINIMAL_INIT_OPTIONS: InitOptions = {
     userPromptSubmit: false,
     stop: false,
     notification: false,
+    teammateIdle: false,
+    taskCompleted: false,
   },
   skills: {
     core: true,

@@ -182,7 +182,23 @@ export class ConfigLoader {
             path = configPath;
             break;
           } else {
-            warnings.push(`Invalid config at ${configPath}: ${validation.errors?.map(e => e.message).join(', ')}`);
+            // Config file exists but doesn't match the strict schema.
+            // Merge whatever valid object fields exist with defaults and continue.
+            // This handles partial configs, legacy configs, and simple key-value files.
+            if (fileConfig && typeof fileConfig === 'object' && !Array.isArray(fileConfig)) {
+              const partial = fileConfig as Record<string, unknown>;
+              const merged = { ...defaultSystemConfig } as Record<string, unknown>;
+              for (const key of Object.keys(partial)) {
+                if (partial[key] && typeof partial[key] === 'object' && !Array.isArray(partial[key])) {
+                  merged[key] = { ...(merged[key] as Record<string, unknown> || {}), ...(partial[key] as Record<string, unknown>) };
+                }
+              }
+              config = merged as SystemConfig;
+              source = 'file';
+              path = configPath;
+            }
+            // Always break on first found config file — don't search further
+            break;
           }
         } catch (error) {
           warnings.push(`Failed to load config from ${configPath}: ${(error as Error).message}`);

@@ -117,6 +117,12 @@ export async function uploadToGCS(
   const contentId = generateContentId(content);
   const checksum = crypto.createHash('sha256').update(content).digest('hex');
   const fileName = options.name || `${contentId}.cfp.json`;
+
+  // Validate filename to prevent path traversal
+  if (!/^[a-zA-Z0-9._\-]+$/.test(fileName) || fileName.includes('..')) {
+    throw new Error(`Invalid filename: ${fileName}`);
+  }
+
   const objectPath = config.prefix ? `${config.prefix}/${fileName}` : fileName;
 
   // S-1: Validate bucket name and object path to prevent command injection
@@ -154,8 +160,11 @@ export async function uploadToGCS(
       }
     }
 
-    // Clean up temp file
-    fs.unlinkSync(tempFile);
+    // Clean up temp file (validate path is within temp dir)
+    const resolvedTemp = path.resolve(tempFile);
+    if (resolvedTemp.startsWith(path.resolve(tempDir))) {
+      fs.unlinkSync(tempFile);
+    }
 
     const uri = `gs://${config.bucket}/${objectPath}`;
     const publicUrl = `https://storage.googleapis.com/${config.bucket}/${objectPath}`;
@@ -171,9 +180,12 @@ export async function uploadToGCS(
       contentId,
     };
   } catch (error) {
-    // Clean up temp file on error
+    // Clean up temp file on error (validate path is within temp dir)
     try {
-      fs.unlinkSync(tempFile);
+      const resolvedTemp = path.resolve(tempFile);
+      if (resolvedTemp.startsWith(path.resolve(tempDir))) {
+        fs.unlinkSync(tempFile);
+      }
     } catch { /* ignore */ }
 
     throw new Error(`GCS upload failed: ${error}`);
@@ -202,13 +214,19 @@ export async function downloadFromGCS(
     execFileSync('gcloud', downloadArgs, { encoding: 'utf-8', stdio: 'pipe' });
 
     const content = fs.readFileSync(tempFile);
-    fs.unlinkSync(tempFile);
+    const resolvedTemp = path.resolve(tempFile);
+    if (resolvedTemp.startsWith(path.resolve(tempDir))) {
+      fs.unlinkSync(tempFile);
+    }
 
     console.log(`[GCS] Downloaded ${content.length} bytes`);
     return content;
   } catch (error) {
     try {
-      fs.unlinkSync(tempFile);
+      const resolvedTemp = path.resolve(tempFile);
+      if (resolvedTemp.startsWith(path.resolve(tempDir))) {
+        fs.unlinkSync(tempFile);
+      }
     } catch { /* ignore */ }
 
     console.error(`[GCS] Download failed: ${error}`);

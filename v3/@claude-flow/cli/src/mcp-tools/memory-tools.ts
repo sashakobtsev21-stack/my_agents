@@ -261,6 +261,8 @@ export const memoryTools: MCPTool[] = [
       const key = input.key as string;
       const namespace = (input.namespace as string) || 'default';
 
+      validateMemoryInput(key);
+
       try {
         const result = await getEntry({ key, namespace });
 
@@ -393,6 +395,8 @@ export const memoryTools: MCPTool[] = [
 
       const key = input.key as string;
       const namespace = (input.namespace as string) || 'default';
+
+      validateMemoryInput(key);
 
       try {
         const result = await deleteEntry({ key, namespace });

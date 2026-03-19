@@ -577,25 +577,50 @@ describe('MCP Tools Deep Test Suite', () => {
       const result: any = await tool.handler({ topology: 'hierarchical' });
       expect(result.success).toBe(true);
       expect(result.swarmId).toBeDefined();
+      expect(result.persisted).toBe(true);
     });
 
-    it('swarm_status returns running status', async () => {
+    it('swarm_status returns running status after init', async () => {
+      // Init a swarm first so status has something to report
+      const initTool = swarmTools.find(t => t.name === 'swarm_init')!;
+      const initResult: any = await initTool.handler({ topology: 'mesh' });
       const tool = swarmTools.find(t => t.name === 'swarm_status')!;
-      const result: any = await tool.handler({});
+      const result: any = await tool.handler({ swarmId: initResult.swarmId });
       expect(result.status).toBe('running');
     });
 
-    it('swarm_shutdown returns success', async () => {
+    it('swarm_shutdown returns success after init', async () => {
+      const initTool = swarmTools.find(t => t.name === 'swarm_init')!;
+      const initResult: any = await initTool.handler({ topology: 'hierarchical' });
       const tool = swarmTools.find(t => t.name === 'swarm_shutdown')!;
-      const result: any = await tool.handler({});
+      const result: any = await tool.handler({ swarmId: initResult.swarmId });
       expect(result.success).toBe(true);
+      expect(result.terminated).toBe(true);
     });
 
-    it('swarm_health returns healthy checks', async () => {
+    it('swarm_health returns healthy checks after init', async () => {
+      const initTool = swarmTools.find(t => t.name === 'swarm_init')!;
+      const initResult: any = await initTool.handler({ topology: 'hierarchical' });
       const tool = swarmTools.find(t => t.name === 'swarm_health')!;
-      const result: any = await tool.handler({});
+      const result: any = await tool.handler({ swarmId: initResult.swarmId });
       expect(result.status).toBe('healthy');
       expect(result.checks).toBeDefined();
+      expect(result.healthy).toBe(true);
+    });
+
+    it('swarm_health returns not_found for nonexistent swarm ID', async () => {
+      const tool = swarmTools.find(t => t.name === 'swarm_health')!;
+      const result: any = await tool.handler({ swarmId: 'nonexistent-id-999' });
+      expect(result.status).toBe('not_found');
+      expect(result.healthy).toBe(false);
+      expect(result.checks).toBeDefined();
+    });
+
+    it('swarm_init rejects invalid topology', async () => {
+      const tool = swarmTools.find(t => t.name === 'swarm_init')!;
+      const result: any = await tool.handler({ topology: 'invalid-topo' });
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Invalid topology');
     });
   });
 

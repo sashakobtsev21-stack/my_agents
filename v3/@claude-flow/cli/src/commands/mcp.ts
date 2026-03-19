@@ -113,9 +113,12 @@ const startCommand: Command = {
     output.printInfo('Starting MCP Server...');
     output.writeln();
 
-    // Check if already running
+    // Check if already running (skip self-detection for stdio — getStatus()
+    // reports the current process as "running" when transport=stdio and no
+    // PID file exists, which would cause us to SIGKILL ourselves)
     const existingStatus = await getMCPServerStatus();
-    if (existingStatus.running) {
+    const isSelfDetected = existingStatus.pid === process.pid;
+    if (existingStatus.running && !isSelfDetected) {
       // For stdio transport, always force restart since we can't health check it
       // For other transports, check health unless --force is specified
       const shouldForceRestart = force || transport === 'stdio';

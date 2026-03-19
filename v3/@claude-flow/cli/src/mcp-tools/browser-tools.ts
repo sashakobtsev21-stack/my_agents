@@ -18,11 +18,11 @@ const browserSessions = new Map<string, {
  * Execute agent-browser CLI command
  */
 async function execBrowserCommand(args: string[], session = 'default'): Promise<MCPToolResult> {
-  const { execSync } = await import('child_process');
+  const { execFileSync } = await import('child_process');
 
   try {
     const fullArgs = ['--session', session, '--json', ...args];
-    const result = execSync(`agent-browser ${fullArgs.join(' ')}`, {
+    const result = execFileSync('agent-browser', fullArgs, {
       encoding: 'utf-8',
       timeout: 30000,
     });

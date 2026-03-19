@@ -70,6 +70,8 @@ const commandLoaders: Record<string, CommandLoader> = {
   guidance: () => import('./guidance.js'),
   // RVFA Appliance Management
   appliance: () => import('./appliance.js'),
+  'appliance-advanced': () => import('./appliance-advanced.js'),
+  'transfer-store': () => import('./transfer-store.js'),
 };
 
 // Cache for loaded commands

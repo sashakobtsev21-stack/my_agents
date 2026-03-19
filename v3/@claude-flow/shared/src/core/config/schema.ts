@@ -156,13 +156,15 @@ export const OrchestratorConfigSchema = z.object({
 
 /**
  * Full system configuration schema
+ * Uses passthrough() to accept unknown extra keys from user configs
+ * without failing validation (e.g., simple key-value pairs, custom fields).
  */
 export const SystemConfigSchema = z.object({
   orchestrator: OrchestratorConfigSchema,
   memory: MemoryConfigSchema.optional(),
   mcp: MCPServerConfigSchema.optional(),
   swarm: SwarmConfigSchema.optional(),
-});
+}).passthrough();
 
 /**
  * Export schema types

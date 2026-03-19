@@ -168,44 +168,31 @@ export function generateSettings(options: InitOptions): object {
 const IS_WINDOWS = process.platform === 'win32';
 
 /**
- * Platform-aware project dir variable reference.
- * Claude Code sets $CLAUDE_PROJECT_DIR (Unix) / %CLAUDE_PROJECT_DIR% (Windows)
- * as an environment variable before running hook commands.
- */
-function projectDirVar(): string {
-  return IS_WINDOWS ? '%CLAUDE_PROJECT_DIR%' : '$CLAUDE_PROJECT_DIR';
-}
-
-/**
- * Build a cross-platform hook command.
- * On Windows, wraps with `cmd /c` to avoid PowerShell stdin/process issues
- * that cause "UserPromptSubmit hook error" in Claude Code.
+ * Build a hook command with reliable $CLAUDE_PROJECT_DIR expansion.
+ * Wraps in `sh -c` to guarantee shell expansion on all platforms (macOS zsh,
+ * Linux bash). Falls back to "." if CLAUDE_PROJECT_DIR is unset, since
+ * Claude Code runs hooks from the project root.
+ * On Windows, uses `cmd /c` with %CLAUDE_PROJECT_DIR%.
  */
 function hookCmd(script: string, subcommand: string): string {
-  const cmd = `node ${script} ${subcommand}`.trim();
-  return IS_WINDOWS ? `cmd /c ${cmd}` : cmd;
-}
-
-/**
- * Build a cross-platform hook command for ESM scripts (.mjs).
- */
-function hookCmdEsm(script: string, subcommand: string): string {
-  const cmd = `node ${script} ${subcommand}`.trim();
-  return IS_WINDOWS ? `cmd /c ${cmd}` : cmd;
+  if (IS_WINDOWS) {
+    return `cmd /c node %CLAUDE_PROJECT_DIR%/${script} ${subcommand}`.trim();
+  }
+  // Use sh -c to ensure $CLAUDE_PROJECT_DIR is expanded by a real shell,
+  // even if Claude Code doesn't invoke hooks through a shell on macOS.
+  // eslint-disable-next-line no-template-curly-in-string
+  const dir = '${CLAUDE_PROJECT_DIR:-.}';
+  return `sh -c 'exec node "${dir}/${script}" ${subcommand}'`;
 }
 
 /** Shorthand for CJS hook-handler commands */
 function hookHandlerCmd(subcommand: string): string {
-  const dir = projectDirVar();
-  const quote = IS_WINDOWS ? '' : '"';
-  return hookCmd(`${quote}${dir}/.claude/helpers/hook-handler.cjs${quote}`, subcommand);
+  return hookCmd('.claude/helpers/hook-handler.cjs', subcommand);
 }
 
 /** Shorthand for ESM auto-memory-hook commands */
 function autoMemoryCmd(subcommand: string): string {
-  const dir = projectDirVar();
-  const quote = IS_WINDOWS ? '' : '"';
-  return hookCmdEsm(`${quote}${dir}/.claude/helpers/auto-memory-hook.mjs${quote}`, subcommand);
+  return hookCmd('.claude/helpers/auto-memory-hook.mjs', subcommand);
 }
 
 /**
@@ -218,11 +205,11 @@ function generateStatusLineConfig(_options: InitOptions): object {
   // The script runs after each assistant message (debounced 300ms).
   // NOTE: statusline must NOT use `cmd /c` — Claude Code manages its stdin
   // directly for statusline commands, and `cmd /c` blocks stdin forwarding.
-  const dir = projectDirVar();
-  const quote = IS_WINDOWS ? '' : '"';
+  // eslint-disable-next-line no-template-curly-in-string
+  const dir = '${CLAUDE_PROJECT_DIR:-.}';
   return {
     type: 'command',
-    command: `node ${quote}${dir}/.claude/helpers/statusline.cjs${quote}`,
+    command: `sh -c 'exec node "${dir}/.claude/helpers/statusline.cjs"'`,
   };
 }
 
@@ -431,8 +418,9 @@ function generateHooksConfig(config: HooksConfig): object {
     ];
   }
 
-  // NOTE: TeammateIdle and TaskCompleted are NOT valid Claude Code hook events.
-  // Their configuration lives in claudeFlow.agentTeams.hooks instead (see generateSettings).
+  // NOTE: TeammateIdle, TaskCompleted, and PostCompact are NOT accepted by
+  // Claude Code's settings.json validator (rejected as "Invalid key in record").
+  // Agent Teams coordination lives in claudeFlow.agentTeams.hooks instead.
 
   return hooks;
 }

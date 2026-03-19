@@ -228,4 +228,7 @@ if (command && handlers[command]) {
 
 main().catch(function(e) {
   console.log('[WARN] Hook handler error: ' + e.message);
+}).finally(function() {
+  // Ensure clean exit for Claude Code hooks
+  process.exit(0);
 });

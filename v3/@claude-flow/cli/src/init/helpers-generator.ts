@@ -589,7 +589,7 @@ export function generateHookHandler(): string {
     '} // end main',
     '',
     'process.exitCode = 0;',
-    'main().catch(() => { process.exitCode = 0; });',
+    'main().catch(() => {}).finally(() => { process.exit(0); });',
   ];
   return lines.join('\n') + '\n';
 }
@@ -907,6 +907,9 @@ function doStatus() {
   console.log('');
 }
 
+// Suppress unhandled rejection warnings from dynamic import() failures
+process.on('unhandledRejection', () => {});
+
 const command = process.argv[2] || 'status';
 
 try {
@@ -922,6 +925,8 @@ try {
   // Hooks must never crash Claude Code - fail silently
   dim(\`Error (non-critical): \${err.message}\`);
 }
+// Ensure clean exit for Claude Code hooks (exit 0 = success)
+process.exit(0);
 `;
 }
 
