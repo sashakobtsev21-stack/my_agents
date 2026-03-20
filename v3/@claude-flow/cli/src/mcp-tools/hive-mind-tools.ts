@@ -341,6 +341,29 @@ export const hiveMindTools: MCPTool[] = [
       const state = loadHiveState();
 
       const uptime = state.createdAt ? Date.now() - new Date(state.createdAt).getTime() : 0;
+
+      // Load agent store once for all workers
+      const agentStore = loadAgentStore();
+
+      // Compute real task metrics from task store
+      const taskStorePath = join(process.cwd(), '.claude-flow', 'tasks', 'store.json');
+      let pendingTaskCount = 0;
+      let activeTaskCount = 0;
+      let completedTaskCount = 0;
+      try {
+        if (existsSync(taskStorePath)) {
+          const taskStore = JSON.parse(readFileSync(taskStorePath, 'utf-8'));
+          for (const task of Object.values(taskStore.tasks || {}) as Array<{ status: string }>) {
+            if (task.status === 'pending') pendingTaskCount++;
+            else if (task.status === 'in_progress') activeTaskCount++;
+            else if (task.status === 'completed') completedTaskCount++;
+          }
+        }
+      } catch { /* ignore */ }
+
+      const workerCount = Math.max(1, state.workers.length);
+      const realLoad = activeTaskCount / workerCount;
+
       const status = {
         // CLI expected fields
         hiveId: `hive-${state.createdAt ? new Date(state.createdAt).getTime() : Date.now()}`,
@@ -351,13 +374,12 @@ export const hiveMindTools: MCPTool[] = [
           id: state.queen.agentId,
           agentId: state.queen.agentId,
           status: 'active',
-          load: 0.3 + Math.random() * 0.4, // Simulated load
-          tasksQueued: state.consensus.pending.length,
+          load: Math.round(realLoad * 1000) / 1000,
+          tasksQueued: pendingTaskCount,
           electedAt: state.queen.electedAt,
           term: state.queen.term,
         } : { id: 'N/A', status: 'offline', load: 0, tasksQueued: 0 },
         workers: state.workers.map(w => {
-          const agentStore = loadAgentStore();
           const agent = agentStore.agents[w] as Record<string, unknown> | undefined;
           return {
             id: w,
@@ -368,10 +390,11 @@ export const hiveMindTools: MCPTool[] = [
           };
         }),
         metrics: {
-          totalTasks: state.consensus.history.length + state.consensus.pending.length,
-          completedTasks: state.consensus.history.length,
+          totalTasks: pendingTaskCount + activeTaskCount + completedTaskCount,
+          completedTasks: completedTaskCount,
+          activeTasks: activeTaskCount,
+          pendingTasks: pendingTaskCount,
           failedTasks: 0,
-          avgTaskTime: 150,
           consensusRounds: state.consensus.history.length,
           memoryUsage: `${Object.keys(state.sharedMemory).length * 2} KB`,
         },

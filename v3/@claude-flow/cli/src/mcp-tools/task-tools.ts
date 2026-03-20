@@ -240,6 +240,28 @@ export const taskTools: MCPTool[] = [
         task.result = (input.result as Record<string, unknown>) || {};
         saveTaskStore(store);
 
+        // Sync assigned agents back to idle and increment taskCount
+        if (task.assignedTo.length > 0) {
+          const agentStorePath = join(process.cwd(), STORAGE_DIR, 'agents.json');
+          try {
+            let agentStore: { agents: Record<string, Record<string, unknown>> } = { agents: {} };
+            if (existsSync(agentStorePath)) {
+              agentStore = JSON.parse(readFileSync(agentStorePath, 'utf-8'));
+            }
+            for (const agentId of task.assignedTo) {
+              if (agentStore.agents[agentId]) {
+                agentStore.agents[agentId].status = 'idle';
+                agentStore.agents[agentId].currentTask = null;
+                agentStore.agents[agentId].taskCount =
+                  ((agentStore.agents[agentId].taskCount as number) || 0) + 1;
+              }
+            }
+            writeFileSync(agentStorePath, JSON.stringify(agentStore, null, 2), 'utf-8');
+          } catch {
+            // Best-effort agent sync
+          }
+        }
+
         return {
           taskId: task.taskId,
           status: task.status,
@@ -330,19 +352,63 @@ export const taskTools: MCPTool[] = [
 
       const previouslyAssigned = [...task.assignedTo];
 
+      // Load agent store to sync worker state
+      const agentStorePath = join(process.cwd(), STORAGE_DIR, 'agents.json');
+      let agentStore: { agents: Record<string, Record<string, unknown>> } = { agents: {} };
+      try {
+        if (existsSync(agentStorePath)) {
+          agentStore = JSON.parse(readFileSync(agentStorePath, 'utf-8'));
+        }
+      } catch { /* ignore */ }
+
       if (input.unassign) {
+        // Revert previously assigned agents to idle
+        for (const agentId of previouslyAssigned) {
+          if (agentStore.agents[agentId]) {
+            agentStore.agents[agentId].status = 'idle';
+            agentStore.agents[agentId].currentTask = null;
+          }
+        }
         task.assignedTo = [];
       } else {
         const agentIds = (input.agentIds as string[]) || [];
+        // Revert old agents to idle
+        for (const agentId of previouslyAssigned) {
+          if (!agentIds.includes(agentId) && agentStore.agents[agentId]) {
+            agentStore.agents[agentId].status = 'idle';
+            agentStore.agents[agentId].currentTask = null;
+          }
+        }
+        // Set new agents to active
+        for (const agentId of agentIds) {
+          if (agentStore.agents[agentId]) {
+            agentStore.agents[agentId].status = 'active';
+            agentStore.agents[agentId].currentTask = taskId;
+          }
+        }
         task.assignedTo = agentIds;
+        // Auto-transition task to in_progress if pending
+        if (task.status === 'pending' && agentIds.length > 0) {
+          task.status = 'in_progress';
+          if (!task.startedAt) {
+            task.startedAt = new Date().toISOString();
+          }
+        }
       }
 
       saveTaskStore(store);
+      // Save agent store
+      const agentDir = join(process.cwd(), STORAGE_DIR);
+      if (!existsSync(agentDir)) {
+        mkdirSync(agentDir, { recursive: true });
+      }
+      writeFileSync(agentStorePath, JSON.stringify(agentStore, null, 2), 'utf-8');
 
       return {
         taskId: task.taskId,
         assignedTo: task.assignedTo,
         previouslyAssigned,
+        status: task.status,
       };
     },
   },

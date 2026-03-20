@@ -104,7 +104,7 @@ importers:
         specifier: ^3.0.0-alpha.8
         version: link:../mcp
       '@claude-flow/shared':
-        specifier: ^3.0.0-alpha.1
+        specifier: ^3.0.0-alpha.7
         version: link:../shared
       '@noble/ed25519':
         specifier: ^2.1.0
@@ -140,21 +140,12 @@ importers:
       '@ruvector/router':
         specifier: ^0.1.27
         version: 0.1.28
-      '@ruvector/ruvllm-wasm':
-        specifier: ^2.0.2
-        version: 2.0.2
-      '@ruvector/rvagent-wasm':
-        specifier: ^0.1.0
-        version: 0.1.0
       '@ruvector/sona':
         specifier: ^0.1.5
         version: 0.1.5
       agentic-flow:
         specifier: ^3.0.0-alpha.1
         version: 3.0.0-alpha.1
-      ruvector:
-        specifier: ^0.2.16
-        version: 0.2.16(@ruvector/router@0.1.28)(zod@3.25.76)
     devDependencies:
       typescript:
         specifier: ^5.3.0
@@ -302,7 +293,7 @@ importers:
     dependencies:
       agentic-flow:
         specifier: ^2.0.0-alpha
-        version: 2.0.0-alpha(@types/node@20.19.27)(marked@11.2.0)(typescript@5.9.3)
+        version: 2.0.0-alpha(@types/node@20.19.27)(hono@4.12.3)(marked@11.2.0)(typescript@5.9.3)
     optionalDependencies:
       agent-booster:
         specifier: ^0.2.2
@@ -377,7 +368,7 @@ importers:
     optionalDependencies:
       agentdb:
         specifier: ^2.0.0 || ^3.0.0-alpha.1
-        version: 3.0.0-alpha.10(@types/node@20.19.27)(hono@4.12.3)(marked@11.2.0)
+        version: 3.0.0-alpha.10(@types/node@20.19.27)(better-sqlite3@11.10.0)(marked@11.2.0)
 
   '@claude-flow/performance':
     dependencies:
@@ -3815,12 +3806,6 @@ packages:
     dev: false
     optional: true
 
-  /@ruvector/ruvllm-wasm@2.0.2:
-    resolution: {integrity: sha512-jVu+t710JvEzU6UZZvKrTp+dWsm3hKzOqB+yxrcqFsVaccVfeKyQuvCx13qVENvuntbnfslryErn9QbydH76yQ==}
-    requiresBuild: true
-    dev: false
-    optional: true
-
   /@ruvector/ruvllm-win32-x64-msvc@0.2.0:
     resolution: {integrity: sha512-ksm+AZVqkkYLVq2Rbc7Rx+gSH7egFWlcH3E5dQpro98Oslc7jUH+uNDRjDVUS3lZXchV+Ot5WPLM4pClRxFm9w==}
     engines: {node: '>= 18'}
@@ -3845,12 +3830,6 @@ packages:
       '@ruvector/ruvllm-linux-x64-gnu': 0.2.0
       '@ruvector/ruvllm-win32-x64-msvc': 0.2.0
     dev: false
-
-  /@ruvector/rvagent-wasm@0.1.0:
-    resolution: {integrity: sha512-zhcnU7XfBEfDwkDFscehq6qGU/TW4LNr287xHHXCuNsaTBPlb8YSnkuMNWg6BBIK/X+UdWAsyYESN5jbNQEaBQ==}
-    requiresBuild: true
-    dev: false
-    optional: true
 
   /@ruvector/rvf-node-darwin-arm64@0.1.7:
     resolution: {integrity: sha512-vll3WJwDn3oOfy1PB10IG7/f3zBpFiMNHL2/2tdJmeRR8La/rSPJ0ZH5MDIsfleiVtaWzh9bvVCtVkZ6uo2jeg==}
@@ -5074,15 +5053,15 @@ packages:
       - supports-color
     dev: false
 
-  /agentdb@2.0.0-alpha.3.4(@types/node@20.19.27)(express@5.2.1)(marked@11.2.0):
+  /agentdb@2.0.0-alpha.3.4(@types/node@20.19.27)(express@5.2.1)(hono@4.12.3)(marked@11.2.0):
     resolution: {integrity: sha512-bUqO5o2VpWomh2xGOHdQoX00CGrPcIAH6zDCt5oa0SeJWAO+bbB7SiElb1TxwcrJQKe96HkiSh2T8z4vFypsxg==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     requiresBuild: true
     dependencies:
-      '@modelcontextprotocol/sdk': 1.27.1(zod@3.25.76)
+      '@modelcontextprotocol/sdk': 1.25.1(hono@4.12.3)(zod@3.25.76)
       '@opentelemetry/api': 1.9.0
-      '@ruvector/attention': 0.1.31
+      '@ruvector/attention': 0.1.4
       '@ruvector/gnn': 0.1.25
       '@ruvector/graph-node': 0.1.26
       '@ruvector/router': 0.1.26
@@ -5097,9 +5076,9 @@ packages:
       jsonwebtoken: 9.0.3
       marked-terminal: 6.2.0(marked@11.2.0)
       ora: 7.0.1
-      ruvector: 0.1.100(zod@3.25.76)
+      ruvector: 0.1.95(zod@3.25.76)
       ruvector-attention-wasm: 0.1.0
-      sql.js: 1.14.0
+      sql.js: 1.13.0
       zod: 3.25.76
     optionalDependencies:
       '@opentelemetry/auto-instrumentations-node': 0.47.1(@opentelemetry/api@1.9.0)
@@ -5129,6 +5108,7 @@ packages:
       - bluebird
       - encoding
       - express
+      - hono
       - marked
       - react-native-b4a
       - supports-color
@@ -5240,55 +5220,6 @@ packages:
       - supports-color
     dev: false
 
-  /agentdb@3.0.0-alpha.10(@types/node@20.19.27)(hono@4.12.3)(marked@11.2.0):
-    resolution: {integrity: sha512-Sk3yRRR44obOHRHKagD9svC5dYksVTMDB96+PeRTWcD9gPRPLhvGhVati8eS8cHW+RxPjfSzuQ7syuzlpY3BvQ==}
-    engines: {node: '>=18.0.0'}
-    hasBin: true
-    requiresBuild: true
-    peerDependencies:
-      '@xenova/transformers': ^2.17.2
-      better-sqlite3: ^11.8.1
-      sqlite3: ^5.1.7
-    peerDependenciesMeta:
-      '@xenova/transformers':
-        optional: true
-      better-sqlite3:
-        optional: true
-      sqlite3:
-        optional: true
-    dependencies:
-      '@modelcontextprotocol/sdk': 1.25.1(hono@4.12.3)(zod@3.25.76)
-      '@ruvector/graph-transformer': 2.0.4
-      ajv: 8.17.1
-      ruvector: 0.1.100(zod@3.25.76)
-      sql.js: 1.13.0
-      zod: 3.25.76
-    optionalDependencies:
-      '@ruvector/attention': 0.1.31
-      '@ruvector/gnn': 0.1.25
-      '@ruvector/graph-node': 2.0.2
-      '@ruvector/router': 0.1.28
-      '@ruvector/sona': 0.1.5
-      chalk: 5.6.2
-      cli-table3: 0.6.5
-      commander: 12.1.0
-      dotenv: 16.6.1
-      hnswlib-node: 3.0.0
-      inquirer: 9.3.8(@types/node@20.19.27)
-      marked-terminal: 6.2.0(marked@11.2.0)
-      ora: 7.0.1
-      ruvector-attention-wasm: 0.1.32
-      ruvector-graph-transformer-wasm: 2.0.4
-      sqlite: 5.1.1
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - '@types/node'
-      - hono
-      - marked
-      - supports-color
-    dev: false
-    optional: true
-
   /agentic-flow@1.10.2(@modelcontextprotocol/sdk@1.27.1):
     resolution: {integrity: sha512-h3d1KNUFkmdFdtjwn792/MPqYrEf7OId2LIIXlJDGM4epx0Vcm5FQ+ROrjxWDE04xgG3AHQ5dNynxPTDdkC7RA==}
     engines: {node: '>=18.0.0'}
@@ -5330,7 +5261,7 @@ packages:
     dev: false
     optional: true
 
-  /agentic-flow@2.0.0-alpha(@types/node@20.19.27)(marked@11.2.0)(typescript@5.9.3):
+  /agentic-flow@2.0.0-alpha(@types/node@20.19.27)(hono@4.12.3)(marked@11.2.0)(typescript@5.9.3):
     resolution: {integrity: sha512-lbBEr7LiOq0lcBFnxrTZEGfXp9KzPsiNtIkWDIve0y+LMW+ZUKl8FNraT0Lwcc7zcKMQoqCfvZksvyEFG+E0Fg==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
@@ -5355,7 +5286,7 @@ packages:
       '@types/react-dom': 19.2.3(@types/react@19.2.7)
       '@vitejs/plugin-react-swc': 4.2.2(vite@7.3.0)
       '@xenova/transformers': 2.17.2
-      agentdb: 2.0.0-alpha.3.4(@types/node@20.19.27)(express@5.2.1)(marked@11.2.0)
+      agentdb: 2.0.0-alpha.3.4(@types/node@20.19.27)(express@5.2.1)(hono@4.12.3)(marked@11.2.0)
       agentic-payments: 0.1.13(typescript@5.9.3)
       autoprefixer: 10.4.23(postcss@8.5.6)
       axios: 1.13.2
@@ -5391,6 +5322,7 @@ packages:
       - debug
       - effect
       - encoding
+      - hono
       - jiti
       - jose
       - less
@@ -10294,39 +10226,6 @@ packages:
       - zod
     dev: false
 
-  /ruvector@0.2.16(@ruvector/router@0.1.28)(zod@3.25.76):
-    resolution: {integrity: sha512-hTaFjQ1YSgksL1K3+od3fd+geMAWaAwHdi+cHTds8anPCkEOxvHsBj3Wiy1psM6+Q1ZbcrJVG8ek8utHHafiOw==}
-    engines: {node: '>=18.0.0'}
-    hasBin: true
-    requiresBuild: true
-    peerDependencies:
-      '@ruvector/router': '>=0.1.0'
-      '@ruvector/ruvllm': '>=2.0.0'
-    peerDependenciesMeta:
-      '@ruvector/router':
-        optional: true
-      '@ruvector/ruvllm':
-        optional: true
-    dependencies:
-      '@modelcontextprotocol/sdk': 1.27.1(zod@3.25.76)
-      '@ruvector/attention': 0.1.31
-      '@ruvector/core': 0.1.30
-      '@ruvector/gnn': 0.1.25
-      '@ruvector/router': 0.1.28
-      '@ruvector/sona': 0.1.5
-      chalk: 4.1.2
-      commander: 11.1.0
-      glob: 10.5.0
-      ora: 5.4.1
-    optionalDependencies:
-      '@ruvector/rvf': 0.1.9
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - supports-color
-      - zod
-    dev: false
-    optional: true
-
   /rxjs@7.8.2:
     resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
     dependencies:
@@ -10691,6 +10590,7 @@ packages:
     resolution: {integrity: sha512-NXYh+kFqLiYRCNAaHD0PcbjFgXyjuolEKLMk5vRt2DgPENtF1kkNzzMlg42dUk5wIsH8MhUzsRhaUxIisoSlZQ==}
     requiresBuild: true
     dev: false
+    optional: true
 
   /sqlite3@5.1.7:
     resolution: {integrity: sha512-GGIyOiFaG+TUra3JIfkI/zGP8yZYLPQ0pl1bH+ODjiX57sPhrLU5sQJn1y9bDKZUFYkX1crlrPfSYt0BKKdkog==}

@@ -333,7 +333,7 @@ export class MCPServerManager extends EventEmitter {
       method: 'server.initialized',
       params: {
         serverInfo: {
-          name: 'claude-flow',
+          name: 'ruflo',
           version: VERSION,
           capabilities: {
             tools: { listChanged: true },
@@ -437,7 +437,7 @@ export class MCPServerManager extends EventEmitter {
             id: message.id,
             result: {
               protocolVersion: '2024-11-05',
-              serverInfo: { name: 'claude-flow', version: '3.0.0' },
+              serverInfo: { name: 'ruflo', version: '3.0.0' },
               capabilities: {
                 tools: { listChanged: true },
                 resources: { subscribe: true, listChanged: true },

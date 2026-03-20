@@ -199,10 +199,21 @@ export const memoryTools: MCPTool[] = [
 
       const key = input.key as string;
       const namespace = (input.namespace as string) || 'default';
-      const value = typeof input.value === 'string' ? input.value : JSON.stringify(input.value);
+      const rawValue = input.value;
+      const value = typeof rawValue === 'string' ? rawValue : (rawValue !== undefined ? JSON.stringify(rawValue) : '');
       const tags = (input.tags as string[]) || [];
       const ttl = input.ttl as number | undefined;
       const upsert = (input.upsert as boolean) || false;
+
+      if (!value) {
+        return {
+          success: false,
+          key,
+          stored: false,
+          hasEmbedding: false,
+          error: 'Value is required and cannot be empty',
+        };
+      }
 
       validateMemoryInput(key, value);
 
