@@ -152,10 +152,10 @@ npx ruflo@latest hooks intelligence --status
 
 ```bash
 # One-line install (recommended)
-curl -fsSL https://cdn.jsdelivr.net/gh/ruvnet/claude-flow@main/scripts/install.sh | bash
+curl -fsSL https://cdn.jsdelivr.net/gh/ruvnet/ruflo@main/scripts/install.sh | bash
 
 # Or full setup with MCP + diagnostics
-curl -fsSL https://cdn.jsdelivr.net/gh/ruvnet/claude-flow@main/scripts/install.sh | bash -s -- --full
+curl -fsSL https://cdn.jsdelivr.net/gh/ruvnet/ruflo@main/scripts/install.sh | bash -s -- --full
 
 # Or via npx
 npx ruflo@latest init --wizard
@@ -438,10 +438,10 @@ claude --dangerously-skip-permissions
 
 ```bash
 # curl-style installer with progress display
-curl -fsSL https://cdn.jsdelivr.net/gh/ruvnet/claude-flow@main/scripts/install.sh | bash
+curl -fsSL https://cdn.jsdelivr.net/gh/ruvnet/ruflo@main/scripts/install.sh | bash
 
 # Full setup (global + MCP + diagnostics)
-curl -fsSL https://cdn.jsdelivr.net/gh/ruvnet/claude-flow@main/scripts/install.sh | bash -s -- --full
+curl -fsSL https://cdn.jsdelivr.net/gh/ruvnet/ruflo@main/scripts/install.sh | bash -s -- --full
 ```
 
 <details>
@@ -668,11 +668,14 @@ npx ruflo@latest init
 # Start MCP server for Claude Code integration
 npx ruflo@latest mcp start
 
-# Run a task with agents
-npx ruflo@latest --agent coder --task "Implement user authentication"
+# Spawn a coding agent
+npx ruflo@latest agent spawn -t coder --name my-coder
 
-# List available agents
-npx ruflo@latest --list
+# Launch a hive-mind swarm with an objective
+npx ruflo@latest hive-mind spawn "Implement user authentication"
+
+# List available agent types
+npx ruflo@latest agent list
 ```
 
 ### Upgrading
@@ -2860,18 +2863,18 @@ Real-world scenarios and pre-built workflows for common tasks.
 
 | Scenario | What It Solves | How To Do It |
 |----------|----------------|--------------|
-| **Code Review** | Get thorough reviews with security, performance, and style checks | `npx ruflo@v3alpha --agent reviewer --task "Review PR #123"` |
-| **Test Generation** | Auto-generate unit, integration, and e2e tests for existing code | `npx ruflo@v3alpha --agent tester --task "Write tests for auth module"` |
-| **Refactoring** | Safely restructure code while maintaining behavior | `npx ruflo@v3alpha --agent coder --task "Refactor user service to use repository pattern"` |
-| **Bug Fixing** | Diagnose and fix bugs with full context analysis | `npx ruflo@v3alpha --agent coder --task "Fix race condition in checkout flow"` |
+| **Code Review** | Get thorough reviews with security, performance, and style checks | `npx ruflo@v3alpha agent spawn -t reviewer --name pr-review` |
+| **Test Generation** | Auto-generate unit, integration, and e2e tests for existing code | `npx ruflo@v3alpha agent spawn -t tester --name test-gen` |
+| **Refactoring** | Safely restructure code while maintaining behavior | `npx ruflo@v3alpha hive-mind spawn "Refactor user service to repository pattern"` |
+| **Bug Fixing** | Diagnose and fix bugs with full context analysis | `npx ruflo@v3alpha hive-mind spawn "Fix race condition in checkout flow"` |
 
 ### 🔒 Security & Compliance
 
 | Scenario | What It Solves | How To Do It |
 |----------|----------------|--------------|
-| **Security Audit** | Find vulnerabilities before attackers do | `npx ruflo@v3alpha --agent security-architect --task "Audit for OWASP Top 10"` |
-| **Dependency Scan** | Identify vulnerable packages and suggest upgrades | `npx ruflo@v3alpha security scan --depth full` |
-| **Compliance Check** | Ensure code meets security standards | `npx ruflo@v3alpha --agent security-architect --task "Check PCI-DSS compliance"` |
+| **Security Audit** | Find vulnerabilities before attackers do | `npx ruflo@v3alpha security scan --depth full` |
+| **Dependency Scan** | Identify vulnerable packages and suggest upgrades | `npx ruflo@v3alpha security cve --check` |
+| **Compliance Check** | Ensure code meets security standards | `npx ruflo@v3alpha security audit` |
 
 ### 🐝 Multi-Agent Swarms
 
@@ -2885,24 +2888,24 @@ Real-world scenarios and pre-built workflows for common tasks.
 
 | Scenario | What It Solves | How To Do It |
 |----------|----------------|--------------|
-| **Performance Profiling** | Find and fix bottlenecks in your application | `npx ruflo@v3alpha --agent perf-analyzer --task "Profile API endpoints"` |
-| **Query Optimization** | Speed up slow database queries | `npx ruflo@v3alpha hooks route "Optimize database queries"` |
-| **Memory Analysis** | Reduce memory usage and fix leaks | `npx ruflo@v3alpha --agent perf-analyzer --task "Analyze memory usage patterns"` |
+| **Performance Profiling** | Find and fix bottlenecks in your application | `npx ruflo@v3alpha performance profile --target src/` |
+| **Query Optimization** | Speed up slow database queries | `npx ruflo@v3alpha performance benchmark --suite all` |
+| **Memory Analysis** | Reduce memory usage and fix leaks | `npx ruflo@v3alpha performance metrics` |
 
 ### 🔄 GitHub & DevOps
 
 | Scenario | What It Solves | How To Do It |
 |----------|----------------|--------------|
-| **PR Management** | Review, approve, and merge PRs efficiently | `npx ruflo@v3alpha --agent pr-manager --task "Review open PRs"` |
-| **Issue Triage** | Categorize, prioritize, and assign issues automatically | `npx ruflo@v3alpha --agent issue-tracker --task "Triage new issues"` |
-| **Release Management** | Coordinate releases with changelogs and versioning | `npx ruflo@v3alpha --agent release-manager --task "Prepare v2.0 release"` |
-| **CI/CD Optimization** | Speed up pipelines and reduce flaky tests | `npx ruflo@v3alpha --agent cicd-engineer --task "Optimize GitHub Actions workflow"` |
+| **PR Management** | Review, approve, and merge PRs efficiently | `npx ruflo@v3alpha hive-mind spawn "Review open PRs"` |
+| **Issue Triage** | Categorize, prioritize, and assign issues automatically | `npx ruflo@v3alpha hive-mind spawn "Triage new issues"` |
+| **Release Management** | Coordinate releases with changelogs and versioning | `npx ruflo@v3alpha hive-mind spawn "Prepare v2.0 release"` |
+| **CI/CD Optimization** | Speed up pipelines and reduce flaky tests | `npx ruflo@v3alpha hive-mind spawn "Optimize GitHub Actions workflow"` |
 
 ### 📋 Spec-Driven Development
 
 | Scenario | What It Solves | How To Do It |
 |----------|----------------|--------------|
-| **Generate Specs** | Create complete specifications before coding | `npx ruflo@v3alpha --agent architect --task "Create ADR for authentication system"` |
+| **Generate Specs** | Create complete specifications before coding | `npx ruflo@v3alpha hive-mind spawn "Create ADR for authentication system"` |
 | **Validate Implementation** | Ensure code matches specifications | `npx ruflo@v3alpha hooks progress --detailed` |
 | **Track Compliance** | Monitor spec adherence across the team | `npx ruflo@v3alpha progress sync` |
 
