@@ -99,9 +99,11 @@ export class MCPServerManager extends EventEmitter {
    * Start the MCP server
    */
   async start(): Promise<MCPServerStatus> {
-    // Check if already running
+    // Check if already running (skip if status reports our own PID —
+    // getStatus() returns running=true for the current process in stdio mode
+    // even before the server is actually started)
     const status = await this.getStatus();
-    if (status.running) {
+    if (status.running && status.pid !== process.pid) {
       throw new Error(`MCP Server already running (PID: ${status.pid})`);
     }
 
