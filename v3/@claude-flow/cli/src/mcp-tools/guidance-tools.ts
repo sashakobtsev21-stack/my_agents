@@ -15,7 +15,38 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const CLI_ROOT = join(__dirname, '../../..');
-const PROJECT_ROOT = join(CLI_ROOT, '../../../..');
+
+/**
+ * Find the project root by looking for .claude/ directory.
+ * Tries CWD first (most common), then walks up from the CLI package location.
+ */
+function findProjectRoot(): string {
+  // Strategy 1: CWD (most reliable when invoked by user)
+  if (existsSync(join(process.cwd(), '.claude'))) {
+    return process.cwd();
+  }
+
+  // Strategy 2: Walk up from CLI package location
+  // CLI is at v3/@claude-flow/cli/ — project root is 4 levels up
+  const fromPackage = join(CLI_ROOT, '../../../..');
+  if (existsSync(join(fromPackage, '.claude'))) {
+    return fromPackage;
+  }
+
+  // Strategy 3: Walk up from CWD
+  let dir = process.cwd();
+  for (let i = 0; i < 10; i++) {
+    if (existsSync(join(dir, '.claude'))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+
+  // Fallback: CWD
+  return process.cwd();
+}
+
+const PROJECT_ROOT = findProjectRoot();
 
 // ── Capability Catalog ──────────────────────────────────────
 
