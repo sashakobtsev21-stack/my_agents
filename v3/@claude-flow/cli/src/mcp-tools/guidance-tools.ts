@@ -327,7 +327,7 @@ function discoverAgents(): string[] {
         } else if (entry.name.endsWith('.md') && entry.name !== 'MIGRATION_SUMMARY.md') {
           const content = readFileSync(join(dir, entry.name), 'utf-8');
           const nameMatch = content.match(/^name:\s*(.+)$/m);
-          if (nameMatch) agents.push(nameMatch[1].trim());
+          if (nameMatch) agents.push(nameMatch[1].trim().replace(/^["']|["']$/g, ''));
         }
       }
     } catch { /* ignore */ }
