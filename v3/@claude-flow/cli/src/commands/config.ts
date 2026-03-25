@@ -6,6 +6,8 @@
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
 import { select, input } from '../prompt.js';
+import { configManager, parseConfigValue } from '../services/config-file-manager.js';
+import * as path from 'path';
 
 // Init configuration
 const initCommand: Command = {
@@ -32,14 +34,24 @@ const initCommand: Command = {
       default: true
     }
   ],
-  action: async (_ctx: CommandContext): Promise<CommandResult> => {
-    // #1425: This command is not yet implemented — was faking file creation
-    output.writeln();
-    output.printError('config init is not yet implemented');
-    output.writeln(output.dim('Configuration files are not actually created by this command yet.'));
-    output.writeln(output.dim('Use the project wizard instead: npx claude-flow@v3alpha init --wizard'));
-    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
-    return { success: false, exitCode: 1 };
+  action: async (ctx: CommandContext): Promise<CommandResult> => {
+    try {
+      const configPath = configManager.create(ctx.cwd, undefined, ctx.flags.force as boolean);
+      output.writeln();
+      output.writeln(output.success(`Configuration created: ${configPath}`));
+      output.writeln();
+      const defaults = configManager.getDefaults();
+      output.writeln(output.bold('Key defaults:'));
+      output.writeln(`  swarm.topology     = ${(defaults.swarm as Record<string, unknown>).topology}`);
+      output.writeln(`  swarm.maxAgents    = ${(defaults.swarm as Record<string, unknown>).maxAgents}`);
+      output.writeln(`  memory.backend     = ${(defaults.memory as Record<string, unknown>).backend}`);
+      output.writeln(`  mcp.transportType  = ${(defaults.mcp as Record<string, unknown>).transportType}`);
+      return { success: true };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      output.printError(message);
+      return { success: false, exitCode: 1 };
+    }
   }
 };
 
@@ -148,12 +160,16 @@ const setCommand: Command = {
       return { success: false, exitCode: 1 };
     }
 
-    // #1425: This command is not yet implemented — was faking config persistence
-    output.writeln();
-    output.printError('config set is not yet implemented');
-    output.writeln(output.dim(`Cannot persist ${key} = ${value} — config file write not implemented.`));
-    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
-    return { success: false, exitCode: 1 };
+    try {
+      const parsedValue = parseConfigValue(value);
+      configManager.set(ctx.cwd, key, parsedValue);
+      output.writeln(`Set ${key} = ${value}`);
+      return { success: true };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      output.printError(message);
+      return { success: false, exitCode: 1 };
+    }
   }
 };
 
@@ -241,13 +257,16 @@ const resetCommand: Command = {
       choices: ['agents', 'swarm', 'memory', 'mcp', 'providers', 'all']
     }
   ],
-  action: async (_ctx: CommandContext): Promise<CommandResult> => {
-    // #1425: This command is not yet implemented — was faking config reset
-    output.writeln();
-    output.printError('config reset is not yet implemented');
-    output.writeln(output.dim('Configuration reset requires config file read/write support.'));
-    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
-    return { success: false, exitCode: 1 };
+  action: async (ctx: CommandContext): Promise<CommandResult> => {
+    try {
+      const configPath = configManager.reset(ctx.cwd);
+      output.writeln(`Configuration reset to defaults: ${configPath}`);
+      return { success: true };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      output.printError(message);
+      return { success: false, exitCode: 1 };
+    }
   }
 };
 
@@ -271,13 +290,18 @@ const exportCommand: Command = {
       choices: ['json', 'yaml']
     }
   ],
-  action: async (_ctx: CommandContext): Promise<CommandResult> => {
-    // #1425: This command is not yet implemented — was faking config export
-    output.writeln();
-    output.printError('config export is not yet implemented');
-    output.writeln(output.dim('Configuration export requires config file read support.'));
-    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
-    return { success: false, exitCode: 1 };
+  action: async (ctx: CommandContext): Promise<CommandResult> => {
+    try {
+      const exportPath = (ctx.flags.output as string) || ctx.args[0] || 'claude-flow.config.export.json';
+      configManager.exportTo(ctx.cwd, exportPath);
+      const resolved = path.resolve(ctx.cwd, exportPath);
+      output.writeln(`Configuration exported to: ${resolved}`);
+      return { success: true };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      output.printError(message);
+      return { success: false, exitCode: 1 };
+    }
   }
 };
 
@@ -308,12 +332,15 @@ const importCommand: Command = {
       return { success: false, exitCode: 1 };
     }
 
-    // #1425: This command is not yet implemented — was faking config import
-    output.writeln();
-    output.printError('config import is not yet implemented');
-    output.writeln(output.dim(`Cannot import from ${file} — config file read/write not implemented.`));
-    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
-    return { success: false, exitCode: 1 };
+    try {
+      configManager.importFrom(ctx.cwd, file);
+      output.writeln(`Configuration imported from: ${path.resolve(ctx.cwd, file)}`);
+      return { success: true };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      output.printError(message);
+      return { success: false, exitCode: 1 };
+    }
   }
 };
 
