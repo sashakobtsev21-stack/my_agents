@@ -649,17 +649,41 @@ export class MCPServerManager extends EventEmitter {
     } catch {
       // Ignore errors
     }
+    // Also clean up legacy PID file location from older versions
+    try {
+      const legacyPath = path.join(process.cwd(), '.claude-flow', 'mcp-server.pid');
+      if (legacyPath !== this.options.pidFile) {
+        await fs.promises.unlink(legacyPath);
+      }
+    } catch {
+      // Ignore — file may not exist
+    }
   }
 
   /**
-   * Check if process is running
+   * Check if process is running AND is a node/claude-flow process.
+   * Plain `kill -0` returns true for any process with the same owner,
+   * which causes false positives when the OS recycles the PID.
    */
   private isProcessRunning(pid: number): boolean {
     try {
       process.kill(pid, 0);
-      return true;
     } catch {
       return false;
+    }
+
+    // Verify it's actually a node process (guards against PID reuse)
+    try {
+      const { execSync } = require('child_process') as typeof import('child_process');
+      const cmdline = execSync(`cat /proc/${pid}/cmdline 2>/dev/null || ps -p ${pid} -o comm= 2>/dev/null`, {
+        encoding: 'utf8',
+        timeout: 1000,
+      }).trim();
+      // Must be a node process to be our MCP server
+      return cmdline.includes('node') || cmdline.includes('claude-flow') || cmdline.includes('npx');
+    } catch {
+      // If we can't inspect the process (macOS, Windows, permissions), fall back to kill check
+      return true;
     }
   }
 
