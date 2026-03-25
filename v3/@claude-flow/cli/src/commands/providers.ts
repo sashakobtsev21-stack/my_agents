@@ -76,20 +76,13 @@ const configureCommand: Command = {
     output.writeln(output.bold(`Configure: ${provider}`));
     output.writeln(output.dim('─'.repeat(40)));
 
-    const spinner = output.createSpinner({ text: 'Updating configuration...', spinner: 'dots' });
-    spinner.start();
-    await new Promise(r => setTimeout(r, 500));
-    spinner.succeed('Configuration updated');
-
+    // #1425: This command is not yet implemented — was faking configuration saves
     output.writeln();
-    output.printBox([
-      `Provider: ${provider}`,
-      `API Key: ${hasKey ? '••••••••' + (hasKey as string).slice(-4) : 'Not set'}`,
-      `Model: ${model || 'Default'}`,
-      `Status: Active`,
-    ].join('\n'), 'Configuration');
-
-    return { success: true };
+    output.printError('providers configure is not yet implemented');
+    output.writeln(output.dim('Provider API keys should be set via environment variables:'));
+    output.writeln(output.dim('  ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.'));
+    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
+    return { success: false, exitCode: 1 };
   },
 };
 
@@ -117,17 +110,12 @@ const testCommand: Command = {
       ? ['Anthropic', 'OpenAI (LLM)', 'OpenAI (Embedding)', 'Transformers.js', 'Agentic Flow']
       : [provider];
 
-    for (const p of providers) {
-      const spinner = output.createSpinner({ text: `Testing ${p}...`, spinner: 'dots' });
-      spinner.start();
-      await new Promise(r => setTimeout(r, 300));
-      spinner.succeed(`${p}: Connected`);
-    }
-
+    // #1425: This command is not yet implemented — was faking connectivity results
     output.writeln();
-    output.printSuccess(`All ${providers.length} providers connected successfully`);
-
-    return { success: true };
+    output.printError('providers test is not yet implemented');
+    output.writeln(output.dim('Provider connectivity testing will be implemented in a future release.'));
+    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
+    return { success: false, exitCode: 1 };
   },
 };
 

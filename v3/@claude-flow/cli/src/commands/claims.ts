@@ -21,31 +21,14 @@ const listCommand: Command = {
     { command: 'claude-flow claims list', description: 'List all claims' },
     { command: 'claude-flow claims list -u user123', description: 'List user claims' },
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
+    // #1425: This command is not yet implemented — was displaying hardcoded fake claims
     output.writeln();
-    output.writeln(output.bold('Claims & Permissions'));
-    output.writeln(output.dim('─'.repeat(70)));
-
-    output.printTable({
-      columns: [
-        { key: 'claim', header: 'Claim', width: 25 },
-        { key: 'type', header: 'Type', width: 12 },
-        { key: 'scope', header: 'Scope', width: 15 },
-        { key: 'value', header: 'Value', width: 20 },
-      ],
-      data: [
-        { claim: 'swarm:create', type: 'Permission', scope: 'Global', value: output.success('Allowed') },
-        { claim: 'swarm:delete', type: 'Permission', scope: 'Owned', value: output.success('Allowed') },
-        { claim: 'agent:spawn', type: 'Permission', scope: 'Global', value: output.success('Allowed') },
-        { claim: 'memory:read', type: 'Permission', scope: 'Namespace', value: output.success('Allowed') },
-        { claim: 'memory:write', type: 'Permission', scope: 'Namespace', value: output.success('Allowed') },
-        { claim: 'admin:*', type: 'Permission', scope: 'Global', value: output.error('Denied') },
-        { claim: 'role', type: 'Identity', scope: 'System', value: 'developer' },
-        { claim: 'tier', type: 'Identity', scope: 'System', value: 'pro' },
-      ],
-    });
-
-    return { success: true };
+    output.printError('claims list is not yet implemented');
+    output.writeln(output.dim('Claims listing requires reading from claims config file.'));
+    output.writeln(output.dim('Use "claims check -c <claim>" to evaluate a specific claim.'));
+    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
+    return { success: false, exitCode: 1 };
   },
 };
 
@@ -224,21 +207,12 @@ const grantCommand: Command = {
       return { success: false, exitCode: 1 };
     }
 
+    // #1425: This command is not yet implemented — was faking claim grant
     output.writeln();
-    const spinner = output.createSpinner({ text: 'Granting claim...', spinner: 'dots' });
-    spinner.start();
-    await new Promise(r => setTimeout(r, 400));
-    spinner.succeed('Claim granted');
-
-    output.writeln();
-    output.printBox([
-      `Claim: ${claim}`,
-      `Target: ${user ? `User: ${user}` : `Role: ${role}`}`,
-      `Scope: ${scope}`,
-      `Status: ${output.success('Active')}`,
-    ].join('\n'), 'Grant Complete');
-
-    return { success: true };
+    output.printError('claims grant is not yet implemented');
+    output.writeln(output.dim(`Cannot grant "${claim}" — claims persistence not yet built.`));
+    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
+    return { success: false, exitCode: 1 };
   },
 };
 
@@ -265,13 +239,12 @@ const revokeCommand: Command = {
       return { success: false, exitCode: 1 };
     }
 
+    // #1425: This command is not yet implemented — was faking claim revocation
     output.writeln();
-    const spinner = output.createSpinner({ text: 'Revoking claim...', spinner: 'dots' });
-    spinner.start();
-    await new Promise(r => setTimeout(r, 300));
-    spinner.succeed('Claim revoked');
-
-    return { success: true };
+    output.printError('claims revoke is not yet implemented');
+    output.writeln(output.dim(`Cannot revoke "${claim}" — claims persistence not yet built.`));
+    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
+    return { success: false, exitCode: 1 };
   },
 };
 
@@ -287,47 +260,13 @@ const rolesCommand: Command = {
     { command: 'claude-flow claims roles', description: 'List all roles' },
     { command: 'claude-flow claims roles -a show -n admin', description: 'Show role details' },
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
-    const action = ctx.flags.action as string || 'list';
-    const name = ctx.flags.name as string;
-
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
+    // #1425: This command is not yet implemented — was displaying hardcoded fake roles
     output.writeln();
-    output.writeln(output.bold('Roles'));
-    output.writeln(output.dim('─'.repeat(60)));
-
-    if (action === 'show' && name) {
-      output.printBox([
-        `Role: ${name}`,
-        `Description: Full system access`,
-        ``,
-        `Claims:`,
-        `  - swarm:* (all swarm operations)`,
-        `  - agent:* (all agent operations)`,
-        `  - memory:* (all memory operations)`,
-        `  - admin:* (administrative functions)`,
-        ``,
-        `Members: 2`,
-        `Created: 2024-01-01`,
-      ].join('\n'), 'Role Details');
-    } else {
-      output.printTable({
-        columns: [
-          { key: 'role', header: 'Role', width: 15 },
-          { key: 'description', header: 'Description', width: 30 },
-          { key: 'claims', header: 'Claims', width: 12 },
-          { key: 'members', header: 'Members', width: 10 },
-        ],
-        data: [
-          { role: output.highlight('admin'), description: 'Full system access', claims: '15', members: '2' },
-          { role: output.highlight('developer'), description: 'Development operations', claims: '10', members: '12' },
-          { role: output.highlight('operator'), description: 'Operational tasks', claims: '8', members: '5' },
-          { role: output.highlight('viewer'), description: 'Read-only access', claims: '3', members: '25' },
-          { role: output.highlight('guest'), description: 'Limited access', claims: '1', members: '100' },
-        ],
-      });
-    }
-
-    return { success: true };
+    output.printError('claims roles is not yet implemented');
+    output.writeln(output.dim('Role management requires claims config persistence not yet built.'));
+    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
+    return { success: false, exitCode: 1 };
   },
 };
 
@@ -343,28 +282,13 @@ const policiesCommand: Command = {
     { command: 'claude-flow claims policies', description: 'List policies' },
     { command: 'claude-flow claims policies -a create -n rate-limit', description: 'Create policy' },
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
+    // #1425: This command is not yet implemented — was displaying hardcoded fake policies
     output.writeln();
-    output.writeln(output.bold('Claim Policies'));
-    output.writeln(output.dim('─'.repeat(60)));
-
-    output.printTable({
-      columns: [
-        { key: 'policy', header: 'Policy', width: 20 },
-        { key: 'type', header: 'Type', width: 15 },
-        { key: 'condition', header: 'Condition', width: 30 },
-        { key: 'status', header: 'Status', width: 12 },
-      ],
-      data: [
-        { policy: 'rate-limit', type: 'Throttle', condition: 'Max 100 req/min', status: output.success('Active') },
-        { policy: 'geo-restrict', type: 'Location', condition: 'US, EU only', status: output.success('Active') },
-        { policy: 'time-window', type: 'Temporal', condition: 'Business hours', status: output.dim('Inactive') },
-        { policy: 'ip-allowlist', type: 'Network', condition: '10.0.0.0/8', status: output.success('Active') },
-        { policy: 'mfa-required', type: 'Auth', condition: 'Admin operations', status: output.success('Active') },
-      ],
-    });
-
-    return { success: true };
+    output.printError('claims policies is not yet implemented');
+    output.writeln(output.dim('Policy management requires claims config persistence not yet built.'));
+    output.writeln(output.dim('Track progress: https://github.com/ruvnet/claude-flow/issues/1425'));
+    return { success: false, exitCode: 1 };
   },
 };
 
