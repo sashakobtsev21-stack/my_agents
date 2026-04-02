@@ -1,17 +1,13 @@
 /**
  * Terminal MCP Tools for CLI
  *
- * V2 Compatibility - Terminal session management tools
- *
- * ⚠️ IMPORTANT: These tools provide STATE MANAGEMENT only.
- * - terminal/execute does NOT actually execute commands
- * - Commands are recorded for tracking/coordination purposes
- * - For real command execution, use Claude Code's Bash tool
+ * Terminal session management with real command execution.
  */
 
 import type { MCPTool } from './types.js';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { execSync } from 'node:child_process';
 
 // Storage paths
 const STORAGE_DIR = '.claude-flow';
@@ -145,10 +141,28 @@ export const terminalTools: MCPTool[] = [
         store.sessions[id] = session;
       }
 
-      // NOTE: This is STATE TRACKING only - does not execute commands
-      // For real execution, use Claude Code's Bash tool
-      const output = `[STATE TRACKING] Command recorded: ${command}`;
-      const exitCode = 0;
+      const timeout = (input.timeout as number) || 30_000;
+      const cwd = session.workingDir || process.cwd();
+      const startTime = Date.now();
+      let output: string;
+      let exitCode: number;
+
+      try {
+        output = execSync(command, {
+          cwd,
+          encoding: 'utf-8',
+          timeout,
+          maxBuffer: 5 * 1024 * 1024,
+          stdio: ['pipe', 'pipe', 'pipe'],
+          env: { ...process.env, ...session.env },
+        });
+        exitCode = 0;
+      } catch (err: any) {
+        output = (err.stdout || '') + (err.stderr ? `\n[stderr] ${err.stderr}` : '');
+        exitCode = err.status ?? 1;
+      }
+
+      const duration = Date.now() - startTime;
       const timestamp = new Date().toISOString();
 
       // Record in history
@@ -164,13 +178,13 @@ export const terminalTools: MCPTool[] = [
       saveTerminalStore(store);
 
       return {
-        success: true,
+        success: exitCode === 0,
         sessionId: session.id,
         command,
         output,
         exitCode,
         executedAt: timestamp,
-        duration: Math.floor(Math.random() * 100) + 10,
+        duration,
       };
     },
   },

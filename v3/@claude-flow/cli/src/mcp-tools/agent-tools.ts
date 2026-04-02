@@ -28,6 +28,7 @@ interface AgentRecord {
   domain?: string;
   model?: ClaudeModel;  // Model assigned to this agent
   modelRoutedBy?: 'explicit' | 'router' | 'agent-booster' | 'default';  // How model was determined (ADR-026)
+  lastResult?: Record<string, unknown>;  // Output from last completed task
 }
 
 interface AgentStore {
@@ -315,6 +316,7 @@ export const agentTools: MCPTool[] = [
           taskCount: agent.taskCount,
           createdAt: agent.createdAt,
           domain: agent.domain,
+          lastResult: agent.lastResult || null,
         };
       }
 

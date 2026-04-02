@@ -50,11 +50,18 @@ const scanCommand: Command = {
         try {
           const packageJsonPath = path.resolve(target, 'package.json');
           if (fs.existsSync(packageJsonPath)) {
-            const auditResult = execSync('npm audit --json 2>/dev/null || true', {
-              cwd: path.resolve(target),
-              encoding: 'utf-8',
-              maxBuffer: 10 * 1024 * 1024,
-            });
+            let auditResult: string;
+            try {
+              auditResult = execSync('npm audit --json', {
+                cwd: path.resolve(target),
+                encoding: 'utf-8',
+                maxBuffer: 10 * 1024 * 1024,
+                stdio: ['pipe', 'pipe', 'pipe'],
+              });
+            } catch (auditErr: any) {
+              // npm audit exits non-zero when vulnerabilities found — stdout still has JSON
+              auditResult = auditErr.stdout || '{}';
+            }
 
             try {
               const audit = JSON.parse(auditResult);
@@ -217,7 +224,9 @@ const scanCommand: Command = {
         const fixSpinner = output.createSpinner({ text: 'Attempting to fix vulnerabilities...', spinner: 'dots' });
         fixSpinner.start();
         try {
-          execSync('npm audit fix 2>/dev/null || true', { cwd: path.resolve(target), encoding: 'utf-8' });
+          try {
+            execSync('npm audit fix', { cwd: path.resolve(target), encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+          } catch { /* npm audit fix may exit non-zero */ }
           fixSpinner.succeed('Applied available fixes (run scan again to verify)');
         } catch {
           fixSpinner.fail('Some fixes could not be applied automatically');
