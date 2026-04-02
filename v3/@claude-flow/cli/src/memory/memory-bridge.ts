@@ -1177,11 +1177,14 @@ export async function bridgeSearchPatterns(options: {
   try {
     const reasoningBank = registry.get('reasoningBank');
 
-    if (reasoningBank && typeof reasoningBank.search === 'function') {
-      const results = await reasoningBank.search(options.query, {
-        topK: options.topK || 5,
-        minScore: options.minConfidence || 0.3,
-      });
+    // ReasoningBank may expose .searchPatterns() (agentdb) or .search() (legacy) (#1492 Bug 2)
+    if (reasoningBank && typeof (reasoningBank.searchPatterns ?? reasoningBank.search) === 'function') {
+      let results: any;
+      if (typeof reasoningBank.searchPatterns === 'function') {
+        results = await reasoningBank.searchPatterns({ task: options.query, k: options.topK || 5, threshold: options.minConfidence || 0.3 });
+      } else {
+        results = await reasoningBank.search(options.query, { topK: options.topK || 5, minScore: options.minConfidence || 0.3 });
+      }
       return {
         results: Array.isArray(results) ? results.map((r: any) => ({
           id: r.id || r.patternId || '',

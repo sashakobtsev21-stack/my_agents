@@ -21,11 +21,11 @@
 [![YouTube](https://img.shields.io/badge/YouTube-Subscribe-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@ReuvenCohen)
 
 # **Production-ready multi-agent AI orchestration for Claude Code**
-*Deploy 60+ specialized agents in coordinated swarms with self-learning capabilities, fault-tolerant consensus, and enterprise-grade security.*
+*Deploy 100+ specialized agents in coordinated swarms with self-learning capabilities, fault-tolerant consensus, and enterprise-grade security.*
 
 </div>
 
-> **Why Ruflo?** Claude Flow is now Ruflo — named by Ruv, who loves Rust, flow states, and building things that feel inevitable. The "Ru" is the Ruv. The "flo" is the flow. Underneath, WASM kernels written in Rust power the policy engine, embeddings, and proof system. 5,900+ commits later, the alpha is over. This is v3.5.
+> **Why Ruflo?** Claude Flow is now Ruflo — named by Ruv, who loves Rust, flow states, and building things that feel inevitable. The "Ru" is the Ruv. The "flo" is the flow. Underneath, WASM kernels written in Rust power the policy engine, embeddings, and proof system. 6,000+ commits later, this is v3.5.
 
 ## Getting into the Flow
 
@@ -56,8 +56,8 @@ flowchart TB
     subgraph ROUTING["🧭 Routing Layer"]
         QL[Q-Learning Router]
         MOE[MoE - 8 Experts]
-        SK[Skills - 42+]
-        HK[Hooks - 17]
+        SK[Skills - 130+]
+        HK[Hooks - 27]
     end
 
     subgraph SWARM["🐝 Swarm Coordination"]
@@ -66,7 +66,7 @@ flowchart TB
         CLM[Claims<br/>Human-Agent Coord]
     end
 
-    subgraph AGENTS["🤖 60+ Agents"]
+    subgraph AGENTS["🤖 100+ Agents"]
         AG1[coder]
         AG2[tester]
         AG3[reviewer]
@@ -132,7 +132,7 @@ flowchart TB
 |-----------|---------|-------------|
 | **SONA** | Self-Optimizing Neural Architecture - learns optimal routing | Fast adaptation |
 | **EWC++** | Elastic Weight Consolidation - prevents catastrophic forgetting | Preserves learned patterns |
-| **Flash Attention** | Optimized attention computation | 2-7x speedup |
+| **Flash Attention** | Optimized attention computation | 2-7x speedup (benchmarked) |
 | **HNSW** | Hierarchical Navigable Small World vector search | Sub-millisecond retrieval |
 | **ReasoningBank** | Pattern storage with trajectory learning | RETRIEVE→JUDGE→DISTILL |
 | **Hyperbolic** | Poincare ball embeddings for hierarchical data | Better code relationships |
@@ -161,12 +161,12 @@ curl -fsSL https://cdn.jsdelivr.net/gh/ruvnet/ruflo@main/scripts/install.sh | ba
 npx ruflo@latest init --wizard
 ```
 
-> **New to Ruflo?** You don't need to learn 259 MCP tools or 26 CLI commands. After running `init`, just use Claude Code normally — the hooks system automatically routes tasks to the right agents, learns from successful patterns, and coordinates multi-agent work in the background. The advanced tools exist for fine-grained control when you need it.
+> **New to Ruflo?** You don't need to learn 310+ MCP tools or 26 CLI commands. After running `init`, just use Claude Code normally — the hooks system automatically routes tasks to the right agents, learns from successful patterns, and coordinates multi-agent work in the background. The advanced tools exist for fine-grained control when you need it.
 
 ---
 ### Key Capabilities
 
-🤖 **60+ Specialized Agents** - Ready-to-use AI agents for coding, code review, testing, security audits, documentation, and DevOps. Each agent is optimized for its specific role.
+🤖 **100+ Specialized Agents** - Ready-to-use AI agents for coding, code review, testing, security audits, documentation, and DevOps. Each agent is optimized for its specific role.
 
 🐝 **Coordinated Agent Teams** - Run unlimited agents simultaneously in organized swarms. Agents spawn sub-workers, communicate, share context, and divide work automatically using hierarchical (queen/workers) or mesh (peer-to-peer) patterns.
 
@@ -193,7 +193,7 @@ Every request flows through four layers: from your CLI or Claude Code interface,
 |-------|------------|--------------|
 | User | Claude Code, CLI | Your interface to control and run commands |
 | Orchestration | MCP Server, Router, Hooks | Routes requests to the right agents |
-| Agents | 60+ types | Specialized workers (coder, tester, reviewer...) |
+| Agents | 100+ types | Specialized workers (coder, tester, reviewer...) |
 | Providers | Anthropic, OpenAI, Google, Ollama | AI models that power reasoning |
 
 </details>
@@ -702,7 +702,7 @@ claude mcp add ruflo -- npx -y ruflo@latest mcp start
 claude mcp list
 ```
 
-Once added, Claude Code can use all 259 ruflo MCP tools directly:
+Once added, Claude Code can use all 313 ruflo MCP tools directly:
 - `swarm_init` - Initialize agent swarms
 - `agent_spawn` - Spawn specialized agents
 - `memory_search` - Search patterns with HNSW vector search
@@ -757,7 +757,7 @@ Ruflo v3 introduces **self-learning neural capabilities** that no other agent or
 
 | Feature | Ruflo v3 | CrewAI | LangGraph | AutoGen | Manus |
 |---------|----------------|--------|-----------|---------|-------|
-| **MCP Integration** | ✅ Native (259 tools) | ⛔ | ⛔ | ⛔ | ⛔ |
+| **MCP Integration** | ✅ Native (313 tools) | ⛔ | ⛔ | ⛔ | ⛔ |
 | **Skills System** | ✅ 42+ pre-built | ⛔ | ⛔ | ⛔ | Limited |
 | **Stream Pipelines** | ✅ JSON chains | ⛔ | Via code | ⛔ | ⛔ |
 | **Pair Programming** | ✅ Driver/Navigator | ⛔ | ⛔ | ⛔ | ⛔ |
@@ -895,7 +895,7 @@ flowchart TB
 
     subgraph Agents["🤖 Agent Layer"]
         Queen[Queen Coordinator]
-        Workers[60+ Specialized Agents]
+        Workers[100+ Specialized Agents]
         Swarm[Swarm Manager]
     end
 
@@ -1180,7 +1180,7 @@ Connect Ruflo to your development environment.
 <details>
 <summary>🔌 <strong>MCP Setup</strong> — Connect Ruflo to Any AI Environment</summary>
 
-Ruflo runs as an MCP (Model Context Protocol) server, allowing you to connect it to any MCP-compatible AI client. This means you can use Ruflo's 60+ agents, swarm coordination, and self-learning capabilities from Claude Desktop, VS Code, Cursor, Windsurf, ChatGPT, and more.
+Ruflo runs as an MCP (Model Context Protocol) server, allowing you to connect it to any MCP-compatible AI client. This means you can use Ruflo's 100+ agents, swarm coordination, and self-learning capabilities from Claude Desktop, VS Code, Cursor, Windsurf, ChatGPT, and more.
 
 ### Quick Add Command
 
@@ -1558,12 +1558,12 @@ chain.verify(envelope); // true — tamper-evident
 Comprehensive capabilities for enterprise-grade AI agent orchestration.
 
 <details>
-<summary>📦 <strong>Features</strong> — 60+ Agents, Swarm Topologies, MCP Tools & Security</summary>
+<summary>📦 <strong>Features</strong> — 100+ Agents, Swarm Topologies, MCP Tools & Security</summary>
 
 Comprehensive feature set for enterprise-grade AI agent orchestration.
 
 <details open>
-<summary>🤖 <strong>Agent Ecosystem</strong> — 60+ specialized agents across 8 categories</summary>
+<summary>🤖 <strong>Agent Ecosystem</strong> — 100+ specialized agents across 8 categories</summary>
 
 Pre-built agents for every development task, from coding to security audits.
 
@@ -1710,7 +1710,7 @@ npx ruflo@latest hooks task-completed --task-id <id> --train-patterns
 </details>
 
 <details>
-<summary>🔧 <strong>MCP Tools & Integration</strong> — 259 tools across 7 categories</summary>
+<summary>🔧 <strong>MCP Tools & Integration</strong> — 313 tools across 31 modules</summary>
 
 Full MCP server with tools for coordination, monitoring, memory, and GitHub integration.
 
@@ -2163,7 +2163,7 @@ npx ruflo@latest worker status
 | `agentConfigs` | 15 V3 agent configurations | Agent testing |
 | `memoryEntries` | Patterns, rules, embeddings | Memory testing |
 | `swarmConfigs` | V3 default, minimal, mesh, hierarchical | Swarm testing |
-| `mcpTools` | 259 tool definitions | MCP testing |
+| `mcpTools` | 313 tool definitions | MCP testing |
 
 </details>
 
@@ -5023,9 +5023,9 @@ npx agentic-flow mcp stdio
 </details>
 
 <details>
-<summary>🔧 <strong>MCP Tools</strong> — 259 Integration Tools</summary>
+<summary>🔧 <strong>MCP Tools</strong> — 313 Integration Tools</summary>
 
-Agentic-flow exposes 259 MCP tools for integration:
+Agentic-flow exposes 310+ MCP tools for integration:
 
 | Category | Tools | Examples |
 |----------|-------|----------|
@@ -6141,7 +6141,7 @@ Domain-Driven Design with bounded contexts, clean architecture, and measured per
 | **Memory** | Pattern retrieval | <10ms | ✅ Met |
 | **Swarm** | Agent spawn | <200ms | ✅ Met |
 | **Swarm** | Consensus latency | <100ms | ✅ Met |
-| **Neural** | SONA adaptation | <0.05ms | ✅ Met |
+| **Neural** | SONA adaptation | <0.05ms | ⚡ Benchmarked |
 | **Graph** | Build (1k nodes) | <200ms | ✅ Met |
 | **Graph** | PageRank (1k nodes) | <100ms | ✅ Met |
 | **Learning** | Insight recording | <5ms | ✅ Met |
@@ -7349,7 +7349,7 @@ export CLAUDE_FLOW_HNSW_EF=100
 │ Pattern Matching      │ Self-learning (ReasoningBank)       │
 │ Security              │ CVE remediation + strict validation │
 │ Modular Architecture  │ 18 @claude-flow/* packages          │
-│ Agent Coordination    │ 60+ specialized agents              │
+│ Agent Coordination    │ 100+ specialized agents              │
 │ Token Efficiency      │ 32% reduction with optimization     │
 └───────────────────────┴─────────────────────────────────────┘
 ```
