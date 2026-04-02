@@ -144,6 +144,7 @@ export const taskTools: MCPTool[] = [
           createdAt: task.createdAt,
           startedAt: task.startedAt,
           completedAt: task.completedAt,
+          result: task.result || null,
         };
       }
 
