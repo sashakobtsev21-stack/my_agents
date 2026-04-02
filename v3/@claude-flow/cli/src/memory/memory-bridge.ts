@@ -444,7 +444,8 @@ export async function bridgeSearchEntries(options: {
   if (!ctx) return null;
 
   try {
-    const { query: queryStr, namespace = 'default', limit = 10, threshold = 0.3 } = options;
+    const { query: queryStr, namespace, limit = 10, threshold = 0.3 } = options;
+    const effectiveNamespace = namespace || 'all';
     const startTime = Date.now();
 
     // Generate query embedding
@@ -460,7 +461,7 @@ export async function bridgeSearchEntries(options: {
     }
 
     // better-sqlite3: .prepare().all() returns array of objects
-    const nsFilter = namespace !== 'all'
+    const nsFilter = effectiveNamespace !== 'all'
       ? `AND namespace = ?`
       : '';
 
@@ -472,7 +473,7 @@ export async function bridgeSearchEntries(options: {
         WHERE status = 'active' ${nsFilter}
         LIMIT 1000
       `);
-      rows = namespace !== 'all' ? stmt.all(namespace) : stmt.all();
+      rows = effectiveNamespace !== 'all' ? stmt.all(effectiveNamespace) : stmt.all();
     } catch {
       return null;
     }

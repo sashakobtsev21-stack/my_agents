@@ -724,14 +724,54 @@ async function writeSettings(
   result: InitResult
 ): Promise<void> {
   const settingsPath = path.join(targetDir, '.claude', 'settings.json');
+  const generated = JSON.parse(generateSettingsJson(options));
 
   if (fs.existsSync(settingsPath) && !options.force) {
-    result.skipped.push('.claude/settings.json');
+    // Merge hooks/env/permissions into existing settings instead of skipping
+    try {
+      const existing = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+      let merged = false;
+
+      // Merge hooks (the critical missing piece — #1484)
+      if (generated.hooks && !existing.hooks) {
+        existing.hooks = generated.hooks;
+        merged = true;
+      }
+
+      // Merge env vars (for CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS etc.)
+      if (generated.env) {
+        existing.env = { ...(existing.env || {}), ...generated.env };
+        merged = true;
+      }
+
+      // Merge permissions (add ruflo allow rules)
+      if (generated.permissions?.allow) {
+        const existingAllow = existing.permissions?.allow || [];
+        const newRules = generated.permissions.allow.filter(
+          (r: string) => !existingAllow.includes(r)
+        );
+        if (newRules.length > 0) {
+          existing.permissions = existing.permissions || {};
+          existing.permissions.allow = [...existingAllow, ...newRules];
+          merged = true;
+        }
+      }
+
+      if (merged) {
+        fs.writeFileSync(settingsPath, JSON.stringify(existing, null, 2), 'utf-8');
+        result.created.files.push('.claude/settings.json (merged hooks)');
+      } else {
+        result.skipped.push('.claude/settings.json');
+      }
+    } catch {
+      // Existing file is corrupt — overwrite
+      fs.writeFileSync(settingsPath, JSON.stringify(generated, null, 2), 'utf-8');
+      result.created.files.push('.claude/settings.json');
+    }
     return;
   }
 
-  const content = generateSettingsJson(options);
-  fs.writeFileSync(settingsPath, content, 'utf-8');
+  fs.writeFileSync(settingsPath, JSON.stringify(generated, null, 2), 'utf-8');
   result.created.files.push('.claude/settings.json');
 }
 
