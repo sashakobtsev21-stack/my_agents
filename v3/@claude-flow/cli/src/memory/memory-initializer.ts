@@ -388,14 +388,14 @@ export async function getHNSWIndex(options?: {
 
     const { VectorDb } = ruvectorCore;
 
-    // Persistent storage paths
-    const swarmDir = path.join(process.cwd(), '.swarm');
+    // Persistent storage paths — resolve to absolute to survive CWD changes
+    const swarmDir = path.resolve(process.cwd(), '.swarm');
     if (!fs.existsSync(swarmDir)) {
       fs.mkdirSync(swarmDir, { recursive: true });
     }
     const hnswPath = path.join(swarmDir, 'hnsw.index');
     const metadataPath = path.join(swarmDir, 'hnsw.metadata.json');
-    const dbPath = options?.dbPath || path.join(swarmDir, 'memory.db');
+    const dbPath = options?.dbPath ? path.resolve(options.dbPath) : path.join(swarmDir, 'memory.db');
 
     // Create HNSW index with persistent storage
     // @ruvector/core uses string enum for distanceMetric: 'Cosine', 'Euclidean', 'DotProduct', 'Manhattan'
@@ -2058,8 +2058,8 @@ export async function storeEntry(options: {
     upsert = false
   } = options;
 
-  const swarmDir = path.join(process.cwd(), '.swarm');
-  const dbPath = customPath || path.join(swarmDir, 'memory.db');
+  const swarmDir = path.resolve(process.cwd(), '.swarm');
+  const dbPath = customPath ? path.resolve(customPath) : path.join(swarmDir, 'memory.db');
 
   try {
     if (!fs.existsSync(dbPath)) {
@@ -2180,14 +2180,15 @@ export async function searchEntries(options: {
   // Fallback: raw sql.js
   const {
     query,
-    namespace = 'default',
+    namespace,
     limit = 10,
     threshold = 0.3,
     dbPath: customPath
   } = options;
+  const effectiveNamespace = namespace || 'all';
 
-  const swarmDir = path.join(process.cwd(), '.swarm');
-  const dbPath = customPath || path.join(swarmDir, 'memory.db');
+  const swarmDir = path.resolve(process.cwd(), '.swarm');
+  const dbPath = customPath ? path.resolve(customPath) : path.join(swarmDir, 'memory.db');
   const startTime = Date.now();
 
   try {
@@ -2203,7 +2204,7 @@ export async function searchEntries(options: {
     const queryEmbedding = queryEmb.embedding;
 
     // Try HNSW search first (150x faster)
-    const hnswResults = await searchHNSWIndex(queryEmbedding, { k: limit, namespace });
+    const hnswResults = await searchHNSWIndex(queryEmbedding, { k: limit, namespace: effectiveNamespace });
     if (hnswResults && hnswResults.length > 0) {
       // Filter by threshold
       const filtered = hnswResults.filter(r => r.score >= threshold);
@@ -2223,12 +2224,12 @@ export async function searchEntries(options: {
 
     // Get entries with embeddings
     const searchStmt = db.prepare(
-      namespace !== 'all'
+      effectiveNamespace !== 'all'
         ? `SELECT id, key, namespace, content, embedding FROM memory_entries WHERE status = 'active' AND namespace = ? LIMIT 1000`
         : `SELECT id, key, namespace, content, embedding FROM memory_entries WHERE status = 'active' LIMIT 1000`
     );
-    if (namespace !== 'all') {
-      searchStmt.bind([namespace]);
+    if (effectiveNamespace !== 'all') {
+      searchStmt.bind([effectiveNamespace]);
     }
     const searchRows: unknown[][] = [];
     while (searchStmt.step()) {

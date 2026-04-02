@@ -747,7 +747,8 @@ export class ControllerRegistry extends EventEmitter {
           const agentdbModule: any = await import('agentdb');
           const RB = agentdbModule.ReasoningBank;
           if (!RB) return null;
-          return new RB(this.agentdb.database);
+          const embedder = this.createEmbeddingService();
+          return new RB(this.agentdb.database, embedder);
         } catch { return null; }
       }
 
