@@ -96,7 +96,11 @@ async function main() {
   // Merge stdin data into prompt resolution: prefer stdin fields, then env vars.
   // NEVER fall back to argv args — shell glob expansion of braces in bash output
   // creates junk files (#1342). Use env vars or stdin only.
-  const prompt = hookInput.prompt || hookInput.command || hookInput.toolInput
+  // Normalize snake_case/camelCase: Claude Code sends tool_input/tool_name (snake_case)
+  var toolInput = hookInput.toolInput || hookInput.tool_input || {};
+  var toolName = hookInput.toolName || hookInput.tool_name || '';
+
+  var prompt = hookInput.prompt || hookInput.command || toolInput
     || process.env.PROMPT || process.env.TOOL_INPUT_command || '';
 
 const handlers = {
@@ -141,7 +145,7 @@ const handlers = {
     }
     if (intelligence && intelligence.recordEdit) {
       try {
-        var file = hookInput.file_path || (hookInput.toolInput && hookInput.toolInput.file_path)
+        var file = hookInput.file_path || toolInput.file_path
           || process.env.TOOL_INPUT_file_path || args[0] || '';
         intelligence.recordEdit(file);
       } catch (e) { /* non-fatal */ }

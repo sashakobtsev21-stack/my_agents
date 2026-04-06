@@ -205,20 +205,50 @@ export const neuralTools: MCPTool[] = [
       store.models[modelId] = model;
       saveNeuralStore(store);
 
-      // Simulate training
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Real training: embed training data and store as searchable patterns
+      const trainingData = input.data as Record<string, unknown> | Array<unknown> | undefined;
+      let patternsStored = 0;
+
+      if (trainingData) {
+        const entries = Array.isArray(trainingData) ? trainingData : [trainingData];
+        for (let i = 0; i < entries.length; i++) {
+          const entry = entries[i];
+          const text = typeof entry === 'string' ? entry
+            : (entry as Record<string, unknown>)?.text as string
+            || (entry as Record<string, unknown>)?.content as string
+            || (entry as Record<string, unknown>)?.label as string
+            || JSON.stringify(entry);
+          if (!text) continue;
+
+          const embedding = await generateEmbedding(text, 384);
+          const patternId = `${modelId}-train-${i}`;
+          store.patterns[patternId] = {
+            id: patternId,
+            name: typeof entry === 'object' && entry !== null && 'label' in entry
+              ? String((entry as Record<string, unknown>).label) : text.slice(0, 100),
+            type: modelType,
+            embedding,
+            metadata: { modelId, epoch: epochs, index: i, raw: entry },
+            createdAt: new Date().toISOString(),
+            usageCount: 0,
+          };
+          patternsStored++;
+        }
+      }
 
       model.status = 'ready';
-      model.accuracy = 0.85 + Math.random() * 0.1;
+      model.accuracy = patternsStored > 0 ? 1.0 : 0; // accuracy = data stored, not simulated
       model.trainedAt = new Date().toISOString();
       saveNeuralStore(store);
 
       return {
         success: true,
+        _realEmbedding: !!realEmbeddings,
         modelId,
         type: modelType,
         status: model.status,
-        accuracy: model.accuracy,
+        patternsStored,
+        totalPatterns: Object.keys(store.patterns).length,
         epochs,
         trainedAt: model.trainedAt,
       };
@@ -250,24 +280,34 @@ export const neuralTools: MCPTool[] = [
         return { success: false, error: 'Model not ready' };
       }
 
-      // Simulate predictions
-      const predictions = [
-        { label: 'coder', confidence: 0.75 + Math.random() * 0.2 },
-        { label: 'researcher', confidence: 0.5 + Math.random() * 0.3 },
-        { label: 'reviewer', confidence: 0.3 + Math.random() * 0.4 },
-        { label: 'tester', confidence: 0.2 + Math.random() * 0.3 },
-      ]
-        .sort((a, b) => b.confidence - a.confidence)
-        .slice(0, topK);
-
       // Generate real embedding for the input
       const startTime = performance.now();
-      const embedding = await generateEmbedding(inputText, 128);
+      const embedding = await generateEmbedding(inputText, 384);
       const latency = Math.round(performance.now() - startTime);
+
+      // Search stored patterns via real cosine similarity
+      const storedPatterns = Object.values(store.patterns);
+      let predictions;
+
+      if (storedPatterns.length > 0) {
+        // Real nearest-neighbor prediction using stored pattern embeddings
+        predictions = storedPatterns
+          .map(p => ({
+            label: p.name || p.type || p.id,
+            confidence: Math.max(0, cosineSimilarity(embedding, p.embedding)),
+            patternId: p.id,
+          }))
+          .sort((a, b) => b.confidence - a.confidence)
+          .slice(0, topK);
+      } else {
+        // No patterns stored — no predictions possible
+        predictions = [];
+      }
 
       return {
         success: true,
         _realEmbedding: !!realEmbeddings,
+        _hasStoredPatterns: storedPatterns.length > 0,
         modelId: model?.id || 'default',
         input: inputText,
         predictions,

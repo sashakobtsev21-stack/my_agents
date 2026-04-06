@@ -58,8 +58,10 @@ function tokenize(text) {
 
 function bootstrapFromMemoryFiles() {
   var entries = [];
+  // Scope to current project only (not all 51+ project dirs)
+  var projectSlug = process.cwd().replace(/^\//, '').replace(/\//g, '-');
   var candidates = [
-    path.join(os.homedir(), ".claude", "projects"),
+    path.join(os.homedir(), ".claude", "projects", projectSlug, "memory"),
     path.join(process.cwd(), ".claude-flow", "memory"),
     path.join(process.cwd(), ".claude", "memory"),
   ];

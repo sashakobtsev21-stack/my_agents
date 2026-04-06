@@ -108,8 +108,12 @@ async function main() {
     try { hookInput = JSON.parse(stdinData); } catch (e) { /* ignore parse errors */ }
   }
 
+  // Normalize snake_case/camelCase: Claude Code sends tool_input/tool_name (snake_case)
+  const toolInput = hookInput.toolInput || hookInput.tool_input || {};
+  const toolName = hookInput.toolName || hookInput.tool_name || '';
+
   // Merge stdin data into prompt resolution: prefer stdin fields, then env, then argv
-  const prompt = hookInput.prompt || hookInput.command || hookInput.toolInput
+  const prompt = hookInput.prompt || hookInput.command || toolInput
     || process.env.PROMPT || process.env.TOOL_INPUT_command || args.join(' ') || '';
 
 const handlers = {
@@ -184,7 +188,7 @@ const handlers = {
     // Record edit for intelligence consolidation — prefer stdin data from Claude Code
     if (intelligence && intelligence.recordEdit) {
       try {
-        const file = hookInput.file_path || (hookInput.toolInput && hookInput.toolInput.file_path)
+        const file = hookInput.file_path || toolInput.file_path
           || process.env.TOOL_INPUT_file_path || args[0] || '';
         intelligence.recordEdit(file);
       } catch (e) { /* non-fatal */ }

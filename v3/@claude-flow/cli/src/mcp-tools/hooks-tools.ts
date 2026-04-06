@@ -1888,10 +1888,10 @@ export const hooksIntelligence: MCPTool = {
         },
         embeddings: {
           provider: 'transformers',
-          model: 'all-MiniLM-L6-v2',
+          model: 'Xenova/all-MiniLM-L6-v2',
           dimension: 384,
           implemented: true,
-          note: 'Real ONNX embeddings via all-MiniLM-L6-v2',
+          note: 'Real ONNX embeddings via Xenova/all-MiniLM-L6-v2',
         },
       },
       realMetrics: {

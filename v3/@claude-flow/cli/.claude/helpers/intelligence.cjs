@@ -248,15 +248,13 @@ function bootstrapFromMemoryFiles() {
   for (const base of candidates) {
     if (!fs.existsSync(base)) continue;
 
-    // For the projects dir, scan subdirectories for memory/
+    // For the projects dir, scope to CURRENT project only (not all 51+ dirs)
     if (base.endsWith('projects')) {
       try {
-        const projectDirs = fs.readdirSync(base);
-        for (const pdir of projectDirs) {
-          const memDir = path.join(base, pdir, 'memory');
-          if (fs.existsSync(memDir)) {
-            parseMemoryDir(memDir, entries);
-          }
+        const projectSlug = cwd.replace(/^\//, '').replace(/\//g, '-');
+        const memDir = path.join(base, projectSlug, 'memory');
+        if (fs.existsSync(memDir)) {
+          parseMemoryDir(memDir, entries);
         }
       } catch { /* skip */ }
     } else if (fs.existsSync(base)) {
