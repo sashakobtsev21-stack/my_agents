@@ -99,7 +99,7 @@
     "agentic-flow": "^3.0.0-alpha.1",
     "@ruvector/attention": "^0.1.4",
     "@ruvector/learning-wasm": "^0.1.29",
-    "@ruvector/router": "^0.1.27",
+    "@ruvector/router": "^0.1.30",
     "@ruvector/rvagent-wasm": "^0.1.0",
     "@ruvector/ruvllm-wasm": "^2.0.2",
     "@ruvector/sona": "^0.1.5"
