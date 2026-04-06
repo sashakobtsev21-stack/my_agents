@@ -56,6 +56,21 @@ function tokenize(text) {
   return text.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(function(w) { return w.length > 2; });
 }
 
+// ── Deduplication helper (fixes #1518) ──────────────────────────────────────
+function deduplicateById(entries) {
+  if (!entries || !Array.isArray(entries)) return entries;
+  var seen = new Map();
+  for (var i = 0; i < entries.length; i++) {
+    var id = entries[i].id || entries[i].key;
+    if (id) {
+      seen.set(id, entries[i]);
+    } else {
+      seen.set('__no_id_' + seen.size, entries[i]);
+    }
+  }
+  return Array.from(seen.values());
+}
+
 function bootstrapFromMemoryFiles() {
   var entries = [];
   // Scope to current project only (not all 51+ project dirs)
@@ -146,7 +161,7 @@ var cachedEntries = null;
 
 module.exports = {
   init: function() {
-    cachedEntries = loadEntries();
+    cachedEntries = deduplicateById(loadEntries());
     var ranked = cachedEntries.map(function(e) {
       return { id: e.id, content: e.content, summary: e.summary, category: e.category, confidence: e.confidence, words: e.words };
     });
