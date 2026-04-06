@@ -642,7 +642,23 @@ function generateStatusline() {
   const lines = [];
 
   // Header
-  let header = c.bold + c.brightPurple + '\\u258A RuFlo V3.5 ' + c.reset;
+  // Read version from package.json
+  let pkgVersion = '3.5';
+  try {
+    const pkgPath = path.join(CWD, 'node_modules', '@claude-flow', 'cli', 'package.json');
+    if (fs.existsSync(pkgPath)) {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+      if (pkg.version) pkgVersion = pkg.version;
+    } else {
+      // Try npx-installed location
+      const npxPkg = path.join(CWD, 'v3', '@claude-flow', 'cli', 'package.json');
+      if (fs.existsSync(npxPkg)) {
+        const pkg = JSON.parse(fs.readFileSync(npxPkg, 'utf-8'));
+        if (pkg.version) pkgVersion = pkg.version;
+      }
+    }
+  } catch { /* use default */ }
+  let header = c.bold + c.brightPurple + '\\u258A RuFlo V' + pkgVersion + ' ' + c.reset;
   header += (swarm.coordinationActive ? c.brightCyan : c.dim) + '\\u25CF ' + c.brightCyan + git.name + c.reset;
   if (git.gitBranch) {
     header += '  ' + c.dim + '\\u2502' + c.reset + '  ' + c.brightBlue + '\\u23C7 ' + git.gitBranch + c.reset;

@@ -26,6 +26,21 @@ const CONFIG = {
 
 const CWD = process.cwd();
 
+// Read package version once at startup
+let pkgVersion = '3.5';
+try {
+  const pkgPaths = [
+    path.join(CWD, 'node_modules', '@claude-flow', 'cli', 'package.json'),
+    path.join(CWD, 'v3', '@claude-flow', 'cli', 'package.json'),
+  ];
+  for (const p of pkgPaths) {
+    if (fs.existsSync(p)) {
+      const pkg = JSON.parse(fs.readFileSync(p, 'utf-8'));
+      if (pkg.version) { pkgVersion = pkg.version; break; }
+    }
+  }
+} catch { /* use default */ }
+
 // ANSI colors
 const c = {
   reset: '\x1b[0m',
@@ -601,7 +616,7 @@ function generateStatusline() {
   const parts = [];
 
   // Branding
-  parts.push(`${c.bold}${c.brightPurple}\u258A RuFlo V3${c.reset}`);
+  parts.push(`${c.bold}${c.brightPurple}\u258A RuFlo v${pkgVersion || '3.5'}${c.reset}`);
 
   // User + swarm indicator
   const dot = swarm.coordinationActive ? `${c.brightGreen}\u25CF${c.reset}` : `${c.brightCyan}\u25CF${c.reset}`;
@@ -668,7 +683,7 @@ function generateDashboard() {
   const lines = [];
 
   // Header
-  let header = `${c.bold}${c.brightPurple}\u258A RuFlo V3 ${c.reset}`;
+  let header = `${c.bold}${c.brightPurple}\u258A RuFlo v${pkgVersion} ${c.reset}`;
   header += `${swarm.coordinationActive ? c.brightCyan : c.dim}\u25CF ${c.brightCyan}${git.name}${c.reset}`;
   if (git.gitBranch) {
     header += `  ${c.dim}\u2502${c.reset}  ${c.brightBlue}\u23C7 ${git.gitBranch}${c.reset}`;

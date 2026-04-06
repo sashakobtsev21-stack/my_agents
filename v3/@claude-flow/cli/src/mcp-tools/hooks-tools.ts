@@ -1716,6 +1716,25 @@ export const hooksSessionStart: MCPTool = {
     const restoreLatest = params.restoreLatest as boolean;
     const shouldStartDaemon = params.startDaemon === true;
 
+    // Auto-regenerate statusline if outdated (fixes older installs)
+    // Checks for the old fake heuristic: "Math.floor(sizeKB / 2)"
+    try {
+      const statuslinePath = join(getProjectCwd(), '.claude', 'helpers', 'statusline.cjs');
+      if (existsSync(statuslinePath)) {
+        const content = readFileSync(statuslinePath, 'utf-8');
+        if (content.includes('Math.floor(sizeKB / 2)') || content.includes('Maturity fallback')) {
+          // Old version detected — regenerate from current generator
+          const { generateStatuslineScript } = await import('../init/statusline-generator.js');
+          const newContent = generateStatuslineScript({
+            runtime: { maxAgents: 15, topology: 'hierarchical', strategy: 'specialized' },
+          } as any);
+          writeFileSync(statuslinePath, newContent, 'utf-8');
+        }
+      }
+    } catch {
+      // Non-critical — old statusline continues to work, just with stale heuristics
+    }
+
     // Auto-start daemon if enabled
     let daemonStatus: { started: boolean; pid?: number; error?: string } = { started: false };
     if (shouldStartDaemon) {
