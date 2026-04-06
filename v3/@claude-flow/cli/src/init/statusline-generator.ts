@@ -460,7 +460,7 @@ function getHooksStatus() {
   return { enabled, total };
 }
 
-// AgentDB stats — count real entries, not file-size heuristics
+// AgentDB stats — count real entries from all data stores
 function getAgentDBStats() {
   let vectorCount = 0;
   let dbSizeKB = 0;
@@ -479,7 +479,22 @@ function getAgentDBStats() {
     } catch { /* fall back */ }
   }
 
-  // 2. Count entries from ranked-context.json
+  // 2. Count entries from hooks memory store (.claude-flow/memory/store.json)
+  const hooksStorePath = path.join(CWD, '.claude-flow', 'memory', 'store.json');
+  const hooksStoreStat = safeStat(hooksStorePath);
+  if (hooksStoreStat) {
+    dbSizeKB += hooksStoreStat.size / 1024;
+    try {
+      const store = JSON.parse(fs.readFileSync(hooksStorePath, 'utf-8'));
+      if (store && store.entries) {
+        const entryCount = Object.keys(store.entries).length;
+        vectorCount = Math.max(vectorCount, entryCount);
+        if (entryCount > 0) namespaces++;
+      }
+    } catch { /* fall back */ }
+  }
+
+  // 3. Count entries from ranked-context.json
   try {
     const ranked = readJSON(path.join(CWD, '.claude-flow', 'data', 'ranked-context.json'));
     if (ranked && ranked.entries && ranked.entries.length > vectorCount) vectorCount = ranked.entries.length;

@@ -1322,6 +1322,30 @@ export const hooksPostTask: MCPTool = {
 
     const duration = Date.now() - startTime;
 
+    // Persist to auto-memory-store for statusline visibility
+    try {
+      const dataDir = join(getProjectCwd(), '.claude-flow', 'data');
+      if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
+      const storePath = join(dataDir, 'auto-memory-store.json');
+      let store: Array<Record<string, unknown>> = [];
+      try {
+        if (existsSync(storePath)) {
+          const parsed = JSON.parse(readFileSync(storePath, 'utf-8'));
+          store = Array.isArray(parsed) ? parsed : [];
+        }
+      } catch { /* start fresh */ }
+      store.push({
+        id: `task-${taskId}`,
+        key: taskId,
+        content: `Task ${success ? 'completed' : 'failed'}: ${taskText || taskId}${agent ? ` (agent: ${agent})` : ''}`,
+        namespace: 'tasks',
+        type: 'task-outcome',
+        metadata: { agent, success, quality },
+        createdAt: Date.now(),
+      });
+      writeFileSync(storePath, JSON.stringify(store, null, 2), 'utf-8');
+    } catch { /* non-critical */ }
+
     return {
       taskId,
       success,
@@ -1719,6 +1743,37 @@ export const hooksSessionStart: MCPTool = {
       // Bridge not available
     }
 
+    // Persist session record to auto-memory-store for statusline visibility
+    try {
+      const dataDir = join(getProjectCwd(), '.claude-flow', 'data');
+      if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
+      const storePath = join(dataDir, 'auto-memory-store.json');
+      let store: Array<Record<string, unknown>> = [];
+      try {
+        if (existsSync(storePath)) {
+          const raw = readFileSync(storePath, 'utf-8');
+          const parsed = JSON.parse(raw);
+          store = Array.isArray(parsed) ? parsed : [];
+        }
+      } catch { /* start fresh */ }
+      // Add session entry (dedup by session ID)
+      const entryId = `session-${sessionId}`;
+      const existing = store.findIndex((e: Record<string, unknown>) => e.id === entryId);
+      const entry = {
+        id: entryId,
+        key: sessionId,
+        content: `Session started: ${sessionId}`,
+        namespace: 'sessions',
+        type: 'session',
+        createdAt: Date.now(),
+      };
+      if (existing >= 0) store[existing] = entry;
+      else store.push(entry);
+      writeFileSync(storePath, JSON.stringify(store, null, 2), 'utf-8');
+    } catch {
+      // Non-critical — statusline just won't show this session
+    }
+
     return {
       sessionId,
       started: new Date().toISOString(),
@@ -1733,8 +1788,8 @@ export const hooksSessionStart: MCPTool = {
       sessionMemory: sessionMemory || { controller: 'none', restoredPatterns: 0 },
       previousSession: restoreLatest ? {
         id: `session-${Date.now() - 86400000}`,
-        tasksRestored: sessionMemory?.restoredPatterns || 3,
-        memoryRestored: sessionMemory?.restoredPatterns || 15,
+        tasksRestored: sessionMemory?.restoredPatterns || 0,
+        memoryRestored: sessionMemory?.restoredPatterns || 0,
       } : null,
     };
   },
