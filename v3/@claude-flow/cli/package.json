@@ -75,7 +75,7 @@
     "test": "vitest run",
     "test:plugin-store": "npx tsx src/plugins/tests/standalone-test.ts",
     "test:pattern-store": "npx tsx src/transfer/store/tests/standalone-test.ts",
-    "postinstall": "node -e \"const{existsSync,symlinkSync}=require('fs');const{join}=require('path');try{const d=join(require.resolve('agentdb'),'..','..','dist');if(existsSync(join(d,'src','controllers'))&&!existsSync(join(d,'controllers'))){symlinkSync('src/controllers',join(d,'controllers'));}}catch{}\"",
+    "postinstall": "node -e \"const{existsSync,cpSync,mkdirSync}=require('fs');const{join}=require('path');try{const d=join(require.resolve('agentdb'),'..','..','dist');const s=join(d,'src','controllers');const t=join(d,'controllers');if(existsSync(s)&&!existsSync(t)){cpSync(s,t,{recursive:true});}}catch{}\"",
     "prepublishOnly": "cp ../../../README.md ./README.md",
     "release": "npm version prerelease --preid=alpha && npm run publish:all",
     "publish:all": "./scripts/publish.sh"
