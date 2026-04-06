@@ -1,3 +1,4 @@
+
 # ADR-073: Stub Tool Honesty & Real Predictions
 
 **Status**: Accepted  
