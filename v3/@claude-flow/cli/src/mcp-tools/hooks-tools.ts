@@ -2781,15 +2781,9 @@ export const hooksIntelligenceAttention: MCPTool = {
       }
     }
 
-    // If no real implementation worked, use placeholder
+    // If no real implementation worked, return empty with honest marker
     if (results.length === 0) {
-      for (let i = 0; i < topK; i++) {
-        results.push({
-          index: i,
-          weight: Math.exp(-i * 0.5) / (1 + Math.exp(-i * 0.5)),
-          pattern: `Attention target #${i + 1}`,
-        });
-      }
+      implementation = 'none';
     }
 
     const computeTimeMs = performance.now() - startTime;
@@ -2800,8 +2794,10 @@ export const hooksIntelligenceAttention: MCPTool = {
       results,
       stats: {
         computeTimeMs,
-        speedup: mode === 'flash' ? '2.49x-7.47x' : mode === 'moe' ? '1.5x-3x' : '1.5x-2x',
-        memoryReduction: mode === 'flash' ? '50-75%' : '25-40%',
+        speedup: implementation.startsWith('real-') ? (mode === 'flash' ? '2.49x-7.47x' : '1.5x-3x') : null,
+        memoryReduction: implementation.startsWith('real-') ? (mode === 'flash' ? '50-75%' : '25-40%') : null,
+        _stub: implementation === 'none',
+        _note: implementation === 'none' ? 'No attention backend available. Install @ruvector/attention for real computation.' : undefined,
       },
       implementation,
     };

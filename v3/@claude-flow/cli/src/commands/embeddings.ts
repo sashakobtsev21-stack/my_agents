@@ -726,9 +726,9 @@ const initCommand: Command = {
             spinner.setText(`Downloading ${model}... ${p.percent.toFixed(0)}%`);
           });
         } else {
-          // Simulate download for when embeddings package not available
+          // Embeddings package not available — skip download
           await new Promise(r => setTimeout(r, 500));
-          output.writeln(output.dim('  (Simulated - @claude-flow/embeddings not installed)'));
+          output.writeln(output.dim('  (Skipped — @claude-flow/embeddings not installed)'));
         }
       }
 
@@ -1258,7 +1258,7 @@ const modelsCommand: Command = {
         }
       } else {
         await new Promise(r => setTimeout(r, 500));
-        spinner.succeed(`Download complete (simulated)`);
+        spinner.succeed(`Download skipped — @claude-flow/embeddings not installed`);
       }
       return { success: true };
     }

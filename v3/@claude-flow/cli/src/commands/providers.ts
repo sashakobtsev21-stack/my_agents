@@ -24,6 +24,7 @@ const listCommand: Command = {
   action: async (ctx: CommandContext): Promise<CommandResult> => {
     const type = ctx.flags.type as string || 'all';
 
+    // Note: Static provider catalog — does not reflect user's configured providers
     output.writeln();
     output.writeln(output.bold('Available Providers'));
     output.writeln(output.dim('─'.repeat(60)));

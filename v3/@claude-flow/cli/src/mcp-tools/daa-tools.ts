@@ -170,11 +170,6 @@ export const daaTools: MCPTool[] = [
       agent.metrics.adaptations++;
       agent.metrics.successRate = (agent.metrics.successRate + performanceScore) / 2;
       agent.lastActivity = new Date().toISOString();
-      agent.status = 'learning';
-
-      // Simulate adaptation delay
-      await new Promise(resolve => setTimeout(resolve, 50));
-
       agent.status = 'active';
       saveDAAStore(store);
 
@@ -260,23 +255,13 @@ export const daaTools: MCPTool[] = [
       workflow.status = 'running';
       saveDAAStore(store);
 
-      // Simulate execution
-      for (const step of workflow.steps) {
-        step.status = 'running';
-        await new Promise(resolve => setTimeout(resolve, 10));
-        step.status = 'completed';
-        step.output = `Completed: ${step.name}`;
-      }
-
-      workflow.status = 'completed';
-      saveDAAStore(store);
-
       return {
         success: true,
         workflowId,
         status: workflow.status,
         steps: workflow.steps,
-        completedAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
+        _note: 'Steps are tracked but not auto-executed. Use agent tools to execute each step.',
       };
     },
   },
@@ -317,6 +302,7 @@ export const daaTools: MCPTool[] = [
         targetAgents: targetIds,
         domain,
         sharedAt: new Date().toISOString(),
+        _note: 'Knowledge stored in shared registry. Target agents can retrieve via daa_learning_status. No cross-agent memory transfer occurs.',
       };
     },
   },
@@ -403,11 +389,9 @@ export const daaTools: MCPTool[] = [
             success: true,
             agentId,
             currentPattern: agent.cognitivePattern,
-            analysis: {
-              strengths: ['Pattern recognition', 'Adaptive learning'],
-              weaknesses: ['May be slow for simple tasks'],
-              recommendations: ['Consider convergent for focused tasks'],
-            },
+            learningRate: agent.learningRate,
+            metrics: agent.metrics,
+            _note: 'Pattern analysis requires real cognitive modeling. Current pattern and metrics shown.',
           };
         }
 
