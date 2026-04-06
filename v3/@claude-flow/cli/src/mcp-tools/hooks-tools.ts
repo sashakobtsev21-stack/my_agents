@@ -3,7 +3,7 @@
  * Provides intelligent hooks functionality via MCP protocol
  */
 
-import { mkdirSync, writeFileSync, existsSync, readFileSync, statSync } from 'fs';
+import { mkdirSync, writeFileSync, existsSync, readFileSync, statSync, unlinkSync, readdirSync, rmSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { type MCPTool, getProjectCwd } from './types.js';
 
@@ -1028,31 +1028,47 @@ export const hooksMetrics: MCPTool = {
   handler: async (params: Record<string, unknown>) => {
     const period = (params.period as string) || '24h';
 
+    // Try to read real counts from memory store
+    const store = loadMemoryStore();
+    const entries = Object.values(store.entries);
+
+    // Count patterns by looking at stored pattern entries
+    const patternEntries = entries.filter(e => e.key.includes('pattern'));
+    const routingEntries = entries.filter(e => e.key.includes('route') || e.key.includes('routing'));
+    const taskEntries = entries.filter(e => e.key.includes('task'));
+
+    if (entries.length === 0) {
+      return {
+        _stub: true,
+        message: 'No metrics data available. Metrics are collected from hooks_post-task and hooks_route calls.',
+        period,
+        patterns: { total: 0, successful: 0, failed: 0, avgConfidence: null },
+        agents: { routingAccuracy: null, totalRoutes: 0, topAgent: null },
+        commands: { totalExecuted: 0, successRate: null, avgRiskScore: null },
+        lastUpdated: new Date().toISOString(),
+      };
+    }
+
     return {
       period,
       patterns: {
-        total: 15,
-        successful: 12,
-        failed: 3,
-        avgConfidence: 0.85,
+        total: patternEntries.length,
+        successful: null,
+        failed: null,
+        avgConfidence: null,
       },
       agents: {
-        routingAccuracy: 0.87,
-        totalRoutes: 42,
-        topAgent: 'coder',
+        routingAccuracy: null,
+        totalRoutes: routingEntries.length,
+        topAgent: null,
       },
       commands: {
-        totalExecuted: 128,
-        successRate: 0.94,
-        avgRiskScore: 0.15,
+        totalExecuted: taskEntries.length,
+        successRate: null,
+        avgRiskScore: null,
       },
-      performance: {
-        flashAttention: '2.49x-7.47x speedup',
-        memoryReduction: '50-75% reduction',
-        searchImprovement: '150x-12,500x faster',
-        tokenReduction: '32.3% fewer tokens',
-      },
-      status: 'healthy',
+      dataSource: 'memory-store',
+      entriesFound: entries.length,
       lastUpdated: new Date().toISOString(),
     };
   },
@@ -1332,14 +1348,31 @@ export const hooksExplain: MCPTool = {
       }
     }
 
+    // Calculate real historical success rate from routing outcomes file
+    let historicalSuccess: number | null = null;
+    let historicalNote = 'No historical data yet';
+    try {
+      const outcomesPath = join(resolve('.'), '.claude-flow/routing-outcomes.json');
+      if (existsSync(outcomesPath)) {
+        const data = JSON.parse(readFileSync(outcomesPath, 'utf-8'));
+        const outcomes: Array<{ success: boolean }> = data.outcomes || [];
+        if (outcomes.length > 0) {
+          historicalSuccess = outcomes.filter(o => o.success).length / outcomes.length;
+          historicalNote = `Calculated from ${outcomes.length} recorded outcomes`;
+        }
+      }
+    } catch {
+      // File unreadable; leave as null
+    }
+
     return {
       task,
       explanation: `The routing decision was made based on keyword analysis of the task description. ` +
         `The task contains keywords that match the "${suggestion.agents[0]}" specialization with ${(suggestion.confidence * 100).toFixed(0)}% confidence.`,
       factors: [
         { factor: 'Keyword Match', weight: 0.4, value: suggestion.confidence, impact: 'Primary routing signal' },
-        { factor: 'Historical Success', weight: 0.3, value: 0.87, impact: 'Past task success rate' },
-        { factor: 'Agent Availability', weight: 0.2, value: 0.95, impact: 'All suggested agents available' },
+        { factor: 'Historical Success', weight: 0.3, value: historicalSuccess, impact: historicalNote },
+        { factor: 'Agent Availability', weight: 0.2, value: null, impact: 'Agent availability tracking not implemented' },
         { factor: 'Task Complexity', weight: 0.1, value: task.length > 100 ? 0.8 : 0.3, impact: 'Complexity assessment' },
       ],
       patterns: matchedPatterns.length > 0 ? matchedPatterns : [
@@ -1351,7 +1384,9 @@ export const hooksExplain: MCPTool = {
         reasoning: [
           `Task analysis identified ${matchedPatterns.length || 1} relevant patterns`,
           `"${suggestion.agents[0]}" has highest capability match for this task type`,
-          `Historical success rate for similar tasks: 87%`,
+          historicalSuccess !== null
+            ? `Historical success rate for similar tasks: ${(historicalSuccess * 100).toFixed(0)}%`
+            : `No historical outcome data available yet`,
           `Confidence threshold met (${(suggestion.confidence * 100).toFixed(0)}% >= 70%)`,
         ],
       },
@@ -1372,30 +1407,22 @@ export const hooksPretrain: MCPTool = {
     },
   },
   handler: async (params: Record<string, unknown>) => {
-    const path = (params.path as string) || '.';
+    const repoPath = (params.path as string) || '.';
     const depth = (params.depth as string) || 'medium';
-    const startTime = Date.now();
-
-    // Scale analysis results by depth level
-    const multiplier = depth === 'deep' ? 3 : depth === 'shallow' ? 1 : 2;
 
     return {
-      path,
+      success: true,
+      _stub: true,
+      message: 'Pre-training requires running the pretrain CLI command. This hook provides status only.',
+      path: repoPath,
       depth,
       stats: {
-        filesAnalyzed: 42 * multiplier,
-        patternsExtracted: 15 * multiplier,
-        strategiesLearned: 8 * multiplier,
-        trajectoriesEvaluated: 23 * multiplier,
-        contradictionsResolved: 3,
+        filesAnalyzed: null,
+        patternsExtracted: null,
+        strategiesLearned: null,
+        trajectoriesEvaluated: null,
+        contradictionsResolved: null,
       },
-      pipeline: {
-        retrieve: { status: 'completed', duration: 120 * multiplier },
-        judge: { status: 'completed', duration: 180 * multiplier },
-        distill: { status: 'completed', duration: 90 * multiplier },
-        consolidate: { status: 'completed', duration: 60 * multiplier },
-      },
-      duration: Date.now() - startTime + (500 * multiplier),
     };
   },
 };
@@ -1511,12 +1538,14 @@ export const hooksTransfer: MCPTool = {
       'agent-success': sourceEntries.filter(e => e.key.includes('agent') || e.metadata?.type === 'agent-success').length,
     };
 
-    // If source has no patterns, provide demo data
+    // If source has no patterns, report honestly instead of substituting demo data
     if (Object.values(byType).every(v => v === 0)) {
-      byType['file-patterns'] = 8;
-      byType['task-routing'] = 12;
-      byType['command-risk'] = 5;
-      byType['agent-success'] = 15;
+      return {
+        success: false,
+        message: 'No patterns found in source project',
+        sourcePath,
+        transferred: 0,
+      };
     }
 
     if (filter) {
@@ -1528,6 +1557,7 @@ export const hooksTransfer: MCPTool = {
     const total = Object.values(byType).reduce((a, b) => a + b, 0);
 
     return {
+      success: true,
       sourcePath,
       transferred: {
         total,
@@ -1542,7 +1572,7 @@ export const hooksTransfer: MCPTool = {
         avgConfidence: 0.82 + (minConfidence > 0.8 ? 0.1 : 0),
         avgAge: '3 days',
       },
-      dataSource: Object.values(sourceStore.entries).length > 0 ? 'source-project' : 'demo-data',
+      dataSource: 'source-project',
     };
   },
 };
@@ -1652,6 +1682,26 @@ export const hooksSessionEnd: MCPTool = {
       }
     }
 
+    // Read actual counts from stores
+    const store = loadMemoryStore();
+    const allEntries = Object.values(store.entries);
+    const taskCount = allEntries.filter(e => e.key.includes('task')).length;
+    const agentCount = allEntries.filter(e => e.key.includes('agent')).length;
+    const patternCount = allEntries.filter(e => e.key.includes('pattern')).length;
+    const trajectoryCount = activeTrajectories.size;
+
+    // Check for pending-insights.jsonl
+    let insightCount = 0;
+    try {
+      const insightsPath = resolve(join('.claude-flow', 'data', 'pending-insights.jsonl'));
+      if (existsSync(insightsPath)) {
+        const content = readFileSync(insightsPath, 'utf-8').trim();
+        insightCount = content ? content.split('\n').length : 0;
+      }
+    } catch {
+      // File not available
+    }
+
     // Phase 5: Wire ReflexionMemory session end + NightlyLearner consolidation via bridge
     let sessionPersistence: { controller: string; persisted: boolean } | null = null;
     try {
@@ -1659,8 +1709,8 @@ export const hooksSessionEnd: MCPTool = {
       const result = await bridge.bridgeSessionEnd({
         sessionId,
         summary: saveState ? 'Session ended with state saved' : 'Session ended',
-        tasksCompleted: 12,
-        patternsLearned: 8,
+        tasksCompleted: taskCount,
+        patternsLearned: patternCount,
       });
       if (result) {
         sessionPersistence = {
@@ -1679,17 +1729,15 @@ export const hooksSessionEnd: MCPTool = {
       daemon: { stopped: daemonStopped },
       sessionPersistence: sessionPersistence || { controller: 'none', persisted: false },
       summary: {
-        tasksExecuted: 12,
-        tasksSucceeded: 10,
-        tasksFailed: 2,
-        commandsExecuted: 45,
-        filesModified: 23,
-        agentsSpawned: 5,
+        tasksExecuted: taskCount,
+        filesModified: 0,
+        agentsSpawned: agentCount,
+        pendingInsights: insightCount,
+        memoryEntries: allEntries.length,
       },
       learningUpdates: {
-        patternsLearned: 8,
-        trajectoriesRecorded: 12,
-        confidenceImproved: 0.05,
+        patternsLearned: patternCount,
+        trajectoriesRecorded: trajectoryCount,
       },
     };
   },
@@ -1923,13 +1971,62 @@ export const hooksIntelligenceReset: MCPTool = {
     properties: {},
   },
   handler: async () => {
+    const cwd = getProjectCwd();
+    const cleared = {
+      trajectories: 0,
+      patterns: 0,
+      dataFiles: 0,
+      neuralFiles: 0,
+    };
+    const deletedFiles: string[] = [];
+
+    // Clear intelligence data files if they exist
+    const dataFiles = [
+      join(cwd, '.claude-flow', 'data', 'auto-memory-store.json'),
+      join(cwd, '.claude-flow', 'data', 'graph-state.json'),
+      join(cwd, '.claude-flow', 'data', 'ranked-context.json'),
+    ];
+
+    for (const filePath of dataFiles) {
+      if (existsSync(filePath)) {
+        try {
+          unlinkSync(filePath);
+          cleared.dataFiles++;
+          deletedFiles.push(filePath);
+        } catch {
+          // Skip files that cannot be deleted
+        }
+      }
+    }
+
+    // Clear neural directory if it exists
+    const neuralDir = join(cwd, '.claude-flow', 'neural');
+    if (existsSync(neuralDir)) {
+      try {
+        const files = readdirSync(neuralDir);
+        for (const file of files) {
+          try {
+            const filePath = join(neuralDir, file);
+            unlinkSync(filePath);
+            cleared.neuralFiles++;
+            deletedFiles.push(filePath);
+          } catch {
+            // Skip files that cannot be deleted
+          }
+        }
+      } catch {
+        // Directory read failed
+      }
+    }
+
+    // Clear in-memory trajectories
+    cleared.trajectories = activeTrajectories.size;
+    activeTrajectories.clear();
+
     return {
       reset: true,
-      cleared: {
-        trajectories: 156,
-        patterns: 89,
-        hnswIndex: 12500,
-      },
+      cleared,
+      deletedFiles,
       timestamp: new Date().toISOString(),
     };
   },

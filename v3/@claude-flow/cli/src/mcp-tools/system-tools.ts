@@ -112,9 +112,9 @@ export const systemTools: MCPTool[] = [
         version: PKG_VERSION,
         components: {
           swarm: { status: 'running', health: metrics.health },
-          memory: { status: 'running', health: 0.95 },
-          neural: { status: 'running', health: 0.90 },
-          mcp: { status: 'running', health: 1.0 },
+          memory: { status: 'unknown', _note: 'Health not measured — use system_health for real checks' },
+          neural: { status: 'unknown', _note: 'Health not measured — use system_health for real checks' },
+          mcp: { status: 'unknown', _note: 'Health not measured — use system_health for real checks' },
         },
         lastCheck: new Date().toISOString(),
       };
@@ -221,51 +221,98 @@ export const systemTools: MCPTool[] = [
     },
     handler: async (input) => {
       const metrics = loadMetrics();
-      const checks: Array<{ name: string; status: string; latency: number; message?: string }> = [];
+      const checks: Array<{ name: string; status: string; latency?: number; message?: string }> = [];
+      const projectCwd = getProjectCwd();
 
-      // Core checks
+      // Memory DB check — verify the store file exists
+      {
+        const t0 = performance.now();
+        const memoryDbPath = join(projectCwd, '.claude-flow', 'memory', 'store.json');
+        const memoryExists = existsSync(memoryDbPath);
+        const elapsed = performance.now() - t0;
+        checks.push({
+          name: 'memory',
+          status: memoryExists ? 'healthy' : 'degraded',
+          latency: Math.round(elapsed * 100) / 100,
+          message: memoryExists ? undefined : 'Memory store not found — run memory init',
+        });
+      }
+
+      // Config check — verify config file exists
+      {
+        const t0 = performance.now();
+        const configPath = join(projectCwd, '.claude-flow', 'config.json');
+        const altConfigPath = join(projectCwd, 'claude-flow.config.json');
+        const configExists = existsSync(configPath) || existsSync(altConfigPath);
+        const elapsed = performance.now() - t0;
+        checks.push({
+          name: 'config',
+          status: configExists ? 'healthy' : 'degraded',
+          latency: Math.round(elapsed * 100) / 100,
+          message: configExists ? undefined : 'Config file not found — run init',
+        });
+      }
+
+      // MCP check — this process is the MCP server if stdin is piped
+      {
+        const isStdio = !process.stdin.isTTY;
+        checks.push({
+          name: 'mcp',
+          status: isStdio ? 'healthy' : 'unknown',
+          message: isStdio ? 'MCP stdio server running (this process)' : 'Not running as MCP server',
+        });
+      }
+
+      // Swarm — cannot verify real connectivity, report unknown
       checks.push({
         name: 'swarm',
-        status: 'healthy',
-        latency: 5 + Math.random() * 10,
+        status: 'unknown',
+        message: 'Swarm connectivity not monitored — check coordination store manually',
       });
 
-      checks.push({
-        name: 'memory',
-        status: 'healthy',
-        latency: 2 + Math.random() * 5,
-      });
-
-      checks.push({
-        name: 'mcp',
-        status: 'healthy',
-        latency: 1 + Math.random() * 3,
-      });
-
+      // Neural — cannot verify, report unknown
       checks.push({
         name: 'neural',
-        status: metrics.health >= 0.7 ? 'healthy' : 'degraded',
-        latency: 10 + Math.random() * 20,
+        status: 'unknown',
+        message: 'Neural network health not monitored',
       });
 
       if (input.deep) {
-        checks.push({
-          name: 'disk',
-          status: 'healthy',
-          latency: 50 + Math.random() * 100,
-        });
+        // Disk check — real free space check via os module
+        {
+          const t0 = performance.now();
+          const freeMem = os.freemem();
+          const totalMem = os.totalmem();
+          const elapsed = performance.now() - t0;
+          // Use memory as a proxy; real disk check would need statvfs
+          checks.push({
+            name: 'disk',
+            status: 'unknown',
+            latency: Math.round(elapsed * 100) / 100,
+            message: 'Disk space check not implemented — use os-level tools',
+          });
+        }
 
+        // Network — cannot verify without making a request
         checks.push({
           name: 'network',
-          status: 'healthy',
-          latency: 20 + Math.random() * 30,
+          status: 'unknown',
+          message: 'Network connectivity not monitored',
         });
 
-        checks.push({
-          name: 'database',
-          status: 'healthy',
-          latency: 15 + Math.random() * 25,
-        });
+        // Database — check if coordination store exists
+        {
+          const t0 = performance.now();
+          const coordPath = join(projectCwd, '.claude-flow', 'coordination', 'store.json');
+          const dbExists = existsSync(coordPath);
+          const elapsed = performance.now() - t0;
+          checks.push({
+            name: 'database',
+            status: dbExists ? 'healthy' : 'unknown',
+            latency: Math.round(elapsed * 100) / 100,
+            message: dbExists ? undefined : 'Coordination store not found',
+          });
+        }
       }
 
       const healthy = checks.filter(c => c.status === 'healthy').length;
