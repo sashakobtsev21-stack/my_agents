@@ -1285,6 +1285,17 @@ export const hooksPostTask: MCPTool = {
       // Non-fatal
     }
 
+    // Record trajectory via intelligence module (SONA + ReasoningBank)
+    try {
+      const intelligence = await import('../memory/intelligence.js');
+      await intelligence.recordTrajectory(
+        [{ type: 'result' as const, content: (params.task as string) || taskId, metadata: { success, agent, quality }, timestamp: Date.now() }],
+        success ? 'success' : 'failure'
+      );
+    } catch {
+      // Intelligence module not available — non-fatal
+    }
+
     // Persist routing outcome for runtime learning (file-based, always reliable)
     const taskText = (params.task as string) || '';
     const outcomeKeywords = extractKeywords(taskText);
@@ -1723,6 +1734,16 @@ export const hooksSessionStart: MCPTool = {
           error: error instanceof Error ? error.message : String(error),
         };
       }
+    }
+
+    // Initialize intelligence module (SONA + local ReasoningBank)
+    let intelligenceStatus: { sonaEnabled: boolean; reasoningBankEnabled: boolean } = { sonaEnabled: false, reasoningBankEnabled: false };
+    try {
+      const intelligence = await import('../memory/intelligence.js');
+      const initResult = await intelligence.initializeIntelligence();
+      intelligenceStatus = { sonaEnabled: initResult.sonaEnabled, reasoningBankEnabled: initResult.reasoningBankEnabled };
+    } catch {
+      // Intelligence module not available — non-fatal
     }
 
     // Phase 5: Wire ReflexionMemory session start via bridge

@@ -96,6 +96,44 @@ async function getRegistry(dbPath?: string): Promise<any | null> {
           console.log = origLog;
         }
 
+        // Wire intelligence module as the learning backend
+        // AgentDB's ReasoningBank/LearningSystem need a better-sqlite3 db handle
+        // which ControllerRegistry doesn't expose. Instead, use the local intelligence
+        // module (SONA + LocalReasoningBank + file persistence) for learning.
+        try {
+          const intelligence = await import('./intelligence.js');
+          const initResult = await intelligence.initializeIntelligence();
+          const reg = registry as any;
+
+          if (initResult.reasoningBankEnabled) {
+            const rb = intelligence.getReasoningBank();
+            if (rb && !reg.get('reasoningBank')) {
+              if (typeof reg.set === 'function') reg.set('reasoningBank', rb);
+              else reg._controllers = { ...(reg._controllers || {}), reasoningBank: rb };
+            }
+          }
+
+          if (initResult.sonaEnabled) {
+            const sona = intelligence.getSonaCoordinator();
+            if (sona && !reg.get('learningSystem')) {
+              if (typeof reg.set === 'function') reg.set('learningSystem', sona);
+              else reg._controllers = { ...(reg._controllers || {}), learningSystem: sona };
+            }
+          }
+
+          // SkillLibrary from AgentDB (no db required)
+          try {
+            const agentdb = await import('agentdb');
+            if (agentdb.SkillLibrary && !reg.get('skills')) {
+              const sk = new (agentdb.SkillLibrary as any)();
+              if (typeof reg.set === 'function') reg.set('skills', sk);
+              else reg._controllers = { ...(reg._controllers || {}), skills: sk };
+            }
+          } catch { /* AgentDB not available */ }
+        } catch {
+          // Intelligence module not available — learning stays unwired
+        }
+
         registryInstance = registry;
         bridgeAvailable = true;
         return registry;
