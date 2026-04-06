@@ -101,6 +101,7 @@ export interface IntelligenceStats {
   sonaEnabled: boolean;
   reasoningBankSize: number;
   patternsLearned: number;
+  signalsProcessed: number;
   trajectoriesRecorded: number;
   lastAdaptation: number | null;
   avgAdaptationTime: number;
@@ -664,6 +665,8 @@ let reasoningBank: LocalReasoningBank | null = null;
 let intelligenceInitialized = false;
 let globalStats = {
   trajectoriesRecorded: 0,
+  patternsLearned: 0,
+  signalsProcessed: 0,
   lastAdaptation: null as number | null
 };
 
@@ -849,20 +852,49 @@ export async function recordTrajectory(
   }
 
   try {
+    // Generate embeddings for steps that don't have them (required for distillation)
+    const enrichedSteps = await Promise.all(steps.map(async (step) => {
+      if (step.embedding && step.embedding.length > 0) return step;
+      try {
+        const { generateEmbedding } = await import('./memory-initializer.js');
+        const result = await generateEmbedding(step.content);
+        return { ...step, embedding: result.embedding };
+      } catch {
+        return step; // Skip embedding if not available
+      }
+    }));
+
     sonaCoordinator!.recordTrajectory({
-      steps,
+      steps: enrichedSteps,
       verdict,
       timestamp: Date.now()
     });
 
     // Apply RL: update pattern confidences based on verdict
     if (reasoningBank) {
-      // Load steps into the coordinator for endTrajectory processing
-      for (const step of steps) {
+      for (const step of enrichedSteps) {
         sonaCoordinator!.addTrajectoryStep(step);
       }
       await sonaCoordinator!.endTrajectory(verdict, reasoningBank);
       await sonaCoordinator!.distillLearning(reasoningBank);
+
+      // Also store successful trajectories as patterns directly
+      if (verdict === 'success') {
+        for (const step of enrichedSteps) {
+          if (step.embedding && step.embedding.length > 0) {
+            reasoningBank.store({
+              id: `pattern-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+              type: step.type,
+              content: step.content,
+              embedding: step.embedding,
+              confidence: verdict === 'success' ? 0.8 : 0.4,
+              metadata: step.metadata || {},
+              createdAt: Date.now(),
+            });
+            globalStats.patternsLearned++;
+          }
+        }
+      }
     }
 
     globalStats.trajectoriesRecorded++;
@@ -946,7 +978,8 @@ export function getIntelligenceStats(): IntelligenceStats {
   return {
     sonaEnabled: !!sonaCoordinator,
     reasoningBankSize: bankStats?.size ?? 0,
-    patternsLearned: bankStats?.patternCount ?? 0,
+    patternsLearned: Math.max(bankStats?.patternCount ?? 0, globalStats.patternsLearned),
+    signalsProcessed: globalStats.signalsProcessed,
     trajectoriesRecorded: globalStats.trajectoriesRecorded,
     lastAdaptation: globalStats.lastAdaptation,
     avgAdaptationTime: sonaStats?.avgAdaptationMs ?? 0
@@ -1026,6 +1059,8 @@ export function clearIntelligence(): void {
   intelligenceInitialized = false;
   globalStats = {
     trajectoriesRecorded: 0,
+    patternsLearned: 0,
+    signalsProcessed: 0,
     lastAdaptation: null
   };
 }
