@@ -1,6 +1,6 @@
 {
   "name": "@claude-flow/cli",
-  "version": "3.5.63",
+  "version": "3.5.64",
   "type": "module",
   "description": "Ruflo CLI - Enterprise AI agent orchestration with 60+ specialized agents, swarm coordination, MCP server, self-learning hooks, and vector memory for Claude Code",
   "main": "dist/src/index.js",
@@ -51,6 +51,7 @@
       "types": "./dist/src/index.d.ts",
       "import": "./dist/src/index.js"
     },
+    "./dist/*": "./dist/*",
     "./ruvector": {
       "types": "./dist/src/ruvector/index.d.ts",
       "import": "./dist/src/ruvector/index.js"
@@ -62,6 +63,14 @@
     "./mcp-tools": {
       "types": "./dist/src/mcp-tools/index.d.ts",
       "import": "./dist/src/mcp-tools/index.js"
+    },
+    "./memory": {
+      "types": "./dist/src/memory/memory-initializer.d.ts",
+      "import": "./dist/src/memory/memory-initializer.js"
+    },
+    "./intelligence": {
+      "types": "./dist/src/memory/intelligence.d.ts",
+      "import": "./dist/src/memory/intelligence.js"
     }
   },
   "files": [
@@ -75,7 +84,7 @@
     "test": "vitest run",
     "test:plugin-store": "npx tsx src/plugins/tests/standalone-test.ts",
     "test:pattern-store": "npx tsx src/transfer/store/tests/standalone-test.ts",
-    "postinstall": "node -e \"const{existsSync,cpSync,mkdirSync}=require('fs');const{join}=require('path');try{const d=join(require.resolve('agentdb'),'..','..','dist');const s=join(d,'src','controllers');const t=join(d,'controllers');if(existsSync(s)&&!existsSync(t)){cpSync(s,t,{recursive:true});}}catch{}\"",
+    "postinstall": "node -e \"const{existsSync,cpSync,readdirSync}=require('fs');const{join,dirname}=require('path');try{const r=require.resolve('agentdb');const base=r.includes('dist/src')?join(dirname(r),'..','..'):(r.includes('dist')?join(dirname(r),'..'):dirname(r));const s=join(base,'dist','src','controllers');const t=join(base,'dist','controllers');if(existsSync(s)&&!existsSync(t)){cpSync(s,t,{recursive:true});}}catch{}\"",
     "prepublishOnly": "cp ../../../README.md ./README.md",
     "release": "npm version prerelease --preid=alpha && npm run publish:all",
     "publish:all": "./scripts/publish.sh"

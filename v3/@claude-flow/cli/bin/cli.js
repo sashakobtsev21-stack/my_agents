@@ -10,6 +10,15 @@
 
 import { randomUUID } from 'crypto';
 
+// Suppress noisy [AgentDB Patch] warnings from agentic-flow's runtime patch
+// These are cosmetic — the patch tries to fix agentdb v1.x imports but we use v3
+const _origWarn = console.warn;
+console.warn = (...args) => {
+  const msg = String(args[0] ?? '');
+  if (msg.includes('[AgentDB Patch]')) return;
+  _origWarn.apply(console, args);
+};
+
 // Check if we should run in MCP server mode
 // Conditions:
 //   1. stdin is being piped AND no CLI arguments provided (auto-detect)
