@@ -92,6 +92,22 @@ function jaccardSimilarity(setA, setB) {
   return intersection / (setA.size + setB.size - intersection);
 }
 
+// ── Deduplication helper (fixes #1518) ──────────────────────────────────────
+
+function deduplicateById(entries) {
+  if (!entries || !Array.isArray(entries)) return entries;
+  const seen = new Map();
+  for (const entry of entries) {
+    const id = entry.id || entry.key;
+    if (id) {
+      seen.set(id, entry);
+    } else {
+      seen.set(`__no_id_${seen.size}`, entry);
+    }
+  }
+  return Array.from(seen.values());
+}
+
 // ── Session state helpers ────────────────────────────────────────────────────
 
 function sessionGet(key) {
@@ -275,13 +291,14 @@ function parseMemoryDir(dir, entries) {
 
       // Parse markdown sections as separate entries
       const sections = content.split(/^##?\s+/m).filter(Boolean);
-      for (const section of sections) {
+      for (let sIdx = 0; sIdx < sections.length; sIdx++) {
+        const section = sections[sIdx];
         const lines = section.trim().split('\n');
         const title = lines[0].trim();
         const body = lines.slice(1).join('\n').trim();
         if (!body || body.length < 10) continue;
 
-        const id = `mem-${file.replace('.md', '')}-${title.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30)}`;
+        const id = `mem-${file.replace('.md', '')}-${title.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30)}-${sIdx}`;
         entries.push({
           id,
           key: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50),
@@ -322,8 +339,15 @@ function init() {
     }
   }
 
+  // Deduplicate store entries by ID (fixes #1518 — 194MB → ~79KB)
+  const deduped = deduplicateById(store);
+  if (deduped.length < store.length) {
+    process.stderr.write(`[INTELLIGENCE] Deduped store: ${store.length} -> ${deduped.length} entries\n`);
+    writeJSON(STORE_PATH, deduped);
+  }
+
   // Skip rebuild if graph is fresh and store hasn't changed
-  if (graphState && graphState.nodeCount === store.length) {
+  if (graphState && graphState.nodeCount === deduped.length) {
     const age = Date.now() - (graphState.updatedAt || 0);
     if (age < 60000) {
       return {
@@ -334,9 +358,9 @@ function init() {
     }
   }
 
-  // Build nodes
+  // Build nodes from deduped entries
   const nodes = {};
-  for (const entry of store) {
+  for (const entry of deduped) {
     const id = entry.id || entry.key || `entry-${Math.random().toString(36).slice(2, 8)}`;
     nodes[id] = {
       id,
@@ -350,7 +374,7 @@ function init() {
   }
 
   // Build edges
-  const edges = buildEdges(store);
+  const edges = buildEdges(deduped);
 
   // Compute PageRank (skip if graph too large — #1531)
   const nodeCount = Object.keys(nodes).length;
@@ -374,7 +398,7 @@ function init() {
   writeJSON(GRAPH_PATH, graph);
 
   // Build ranked context for fast lookup
-  const rankedEntries = store.map(entry => {
+  const rankedEntries = deduped.map(entry => {
     const id = entry.id;
     const content = entry.content || entry.value || '';
     const summary = entry.summary || entry.key || '';
@@ -532,10 +556,14 @@ function boostConfidence(ids, amount) {
 function consolidate() {
   ensureDataDir();
 
-  const store = readJSON(STORE_PATH);
+  let store = readJSON(STORE_PATH);
   if (!store || !Array.isArray(store)) {
     return { entries: 0, edges: 0, newEntries: 0, message: 'No store to consolidate' };
   }
+
+  // Deduplicate store entries by ID before processing (fixes #1518)
+  const preDedupCount = store.length;
+  store = deduplicateById(store);
 
   // 1. Process pending insights
   let newEntries = 0;
@@ -660,8 +688,8 @@ function consolidate() {
     entries: rankedEntries,
   });
 
-  // 8. Persist updated store (with new insight entries)
-  if (newEntries > 0) writeJSON(STORE_PATH, store);
+  // 8. Persist updated store (deduped or with new insight entries)
+  if (newEntries > 0 || store.length < preDedupCount) writeJSON(STORE_PATH, store);
 
   // 9. Save snapshot for delta tracking
   const updatedGraph = readJSON(GRAPH_PATH);
