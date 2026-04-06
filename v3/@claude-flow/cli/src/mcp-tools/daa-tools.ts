@@ -173,6 +173,19 @@ export const daaTools: MCPTool[] = [
       agent.status = 'active';
       saveDAAStore(store);
 
+      // Store adaptation feedback in AgentDB for pattern learning (backward compat: JSON store above)
+      let _storedIn: 'agentdb' | 'json-store' = 'json-store';
+      try {
+        const bridge = await import('../memory/memory-bridge.js');
+        await bridge.bridgeRecordFeedback({
+          taskId: `adapt-${agentId}-${agent.metrics.adaptations}`,
+          success: performanceScore >= 0.5,
+          quality: performanceScore,
+          agent: agentId,
+        });
+        _storedIn = 'agentdb';
+      } catch { /* AgentDB not available */ }
+
       return {
         success: true,
         agentId,
@@ -183,6 +196,7 @@ export const daaTools: MCPTool[] = [
           newSuccessRate: agent.metrics.successRate,
         },
         status: agent.status,
+        _storedIn,
       };
     },
   },
@@ -286,13 +300,29 @@ export const daaTools: MCPTool[] = [
       const domain = (input.knowledgeDomain as string) || 'general';
 
       const knowledgeId = `knowledge-${Date.now()}`;
-      store.knowledge[knowledgeId] = {
+      const knowledgeEntry = {
         domain,
         content: input.knowledgeContent || {},
         sharedBy: sourceId,
+        targetAgents: targetIds,
         timestamp: new Date().toISOString(),
       };
 
+      // Primary: store in AgentDB for vector-searchable knowledge
+      let _storedIn: 'agentdb' | 'json-store' = 'json-store';
+      try {
+        const bridge = await import('../memory/memory-bridge.js');
+        await bridge.bridgeStoreEntry({
+          key: knowledgeId,
+          value: JSON.stringify(knowledgeEntry),
+          namespace: 'daa-knowledge',
+          tags: [domain, sourceId, ...targetIds],
+        });
+        _storedIn = 'agentdb';
+      } catch { /* AgentDB not available */ }
+
+      // Backward compat: always persist in JSON store
+      store.knowledge[knowledgeId] = knowledgeEntry;
       saveDAAStore(store);
 
       return {
@@ -301,8 +331,11 @@ export const daaTools: MCPTool[] = [
         sourceAgent: sourceId,
         targetAgents: targetIds,
         domain,
-        sharedAt: new Date().toISOString(),
-        _note: 'Knowledge stored in shared registry. Target agents can retrieve via daa_learning_status. No cross-agent memory transfer occurs.',
+        sharedAt: knowledgeEntry.timestamp,
+        _storedIn,
+        _note: _storedIn === 'agentdb'
+          ? 'Knowledge stored in AgentDB (vector-searchable) and JSON store. Target agents can retrieve via daa_learning_status or memory search.'
+          : 'Knowledge stored in shared JSON registry. Target agents can retrieve via daa_learning_status. No cross-agent memory transfer occurs.',
       };
     },
   },

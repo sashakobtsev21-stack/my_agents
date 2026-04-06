@@ -157,6 +157,73 @@ export const systemTools: MCPTool[] = [
       const totalMem = os.totalmem();
       const freeMem = os.freemem();
 
+      // Read real agent/task counts — try AgentDB first, fallback to JSON stores
+      let agentCounts = { active: 0, total: 0 };
+      let taskCounts = { pending: 0, completed: 0, failed: 0 };
+      let _metricsSource: 'agentdb' | 'json-store' | 'none' = 'none';
+
+      // Primary: AgentDB (sql.js + HNSW)
+      try {
+        const bridge = await import('../memory/memory-bridge.js');
+        const agentResults = await bridge.bridgeListEntries({ namespace: 'agents', limit: 10000 }) as { entries?: Array<{ metadata?: string; value?: string }> } | null;
+        const agentEntries = agentResults?.entries;
+        if (agentEntries && agentEntries.length > 0) {
+          let active = 0;
+          for (const a of agentEntries) {
+            try {
+              const meta = a.metadata ? JSON.parse(a.metadata) : (a.value ? JSON.parse(a.value) : {});
+              if (meta.status === 'active' || meta.status === 'running') active++;
+            } catch { /* skip unparseable */ }
+          }
+          agentCounts = { total: agentEntries.length, active };
+          _metricsSource = 'agentdb';
+        }
+        const taskResults = await bridge.bridgeListEntries({ namespace: 'tasks', limit: 10000 }) as { entries?: Array<{ metadata?: string; value?: string }> } | null;
+        const taskEntries = taskResults?.entries;
+        if (taskEntries && taskEntries.length > 0) {
+          let pending = 0, completed = 0, failed = 0;
+          for (const t of taskEntries) {
+            try {
+              const meta = t.metadata ? JSON.parse(t.metadata) : (t.value ? JSON.parse(t.value) : {});
+              if (meta.status === 'pending' || meta.status === 'assigned') pending++;
+              else if (meta.status === 'completed') completed++;
+              else if (meta.status === 'failed') failed++;
+            } catch { /* skip */ }
+          }
+          taskCounts = { pending, completed, failed };
+          _metricsSource = 'agentdb';
+        }
+      } catch { /* AgentDB not available, try JSON fallback */ }
+
+      // Fallback: JSON store files (backward compatibility)
+      if (_metricsSource === 'none') {
+        try {
+          const agentStorePath = join(getProjectCwd(), STORAGE_DIR, 'agents', 'store.json');
+          if (existsSync(agentStorePath)) {
+            const agentStore = JSON.parse(readFileSync(agentStorePath, 'utf-8'));
+            const agents = Object.values(agentStore.agents || {}) as Array<{ status: string }>;
+            agentCounts = {
+              total: agents.length,
+              active: agents.filter(a => a.status === 'active' || a.status === 'running').length,
+            };
+            _metricsSource = 'json-store';
+          }
+        } catch { /* agent store not available */ }
+        try {
+          const taskStorePath = join(getProjectCwd(), STORAGE_DIR, 'tasks', 'store.json');
+          if (existsSync(taskStorePath)) {
+            const taskStore = JSON.parse(readFileSync(taskStorePath, 'utf-8'));
+            const tasks = Object.values(taskStore.tasks || {}) as Array<{ status: string }>;
+            taskCounts = {
+              pending: tasks.filter(t => t.status === 'pending' || t.status === 'assigned').length,
+              completed: tasks.filter(t => t.status === 'completed').length,
+              failed: tasks.filter(t => t.status === 'failed').length,
+            };
+            _metricsSource = 'json-store';
+          }
+        } catch { /* task store not available */ }
+      }
+
       const currentMetrics: SystemMetrics = {
         ...store,
         cpu: loadAvg[0] * 100 / cpus.length, // Real CPU load percentage
@@ -164,6 +231,9 @@ export const systemTools: MCPTool[] = [
           used: Math.round((totalMem - freeMem) / 1024 / 1024), // Real MB used
           total: Math.round(totalMem / 1024 / 1024), // Real total MB
         },
+        agents: agentCounts,
+        tasks: taskCounts,
+        // requests: no MCP request tracking infrastructure yet — stays at stored value
         uptime: Date.now() - new Date(store.startTime).getTime(),
         lastCheck: new Date().toISOString(),
       };
@@ -173,7 +243,8 @@ export const systemTools: MCPTool[] = [
       if (category === 'all') {
         return {
           ...currentMetrics,
-          _real: true, // Flag indicating real metrics
+          _real: true,
+          _metricsSource,
           heap: {
             used: Math.round(memUsage.heapUsed / 1024 / 1024),
             total: Math.round(memUsage.heapTotal / 1024 / 1024),
