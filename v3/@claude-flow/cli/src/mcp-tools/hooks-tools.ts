@@ -3211,6 +3211,8 @@ function detectWorkerTriggers(text: string): {
   confidence: number;
   context: string;
 } {
+  if (!text) return { detected: false, triggers: [], confidence: 0, context: '' };
+
   const detectedTriggers: WorkerTrigger[] = [];
   let totalMatches = 0;
 
