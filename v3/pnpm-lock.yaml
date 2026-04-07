@@ -30,7 +30,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/aidefence':
     dependencies:
@@ -58,7 +58,7 @@ importers:
         version: 0.6.0
       agentic-flow:
         specifier: ^2.0.3
-        version: 2.0.3(@types/node@20.19.27)(marked@11.2.0)
+        version: 2.0.3(@types/node@20.19.27)(hono@4.12.11)(marked@11.2.0)
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -96,7 +96,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/cli':
     dependencies:
@@ -132,8 +132,11 @@ importers:
         specifier: ^0.1.3
         version: 0.1.3(@claude-flow/memory@@claude-flow+memory)
       '@ruvector/attention':
-        specifier: ^0.1.4
-        version: 0.1.31
+        specifier: ^0.1.32
+        version: 0.1.32
+      '@ruvector/attention-darwin-arm64':
+        specifier: 0.1.32
+        version: 0.1.32
       '@ruvector/learning-wasm':
         specifier: ^0.1.29
         version: 0.1.29
@@ -217,7 +220,7 @@ importers:
         version: 25.0.2(typescript@5.9.3)
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/embeddings':
     dependencies:
@@ -229,7 +232,7 @@ importers:
         version: 2.17.2
       agentic-flow:
         specifier: ^2.0.0
-        version: 2.0.3(@types/node@20.19.27)(hono@4.12.3)(marked@11.2.0)
+        version: 2.0.3(@types/node@20.19.27)(hono@4.12.11)(marked@11.2.0)
       sql.js:
         specifier: ^1.13.0
         version: 1.13.0
@@ -242,7 +245,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/guidance':
     dependencies:
@@ -264,7 +267,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/hooks':
     dependencies:
@@ -296,7 +299,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/integration':
     dependencies:
@@ -310,7 +313,7 @@ importers:
     devDependencies:
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/mcp':
     dependencies:
@@ -341,7 +344,7 @@ importers:
         version: 8.18.1
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/memory':
     dependencies:
@@ -363,7 +366,7 @@ importers:
         version: 1.4.9
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/neural':
     dependencies:
@@ -389,7 +392,7 @@ importers:
     devDependencies:
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/plugins':
     dependencies:
@@ -417,7 +420,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/providers':
     dependencies:
@@ -458,7 +461,7 @@ importers:
         version: 5.0.2
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/shared':
     dependencies:
@@ -492,7 +495,7 @@ importers:
         version: 7.2.0
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
       ws:
         specifier: ^8.16.0
         version: 8.19.0
@@ -504,7 +507,7 @@ importers:
     devDependencies:
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
   '@claude-flow/testing':
     devDependencies:
@@ -522,7 +525,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+        version: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
 
 packages:
 
@@ -1237,16 +1240,6 @@ packages:
       hono: 4.12.11
     dev: false
 
-  /@hono/node-server@1.19.7(hono@4.12.3):
-    resolution: {integrity: sha512-vUcD0uauS7EU2caukW8z5lJKtoGMokxNbJtBiwHgpqxEXokaHCBkQUmCHhjFB1VUTWdqj25QoMkMKzgjq+uhrw==}
-    engines: {node: '>=18.14.1'}
-    peerDependencies:
-      hono: ^4
-    dependencies:
-      hono: 4.12.3
-    dev: false
-    optional: true
-
   /@hono/node-server@1.19.9(hono@4.12.11):
     resolution: {integrity: sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw==}
     engines: {node: '>=18.14.1'}
@@ -1556,38 +1549,6 @@ packages:
       - hono
       - supports-color
     dev: false
-
-  /@modelcontextprotocol/sdk@1.25.1(hono@4.12.3)(zod@3.25.76):
-    resolution: {integrity: sha512-yO28oVFFC7EBoiKdAn+VqRm+plcfv4v0xp6osG/VsCB0NlPZWi87ajbCZZ8f/RvOFLEu7//rSRmuZZ7lMoe3gQ==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      '@cfworker/json-schema': ^4.1.1
-      zod: ^3.25 || ^4.0
-    peerDependenciesMeta:
-      '@cfworker/json-schema':
-        optional: true
-    dependencies:
-      '@hono/node-server': 1.19.7(hono@4.12.3)
-      ajv: 8.18.0
-      ajv-formats: 3.0.1(ajv@8.18.0)
-      content-type: 1.0.5
-      cors: 2.8.5
-      cross-spawn: 7.0.6
-      eventsource: 3.0.7
-      eventsource-parser: 3.0.6
-      express: 5.2.1
-      express-rate-limit: 7.5.1(express@5.2.1)
-      jose: 6.1.3
-      json-schema-typed: 8.0.2
-      pkce-challenge: 5.0.1
-      raw-body: 3.0.2
-      zod: 3.25.76
-      zod-to-json-schema: 3.25.1(zod@3.25.76)
-    transitivePeerDependencies:
-      - hono
-      - supports-color
-    dev: false
-    optional: true
 
   /@modelcontextprotocol/sdk@1.27.1(zod@3.25.76):
     resolution: {integrity: sha512-sr6GbP+4edBwFndLbM60gf07z0FQ79gaExpnsjMGePXqFcSSb7t6iscpjk9DhFhwd+mTEQrzNafGP8/iGGFYaA==}
@@ -1939,6 +1900,7 @@ packages:
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
     requiresBuild: true
+    dev: false
 
   /@opentelemetry/api@1.9.1:
     resolution: {integrity: sha512-gLyJlPHPZYdAk1JENA9LeHejZe1Ti77/pTeFm/nMXmQH/HFZlcS/O2XJB+L8fkbrNSqhdtlvjBVjxwUYanNH5Q==}
@@ -3653,16 +3615,16 @@ packages:
     requiresBuild: true
     optional: true
 
-  /@ruvector/attention-darwin-arm64@0.1.31:
-    resolution: {integrity: sha512-9gOug/T0q5OCR65g1AKxWaJSTqTMa7kSAFH1sH2VeoNzqWr++EEOTE68vtajYSpNvM+r8788ehApCqjVW5mhHA==}
+  /@ruvector/attention-darwin-arm64@0.1.32:
+    resolution: {integrity: sha512-CQ/oftq9o9t2EEBwCfUfdZsxuzHRXrHhtdZk05GZfvPxiDbsuw3NLgDQRR3cvg+8xU9lAmzer+8WCGdxbgX7vQ==}
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
     dev: false
     optional: true
 
-  /@ruvector/attention-darwin-x64@0.1.31:
-    resolution: {integrity: sha512-nBxQYRPU3+Z3Q8Qq4BFr/NTgw9QKjoh04vqYzECfJQJyyleIpDPWJpCwU3nhDy+4yMLdBQpQa8HYr2/C9rHCnQ==}
+  /@ruvector/attention-darwin-x64@0.1.32:
+    resolution: {integrity: sha512-S11zMfLn+nZJlozLE4b8zVERdSTzD4DJ4Xb+bAUavTLrptYdIhJ0EzqPvCjF1XcSyAgAAkE9+u0oLEjVmAhT3Q==}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
@@ -3677,16 +3639,16 @@ packages:
     dev: false
     optional: true
 
-  /@ruvector/attention-linux-arm64-gnu@0.1.31:
-    resolution: {integrity: sha512-2Via10Rlfg+wzKANHsBZN01JXlONeTclPJxlYSpdsJPQ7UNlEEQ69/6y1R8sz+Ym1AE7whG0h5YWrqEyhhNcKg==}
+  /@ruvector/attention-linux-arm64-gnu@0.1.32:
+    resolution: {integrity: sha512-eySb6dYHy1WZ3RWuR80PP9r3X6wDWrTZ26bzZ7jEhg3o61bYwoRJ9BphSj0cSUdz1OMwcu163M/ddR1SM8/Ieg==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /@ruvector/attention-linux-x64-gnu@0.1.31:
-    resolution: {integrity: sha512-IXUZeS1g6V6+KYUOCy0IlVom19262stsNnoajfpUPct7udtHmD/wr3yJ6XbWxivZ2pNV7Na+z21R0oMiCGk+jA==}
+  /@ruvector/attention-linux-x64-gnu@0.1.32:
+    resolution: {integrity: sha512-Xch9eOJVMPouOB3L05VUHVA8RofzRnXh6tpEpIScSrkG6oqHwWaVf4Ku8SHe5YZ3FIsM+Oj1jrv11jtN56rpDg==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
@@ -3701,8 +3663,8 @@ packages:
     dev: false
     optional: true
 
-  /@ruvector/attention-win32-x64-msvc@0.1.31:
-    resolution: {integrity: sha512-eRtFASeJhWCiYC+Lcyg1pwQV+ky6PciVj+o56BchpA+36SLEvYPziIAaJ8KYaMp3zVAFadNiM3DYCmvjxB/n6A==}
+  /@ruvector/attention-win32-x64-msvc@0.1.32:
+    resolution: {integrity: sha512-KMeo9ruZySGtyw1NFIE/6wWoGgPa07FhUplCVP75Y3y5JSFXrd6NjgEIfSItQOZ0RVRzTeXuUglkOzMo0kb/6Q==}
     cpu: [x64]
     os: [win32]
     requiresBuild: true
@@ -3717,14 +3679,14 @@ packages:
     dev: false
     optional: true
 
-  /@ruvector/attention@0.1.31:
-    resolution: {integrity: sha512-xZC1EKuR8dop64LGy0wDyiMmMnxZtTalvIy3hZSCQglM8jxV+zlj1xPDiAQVl/aZZJ59K1UaGq3J1U552EOSxA==}
+  /@ruvector/attention@0.1.32:
+    resolution: {integrity: sha512-7ePEASX4+Y8qVU2p2CszL/fgP+E3BRSZm7oukDaTwED5HSrw1jdQk75LijR488s3dYYeHdgoSv67P+WWHbM98A==}
     optionalDependencies:
-      '@ruvector/attention-darwin-arm64': 0.1.31
-      '@ruvector/attention-darwin-x64': 0.1.31
-      '@ruvector/attention-linux-arm64-gnu': 0.1.31
-      '@ruvector/attention-linux-x64-gnu': 0.1.31
-      '@ruvector/attention-win32-x64-msvc': 0.1.31
+      '@ruvector/attention-darwin-arm64': 0.1.32
+      '@ruvector/attention-darwin-x64': 0.1.32
+      '@ruvector/attention-linux-arm64-gnu': 0.1.32
+      '@ruvector/attention-linux-x64-gnu': 0.1.32
+      '@ruvector/attention-win32-x64-msvc': 0.1.32
     dev: false
 
   /@ruvector/attention@0.1.4:
@@ -5086,7 +5048,7 @@ packages:
       obug: 2.1.1
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)
+      vitest: 4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -5461,7 +5423,7 @@ packages:
     dependencies:
       '@modelcontextprotocol/sdk': 1.25.1(hono@4.12.11)(zod@3.25.76)
       '@opentelemetry/api': 1.9.0
-      '@ruvector/attention': 0.1.4
+      '@ruvector/attention': 0.1.32
       '@ruvector/gnn': 0.1.25
       '@ruvector/graph-node': 0.1.26
       '@ruvector/router': 0.1.26
@@ -5510,123 +5472,6 @@ packages:
       - react-native-b4a
       - supports-color
     dev: false
-
-  /agentdb@2.0.0-alpha.3.7(@types/node@20.19.27)(express@5.2.1)(hono@4.12.3)(marked@11.2.0):
-    resolution: {integrity: sha512-03CUdFgrqw8Mplkvlz66YCKQBSD+l+r8ox4hTZmx56nvkJU8ltKMQJ9h9nz7kvxEbDz2PeZO+SqT45qHNEWRcg==}
-    engines: {node: '>=18.0.0'}
-    hasBin: true
-    requiresBuild: true
-    dependencies:
-      '@modelcontextprotocol/sdk': 1.25.1(hono@4.12.3)(zod@3.25.76)
-      '@opentelemetry/api': 1.9.0
-      '@ruvector/attention': 0.1.4
-      '@ruvector/gnn': 0.1.25
-      '@ruvector/graph-node': 0.1.26
-      '@ruvector/router': 0.1.26
-      '@ruvector/ruvllm': 0.2.4
-      '@ruvector/sona': 0.1.5
-      ajv: 8.17.1
-      chalk: 5.6.2
-      cli-table3: 0.6.5
-      commander: 12.1.0
-      dotenv: 16.6.1
-      inquirer: 9.3.8(@types/node@20.19.27)
-      jsonwebtoken: 9.0.3
-      marked-terminal: 6.2.0(marked@11.2.0)
-      ora: 7.0.1
-      ruvector: 0.1.95(zod@3.25.76)
-      ruvector-attention-wasm: 0.1.0
-      sql.js: 1.13.0
-      zod: 3.25.76
-    optionalDependencies:
-      '@opentelemetry/auto-instrumentations-node': 0.47.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-metrics-otlp-http': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-prometheus': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-trace-otlp-http': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-metrics': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-node': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
-      '@xenova/transformers': 2.17.2
-      argon2: 0.44.0
-      bcrypt: 6.0.0
-      better-sqlite3: 11.10.0
-      express-rate-limit: 8.3.2(express@5.2.1)
-      helmet: 8.1.0
-      hnswlib-node: 3.0.0
-      sharp: 0.32.6
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - '@types/node'
-      - bare-abort-controller
-      - bare-buffer
-      - encoding
-      - express
-      - hono
-      - marked
-      - react-native-b4a
-      - supports-color
-    dev: false
-    optional: true
-
-  /agentdb@2.0.0-alpha.3.7(@types/node@20.19.27)(express@5.2.1)(marked@11.2.0):
-    resolution: {integrity: sha512-03CUdFgrqw8Mplkvlz66YCKQBSD+l+r8ox4hTZmx56nvkJU8ltKMQJ9h9nz7kvxEbDz2PeZO+SqT45qHNEWRcg==}
-    engines: {node: '>=18.0.0'}
-    hasBin: true
-    requiresBuild: true
-    dependencies:
-      '@modelcontextprotocol/sdk': 1.27.1(zod@3.25.76)
-      '@opentelemetry/api': 1.9.0
-      '@ruvector/attention': 0.1.31
-      '@ruvector/gnn': 0.1.25
-      '@ruvector/graph-node': 0.1.26
-      '@ruvector/router': 0.1.26
-      '@ruvector/ruvllm': 0.2.4
-      '@ruvector/sona': 0.1.5
-      ajv: 8.17.1
-      chalk: 5.6.2
-      cli-table3: 0.6.5
-      commander: 12.1.0
-      dotenv: 16.6.1
-      inquirer: 9.3.8(@types/node@20.19.27)
-      jsonwebtoken: 9.0.3
-      marked-terminal: 6.2.0(marked@11.2.0)
-      ora: 7.0.1
-      ruvector: 0.1.100(zod@3.25.76)
-      ruvector-attention-wasm: 0.1.0
-      sql.js: 1.14.1
-      zod: 3.25.76
-    optionalDependencies:
-      '@opentelemetry/auto-instrumentations-node': 0.47.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-metrics-otlp-http': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-prometheus': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-trace-otlp-http': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-metrics': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-node': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
-      '@xenova/transformers': 2.17.2
-      argon2: 0.44.0
-      bcrypt: 6.0.0
-      better-sqlite3: 11.10.0
-      express-rate-limit: 8.3.2(express@5.2.1)
-      helmet: 8.1.0
-      hnswlib-node: 3.0.0
-      sharp: 0.32.6
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - '@types/node'
-      - bare-abort-controller
-      - bare-buffer
-      - encoding
-      - express
-      - marked
-      - react-native-b4a
-      - supports-color
-    dev: false
-    optional: true
 
   /agentdb@3.0.0-alpha.10(@types/node@20.19.27)(better-sqlite3@11.10.0)(marked@11.2.0):
     resolution: {integrity: sha512-Sk3yRRR44obOHRHKagD9svC5dYksVTMDB96+PeRTWcD9gPRPLhvGhVati8eS8cHW+RxPjfSzuQ7syuzlpY3BvQ==}
@@ -5653,7 +5498,7 @@ packages:
       sql.js: 1.13.0
       zod: 3.25.76
     optionalDependencies:
-      '@ruvector/attention': 0.1.31
+      '@ruvector/attention': 0.1.32
       '@ruvector/gnn': 0.1.25
       '@ruvector/graph-node': 2.0.3
       '@ruvector/router': 0.1.30
@@ -5692,7 +5537,7 @@ packages:
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-node': 0.52.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.40.0
-      '@ruvector/attention': 0.1.31
+      '@ruvector/attention': 0.1.32
       '@ruvector/gnn': 0.1.25
       '@ruvector/graph-node': 2.0.3
       '@ruvector/router': 0.1.30
@@ -5782,7 +5627,7 @@ packages:
       '@anthropic-ai/claude-code': 2.0.76
       '@anthropic-ai/sdk': 0.65.0(zod@3.25.76)
       '@google/genai': 1.34.0(@modelcontextprotocol/sdk@1.27.1)
-      '@ruvector/attention': 0.1.31
+      '@ruvector/attention': 0.1.32
       '@ruvector/gnn': 0.1.25
       '@supabase/supabase-js': 2.89.0
       '@types/react': 19.2.7
@@ -5843,7 +5688,7 @@ packages:
       - utf-8-validate
     dev: false
 
-  /agentic-flow@2.0.3(@types/node@20.19.27)(hono@4.12.3)(marked@11.2.0):
+  /agentic-flow@2.0.3(@types/node@20.19.27)(hono@4.12.11)(marked@11.2.0):
     resolution: {integrity: sha512-yqrcwWG+RztVKx4w9bvIiAymXEZn93GiTsF6qhYv2gOTQyhIl+VKwY9MLuQKz+Nr5wibTJ4EPm1Cib43usvNNA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
@@ -5874,9 +5719,9 @@ packages:
       yaml: 2.8.2
       zod: 3.25.76
     optionalDependencies:
-      '@ruvector/attention': 0.1.31
+      '@ruvector/attention': 0.1.32
       '@ruvector/sona': 0.1.5
-      agentdb: 2.0.0-alpha.3.7(@types/node@20.19.27)(express@5.2.1)(hono@4.12.3)(marked@11.2.0)
+      agentdb: 2.0.0-alpha.3.7(@types/node@20.19.27)(express@5.2.1)(hono@4.12.11)(marked@11.2.0)
       better-sqlite3: 11.10.0
       onnxruntime-node: 1.24.3
       sharp: 0.32.6
@@ -5894,64 +5739,6 @@ packages:
       - effect
       - encoding
       - hono
-      - jose
-      - marked
-      - react-native-b4a
-      - supports-color
-      - sury
-      - utf-8-validate
-    dev: false
-
-  /agentic-flow@2.0.3(@types/node@20.19.27)(marked@11.2.0):
-    resolution: {integrity: sha512-yqrcwWG+RztVKx4w9bvIiAymXEZn93GiTsF6qhYv2gOTQyhIl+VKwY9MLuQKz+Nr5wibTJ4EPm1Cib43usvNNA==}
-    engines: {node: '>=18.0.0'}
-    hasBin: true
-    requiresBuild: true
-    dependencies:
-      '@anthropic-ai/claude-agent-sdk': 0.1.76(zod@3.25.76)
-      '@anthropic-ai/sdk': 0.65.0(zod@3.25.76)
-      '@google/genai': 1.34.0(@modelcontextprotocol/sdk@1.27.1)
-      '@ruvector/core': 0.1.30
-      '@ruvector/edge-full': 0.1.0
-      '@ruvector/router': 0.1.26
-      '@ruvector/ruvllm': 0.2.4
-      '@ruvector/tiny-dancer': 0.1.15
-      '@supabase/supabase-js': 2.89.0
-      '@xenova/transformers': 2.17.2
-      axios: 1.13.2
-      dotenv: 16.6.1
-      express: 5.2.1
-      fastmcp: 3.26.7
-      glob: 13.0.0
-      gun: 0.2020.1241
-      http-proxy-middleware: 3.0.5
-      ruvector: 0.1.95(zod@3.25.76)
-      ruvector-onnx-embeddings-wasm: 0.1.2
-      tiktoken: 1.0.22
-      ulid: 3.0.2
-      ws: 8.18.3
-      yaml: 2.8.2
-      zod: 3.25.76
-    optionalDependencies:
-      '@ruvector/attention': 0.1.31
-      '@ruvector/sona': 0.1.5
-      agentdb: 2.0.0-alpha.3.7(@types/node@20.19.27)(express@5.2.1)(marked@11.2.0)
-      better-sqlite3: 11.10.0
-      onnxruntime-node: 1.24.3
-      sharp: 0.32.6
-      sql.js: 1.14.1
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - '@modelcontextprotocol/sdk'
-      - '@types/node'
-      - '@valibot/to-json-schema'
-      - arktype
-      - bare-abort-controller
-      - bare-buffer
-      - bufferutil
-      - debug
-      - effect
-      - encoding
       - jose
       - marked
       - react-native-b4a
@@ -8343,12 +8130,6 @@ packages:
     resolution: {integrity: sha512-r4xbIa3mGGGoH9nN4A14DOg2wx7y2oQyJEb5O57C/xzETG/qx4c7CVDQ5WMeKHZ7ORk2W0hZ/sQKXTav3cmYBA==}
     engines: {node: '>=16.9.0'}
     dev: false
-
-  /hono@4.12.3:
-    resolution: {integrity: sha512-SFsVSjp8sj5UumXOOFlkZOG6XS9SJDKw0TbwFeV+AJ8xlST8kxK5Z/5EYa111UY8732lK2S/xB653ceuaoGwpg==}
-    engines: {node: '>=16.9.0'}
-    dev: false
-    optional: true
 
   /hook-std@4.0.0:
     resolution: {integrity: sha512-IHI4bEVOt3vRUDJ+bFA9VUJlo7SzvFARPNLw75pqSmAOP2HmTWfFJtPvLBrDrlgjEYXY9zs7SFdHPQaJShkSCQ==}
@@ -10754,7 +10535,7 @@ packages:
     hasBin: true
     dependencies:
       '@modelcontextprotocol/sdk': 1.27.1(zod@3.25.76)
-      '@ruvector/attention': 0.1.31
+      '@ruvector/attention': 0.1.32
       '@ruvector/core': 0.1.30
       '@ruvector/gnn': 0.1.25
       '@ruvector/sona': 0.1.5
@@ -10775,7 +10556,7 @@ packages:
     hasBin: true
     dependencies:
       '@modelcontextprotocol/sdk': 1.27.1(zod@3.25.76)
-      '@ruvector/attention': 0.1.31
+      '@ruvector/attention': 0.1.32
       '@ruvector/core': 0.1.30
       '@ruvector/gnn': 0.1.25
       '@ruvector/sona': 0.1.5
@@ -12145,76 +11926,6 @@ packages:
       - sugarss
       - supports-color
       - terser
-    dev: true
-
-  /vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27):
-    resolution: {integrity: sha512-E4t7DJ9pESL6E3I8nFjPa4xGUd3PmiWDLsDztS2qXSJWfHtbQnwAWylaBvSNY48I3vr8PTqIZlyK8TE3V3CA4Q==}
-    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
-    hasBin: true
-    peerDependencies:
-      '@edge-runtime/vm': '*'
-      '@opentelemetry/api': ^1.9.0
-      '@types/node': ^20.0.0 || ^22.0.0 || >=24.0.0
-      '@vitest/browser-playwright': 4.0.16
-      '@vitest/browser-preview': 4.0.16
-      '@vitest/browser-webdriverio': 4.0.16
-      '@vitest/ui': 4.0.16
-      happy-dom: '*'
-      jsdom: '*'
-    peerDependenciesMeta:
-      '@edge-runtime/vm':
-        optional: true
-      '@opentelemetry/api':
-        optional: true
-      '@types/node':
-        optional: true
-      '@vitest/browser-playwright':
-        optional: true
-      '@vitest/browser-preview':
-        optional: true
-      '@vitest/browser-webdriverio':
-        optional: true
-      '@vitest/ui':
-        optional: true
-      happy-dom:
-        optional: true
-      jsdom:
-        optional: true
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@types/node': 20.19.27
-      '@vitest/expect': 4.0.16
-      '@vitest/mocker': 4.0.16(vite@7.3.0)
-      '@vitest/pretty-format': 4.0.16
-      '@vitest/runner': 4.0.16
-      '@vitest/snapshot': 4.0.16
-      '@vitest/spy': 4.0.16
-      '@vitest/utils': 4.0.16
-      es-module-lexer: 1.7.0
-      expect-type: 1.3.0
-      magic-string: 0.30.21
-      obug: 2.1.1
-      pathe: 2.0.3
-      picomatch: 4.0.3
-      std-env: 3.10.0
-      tinybench: 2.9.0
-      tinyexec: 1.0.2
-      tinyglobby: 0.2.15
-      tinyrainbow: 3.0.3
-      vite: 7.3.0(@types/node@20.19.27)(tsx@4.21.0)
-      why-is-node-running: 2.3.0
-    transitivePeerDependencies:
-      - jiti
-      - less
-      - lightningcss
-      - msw
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - terser
-      - tsx
-      - yaml
     dev: true
 
   /vitest@4.0.16(@opentelemetry/api@1.9.1)(@types/node@20.19.27):
