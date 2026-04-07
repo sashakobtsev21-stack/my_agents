@@ -516,7 +516,9 @@ export class LoRAAdapter {
     if (pipeline) {
       try {
         pipeline.saveCheckpoint(path);
-        return true;
+        // Verify ruvllm actually wrote the file (some versions are no-op)
+        const fs = await import('fs');
+        if (fs.existsSync(path)) return true;
       } catch { /* fall through to JS fallback */ }
     }
     // Fallback: save our own weights as JSON
