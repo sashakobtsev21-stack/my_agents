@@ -233,6 +233,23 @@ export const agentdbCausalEdge: MCPTool = {
       if (!sourceId) return { success: false, error: 'sourceId is required (non-empty string)' };
       if (!targetId) return { success: false, error: 'targetId is required (non-empty string)' };
       if (!relation) return { success: false, error: 'relation is required (non-empty string)' };
+      // Try native graph-node backend first (ADR-087)
+      try {
+        const graphBackend = await import('../ruvector/graph-backend.js');
+        if (await graphBackend.isGraphBackendAvailable()) {
+          const graphResult = await graphBackend.recordCausalEdge(
+            sourceId, targetId, relation,
+            typeof params.weight === 'number' ? validateScore(params.weight, 0.5) : undefined,
+          );
+          if (graphResult.success) {
+            // Also record in AgentDB bridge for compatibility
+            const bridge = await getBridge();
+            await bridge.bridgeRecordCausalEdge({ sourceId, targetId, relation, weight: typeof params.weight === 'number' ? validateScore(params.weight, 0.5) : undefined }).catch(() => {});
+            return { ...graphResult, _graphNodeBackend: true };
+          }
+        }
+      } catch { /* graph-node not available, fall through */ }
+
       const bridge = await getBridge();
       const result = await bridge.bridgeRecordCausalEdge({
         sourceId,

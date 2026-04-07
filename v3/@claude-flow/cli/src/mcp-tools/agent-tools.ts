@@ -240,6 +240,12 @@ export const agentTools: MCPTool[] = [
       store.agents[agentId] = agent;
       saveAgentStore(store);
 
+      // Record agent in graph database (ADR-087, best-effort)
+      try {
+        const { addNode } = await import('../ruvector/graph-backend.js');
+        await addNode({ id: agentId, type: 'agent', name: agentType });
+      } catch { /* graph-node not available */ }
+
       // Include Agent Booster routing info if applicable
       const response: Record<string, unknown> = {
         success: true,

@@ -711,6 +711,27 @@ class LocalReasoningBank {
 }
 
 // ============================================================================
+// @ruvector/ruvllm SonaCoordinator Integration
+// ============================================================================
+
+let ruvllmCoordinator: any = null;
+let ruvllmLoaded = false;
+
+async function loadRuvllmCoordinator(): Promise<any> {
+  if (ruvllmLoaded) return ruvllmCoordinator;
+  ruvllmLoaded = true;
+  try {
+    const { createRequire } = await import('module');
+    const requireCjs = createRequire(import.meta.url);
+    const ruvllm = requireCjs('@ruvector/ruvllm');
+    ruvllmCoordinator = new ruvllm.SonaCoordinator(ruvllm.DEFAULT_SONA_CONFIG);
+    return ruvllmCoordinator;
+  } catch {
+    return null;
+  }
+}
+
+// ============================================================================
 // Module State
 // ============================================================================
 
@@ -799,6 +820,9 @@ export async function initializeIntelligence(config?: Partial<SonaConfig>): Prom
 
     // Load persisted stats if available
     loadPersistedStats();
+
+    // Eagerly load ruvllm coordinator so stats reflect backend status
+    await loadRuvllmCoordinator();
 
     intelligenceInitialized = true;
 
@@ -951,6 +975,26 @@ export async function recordTrajectory(
       }
     }
 
+    // Forward trajectory to @ruvector/ruvllm SonaCoordinator if available
+    const ruvllmCoord = await loadRuvllmCoordinator();
+    if (ruvllmCoord) {
+      try {
+        const avgQuality = verdict === 'success' ? 1.0 : verdict === 'partial' ? 0.5 : 0.0;
+        ruvllmCoord.recordTrajectory({
+          steps: enrichedSteps.map(s => ({
+            state: s.content,
+            action: s.type,
+            reward: avgQuality,
+            embedding: s.embedding || []
+          })),
+          totalReward: avgQuality,
+          success: verdict === 'success'
+        });
+      } catch {
+        // ruvllm recording failed silently
+      }
+    }
+
     globalStats.trajectoriesRecorded++;
     globalStats.lastAdaptation = Date.now();
     savePersistedStats();
@@ -1025,9 +1069,28 @@ export async function findSimilarPatterns(
 /**
  * Get intelligence system statistics
  */
-export function getIntelligenceStats(): IntelligenceStats {
+export function getIntelligenceStats(): IntelligenceStats & {
+  _ruvllmBackend: string;
+  _ruvllmTrajectories: number;
+  _contrastiveTrainer?: { triplets: number; agents: number } | string;
+  _trainingBackend?: string;
+} {
   const sonaStats = sonaCoordinator?.stats();
   const bankStats = reasoningBank?.stats();
+
+  const ruvllmStats = ruvllmCoordinator?.stats?.() || null;
+
+  // Fetch cross-module stats for unified reporting
+  let contrastiveTrainer: { triplets: number; agents: number } | string = 'unavailable';
+  let trainingBackend = 'unavailable';
+  try {
+    // Synchronous check — contrastiveTrainer is module-level in sona-optimizer
+    // We read it via the SONAOptimizer singleton if available
+    const sonaModule = (globalThis as any).__claudeFlowSonaStats;
+    if (sonaModule) {
+      contrastiveTrainer = sonaModule._contrastiveTrainer || 'unavailable';
+    }
+  } catch { /* not available */ }
 
   return {
     sonaEnabled: !!sonaCoordinator,
@@ -1036,7 +1099,11 @@ export function getIntelligenceStats(): IntelligenceStats {
     signalsProcessed: globalStats.signalsProcessed,
     trajectoriesRecorded: globalStats.trajectoriesRecorded,
     lastAdaptation: globalStats.lastAdaptation,
-    avgAdaptationTime: sonaStats?.avgAdaptationMs ?? 0
+    avgAdaptationTime: sonaStats?.avgAdaptationMs ?? 0,
+    _ruvllmBackend: ruvllmStats ? 'active' : 'unavailable',
+    _ruvllmTrajectories: ruvllmStats?.trajectoriesBuffered || 0,
+    _contrastiveTrainer: contrastiveTrainer,
+    _trainingBackend: trainingBackend,
   };
 }
 
@@ -1319,6 +1386,15 @@ export async function clearAllPatterns(): Promise<void> {
  */
 export function getNeuralDataDir(): string {
   return getDataDir();
+}
+
+/**
+ * Trigger background learning on the @ruvector/ruvllm SonaCoordinator.
+ * No-op if ruvllm is not installed.
+ */
+export async function runBackgroundLearning(): Promise<void> {
+  const coord = await loadRuvllmCoordinator();
+  if (coord) coord.runBackgroundLoop();
 }
 
 /**

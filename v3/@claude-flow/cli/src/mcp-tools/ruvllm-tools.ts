@@ -21,8 +21,33 @@ export const ruvllmWasmTools: MCPTool[] = [
     handler: async () => {
       try {
         const mod = await loadRuvllmWasm();
-        const status = await mod.getRuvllmStatus();
-        return { content: [{ type: 'text', text: JSON.stringify(status, null, 2) }] };
+        const wasmStatus = await mod.getRuvllmStatus();
+
+        // Also include native ruvllm CJS backend status (ADR-086)
+        let nativeBackend: Record<string, unknown> = { available: false };
+        try {
+          const { getIntelligenceStats } = await import('../memory/intelligence.js');
+          const iStats = getIntelligenceStats();
+          const { getSONAStats } = await import('../memory/sona-optimizer.js');
+          const sStats = await getSONAStats();
+          nativeBackend = {
+            available: iStats._ruvllmBackend === 'active',
+            coordinator: iStats._ruvllmBackend || 'unavailable',
+            trajectories: iStats._ruvllmTrajectories || 0,
+            contrastiveTrainer: sStats._contrastiveTrainer !== 'unavailable' ? 'active' : 'unavailable',
+            trainingBackend: iStats._trainingBackend || 'unknown',
+          };
+        } catch { /* not initialized yet */ }
+
+        // Graph database status (ADR-087)
+        let graphStatus: Record<string, unknown> = { available: false };
+        try {
+          const { getGraphStats } = await import('../ruvector/graph-backend.js');
+          const gs = await getGraphStats();
+          graphStatus = { available: gs.backend === 'graph-node', ...gs };
+        } catch { /* not loaded */ }
+
+        return { content: [{ type: 'text', text: JSON.stringify({ wasm: wasmStatus, native: nativeBackend, graph: graphStatus }, null, 2) }] };
       } catch (err) {
         return { content: [{ type: 'text', text: JSON.stringify({ error: String(err) }) }], isError: true };
       }

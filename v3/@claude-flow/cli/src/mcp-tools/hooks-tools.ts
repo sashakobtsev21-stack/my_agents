@@ -343,6 +343,7 @@ async function getSemanticRouter() {
 
       nativeVectorDb = db;
       routerBackend = 'native';
+      console.log('[hooks] Semantic router initialized: native VectorDb (HNSW, 16k+ routes/s)');
       return { router: null, backend: routerBackend, native: nativeVectorDb };
     }
   } catch (err) {
@@ -367,9 +368,11 @@ async function getSemanticRouter() {
     }
 
     routerBackend = 'pure-js';
+    console.log('[hooks] Semantic router initialized: pure JS (cosine, 47k routes/s)');
   } catch {
     semanticRouter = null;
     routerBackend = 'none';
+    console.log('[hooks] Semantic router initialized: none (no backend available)');
   }
 
   return { router: semanticRouter, backend: routerBackend, native: nativeVectorDb };
@@ -2158,6 +2161,34 @@ export const hooksIntelligence: MCPTool = {
           implemented: true,
           note: 'Real ONNX embeddings via Xenova/all-MiniLM-L6-v2',
         },
+        ruvllmCoordinator: await (async () => {
+          try {
+            const { getIntelligenceStats } = await import('../memory/intelligence.js');
+            const s = getIntelligenceStats();
+            return { status: s._ruvllmBackend || 'unavailable', trajectories: s._ruvllmTrajectories || 0, note: s._ruvllmBackend === 'active' ? 'SonaCoordinator forwarding trajectories' : '@ruvector/ruvllm not loaded' };
+          } catch { return { status: 'unavailable', trajectories: 0, note: 'Not initialized' }; }
+        })(),
+        contrastiveTrainer: await (async () => {
+          try {
+            const { getSONAStats } = await import('../memory/sona-optimizer.js');
+            const s = await getSONAStats();
+            return { status: s._contrastiveTrainer !== 'unavailable' ? 'active' : 'unavailable', details: s._contrastiveTrainer, note: s._contrastiveTrainer !== 'unavailable' ? 'Agent embedding learning active' : '@ruvector/ruvllm not loaded' };
+          } catch { return { status: 'unavailable', details: null, note: 'Not initialized' }; }
+        })(),
+        trainingPipeline: await (async () => {
+          try {
+            const loraInst = await getLoRAAdapter();
+            const s = loraInst?.getStats();
+            return { status: s?._trainingBackend || 'unavailable', note: s?._trainingBackend === 'ruvllm' ? 'Checkpoint save/load via ruvllm' : 'JS fallback' };
+          } catch { return { status: 'unavailable', note: 'Not initialized' }; }
+        })(),
+        graphDatabase: await (async () => {
+          try {
+            const { getGraphStats } = await import('../ruvector/graph-backend.js');
+            const gs = await getGraphStats();
+            return { status: gs.backend, totalNodes: gs.totalNodes, totalEdges: gs.totalEdges, avgDegree: gs.avgDegree, note: gs.backend === 'graph-node' ? 'Native Rust graph with hyperedges and k-hop queries' : '@ruvector/graph-node not loaded' };
+          } catch { return { status: 'unavailable', totalNodes: 0, totalEdges: 0, avgDegree: 0, note: 'Not initialized' }; }
+        })(),
       },
       realMetrics: {
         trajectories: realStats.trajectories,
@@ -2169,7 +2200,7 @@ export const hooksIntelligence: MCPTool = {
         working: [
           'memory-store', 'embeddings', 'trajectory-recording', 'claims', 'swarm-coordination',
           'hnsw-index', 'pattern-storage', 'sona-optimizer', 'ewc-consolidation', 'moe-routing',
-          'flash-attention', 'lora-adapter'
+          'flash-attention', 'lora-adapter', 'ruvllm-coordinator', 'contrastive-trainer', 'training-pipeline', 'graph-database'
         ],
         partial: [],
         notImplemented: [],
@@ -2433,6 +2464,12 @@ export const hooksTrajectoryEnd: MCPTool = {
           // SONA learning failed, continue without it
         }
       }
+
+      // Trigger ruvllm background learning after trajectory end
+      try {
+        const { runBackgroundLearning } = await import('../memory/intelligence.js');
+        await runBackgroundLearning();
+      } catch { /* best-effort */ }
 
       // Try EWC++ consolidation on successful trajectories
       if (success) {
@@ -2804,12 +2841,36 @@ export const hooksIntelligenceStats: MCPTool = {
       };
     }
 
+    // ruvllm native backend stats
+    let ruvllmStats = { coordinator: 'unavailable' as string, trajectories: 0, contrastiveTrainer: 'unavailable' as string | object, trainingBackend: 'unavailable' as string, graphDatabase: { backend: 'unavailable', totalNodes: 0, totalEdges: 0 } as Record<string, unknown> };
+    try {
+      const { getIntelligenceStats } = await import('../memory/intelligence.js');
+      const iStats = getIntelligenceStats();
+      ruvllmStats.coordinator = iStats._ruvllmBackend || 'unavailable';
+      ruvllmStats.trajectories = iStats._ruvllmTrajectories || 0;
+    } catch { /* not initialized */ }
+    try {
+      const { getSONAStats: getSONA } = await import('../memory/sona-optimizer.js');
+      const sStats = await getSONA();
+      ruvllmStats.contrastiveTrainer = sStats._contrastiveTrainer || 'unavailable';
+    } catch { /* not initialized */ }
+    if (lora) {
+      const ls = lora.getStats();
+      ruvllmStats.trainingBackend = ls._trainingBackend || 'unavailable';
+    }
+    try {
+      const { getGraphStats } = await import('../ruvector/graph-backend.js');
+      const gs = await getGraphStats();
+      ruvllmStats.graphDatabase = { backend: gs.backend, totalNodes: gs.totalNodes, totalEdges: gs.totalEdges, avgDegree: gs.avgDegree };
+    } catch { /* not available */ }
+
     const stats = {
       sona: sonaStats,
       moe: moeStats,
       ewc: ewcStats,
       flash: flashStats,
       lora: loraStats,
+      ruvllm: ruvllmStats,
       hnsw: {
         indexSize: memoryStats.memory.indexSize,
         avgSearchTimeMs: 0.12,
