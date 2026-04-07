@@ -137,6 +137,9 @@ importers:
       '@ruvector/attention-darwin-arm64':
         specifier: 0.1.32
         version: 0.1.32
+      '@ruvector/diskann':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@ruvector/learning-wasm':
         specifier: ^0.1.29
         version: 0.1.29
@@ -3708,6 +3711,64 @@ packages:
       ruvector-core-linux-x64-gnu: 0.1.29
       ruvector-core-win32-x64-msvc: 0.1.29
     dev: false
+
+  /@ruvector/diskann-darwin-arm64@0.1.0:
+    resolution: {integrity: sha512-QMw34e96mbgXBkCALtIFQcQhx+Ic9uKf3XYKulT9Ibk3+GN9pdVDUldUZa1m9LZnzz/M8yCcl/9E90lr6hgEag==}
+    engines: {node: '>= 18'}
+    cpu: [arm64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@ruvector/diskann-darwin-x64@0.1.0:
+    resolution: {integrity: sha512-BpZHgwyxlqZXluFq937KhQZQRLoHq1mPCgbacZAO4nphhpoOWuT4li2vSv3FueYGpzyfFYu27lCJNg05S7r/hw==}
+    engines: {node: '>= 18'}
+    cpu: [x64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@ruvector/diskann-linux-arm64-gnu@0.1.0:
+    resolution: {integrity: sha512-nw2oc/172ZTd1ToQj6bbSkiQavJaU/xfOEW5IQzKMs/Jr3lMvEc9u/AiDBVoMaTe1b2zSjUi4y3n8bDU9Tg1ZQ==}
+    engines: {node: '>= 18'}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@ruvector/diskann-linux-x64-gnu@0.1.0:
+    resolution: {integrity: sha512-lRYcowyOiD4edl84PZQ2bwAlH4qTAAXr7G73rFIcwsf53iUm++qG1CgjGcUF9iI8FeEy4BIUgVheVywNOHLYsw==}
+    engines: {node: '>= 18'}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@ruvector/diskann-win32-x64-msvc@0.1.0:
+    resolution: {integrity: sha512-IAk0Tjco/WSRe6z7k6kR9JzmssMv6g7sg8JaknxbH5HexbKWloh07E9cgoOp2gtciyT1mYF66FgJaamUmHzmqA==}
+    engines: {node: '>= 18'}
+    cpu: [x64]
+    os: [win32]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@ruvector/diskann@0.1.0:
+    resolution: {integrity: sha512-PdhDpQPN7Ch+67LbZCFgosoJ+TmNczTL2X1my+Qh9ejFpPAFwfmE1gTco1HHBA7Vo0gdmB8GxttbqbG+I9vxiQ==}
+    engines: {node: '>=18.0.0'}
+    requiresBuild: true
+    optionalDependencies:
+      '@ruvector/diskann-darwin-arm64': 0.1.0
+      '@ruvector/diskann-darwin-x64': 0.1.0
+      '@ruvector/diskann-linux-arm64-gnu': 0.1.0
+      '@ruvector/diskann-linux-x64-gnu': 0.1.0
+      '@ruvector/diskann-win32-x64-msvc': 0.1.0
+    dev: false
+    optional: true
 
   /@ruvector/edge-full@0.1.0:
     resolution: {integrity: sha512-GSvq2bB+aTNXpISTqccdZwOroRLSdQhi33L7569QUVi9P7a03hEtdZSX/Gk5aWtDufp230T57uLXQUA1Q0uBeQ==}
