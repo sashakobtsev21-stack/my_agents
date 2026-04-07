@@ -262,37 +262,21 @@ const cveCommand: Command = {
     output.writeln(output.bold('CVE Database'));
     output.writeln(output.dim('─'.repeat(50)));
 
+    output.writeln(output.warning('⚠ No CVE database configured.'));
+    output.writeln(output.dim('This command requires a CVE data source (e.g., NVD API) which is not yet integrated.'));
+    output.writeln();
+
     if (checkCve) {
-      output.printBox([
-        `CVE ID: ${checkCve}`,
-        `Severity: CRITICAL (9.8)`,
-        `Status: Active`,
-        ``,
-        `Description: Remote code execution vulnerability`,
-        `Affected: lodash < 4.17.21`,
-        `Fix: Upgrade to lodash >= 4.17.21`,
-        ``,
-        `References:`,
-        `  - https://nvd.nist.gov/vuln/detail/${checkCve}`,
-        `  - https://github.com/advisories`,
-      ].join('\n'), 'CVE Details');
+      output.writeln(`To look up ${output.bold(checkCve)}, use one of these real sources:`);
     } else {
-      output.writeln(output.warning('⚠ No real CVE database configured. Showing example data.'));
-      output.writeln(output.dim('Run "npm audit" or "claude-flow security scan" for real vulnerability detection.'));
-      output.writeln();
-      output.printTable({
-        columns: [
-          { key: 'id', header: 'CVE ID (Example)', width: 22 },
-          { key: 'severity', header: 'Severity', width: 12 },
-          { key: 'package', header: 'Package', width: 20 },
-          { key: 'status', header: 'Status', width: 15 },
-        ],
-        data: [
-          { id: 'CVE-YYYY-NNNN', severity: output.error('CRITICAL'), package: 'example-pkg@1.0.0', status: output.warning('Example') },
-          { id: 'CVE-YYYY-NNNN', severity: output.warning('HIGH'), package: 'example-pkg@2.0.0', status: output.success('Example') },
-          { id: 'CVE-YYYY-NNNN', severity: output.info('MEDIUM'), package: 'example-pkg@3.0.0', status: output.success('Example') },
-        ],
-      });
+      output.writeln('To check for real vulnerabilities, use:');
+    }
+
+    output.writeln();
+    output.writeln(`  ${output.dim('$')} npm audit                                    ${output.dim('# dependency vulnerabilities')}`);
+    output.writeln(`  ${output.dim('$')} claude-flow security scan                     ${output.dim('# real code + dependency scan')}`);
+    if (checkCve) {
+      output.writeln(`  ${output.dim('$')} open https://nvd.nist.gov/vuln/detail/${checkCve}  ${output.dim('# NVD lookup')}`);
     }
 
     return { success: true };
@@ -319,22 +303,29 @@ const threatsCommand: Command = {
     output.writeln(output.bold(`Threat Model: ${model.toUpperCase()}`));
     output.writeln(output.dim('─'.repeat(50)));
 
+    output.writeln(output.warning('⚠ Automated threat modeling is not yet implemented.'));
+    output.writeln(output.dim('The table below is a STRIDE reference template, not an analysis of your code.'));
+    output.writeln();
+
     output.printTable({
       columns: [
-        { key: 'category', header: 'Category', width: 20 },
-        { key: 'threat', header: 'Threat', width: 30 },
-        { key: 'risk', header: 'Risk', width: 10 },
-        { key: 'mitigation', header: 'Mitigation', width: 30 },
+        { key: 'category', header: `${model.toUpperCase()} Category`, width: 20 },
+        { key: 'description', header: 'What to Assess', width: 40 },
+        { key: 'example', header: 'Example Mitigation', width: 30 },
       ],
       data: [
-        { category: 'Spoofing', threat: 'API key theft', risk: output.error('High'), mitigation: 'Use secure key storage' },
-        { category: 'Tampering', threat: 'Data manipulation', risk: output.warning('Medium'), mitigation: 'Input validation' },
-        { category: 'Repudiation', threat: 'Action denial', risk: output.info('Low'), mitigation: 'Audit logging' },
-        { category: 'Info Disclosure', threat: 'Data leakage', risk: output.error('High'), mitigation: 'Encryption at rest' },
-        { category: 'DoS', threat: 'Resource exhaustion', risk: output.warning('Medium'), mitigation: 'Rate limiting' },
-        { category: 'Elevation', threat: 'Privilege escalation', risk: output.error('High'), mitigation: 'RBAC implementation' },
+        { category: 'Spoofing', description: 'Can an attacker impersonate a user or service?', example: 'Strong authentication, mTLS' },
+        { category: 'Tampering', description: 'Can data or code be modified without detection?', example: 'Input validation, integrity checks' },
+        { category: 'Repudiation', description: 'Can actions be performed without accountability?', example: 'Audit logging, signed commits' },
+        { category: 'Info Disclosure', description: 'Can sensitive data leak to unauthorized parties?', example: 'Encryption at rest and in transit' },
+        { category: 'DoS', description: 'Can service availability be degraded?', example: 'Rate limiting, resource quotas' },
+        { category: 'Elevation', description: 'Can privileges be escalated beyond granted level?', example: 'RBAC, principle of least privilege' },
       ],
     });
+
+    output.writeln();
+    output.writeln(output.dim('For real threat modeling, review your architecture manually using this framework.'));
+    output.writeln(output.dim('Run "claude-flow security scan" for automated vulnerability detection.'));
 
     return { success: true };
   },

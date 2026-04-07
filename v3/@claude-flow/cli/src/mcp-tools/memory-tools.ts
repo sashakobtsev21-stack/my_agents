@@ -58,7 +58,7 @@ const MAX_KEY_LENGTH = 1024;
 const MAX_VALUE_SIZE = 1024 * 1024; // 1MB
 const MAX_QUERY_LENGTH = 4096;
 
-function validateMemoryInput(key?: string, value?: string, query?: string): void {
+function validateMemoryInput(key?: string, value?: string, query?: string, namespace?: string): void {
   if (key && key.length > MAX_KEY_LENGTH) {
     throw new Error(`Key exceeds maximum length of ${MAX_KEY_LENGTH} characters`);
   }
@@ -67,6 +67,14 @@ function validateMemoryInput(key?: string, value?: string, query?: string): void
   }
   if (query && query.length > MAX_QUERY_LENGTH) {
     throw new Error(`Query exceeds maximum length of ${MAX_QUERY_LENGTH} characters`);
+  }
+  // Reject path traversal and shell metacharacters in keys/namespaces (#1425)
+  const dangerousPattern = /[;&|`$(){}[\]<>!#\\\0]|\.\.[/\\]/;
+  if (key && dangerousPattern.test(key)) {
+    throw new Error('Key contains disallowed characters');
+  }
+  if (namespace && dangerousPattern.test(namespace)) {
+    throw new Error('Namespace contains disallowed characters');
   }
 }
 
@@ -215,7 +223,7 @@ export const memoryTools: MCPTool[] = [
         };
       }
 
-      validateMemoryInput(key, value);
+      validateMemoryInput(key, value, undefined, namespace);
 
       const startTime = performance.now();
 

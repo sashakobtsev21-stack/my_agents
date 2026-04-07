@@ -8,6 +8,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier, validateAgentSpawn } from './validate-input.js';
 
 // Storage paths
 const STORAGE_DIR = '.claude-flow';
@@ -197,6 +198,12 @@ export const agentTools: MCPTool[] = [
       required: ['agentType'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425: wire security validators to runtime)
+      const validation = await validateAgentSpawn(input);
+      if (!validation.valid) {
+        return { success: false, error: `Input validation failed: ${validation.errors.join('; ')}` };
+      }
+
       const store = loadAgentStore();
       const agentId = (input.agentId as string) || `agent-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const agentType = input.agentType as string;
@@ -240,8 +247,9 @@ export const agentTools: MCPTool[] = [
         agentType: agent.agentType,
         model: agent.model,
         modelRoutedBy: routingResult.routedBy,
-        status: 'spawned',
+        status: 'registered',
         createdAt: agent.createdAt,
+        note: 'Agent registered for coordination. Use Claude Code Task tool or claude -p to execute work.',
       };
 
       // Add Agent Booster info if task can skip LLM
