@@ -451,7 +451,9 @@ class LocalReasoningBank {
   }
 
   /**
-   * Load patterns from disk
+   * Load patterns from disk, deduplicating by content.
+   * When multiple patterns share identical content, keeps the one with
+   * highest confidence (ties broken by most recent lastUsedAt).
    */
   private loadFromDisk(): void {
     try {
@@ -459,9 +461,43 @@ class LocalReasoningBank {
       if (existsSync(path)) {
         const data = JSON.parse(readFileSync(path, 'utf-8'));
         if (Array.isArray(data)) {
+          const totalLoaded = data.length;
+
+          // Group by content to deduplicate
+          const byContent = new Map<string, StoredPattern>();
           for (const pattern of data) {
+            const key = pattern.content;
+            const existing = byContent.get(key);
+            if (!existing) {
+              byContent.set(key, pattern);
+            } else {
+              // Keep the one with higher confidence; break ties by lastUsedAt
+              if (
+                pattern.confidence > existing.confidence ||
+                (pattern.confidence === existing.confidence &&
+                  (pattern.lastUsedAt ?? 0) > (existing.lastUsedAt ?? 0))
+              ) {
+                // Merge: adopt the higher usageCount sum
+                pattern.usageCount = (pattern.usageCount ?? 0) + (existing.usageCount ?? 0);
+                byContent.set(key, pattern);
+              } else {
+                existing.usageCount = (existing.usageCount ?? 0) + (pattern.usageCount ?? 0);
+              }
+            }
+          }
+
+          // Populate the bank from deduplicated entries
+          for (const pattern of byContent.values()) {
             this.patterns.set(pattern.id, pattern);
             this.patternList.push(pattern);
+          }
+
+          const removed = totalLoaded - byContent.size;
+          if (removed > 0) {
+            console.log(`Deduplicated ${removed} patterns (${byContent.size} unique)`);
+            // Persist the compacted set immediately so the file shrinks on disk
+            this.dirty = true;
+            this.flushToDisk();
           }
         }
       }
@@ -507,6 +543,9 @@ class LocalReasoningBank {
 
   /**
    * Store a pattern - O(1)
+   * Deduplicates by content: if a pattern with the same content already
+   * exists, the existing entry is updated (bumped usageCount, higher
+   * confidence wins, refreshed lastUsedAt) instead of adding a duplicate.
    */
   store(pattern: Omit<StoredPattern, 'usageCount' | 'createdAt' | 'lastUsedAt'> & Partial<StoredPattern>): void {
     const now = Date.now();
@@ -529,6 +568,21 @@ class LocalReasoningBank {
         this.patternList[idx] = stored;
       }
     } else {
+      // Check for content-duplicate before inserting a new entry
+      const contentDupe = this.patternList.find(p => p.content === pattern.content);
+      if (contentDupe) {
+        // Merge into the existing pattern instead of adding a duplicate
+        contentDupe.usageCount++;
+        contentDupe.lastUsedAt = now;
+        if (stored.confidence > contentDupe.confidence) {
+          contentDupe.confidence = stored.confidence;
+        }
+        // Keep the Map in sync with the mutated object
+        this.patterns.set(contentDupe.id, contentDupe);
+        this.saveToDisk();
+        return;
+      }
+
       // Evict oldest if at capacity
       if (this.patterns.size >= this.maxSize) {
         const oldest = this.patternList.shift();

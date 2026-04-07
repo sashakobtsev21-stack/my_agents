@@ -1574,7 +1574,8 @@ const benchmarkCommand: Command = {
     spinner.start();
 
     try {
-      const attention: any = await import('@ruvector/attention');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic import of optional native WASM module with no type declarations
+      const attention = await import('@ruvector/attention') as unknown as Record<string, new (...args: number[]) => { computeRaw: (q: Float32Array, k: Float32Array[], v: Float32Array[]) => Float32Array }>;
 
       // Manual benchmark since benchmarkAttention has a binding bug
       const benchmarkMechanism = async (name: string, mechanism: { computeRaw: (q: Float32Array, k: Float32Array[], v: Float32Array[]) => Float32Array }) => {

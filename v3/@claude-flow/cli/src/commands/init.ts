@@ -37,7 +37,14 @@ async function initCodexAction(
 
   try {
     // Dynamic import of the Codex initializer with lazy loading fallback
-    let CodexInitializer: any;
+    interface CodexInitResult {
+      success: boolean;
+      errors?: string[];
+      filesCreated: string[];
+      skillsGenerated: string[];
+      warnings?: string[];
+    }
+    let CodexInitializer: (new () => { initialize: (options: Record<string, unknown>) => Promise<CodexInitResult> }) | undefined;
 
     // Try multiple resolution strategies for the @claude-flow/codex package
     // Use a variable to prevent TypeScript from statically resolving the optional module

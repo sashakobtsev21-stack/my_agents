@@ -13,6 +13,7 @@
  */
 
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier, validateText } from './validate-input.js';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -184,6 +185,8 @@ export const neuralTools: MCPTool[] = [
       required: ['modelType'],
     },
     handler: async (input) => {
+      if (input.modelId) { const v = validateIdentifier(input.modelId as string, 'modelId'); if (!v.valid) return { success: false, error: v.error }; }
+
       const store = loadNeuralStore();
       const modelId = (input.modelId as string) || `model-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       const modelType = input.modelType as NeuralModel['type'];
@@ -268,6 +271,9 @@ export const neuralTools: MCPTool[] = [
       required: ['input'],
     },
     handler: async (input) => {
+      { const v = validateText(input.input as string, 'input'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.modelId) { const v = validateIdentifier(input.modelId as string, 'modelId'); if (!v.valid) return { success: false, error: v.error }; }
+
       const store = loadNeuralStore();
       const modelId = input.modelId as string;
       const inputText = input.input as string;
@@ -333,6 +339,11 @@ export const neuralTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.patternId) { const v = validateIdentifier(input.patternId as string, 'patternId'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.name) { const v = validateText(input.name as string, 'name'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.type) { const v = validateIdentifier(input.type as string, 'type'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.query) { const v = validateText(input.query as string, 'query'); if (!v.valid) return { success: false, error: v.error }; }
+
       const store = loadNeuralStore();
       const action = (input.action as string) || 'list';
 
@@ -447,6 +458,8 @@ export const neuralTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.modelId) { const v = validateIdentifier(input.modelId as string, 'modelId'); if (!v.valid) return { success: false, error: v.error }; }
+
       const store = loadNeuralStore();
       const method = (input.method as string) || 'quantize';
       const targetReduction = (input.targetSize as number) || 0.5;
@@ -553,6 +566,8 @@ export const neuralTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.modelId) { const v = validateIdentifier(input.modelId as string, 'modelId'); if (!v.valid) return { success: false, error: v.error }; }
+
       const store = loadNeuralStore();
 
       if (input.modelId) {
@@ -606,6 +621,8 @@ export const neuralTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.modelId) { const v = validateIdentifier(input.modelId as string, 'modelId'); if (!v.valid) return { success: false, error: v.error }; }
+
       const store = loadNeuralStore();
       const target = (input.target as string) || 'balanced';
       const patterns = Object.values(store.patterns);

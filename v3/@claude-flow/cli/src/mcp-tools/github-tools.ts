@@ -6,6 +6,7 @@
  */
 
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier, validateText } from './validate-input.js';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
@@ -97,6 +98,10 @@ export const githubTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.owner) { const v = validateIdentifier(input.owner as string, 'owner'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.repo) { const v = validateIdentifier(input.repo as string, 'repo'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.branch) { const v = validateIdentifier(input.branch as string, 'branch'); if (!v.valid) return { success: false, error: v.error }; }
+
       const store = loadGitHubStore();
       const branch = (input.branch as string) || 'main';
       const cwd = getProjectCwd();
@@ -181,6 +186,13 @@ export const githubTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.owner) { const v = validateIdentifier(input.owner as string, 'owner'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.repo) { const v = validateIdentifier(input.repo as string, 'repo'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.title) { const v = validateText(input.title as string, 'title'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.body) { const v = validateText(input.body as string, 'body'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.branch) { const v = validateIdentifier(input.branch as string, 'branch'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.baseBranch) { const v = validateIdentifier(input.baseBranch as string, 'baseBranch'); if (!v.valid) return { success: false, error: v.error }; }
+
       const store = loadGitHubStore();
       const action = (input.action as string) || 'list';
       const gh = hasGhCli();
@@ -279,6 +291,11 @@ export const githubTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.owner) { const v = validateIdentifier(input.owner as string, 'owner'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.repo) { const v = validateIdentifier(input.repo as string, 'repo'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.title) { const v = validateText(input.title as string, 'title'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.body) { const v = validateText(input.body as string, 'body'); if (!v.valid) return { success: false, error: v.error }; }
+
       const store = loadGitHubStore();
       const action = (input.action as string) || 'list';
       const gh = hasGhCli();
@@ -364,6 +381,11 @@ export const githubTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.owner) { const v = validateIdentifier(input.owner as string, 'owner'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.repo) { const v = validateIdentifier(input.repo as string, 'repo'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.workflowId) { const v = validateIdentifier(input.workflowId as string, 'workflowId'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.ref) { const v = validateIdentifier(input.ref as string, 'ref'); if (!v.valid) return { success: false, error: v.error }; }
+
       const action = (input.action as string) || 'list';
       const gh = hasGhCli();
 
@@ -437,6 +459,9 @@ export const githubTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.owner) { const v = validateIdentifier(input.owner as string, 'owner'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.repo) { const v = validateIdentifier(input.repo as string, 'repo'); if (!v.valid) return { success: false, error: v.error }; }
+
       const metric = (input.metric as string) || 'all';
       const timeRange = (input.timeRange as string) || '30d';
       const cwd = getProjectCwd();

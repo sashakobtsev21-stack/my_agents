@@ -10,6 +10,7 @@
  */
 
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier, validateText } from './validate-input.js';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -214,6 +215,7 @@ export const coordinationTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.task) { const vTask = validateText(input.task, 'task'); if (!vTask.valid) return { success: false, error: vTask.error }; }
       const store = loadCoordStore();
       const action = (input.action as string) || 'get';
 
@@ -372,6 +374,7 @@ export const coordinationTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.nodeId) { const vNode = validateIdentifier(input.nodeId, 'nodeId'); if (!vNode.valid) return { success: false, error: vNode.error }; }
       const store = loadCoordStore();
       const action = (input.action as string) || 'list';
 
@@ -467,6 +470,8 @@ export const coordinationTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.proposalId) { const vProp = validateIdentifier(input.proposalId, 'proposalId'); if (!vProp.valid) return { success: false, error: vProp.error }; }
+      if (input.voterId) { const vVoter = validateIdentifier(input.voterId, 'voterId'); if (!vVoter.valid) return { success: false, error: vVoter.error }; }
       const store = loadCoordStore();
       const action = (input.action as string) || 'status';
       const strategy = (input.strategy as string) || 'raft';
@@ -707,6 +712,11 @@ export const coordinationTools: MCPTool[] = [
       required: ['task'],
     },
     handler: async (input) => {
+      const vTask = validateText(input.task, 'task');
+      if (!vTask.valid) return { success: false, error: vTask.error };
+      if (input.agents && Array.isArray(input.agents)) {
+        for (const a of input.agents as string[]) { const vA = validateIdentifier(a, 'agents[]'); if (!vA.valid) return { success: false, error: vA.error }; }
+      }
       const store = loadCoordStore();
       const task = input.task as string;
       const agents = (input.agents as string[]) || Object.keys(store.nodes);

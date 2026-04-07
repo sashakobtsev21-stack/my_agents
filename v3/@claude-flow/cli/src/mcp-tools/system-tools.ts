@@ -10,6 +10,7 @@
  */
 
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier } from './validate-input.js';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -470,6 +471,7 @@ export const systemTools: MCPTool[] = [
         return { success: false, error: 'Reset requires confirmation' };
       }
 
+      if (input.component) { const v = validateIdentifier(input.component, 'component'); if (!v.valid) return { success: false, error: v.error }; }
       const component = (input.component as string) || 'metrics';
 
       // Reset metrics to defaults

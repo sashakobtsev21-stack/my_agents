@@ -10,6 +10,7 @@
  */
 
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier, validateText } from './validate-input.js';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -103,6 +104,10 @@ export const daaTools: MCPTool[] = [
       required: ['id'],
     },
     handler: async (input) => {
+      const vId = validateIdentifier(input.id, 'id');
+      if (!vId.valid) return { success: false, error: vId.error };
+      if (input.name) { const vName = validateText(input.name, 'name'); if (!vName.valid) return { success: false, error: vName.error }; }
+      if (input.type) { const vType = validateIdentifier(input.type, 'type'); if (!vType.valid) return { success: false, error: vType.error }; }
       const store = loadDAAStore();
       const id = input.id as string;
 
@@ -167,6 +172,9 @@ export const daaTools: MCPTool[] = [
       required: ['agentId'],
     },
     handler: async (input) => {
+      const vAgentId = validateIdentifier(input.agentId, 'agentId');
+      if (!vAgentId.valid) return { success: false, error: vAgentId.error };
+      if (input.feedback) { const vFeedback = validateText(input.feedback, 'feedback'); if (!vFeedback.valid) return { success: false, error: vFeedback.error }; }
       const store = loadDAAStore();
       const agentId = input.agentId as string;
       const agent = store.agents[agentId];
@@ -227,6 +235,10 @@ export const daaTools: MCPTool[] = [
       required: ['id', 'name'],
     },
     handler: async (input) => {
+      const vId = validateIdentifier(input.id, 'id');
+      if (!vId.valid) return { success: false, error: vId.error };
+      const vName = validateText(input.name, 'name');
+      if (!vName.valid) return { success: false, error: vName.error };
       const store = loadDAAStore();
       const id = input.id as string;
 
@@ -269,6 +281,8 @@ export const daaTools: MCPTool[] = [
       required: ['workflowId'],
     },
     handler: async (input) => {
+      const vWorkflowId = validateIdentifier(input.workflowId, 'workflowId');
+      if (!vWorkflowId.valid) return { success: false, error: vWorkflowId.error };
       const store = loadDAAStore();
       const workflowId = input.workflowId as string;
       const workflow = store.workflows[workflowId];
@@ -319,6 +333,12 @@ export const daaTools: MCPTool[] = [
       required: ['sourceAgentId', 'targetAgentIds'],
     },
     handler: async (input) => {
+      const vSourceId = validateIdentifier(input.sourceAgentId, 'sourceAgentId');
+      if (!vSourceId.valid) return { success: false, error: vSourceId.error };
+      if (input.targetAgentIds && Array.isArray(input.targetAgentIds)) {
+        for (const t of input.targetAgentIds as string[]) { const vT = validateIdentifier(t, 'targetAgentIds[]'); if (!vT.valid) return { success: false, error: vT.error }; }
+      }
+      if (input.knowledgeDomain) { const vDomain = validateIdentifier(input.knowledgeDomain, 'knowledgeDomain'); if (!vDomain.valid) return { success: false, error: vDomain.error }; }
       const store = loadDAAStore();
       const sourceId = input.sourceAgentId as string;
       const targetIds = input.targetAgentIds as string[];
@@ -376,6 +396,7 @@ export const daaTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.agentId) { const vAgentId = validateIdentifier(input.agentId, 'agentId'); if (!vAgentId.valid) return { success: false, error: vAgentId.error }; }
       const store = loadDAAStore();
       const agentId = input.agentId as string;
 
@@ -432,6 +453,8 @@ export const daaTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.agentId) { const vAgentId = validateIdentifier(input.agentId, 'agentId'); if (!vAgentId.valid) return { success: false, error: vAgentId.error }; }
+      if (input.pattern) { const vPattern = validateIdentifier(input.pattern, 'pattern'); if (!vPattern.valid) return { success: false, error: vPattern.error }; }
       const store = loadDAAStore();
       const agentId = input.agentId as string;
       const action = (input.action as string) || 'analyze';

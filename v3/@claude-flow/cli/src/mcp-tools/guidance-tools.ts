@@ -8,6 +8,7 @@
  */
 
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier, validateText } from './validate-input.js';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -378,6 +379,8 @@ const guidanceCapabilities: MCPTool = {
     const area = params.area as string | undefined;
     const format = (params.format as string) || 'summary';
 
+    if (area) { const v = validateIdentifier(area, 'area'); if (!v.valid) return { content: [{ type: 'text', text: JSON.stringify({ error: v.error }, null, 2) }], isError: true }; }
+
     if (area) {
       const cap = CAPABILITY_CATALOG[area];
       if (!cap) {
@@ -420,6 +423,9 @@ const guidanceRecommend: MCPTool = {
   },
   handler: async (params: Record<string, unknown>) => {
     const task = params.task as string;
+
+    { const v = validateText(task, 'task'); if (!v.valid) return { content: [{ type: 'text', text: JSON.stringify({ error: v.error }, null, 2) }], isError: true }; }
+
     const matches: Array<{ area: string; capability: CapabilityArea; workflow: string; score: number }> = [];
 
     for (const route of TASK_ROUTES) {
@@ -538,6 +544,9 @@ const guidanceWorkflow: MCPTool = {
   },
   handler: async (params: Record<string, unknown>) => {
     const type = params.type as string;
+
+    { const v = validateIdentifier(type, 'type'); if (!v.valid) return { content: [{ type: 'text', text: JSON.stringify({ error: v.error }, null, 2) }], isError: true }; }
+
     const template = WORKFLOW_TEMPLATES[type];
 
     if (!template) {
@@ -587,6 +596,8 @@ const guidanceQuickRef: MCPTool = {
   },
   handler: async (params: Record<string, unknown>) => {
     const domain = params.domain as string;
+
+    { const v = validateIdentifier(domain, 'domain'); if (!v.valid) return { content: [{ type: 'text', text: JSON.stringify({ error: v.error }, null, 2) }], isError: true }; }
 
     const refs: Record<string, { title: string; commands: Array<{ cmd: string; desc: string }> }> = {
       'getting-started': {

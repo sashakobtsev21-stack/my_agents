@@ -7,6 +7,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier, validateText } from './validate-input.js';
 
 // Storage paths
 const STORAGE_DIR = '.claude-flow';
@@ -234,6 +235,9 @@ export const hiveMindTools: MCPTool[] = [
         return { success: false, error: 'Hive-mind not initialized. Run hive-mind/init first.' };
       }
 
+      if (input.agentType) { const v = validateIdentifier(input.agentType as string, 'agentType'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.prefix) { const v = validateIdentifier(input.prefix as string, 'prefix'); if (!v.valid) return { success: false, error: v.error }; }
+
       const count = Math.min(Math.max(1, (input.count as number) || 1), 20); // Cap at 20
       const role = (input.role as string) || 'worker';
       const agentType = (input.agentType as string) || 'worker';
@@ -294,6 +298,8 @@ export const hiveMindTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.queenId) { const v = validateIdentifier(input.queenId as string, 'queenId'); if (!v.valid) return { success: false, error: v.error }; }
+
       const state = loadHiveState();
       const hiveId = `hive-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const queenId = (input.queenId as string) || `queen-${Date.now()}`;
@@ -444,6 +450,8 @@ export const hiveMindTools: MCPTool[] = [
       const state = loadHiveState();
       const agentId = input.agentId as string;
 
+      { const v = validateIdentifier(agentId, 'agentId'); if (!v.valid) return { success: false, error: v.error }; }
+
       if (!state.initialized) {
         return { success: false, error: 'Hive-mind not initialized' };
       }
@@ -476,6 +484,8 @@ export const hiveMindTools: MCPTool[] = [
     handler: async (input) => {
       const state = loadHiveState();
       const agentId = input.agentId as string;
+
+      { const v = validateIdentifier(agentId, 'agentId'); if (!v.valid) return { success: false, agentId, error: v.error }; }
 
       const index = state.workers.indexOf(agentId);
       if (index > -1) {
@@ -513,6 +523,10 @@ export const hiveMindTools: MCPTool[] = [
       required: ['action'],
     },
     handler: async (input) => {
+      if (input.proposalId) { const v = validateIdentifier(input.proposalId as string, 'proposalId'); if (!v.valid) return { action: input.action, error: v.error }; }
+      if (input.voterId) { const v = validateIdentifier(input.voterId as string, 'voterId'); if (!v.valid) return { action: input.action, error: v.error }; }
+      if (input.type) { const v = validateText(input.type as string, 'type'); if (!v.valid) return { action: input.action, error: v.error }; }
+
       const state = loadHiveState();
       const action = input.action as string;
       const strategy = (input.strategy as ConsensusStrategy) || 'raft';
@@ -826,6 +840,9 @@ export const hiveMindTools: MCPTool[] = [
         return { success: false, error: 'Hive-mind not initialized' };
       }
 
+      { const v = validateText(input.message as string, 'message'); if (!v.valid) return { success: false, error: v.error }; }
+      if (input.fromId) { const v = validateIdentifier(input.fromId as string, 'fromId'); if (!v.valid) return { success: false, error: v.error }; }
+
       const messageId = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
       // Store in shared memory
@@ -930,6 +947,8 @@ export const hiveMindTools: MCPTool[] = [
       required: ['action'],
     },
     handler: async (input) => {
+      if (input.key) { const v = validateIdentifier(input.key as string, 'key'); if (!v.valid) return { action: input.action, error: v.error }; }
+
       const state = loadHiveState();
       const action = input.action as string;
       const key = input.key as string;

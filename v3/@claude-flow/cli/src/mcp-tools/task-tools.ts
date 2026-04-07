@@ -7,6 +7,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier, validateText } from './validate-input.js';
 
 // Storage paths
 const STORAGE_DIR = '.claude-flow';
@@ -83,6 +84,12 @@ export const taskTools: MCPTool[] = [
       required: ['type', 'description'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vType = validateIdentifier(input.type, 'type');
+      if (!vType.valid) return { success: false, error: vType.error };
+      const vDesc = validateText(input.description, 'description');
+      if (!vDesc.valid) return { success: false, error: vDesc.error };
+
       const store = loadTaskStore();
       const taskId = `task-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -127,6 +134,10 @@ export const taskTools: MCPTool[] = [
       required: ['taskId'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vId = validateIdentifier(input.taskId, 'taskId');
+      if (!vId.valid) return { success: false, error: vId.error };
+
       const store = loadTaskStore();
       const taskId = input.taskId as string;
       const task = store.tasks[taskId];
@@ -230,6 +241,10 @@ export const taskTools: MCPTool[] = [
       required: ['taskId'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vId = validateIdentifier(input.taskId, 'taskId');
+      if (!vId.valid) return { success: false, error: vId.error };
+
       const store = loadTaskStore();
       const taskId = input.taskId as string;
       const task = store.tasks[taskId];
@@ -293,6 +308,10 @@ export const taskTools: MCPTool[] = [
       required: ['taskId'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vId = validateIdentifier(input.taskId, 'taskId');
+      if (!vId.valid) return { success: false, error: vId.error };
+
       const store = loadTaskStore();
       const taskId = input.taskId as string;
       const task = store.tasks[taskId];
@@ -343,6 +362,10 @@ export const taskTools: MCPTool[] = [
       required: ['taskId'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vId = validateIdentifier(input.taskId, 'taskId');
+      if (!vId.valid) return { success: false, error: vId.error };
+
       const store = loadTaskStore();
       const taskId = input.taskId as string;
       const task = store.tasks[taskId];
@@ -426,6 +449,14 @@ export const taskTools: MCPTool[] = [
       required: ['taskId'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vId = validateIdentifier(input.taskId, 'taskId');
+      if (!vId.valid) return { success: false, error: vId.error };
+      if (input.reason) {
+        const v = validateText(input.reason, 'reason');
+        if (!v.valid) return { success: false, error: v.error };
+      }
+
       const store = loadTaskStore();
       const taskId = input.taskId as string;
       const task = store.tasks[taskId];

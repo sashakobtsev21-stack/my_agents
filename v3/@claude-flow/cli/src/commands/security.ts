@@ -58,9 +58,9 @@ const scanCommand: Command = {
                 maxBuffer: 10 * 1024 * 1024,
                 stdio: ['pipe', 'pipe', 'pipe'],
               });
-            } catch (auditErr: any) {
+            } catch (auditErr: unknown) {
               // npm audit exits non-zero when vulnerabilities found — stdout still has JSON
-              auditResult = auditErr.stdout || '{}';
+              auditResult = (auditErr instanceof Error && 'stdout' in auditErr ? (auditErr as { stdout: string }).stdout : undefined) || '{}';
             }
 
             try {

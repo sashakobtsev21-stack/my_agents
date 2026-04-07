@@ -8,6 +8,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, resolve } from 'path';
 import type { MCPTool } from './types.js';
+import { validateIdentifier, validateText } from './validate-input.js';
 
 // Configuration paths
 const CONFIG_DIR = '.claude-flow';
@@ -289,6 +290,9 @@ export const embeddingsTools: MCPTool[] = [
       }
 
       const text = input.text as string;
+
+      { const v = validateText(text, 'text'); if (!v.valid) return { success: false, error: v.error }; }
+
       const useHyperbolic = input.hyperbolic === true && config.hyperbolic.enabled;
 
       // Generate real ONNX embedding
@@ -356,6 +360,9 @@ export const embeddingsTools: MCPTool[] = [
       const text1 = input.text1 as string;
       const text2 = input.text2 as string;
       const metric = (input.metric as string) || 'cosine';
+
+      { const v = validateText(text1, 'text1'); if (!v.valid) return { success: false, error: v.error }; }
+      { const v = validateText(text2, 'text2'); if (!v.valid) return { success: false, error: v.error }; }
 
       // Generate real ONNX embeddings for both texts
       const [emb1, emb2] = await Promise.all([
@@ -448,6 +455,9 @@ export const embeddingsTools: MCPTool[] = [
       const topK = (input.topK as number) || 5;
       const threshold = (input.threshold as number) || 0.5;
       const namespace = input.namespace as string;
+
+      { const v = validateText(query, 'query'); if (!v.valid) return { success: false, error: v.error }; }
+      if (namespace) { const v = validateIdentifier(namespace, 'namespace'); if (!v.valid) return { success: false, error: v.error }; }
 
       const startTime = performance.now();
 

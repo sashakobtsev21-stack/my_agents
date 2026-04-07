@@ -65,7 +65,7 @@ const startCommand: Command = {
         }
       }
       if (thresholds.maxCpuLoad !== undefined || thresholds.minFreeMemoryPercent !== undefined) {
-        config.resourceThresholds = thresholds as any;
+        config.resourceThresholds = thresholds as DaemonConfig['resourceThresholds'];
       }
     }
 
@@ -256,7 +256,7 @@ async function startBackgroundDaemon(projectRoot: string, quiet: boolean, maxCpu
 
   // Platform-aware spawn flags
   const isWin = process.platform === 'win32';
-  const spawnOpts: any = {
+  const spawnOpts: Record<string, unknown> = {
     cwd: resolvedRoot,
     detached: !isWin,  // detached is POSIX-only; Windows uses windowsHide
     // Use 'ignore' for all stdio — passing fs.openSync() FDs causes the child to
@@ -502,8 +502,8 @@ const statusCommand: Command = {
       const workerData = status.config.workers.map(w => {
         const state = status.workers.get(w.type);
         // Check for headless mode from worker config or state
-        const isHeadless = (w as any).headless || (state as any)?.headless || false;
-        const sandboxMode = (w as any).sandbox || (state as any)?.sandbox || null;
+        const isHeadless = (w as unknown as Record<string, unknown>).headless || (state as unknown as Record<string, unknown> | undefined)?.headless || false;
+        const sandboxMode = (w as unknown as Record<string, unknown>).sandbox || (state as unknown as Record<string, unknown> | undefined)?.sandbox || null;
         return {
           type: w.enabled ? output.highlight(w.type) : output.dim(w.type),
           enabled: w.enabled ? output.success('✓') : output.dim('○'),

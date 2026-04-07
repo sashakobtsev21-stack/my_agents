@@ -17,6 +17,7 @@ import {
   getOfficialPlugins,
   type PluginEntry,
   type PluginSearchOptions,
+  type PluginType,
 } from '../plugins/store/index.js';
 import { getPluginManager, type InstalledPlugin } from '../plugins/manager.js';
 import { getBulkRatings } from '../services/registry-api.js';
@@ -113,7 +114,7 @@ const listCommand: Command = {
       // Build search options
       const searchOptions: PluginSearchOptions = {
         category,
-        type: type as any,
+        type: type as PluginType,
         sortBy: 'downloads',
         sortOrder: 'desc',
       };
@@ -768,7 +769,7 @@ const searchCommand: Command = {
       const searchOptions: PluginSearchOptions = {
         query,
         category,
-        type: type as any,
+        type: type as PluginType,
         verified,
         limit,
         sortBy: 'downloads',

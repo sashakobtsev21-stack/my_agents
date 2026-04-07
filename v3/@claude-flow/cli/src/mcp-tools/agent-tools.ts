@@ -8,7 +8,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { type MCPTool, getProjectCwd } from './types.js';
-import { validateIdentifier, validateAgentSpawn } from './validate-input.js';
+import { validateIdentifier, validateText, validateAgentSpawn } from './validate-input.js';
 
 // Storage paths
 const STORAGE_DIR = '.claude-flow';
@@ -278,6 +278,9 @@ export const agentTools: MCPTool[] = [
       required: ['agentId'],
     },
     handler: async (input) => {
+      const v = validateIdentifier(input.agentId, 'agentId');
+      if (!v.valid) return { success: false, error: `Input validation failed: ${v.error}` };
+
       const store = loadAgentStore();
       const agentId = input.agentId as string;
 
@@ -311,6 +314,9 @@ export const agentTools: MCPTool[] = [
       required: ['agentId'],
     },
     handler: async (input) => {
+      const v = validateIdentifier(input.agentId, 'agentId');
+      if (!v.valid) return { agentId: input.agentId, status: 'not_found', error: `Input validation failed: ${v.error}` };
+
       const store = loadAgentStore();
       const agentId = input.agentId as string;
       const agent = store.agents[agentId];
@@ -348,6 +354,15 @@ export const agentTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.status) {
+        const v = validateIdentifier(input.status, 'status');
+        if (!v.valid) return { agents: [], total: 0, error: `Input validation failed: ${v.error}` };
+      }
+      if (input.domain) {
+        const v = validateIdentifier(input.domain, 'domain');
+        if (!v.valid) return { agents: [], total: 0, error: `Input validation failed: ${v.error}` };
+      }
+
       const store = loadAgentStore();
       let agents = Object.values(store.agents);
 
@@ -396,6 +411,11 @@ export const agentTools: MCPTool[] = [
       required: ['action'],
     },
     handler: async (input) => {
+      if (input.agentType) {
+        const v = validateIdentifier(input.agentType, 'agentType');
+        if (!v.valid) return { action: input.action, error: `Input validation failed: ${v.error}` };
+      }
+
       const store = loadAgentStore();
       const agents = Object.values(store.agents).filter(a => a.status !== 'terminated');
       const action = (input.action as string) || 'status';  // Default to status
@@ -511,6 +531,11 @@ export const agentTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.agentId) {
+        const v = validateIdentifier(input.agentId, 'agentId');
+        if (!v.valid) return { agentId: input.agentId, error: `Input validation failed: ${v.error}` };
+      }
+
       const store = loadAgentStore();
       const agents = Object.values(store.agents).filter(a => a.status !== 'terminated');
       const threshold = (input.threshold as number) || 0.5;
@@ -588,6 +613,13 @@ export const agentTools: MCPTool[] = [
       required: ['agentId'],
     },
     handler: async (input) => {
+      const v = validateIdentifier(input.agentId, 'agentId');
+      if (!v.valid) return { success: false, agentId: input.agentId, error: `Input validation failed: ${v.error}` };
+      if (input.status) {
+        const vs = validateIdentifier(input.status, 'status');
+        if (!vs.valid) return { success: false, agentId: input.agentId, error: `Input validation failed: ${vs.error}` };
+      }
+
       const store = loadAgentStore();
       const agentId = input.agentId as string;
       const agent = store.agents[agentId];

@@ -6,6 +6,7 @@
  */
 
 import type { MCPTool, MCPToolResult } from './types.js';
+import { validateIdentifier, validateText } from './validate-input.js';
 
 // Session registry for multi-session support
 const browserSessions = new Map<string, {
@@ -86,6 +87,9 @@ export const browserTools: MCPTool[] = [
       required: ['url'],
     },
     handler: async (input) => {
+      const vUrl = validateText(input.url, 'url');
+      if (!vUrl.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vUrl.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { url, session, waitUntil } = input as {
         url: string;
         session?: string;
@@ -193,6 +197,8 @@ export const browserTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.selector) { const vSel = validateText(input.selector, 'selector'); if (!vSel.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vSel.error }) }], isError: true }; }
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { session, interactive, compact, depth, selector } = input as {
         session?: string;
         interactive?: boolean;
@@ -222,6 +228,8 @@ export const browserTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.path) { const vP = validateText(input.path, 'path'); if (!vP.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vP.error }) }], isError: true }; }
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { session, path, fullPage } = input as {
         session?: string;
         path?: string;
@@ -253,6 +261,9 @@ export const browserTools: MCPTool[] = [
       required: ['target'],
     },
     handler: async (input) => {
+      const vTarget = validateText(input.target, 'target');
+      if (!vTarget.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vTarget.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { target, session, button, count } = input as {
         target: string;
         session?: string;
@@ -280,6 +291,11 @@ export const browserTools: MCPTool[] = [
       required: ['target', 'value'],
     },
     handler: async (input) => {
+      const vTarget = validateText(input.target, 'target');
+      if (!vTarget.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vTarget.error }) }], isError: true };
+      const vValue = validateText(input.value, 'value');
+      if (!vValue.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vValue.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { target, value, session } = input as {
         target: string;
         value: string;
@@ -304,6 +320,11 @@ export const browserTools: MCPTool[] = [
       required: ['target', 'text'],
     },
     handler: async (input) => {
+      const vTarget = validateText(input.target, 'target');
+      if (!vTarget.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vTarget.error }) }], isError: true };
+      const vText = validateText(input.text, 'text');
+      if (!vText.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vText.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { target, text, session, delay } = input as {
         target: string;
         text: string;
@@ -329,6 +350,9 @@ export const browserTools: MCPTool[] = [
       required: ['key'],
     },
     handler: async (input) => {
+      const vKey = validateText(input.key, 'key');
+      if (!vKey.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vKey.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { key, session } = input as { key: string; session?: string };
       return execBrowserCommand(['press', key], session);
     },
@@ -347,6 +371,9 @@ export const browserTools: MCPTool[] = [
       required: ['target'],
     },
     handler: async (input) => {
+      const vTarget = validateText(input.target, 'target');
+      if (!vTarget.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vTarget.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { target, session } = input as { target: string; session?: string };
       return execBrowserCommand(['hover', target], session);
     },
@@ -366,6 +393,11 @@ export const browserTools: MCPTool[] = [
       required: ['target', 'value'],
     },
     handler: async (input) => {
+      const vTarget = validateText(input.target, 'target');
+      if (!vTarget.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vTarget.error }) }], isError: true };
+      const vValue = validateText(input.value, 'value');
+      if (!vValue.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vValue.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { target, value, session } = input as {
         target: string;
         value: string;
@@ -388,6 +420,9 @@ export const browserTools: MCPTool[] = [
       required: ['target'],
     },
     handler: async (input) => {
+      const vTarget = validateText(input.target, 'target');
+      if (!vTarget.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vTarget.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { target, session } = input as { target: string; session?: string };
       return execBrowserCommand(['check', target], session);
     },
@@ -406,6 +441,9 @@ export const browserTools: MCPTool[] = [
       required: ['target'],
     },
     handler: async (input) => {
+      const vTarget = validateText(input.target, 'target');
+      if (!vTarget.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vTarget.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { target, session } = input as { target: string; session?: string };
       return execBrowserCommand(['uncheck', target], session);
     },
@@ -453,6 +491,9 @@ export const browserTools: MCPTool[] = [
       required: ['target'],
     },
     handler: async (input) => {
+      const vTarget = validateText(input.target, 'target');
+      if (!vTarget.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vTarget.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { target, session } = input as { target: string; session?: string };
       return execBrowserCommand(['get', 'text', target], session);
     },
@@ -471,6 +512,9 @@ export const browserTools: MCPTool[] = [
       required: ['target'],
     },
     handler: async (input) => {
+      const vTarget = validateText(input.target, 'target');
+      if (!vTarget.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vTarget.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { target, session } = input as { target: string; session?: string };
       return execBrowserCommand(['get', 'value', target], session);
     },
@@ -527,6 +571,10 @@ export const browserTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.selector) { const vSel = validateText(input.selector, 'selector'); if (!vSel.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vSel.error }) }], isError: true }; }
+      if (input.text) { const vT = validateText(input.text, 'text'); if (!vT.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vT.error }) }], isError: true }; }
+      if (input.url) { const vU = validateText(input.url, 'url'); if (!vU.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vU.error }) }], isError: true }; }
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { selector, text, url, timeout, session } = input as {
         selector?: string;
         text?: string;
@@ -560,6 +608,9 @@ export const browserTools: MCPTool[] = [
       required: ['script'],
     },
     handler: async (input) => {
+      const vScript = validateText(input.script, 'script');
+      if (!vScript.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vScript.error }) }], isError: true };
+      if (input.session) { const vS = validateIdentifier(input.session, 'session'); if (!vS.valid) return { content: [{ type: 'text', text: JSON.stringify({ success: false, error: vS.error }) }], isError: true }; }
       const { script, session } = input as { script: string; session?: string };
       return execBrowserCommand(['eval', script], session);
     },

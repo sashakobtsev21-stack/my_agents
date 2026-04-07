@@ -13,6 +13,7 @@
  */
 
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier } from './validate-input.js';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import * as os from 'node:os';
@@ -200,6 +201,7 @@ export const performanceTools: MCPTool[] = [
       },
     },
     handler: async (_input) => {
+      if (_input.component) { const v = validateIdentifier(_input.component, 'component'); if (!v.valid) return { success: false, error: v.error }; }
       const loadAvg = os.loadavg();
       const cpus = os.cpus();
       const cpuPercent = Math.min((loadAvg[0] / cpus.length) * 100, 100);
@@ -404,6 +406,7 @@ export const performanceTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      if (input.target) { const v = validateIdentifier(input.target, 'target'); if (!v.valid) return { success: false, error: v.error }; }
       const target = (input.target as string) || 'all';
       const durationSec = Math.min((input.duration as number) || 1, 10);
       const durationMs = durationSec * 1000;

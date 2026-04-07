@@ -20,8 +20,8 @@
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/reuvencohen/)
 [![YouTube](https://img.shields.io/badge/YouTube-Subscribe-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@ReuvenCohen)
 
-# **Production-ready multi-agent AI orchestration for Claude Code**
-*Deploy 100+ specialized agents in coordinated swarms with self-learning capabilities, fault-tolerant consensus, and enterprise-grade security.*
+# **Multi-agent AI orchestration for Claude Code**
+*Deploy 16 specialized agent roles + custom types in coordinated swarms with self-learning capabilities, fault-tolerant consensus, and enterprise-grade security.*
 
 </div>
 
@@ -62,7 +62,7 @@ flowchart TB
 
     subgraph SWARM["🐝 Swarm Coordination"]
         TOPO[Topologies<br/>mesh/hier/ring/star]
-        CONS[Consensus<br/>Raft/BFT/Gossip/CRDT]
+        CONS[Consensus<br/>Raft/BFT/Gossip]
         CLM[Claims<br/>Human-Agent Coord]
     end
 
@@ -89,12 +89,12 @@ flowchart TB
             FLASH[Flash Attention<br/>2.49-7.47x]
         end
         subgraph ROW2[" "]
-            HNSW[HNSW<br/>150x-12,500x faster]
+            HNSW[HNSW<br/>HNSW-indexed]
             RB[ReasoningBank<br/>Pattern Store]
             HYP[Hyperbolic<br/>Poincaré]
         end
         subgraph ROW3[" "]
-            LORA[LoRA/Micro<br/>128x compress]
+            LORA[LoRA/Micro<br/>low-rank adaptation]
             QUANT[Int8 Quant<br/>3.92x memory]
             RL[9 RL Algos<br/>Q/SARSA/PPO/DQN]
         end
@@ -130,7 +130,7 @@ flowchart TB
 
 | Component | Purpose | Performance |
 |-----------|---------|-------------|
-| **SONA** | Self-Optimizing Neural Architecture - learns optimal routing | Fast adaptation |
+| **SONA** | Self-Optimizing Pattern Learning - learns optimal routing | Fast adaptation |
 | **EWC++** | Elastic Weight Consolidation - prevents catastrophic forgetting | Preserves learned patterns |
 | **Flash Attention** | Optimized attention computation | 2-7x speedup (benchmarked) |
 | **HNSW** | Hierarchical Navigable Small World vector search | Sub-millisecond retrieval |
@@ -230,8 +230,8 @@ The system stores successful patterns in vector memory, builds a knowledge graph
 | Knowledge Graph | MemoryGraph, PageRank, Communities | Identifies influential insights, detects clusters (ADR-049) |
 | Self-Learning | LearningBridge, SONA, ReasoningBank | Triggers learning from insights, confidence lifecycle (ADR-049) |
 | Agent Scopes | AgentMemoryScope, 3-scope dirs | Per-agent isolation + cross-agent knowledge transfer (ADR-049) |
-| Embeddings | ONNX Runtime, MiniLM | Local vectors without API calls (75x faster) |
-| Learning | SONA, MoE, ReasoningBank | Self-improves from results (<0.05ms adaptation) |
+| Embeddings | ONNX Runtime, MiniLM | Local vectors without API calls (faster with ONNX runtime) |
+| Learning | SONA, MoE, ReasoningBank | Self-improves from results (sub-millisecond pattern matching) |
 | Fine-tuning | MicroLoRA, EWC++ | Lightweight adaptation without full retraining |
 
 </details>
@@ -299,7 +299,7 @@ When you see these in hook output, the system is telling you how to optimize:
 ```bash
 # Agent Booster available - skip LLM entirely
 [AGENT_BOOSTER_AVAILABLE] Intent: var-to-const
-→ Use Edit tool directly, 352x faster than LLM
+→ Use Edit tool directly, instant (regex-based, no LLM call) than LLM
 
 # Model recommendation for Task tool
 [TASK_MODEL_RECOMMENDATION] Use model="haiku"
@@ -312,12 +312,12 @@ When you see these in hook output, the system is telling you how to optimize:
 |--------|---------------|----------|
 | Latency | <1ms | 2-5s |
 | Cost | $0 | $0.0002-$0.015 |
-| Speedup | **352x faster** | baseline |
+| Speedup | **instant (regex-based, no LLM call)** | baseline |
 
 </details>
 
 <details>
-<summary>💰 <strong>Token Optimizer</strong> — 30-50% token reduction</summary>
+<summary>💰 <strong>Token Optimizer</strong> — reduces token usage via pattern caching and smart routing</summary>
 
 The Token Optimizer integrates agentic-flow optimizations to reduce API costs by compressing context and caching results.
 
@@ -340,7 +340,7 @@ const optimizer = await getTokenOptimizer();
 // Get compact context (32% fewer tokens)
 const ctx = await optimizer.getCompactContext("auth patterns");
 
-// Optimized edit (352x faster for simple transforms)
+// Optimized edit (instant (regex-based, no LLM call) for simple transforms)
 await optimizer.optimizedEdit(file, oldStr, newStr, "typescript");
 
 // Optimal config for swarm (100% success rate)
@@ -399,19 +399,19 @@ swarm_init({
 | Capability | Claude Code Alone | Claude Code + Ruflo |
 |------------|-------------------|---------------------------|
 | **Agent Collaboration** | Agents work in isolation, no shared context | Agents collaborate via swarms with shared memory and consensus |
-| **Coordination** | Manual orchestration between tasks | Queen-led hierarchy with 5 consensus algorithms (Raft, Byzantine, Gossip) |
+| **Coordination** | Manual orchestration between tasks | Queen-led hierarchy with 3 consensus algorithms (Raft, Byzantine, Gossip) |
 | **Hive Mind** | ⛔ Not available | 🐝 Queen-led swarms with collective intelligence, 3 queen types, 8 worker types |
 | **Consensus** | ⛔ No multi-agent decisions | Byzantine fault-tolerant voting (f < n/3), weighted, majority |
 | **Memory** | Session-only, no persistence | HNSW vector memory with sub-ms retrieval + knowledge graph |
 | **Vector Database** | ⛔ No native support | 🐘 RuVector PostgreSQL with 77+ SQL functions, ~61µs search, 16,400 QPS |
 | **Knowledge Graph** | ⛔ Flat insight lists | PageRank + community detection identifies influential insights (ADR-049) |
 | **Collective Memory** | ⛔ No shared knowledge | Shared knowledge base with LRU cache, SQLite persistence, 8 memory types |
-| **Learning** | Static behavior, no adaptation | SONA self-learning with <0.05ms adaptation, LearningBridge for insights |
+| **Learning** | Static behavior, no adaptation | SONA self-learning with sub-millisecond pattern matching, LearningBridge for insights |
 | **Agent Scoping** | Single project scope | 3-scope agent memory (project/local/user) with cross-agent transfer |
 | **Task Routing** | You decide which agent to use | Intelligent routing based on learned patterns (89% accuracy) |
 | **Complex Tasks** | Manual breakdown required | Automatic decomposition across 5 domains (Security, Core, Integration, Support) |
 | **Background Workers** | Nothing runs automatically | 12 context-triggered workers auto-dispatch on file changes, patterns, sessions |
-| **LLM Provider** | Anthropic only | 6 providers with automatic failover and cost-based routing (85% savings) |
+| **LLM Provider** | Anthropic only | 5 providers (Anthropic, OpenAI, Google, Cohere, Ollama) with automatic failover and cost-based routing (cost-optimized routing) |
 | **Security** | Standard protections | CVE-hardened with bcrypt, input validation, path traversal prevention |
 | **Performance** | Baseline | Faster tasks via parallel swarm spawning and intelligent routing |
 
@@ -726,7 +726,7 @@ Ruflo v3 introduces **self-learning neural capabilities** that no other agent or
 | **Pattern Learning** | ✅ From trajectories | ⛔ | ⛔ | ⛔ | ⛔ |
 | **Expert Routing** | ✅ MoE (8 experts) | Manual | Graph edges | ⛔ | Fixed |
 | **Attention Optimization** | ✅ Flash Attention | ⛔ | ⛔ | ⛔ | ⛔ |
-| **Low-Rank Adaptation** | ✅ LoRA (128x compress) | ⛔ | ⛔ | ⛔ | ⛔ |
+| **Low-Rank Adaptation** | ✅ LoRA (low-rank adaptation) | ⛔ | ⛔ | ⛔ | ⛔ |
 
 #### 💾 Memory & Embeddings
 
@@ -783,7 +783,7 @@ What makes Ruflo different from other agent frameworks? These 10 capabilities wo
 
 | | Feature | What It Does | Technical Details |
 |---|---------|--------------|-------------------|
-| 🧠 | **SONA** | Learns which agents perform best for each task type and routes work accordingly | Self-Optimizing Neural Architecture |
+| 🧠 | **SONA** | Learns which agents perform best for each task type and routes work accordingly | Self-Optimizing Pattern Learning |
 | 🔒 | **EWC++** | Preserves learned patterns when training on new ones — no forgetting | Elastic Weight Consolidation prevents catastrophic forgetting |
 | 🎯 | **MoE** | Routes tasks through 8 specialized expert networks based on task type | Mixture of 8 Experts with dynamic gating |
 | ⚡ | **Flash Attention** | Accelerates attention computation for faster agent responses | Optimized attention via @ruvector/attention |
@@ -797,7 +797,7 @@ What makes Ruflo different from other agent frameworks? These 10 capabilities wo
 </details>
 
 <details>
-<summary>💰 <strong>Intelligent 3-Tier Model Routing</strong> — Save 75% on API costs, extend Claude Max 2.5x</summary>
+<summary>💰 <strong>Intelligent 3-Tier Model Routing</strong> — Reduce API costs by routing simple tasks to cheaper models</summary>
 
 Not every task needs the most powerful (and expensive) model. Ruflo analyzes each request and automatically routes it to the cheapest handler that can do the job well. Simple code transforms skip the LLM entirely using WebAssembly. Medium tasks use faster, cheaper models. Only complex architecture decisions use Opus.
 
@@ -806,7 +806,7 @@ Not every task needs the most powerful (and expensive) model. Ruflo analyzes eac
 | Benefit | Impact |
 |---------|--------|
 | 💵 **API Cost Reduction** | 75% lower costs by using right-sized models |
-| ⏱️ **Claude Max Extension** | 2.5x more tasks within your quota limits |
+| ⏱️ **Claude Max Extension** | More tasks within quota via smart model selection |
 | 🚀 **Faster Simple Tasks** | <1ms for transforms vs 2-5s with LLM |
 | 🎯 **Zero Wasted Tokens** | Simple edits use 0 tokens (WASM handles them) |
 
@@ -818,7 +818,7 @@ Not every task needs the most powerful (and expensive) model. Ruflo analyzes eac
 | **2** | Haiku/Sonnet | 500ms-2s | $0.0002-$0.003 | Bug fixes, refactoring, feature implementation |
 | **3** | Opus | 2-5s | $0.015 | Architecture, security design, distributed systems |
 
-**Benchmark Results:** 100% routing accuracy, 0.57ms avg routing decision latency
+**Routing:** Q-learning with epsilon-greedy exploration, sub-millisecond decision latency
 
 </details>
 
@@ -1563,7 +1563,7 @@ Comprehensive capabilities for enterprise-grade AI agent orchestration.
 Comprehensive feature set for enterprise-grade AI agent orchestration.
 
 <details open>
-<summary>🤖 <strong>Agent Ecosystem</strong> — 100+ specialized agents across 8 categories</summary>
+<summary>🤖 <strong>Agent Ecosystem</strong> — 16 specialized agent roles + custom types across 8 categories</summary>
 
 Pre-built agents for every development task, from coding to security audits.
 
@@ -1785,7 +1785,7 @@ Install these optional plugins to extend Ruflo capabilities:
 |--------|---------|-------------|-----------------|
 | **@claude-flow/plugin-agentic-qe** | 3.0.0-alpha.2 | Quality Engineering with 58 AI agents across 12 DDD contexts. TDD, coverage analysis, security scanning, chaos engineering, accessibility testing. | `npm install @claude-flow/plugin-agentic-qe` |
 | **@claude-flow/plugin-prime-radiant** | 0.1.4 | Mathematical AI interpretability with 6 engines: sheaf cohomology, spectral analysis, causal inference, quantum topology, category theory, HoTT proofs. | `npm install @claude-flow/plugin-prime-radiant` |
-| **@claude-flow/plugin-gastown-bridge** | 0.1.0 | Gas Town orchestrator integration with WASM-accelerated formula parsing (352x faster), Beads sync, convoy management, and graph analysis. 20 MCP tools. | `npx ruflo@latest plugins install -n @claude-flow/plugin-gastown-bridge` |
+| **@claude-flow/plugin-gastown-bridge** | 0.1.0 | Gas Town orchestrator integration with WASM-accelerated formula parsing (instant (regex-based, no LLM call)), Beads sync, convoy management, and graph analysis. 20 MCP tools. | `npx ruflo@latest plugins install -n @claude-flow/plugin-gastown-bridge` |
 | **@claude-flow/teammate-plugin** | 1.0.0-alpha.1 | Native TeammateTool integration for Claude Code v2.1.19+. BMSSP WASM acceleration, rate limiting, circuit breaker, semantic routing. 21 MCP tools. | `npx ruflo@latest plugins install -n @claude-flow/teammate-plugin` |
 
 #### 🏥 Domain-Specific Plugins
@@ -1830,7 +1830,7 @@ Install these optional plugins to extend Ruflo capabilities:
 **Teammate Plugin Features:**
 - Native TeammateTool integration for Claude Code v2.1.19+
 - 21 MCP tools: `teammate/spawn`, `teammate/coordinate`, `teammate/broadcast`, `teammate/discover-teams`, `teammate/route-task`, etc.
-- BMSSP WASM acceleration for topology optimization (352x faster)
+- BMSSP WASM acceleration for topology optimization (instant (regex-based, no LLM call))
 - Rate limiting with sliding window (configurable limits)
 - Circuit breaker for fault tolerance (closed/open/half-open states)
 - Semantic routing with skill-based teammate selection
@@ -2051,7 +2051,7 @@ npx ruflo@latest worker status
 </details>
 
 <details>
-<summary>☁️ <strong>LLM Providers</strong> — 6 providers with automatic failover</summary>
+<summary>☁️ <strong>LLM Providers</strong> — 5 providers (Anthropic, OpenAI, Google, Cohere, Ollama) with automatic failover</summary>
 
 | Provider | Models | Features | Cost |
 |----------|--------|----------|------|
@@ -2105,7 +2105,7 @@ npx ruflo@latest worker status
 | **Byzantine (PBFT)** | Practical Byzantine Fault Tolerance | f < n/3 faulty nodes | ~100ms | Adversarial environments |
 | **Raft** | Leader-based log replication | f < n/2 failures | ~50ms | Strong consistency |
 | **Gossip** | Epidemic protocol dissemination | High partition tolerance | ~200ms | Eventually consistent |
-| **CRDT** | Conflict-free Replicated Data Types | Strong eventual consistency | ~10ms | Concurrent updates |
+| **CRDT** | Conflict-free Replicated Data Types (planned) | Strong eventual consistency | ~10ms | Concurrent updates |
 | **Quorum** | Configurable read/write quorums | Flexible | ~75ms | Tunable consistency |
 
 </details>
@@ -2196,8 +2196,8 @@ npx ruflo@latest worker status
 | Component | Description | Performance |
 |-----------|-------------|-------------|
 | **AgenticFlowBridge** | agentic-flow@alpha integration | ADR-001 compliant |
-| **SONA Adapter** | Learning system integration | <0.05ms adaptation |
-| **Flash Attention** | Attention mechanism coordinator | 2.49x-7.47x speedup |
+| **SONA Adapter** | Learning system integration | sub-millisecond pattern matching |
+| **Flash Attention** | Attention mechanism coordinator | optimized attention (WASM-accelerated when available) |
 | **SDK Bridge** | Version negotiation, API compatibility | Auto-detection |
 | **Feature Flags** | Dynamic feature management | 9 configurable flags |
 | **Runtime Detection** | NAPI, WASM, JS auto-selection | Optimal performance |
@@ -2244,7 +2244,7 @@ npx ruflo@latest worker status
 
 | Feature | Description | Performance |
 |---------|-------------|-------------|
-| **SONA Learning** | Self-Optimizing Neural Architecture | <0.05ms adaptation |
+| **SONA Learning** | Self-Optimizing Pattern Learning | sub-millisecond pattern matching |
 | **5 Learning Modes** | real-time, balanced, research, edge, batch | Mode-specific optimization |
 | **9 RL Algorithms** | PPO, A2C, DQN, Q-Learning, SARSA, Decision Transformer, etc. | Comprehensive RL |
 | **LoRA Integration** | Low-Rank Adaptation for efficient fine-tuning | Minimal memory overhead |
@@ -2256,7 +2256,7 @@ npx ruflo@latest worker status
 |---------|-------------|-------------|
 | **Scalar Quantization** | Reduce vector precision for memory savings | 4x memory reduction |
 | **Product Quantization** | Compress vectors into codebooks | 8-32x memory reduction |
-| **HNSW Indexing** | Hierarchical Navigable Small World graphs | 150x-12,500x faster search |
+| **HNSW Indexing** | Hierarchical Navigable Small World graphs | HNSW-indexed search |
 | **LRU Caching** | Intelligent embedding cache with TTL | <1ms cache hits |
 | **Batch Processing** | Process multiple embeddings in single call | 10x throughput |
 | **Memory Compression** | Pattern distillation and pruning | 50-75% reduction |
@@ -2388,9 +2388,9 @@ npx ruflo hive-mind status                                  # Check status
 |---------|-------------|---------|
 | **ADR-001 Compliance** | Build on agentic-flow, don't duplicate | Eliminates 10,000+ duplicate lines |
 | **Core Foundation** | Use agentic-flow as the base layer | Unified architecture |
-| **SONA Integration** | Seamless learning system connection | <0.05ms adaptation |
-| **Flash Attention** | Optimized attention mechanisms | 2.49x-7.47x speedup |
-| **AgentDB Bridge** | Vector storage integration | 150x-12,500x faster search |
+| **SONA Integration** | Seamless learning system connection | sub-millisecond pattern matching |
+| **Flash Attention** | Optimized attention mechanisms | optimized attention (WASM-accelerated when available) |
+| **AgentDB Bridge** | Vector storage integration | HNSW-indexed search |
 | **Feature Flags** | Dynamic capability management | 9 configurable features |
 | **Runtime Detection** | NAPI/WASM/JS auto-selection | Optimal performance per platform |
 | **Graceful Fallback** | Works with or without agentic-flow | Always functional |
@@ -2678,7 +2678,7 @@ Complete command-line interface for all Ruflo operations.
 | `init` | 4 | Project initialization with wizard, presets, skills, hooks |
 | `agent` | 8 | Agent lifecycle (spawn, list, status, stop, metrics, pool, health, logs) |
 | `swarm` | 6 | Multi-agent swarm coordination and orchestration |
-| `memory` | 11 | AgentDB memory with vector search (150x-12,500x faster) |
+| `memory` | 11 | AgentDB memory with vector search (HNSW-indexed) |
 | `mcp` | 9 | MCP server management and tool execution |
 | `task` | 6 | Task creation, assignment, and lifecycle |
 | `session` | 7 | Session state management and persistence |
@@ -2700,7 +2700,7 @@ Complete command-line interface for all Ruflo operations.
 | `providers` | 5 | AI providers (list, add, remove, test, configure) |
 | `plugins` | 5 | Plugin management (list, install, uninstall, enable, disable) |
 | `deployment` | 5 | Deployment management (deploy, rollback, status, environments, release) |
-| `embeddings` | 4 | Vector embeddings (embed, batch, search, init) - 75x faster with agentic-flow |
+| `embeddings` | 4 | Vector embeddings (embed, batch, search, init) - faster with ONNX runtime with agentic-flow |
 | `claims` | 4 | Claims-based authorization (check, grant, revoke, list) |
 | `migrate` | 5 | V2 to V3 migration with rollback support |
 | `process` | 4 | Background process management |
@@ -2803,7 +2803,7 @@ The embeddings package (v3.0.0-alpha.12) provides high-performance vector embedd
 | **Document chunking** | Configurable overlap and size | Handles large documents |
 | **Normalization** | L2, L1, min-max, z-score | 4 normalization methods |
 | **Hyperbolic embeddings** | Poincaré ball model | Better hierarchical representation |
-| **agentic-flow ONNX** | Integrated ONNX runtime | 75x faster than API calls |
+| **agentic-flow ONNX** | Integrated ONNX runtime | faster with ONNX runtime than API calls |
 | **Neural substrate** | RuVector integration | Full learning pipeline |
 
 **Models Available:**
@@ -2994,7 +2994,7 @@ The statusline shows live context metrics read from `autopilot-state.json`:
 |------|---------|---------|----------|
 | 1 | **SQLite** (default) | `.claude-flow/data/transcript-archive.db` | WAL mode, indexed queries, ACID, importance ranking |
 | 2 | **RuVector PostgreSQL** | Configurable remote | TB-scale, pgvector embeddings, GNN search |
-| 3 | **AgentDB + HNSW** | In-memory + persist | 150x-12,500x faster semantic search |
+| 3 | **AgentDB + HNSW** | In-memory + persist | HNSW-indexed semantic search |
 | 4 | **JSON** (fallback) | `.claude-flow/data/transcript-archive.json` | Zero dependencies, always works |
 
 ### Configuration
@@ -3202,7 +3202,7 @@ When hooks run, they emit signals that guide routing decisions. Watch for these 
 
 | Signal | Meaning | Action |
 |--------|---------|--------|
-| `[AGENT_BOOSTER_AVAILABLE]` | Simple transform detected, skip LLM | Use Edit tool directly (352x faster, $0) |
+| `[AGENT_BOOSTER_AVAILABLE]` | Simple transform detected, skip LLM | Use Edit tool directly (instant (regex-based, no LLM call), $0) |
 | `[TASK_MODEL_RECOMMENDATION] Use model="haiku"` | Low complexity task | Pass `model: "haiku"` to Task tool |
 | `[TASK_MODEL_RECOMMENDATION] Use model="sonnet"` | Medium complexity task | Pass `model: "sonnet"` to Task tool |
 | `[TASK_MODEL_RECOMMENDATION] Use model="opus"` | High complexity task | Pass `model: "opus"` to Task tool |
@@ -3221,7 +3221,7 @@ $ npx ruflo@latest hooks pre-task --description "convert var to const in utils.t
 
 [AGENT_BOOSTER_AVAILABLE] Intent: var-to-const
 Recommendation: Use Edit tool directly
-Performance: <1ms (352x faster than LLM)
+Performance: <1ms (instant (regex-based, no LLM call) than LLM)
 Cost: $0
 ```
 
@@ -3243,7 +3243,7 @@ UserPrompt:
     → Inject top-5 patterns into Claude's context:
 
     [INTELLIGENCE] Relevant patterns for this task:
-      * (0.95) HNSW gives 150x-12,500x speedup [rank #1, 12x accessed]
+      * (0.95) HNSW gives HNSW-indexed search [rank #1, 12x accessed]
       * (0.88) London School TDD preferred [rank #3, 8x accessed]
 
 PostEdit:
@@ -3305,7 +3305,7 @@ The stats command shows:
     Never accessed:     3
 
   Top Patterns (by composite score)
-    #1  HNSW gives 150x-12,500x speedup
+    #1  HNSW gives HNSW-indexed search
          conf=0.600  pr=0.2099  score=0.3659  accessed=2x
     #2  London School TDD preferred
          conf=0.600  pr=0.1995  score=0.3597  accessed=2x
@@ -3686,7 +3686,7 @@ curl "https://publish-registry-xxx.cloudfunctions.net?action=import-model&cid=Qm
 
 ### Pre-trained Model Registry
 
-Import pre-trained learning patterns for common tasks. **90.5% average accuracy** across 40 patterns trained on 110,600+ examples.
+Import pre-defined rule-based patterns for common tasks. 40 patterns across 8 categories (trigger-action rules, not ML-trained models).
 
 | Model | Category | Patterns | Accuracy | Use Case |
 |-------|----------|----------|----------|----------|
@@ -3720,8 +3720,8 @@ npx ruflo@latest hooks route --task "review authentication code" --use-patterns
 | Metric | Fresh Install | With Pre-trained |
 |--------|---------------|------------------|
 | Patterns Available | 0 | 40 |
-| Detection Accuracy | ~50-60% | 90.5% |
-| Historical Examples | 0 | 110,600+ |
+| Detection Patterns | ~50-60% | 40 rule-based patterns |
+| Pattern Categories | 0 | 8 categories |
 | Issue Detection Rate | ~60-70% | ~90-95% |
 | Time to First Insight | Discovery needed | Immediate |
 
@@ -4050,8 +4050,8 @@ Skills are **reusable workflows** that combine agents, hooks, and patterns into 
 |-------|--------------|-------------|
 | `v3-ddd-architecture` | Bounded contexts, modular design, clean architecture | Large-scale refactoring |
 | `v3-security-overhaul` | CVE fixes, secure-by-default patterns | Security hardening |
-| `v3-memory-unification` | AgentDB unification, 150x-12,500x search improvements | Memory optimization |
-| `v3-performance-optimization` | 2.49x-7.47x speedup, memory reduction | Performance tuning |
+| `v3-memory-unification` | AgentDB unification, HNSW search improvements | Memory optimization |
+| `v3-performance-optimization` | optimized attention (WASM-accelerated when available), memory reduction | Performance tuning |
 | `v3-swarm-coordination` | 15-agent hierarchical mesh, 10 ADRs implementation | Swarm architecture |
 | `v3-mcp-optimization` | Connection pooling, load balancing, <100ms response | MCP performance |
 | `v3-core-implementation` | DDD domains, dependency injection, TypeScript | Core development |
@@ -4420,7 +4420,7 @@ npx ruflo@latest memory init --force
 npx ruflo@latest memory store --key "pattern-auth" --value "JWT authentication with refresh tokens"
 npx ruflo@latest memory store --key "pattern-cache" --value "Redis caching for API responses"
 
-# Build HNSW index for 150x-12,500x faster search
+# Build HNSW index for HNSW-indexed search
 npx ruflo@latest memory search --query "authentication" --build-hnsw
 
 # Semantic search (uses HNSW if built)
@@ -4501,7 +4501,7 @@ await aidefence.learnFromDetection(userInput, analysis, {
 
 | Provider | Latency | Quality | Cost | Offline | Best For |
 |----------|---------|---------|------|---------|----------|
-| **Agentic-Flow (ONNX)** | ~3ms | Good | Free | ✅ | Production (75x faster) |
+| **Agentic-Flow (ONNX)** | ~3ms | Good | Free | ✅ | Production (faster with ONNX runtime) |
 | **OpenAI** | ~50-100ms | Excellent | $0.02-0.13/1M | ❌ | Highest quality |
 | **Transformers.js** | ~230ms | Good | Free | ✅ | Local development |
 | **Mock** | <1ms | N/A | Free | ✅ | Testing |
@@ -4766,7 +4766,7 @@ Core infrastructure packages powering Ruflo's intelligence layer.
 [![npm downloads](https://img.shields.io/npm/dm/agentic-flow?color=green)](https://www.npmjs.com/package/agentic-flow)
 [![GitHub](https://img.shields.io/badge/GitHub-ruvnet%2Fagentic--flow-blue?logo=github)](https://github.com/ruvnet/agentic-flow)
 
-Ruflo v3 is built on top of **[agentic-flow](https://github.com/ruvnet/agentic-flow)**, a production-ready AI agent orchestration platform. This deep integration provides 352x faster code transformations, learning memory, and geometric intelligence.
+Ruflo v3 is built on top of **[agentic-flow](https://github.com/ruvnet/agentic-flow)**, a production-ready AI agent orchestration platform. This deep integration provides instant (regex-based, no LLM call) code transformations, learning memory, and geometric intelligence.
 
 ### Quick Start
 
@@ -4788,9 +4788,9 @@ claude mcp add agentic-flow -- npx agentic-flow mcp start
 
 | Component | Description | Performance |
 |-----------|-------------|-------------|
-| **Agent Booster** | Rust/WASM code transformations | 352x faster, $0 cost |
-| **ReasoningBank** | Learning memory with HNSW | 150x-12,500x search |
-| **ONNX Embeddings** | Local vector generation | 75x faster than Transformers.js |
+| **Agent Booster** | Rust/WASM code transformations | instant (regex-based, no LLM call), $0 cost |
+| **ReasoningBank** | Learning memory with HNSW | HNSW-indexed search |
+| **ONNX Embeddings** | Local vector generation | faster with ONNX runtime than Transformers.js |
 | **Embedding Geometry** | Geometric intelligence layer | <3ms latency |
 | **Multi-Model Router** | Intelligent model selection | 30-50% cost savings |
 | **QUIC Transport** | High-performance transport | Ultra-low latency |
@@ -5025,7 +5025,7 @@ npx agentic-flow mcp stdio
 <details>
 <summary>🔧 <strong>MCP Tools</strong> — 313 Integration Tools</summary>
 
-Agentic-flow exposes 310+ MCP tools for integration:
+The agentic-flow ecosystem exposes MCP tools across packages (ruflo CLI provides 314 tools):
 
 | Category | Tools | Examples |
 |----------|-------|----------|
@@ -5068,7 +5068,7 @@ const optimizer = await getTokenOptimizer();
 // Uses ReasoningBank (32% fewer tokens)
 const ctx = await optimizer.getCompactContext('auth patterns');
 
-// Uses Agent Booster (352x faster edits)
+// Uses Agent Booster (instant (regex-based, no LLM call) edits)
 await optimizer.optimizedEdit(file, old, new, 'typescript');
 
 // Uses Model Router (optimal model selection)
@@ -5197,7 +5197,7 @@ console.log('All agents completed:', results);
 |--------|-----|-----------------|
 | Concurrent commits | 15 ops/s | **350 ops/s (23x)** |
 | Context switching | 500-1000ms | **50-100ms (10x)** |
-| Conflict resolution | 30-40% auto | **87% auto (2.5x)** |
+| Conflict resolution | 30-40% auto | **AI-assisted (via agentic-jujutsu)** |
 | Lock waiting | 50 min/day | **0 min (∞)** |
 | SHA3-512 fingerprints | N/A | **<1ms** |
 
@@ -5494,7 +5494,7 @@ console.log(`Memory reduction: ${bench.memoryReduction}x`);
 </details>
 
 <details>
-<summary>🧠 <strong>@ruvector/sona</strong> — Self-Optimizing Neural Architecture</summary>
+<summary>🧠 <strong>@ruvector/sona</strong> — Self-Optimizing Pattern Learning</summary>
 
 SONA provides runtime-adaptive learning with minimal overhead:
 
@@ -5531,7 +5531,7 @@ await sona.consolidate();
 - **LoRA**: Low-rank adaptation for efficient fine-tuning
 - **EWC++**: Prevents catastrophic forgetting
 - **ReasoningBank**: Pattern storage with similarity search
-- **Sub-millisecond**: <0.05ms adaptation overhead
+- **Sub-millisecond**: sub-millisecond pattern matching overhead
 
 </details>
 
@@ -6403,7 +6403,7 @@ Statistical benchmarking, memory tracking, regression detection, and V3 performa
 | **Auto-Calibration** | Adjusts iterations for statistical significance | Automatic |
 | **Regression Detection** | Compare against baselines with significance testing | <10ms |
 | **V3 Targets** | Built-in targets for all performance metrics | Preconfigured |
-| **Flash Attention** | Validate 2.49x-7.47x speedup targets | Integrated |
+| **Flash Attention** | Validate optimized attention (WASM-accelerated when available) targets | Integrated |
 
 ### Quick Start
 
@@ -7349,7 +7349,7 @@ export CLAUDE_FLOW_HNSW_EF=100
 │ Pattern Matching      │ Self-learning (ReasoningBank)       │
 │ Security              │ CVE remediation + strict validation │
 │ Modular Architecture  │ 18 @claude-flow/* packages          │
-│ Agent Coordination    │ 100+ specialized agents              │
+│ Agent Coordination    │ 16 specialized agent roles + custom types              │
 │ Token Efficiency      │ 32% reduction with optimization     │
 └───────────────────────┴─────────────────────────────────────┘
 ```

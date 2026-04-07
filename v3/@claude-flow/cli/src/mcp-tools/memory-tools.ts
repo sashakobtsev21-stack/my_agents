@@ -13,6 +13,7 @@
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { join, resolve } from 'path';
 import type { MCPTool } from './types.js';
+import { validateIdentifier } from './validate-input.js';
 
 // Legacy JSON store interface (for migration)
 interface LegacyMemoryEntry {
@@ -280,7 +281,7 @@ export const memoryTools: MCPTool[] = [
       const key = input.key as string;
       const namespace = (input.namespace as string) || 'default';
 
-      validateMemoryInput(key);
+      validateMemoryInput(key, undefined, undefined, namespace);
 
       try {
         const result = await getEntry({ key, namespace });
@@ -415,7 +416,7 @@ export const memoryTools: MCPTool[] = [
       const key = input.key as string;
       const namespace = (input.namespace as string) || 'default';
 
-      validateMemoryInput(key);
+      validateMemoryInput(key, undefined, undefined, namespace);
 
       try {
         const result = await deleteEntry({ key, namespace });
@@ -458,6 +459,8 @@ export const memoryTools: MCPTool[] = [
       const namespace = input.namespace as string | undefined;
       const limit = (input.limit as number) || 50;
       const offset = (input.offset as number) || 0;
+
+      if (namespace) { const vNs = validateIdentifier(namespace, 'namespace'); if (!vNs.valid) throw new Error(vNs.error); }
 
       try {
         const result = await listEntries({
@@ -605,6 +608,7 @@ export const memoryTools: MCPTool[] = [
       const { homedir } = await import('os');
 
       const ns = (input.namespace as string) || 'claude-memories';
+      if (input.namespace) { const vNs = validateIdentifier(ns, 'namespace'); if (!vNs.valid) return { success: false, imported: 0, error: vNs.error }; }
       const allProjects = input.allProjects as boolean;
       const claudeProjectsDir = join(homedir(), '.claude', 'projects');
 
@@ -773,6 +777,8 @@ export const memoryTools: MCPTool[] = [
       const query = input.query as string;
       const limit = (input.limit as number) || 10;
       const ns = input.namespace as string | undefined;
+
+      if (ns) { const vNs = validateIdentifier(ns, 'namespace'); if (!vNs.valid) return { success: false, query, results: [], total: 0, error: vNs.error }; }
 
       // Search all namespaces unless filtered
       const namespaces = ns ? [ns] : ['default', 'claude-memories', 'auto-memory', 'patterns', 'tasks', 'feedback'];

@@ -7,6 +7,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier, validatePath, validateText } from './validate-input.js';
 
 // Storage paths
 const STORAGE_DIR = '.claude-flow';
@@ -101,6 +102,20 @@ export const workflowTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      if (input.template) {
+        const v = validateIdentifier(input.template, 'template');
+        if (!v.valid) return { success: false, error: v.error };
+      }
+      if (input.file) {
+        const v = validatePath(input.file, 'file');
+        if (!v.valid) return { success: false, error: v.error };
+      }
+      if (input.task) {
+        const v = validateText(input.task, 'task');
+        if (!v.valid) return { success: false, error: v.error };
+      }
+
       const store = loadWorkflowStore();
       const template = input.template as string | undefined;
       const task = input.task as string | undefined;
@@ -202,6 +217,14 @@ export const workflowTools: MCPTool[] = [
       required: ['name'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vName = validateText(input.name, 'name', 256);
+      if (!vName.valid) return { success: false, error: vName.error };
+      if (input.description) {
+        const v = validateText(input.description, 'description');
+        if (!v.valid) return { success: false, error: v.error };
+      }
+
       const store = loadWorkflowStore();
       const workflowId = `workflow-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -250,6 +273,10 @@ export const workflowTools: MCPTool[] = [
       required: ['workflowId'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vId = validateIdentifier(input.workflowId, 'workflowId');
+      if (!vId.valid) return { success: false, error: vId.error };
+
       const store = loadWorkflowStore();
       const workflowId = input.workflowId as string;
       const workflow = store.workflows[workflowId];
@@ -309,6 +336,10 @@ export const workflowTools: MCPTool[] = [
       required: ['workflowId'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vId = validateIdentifier(input.workflowId, 'workflowId');
+      if (!vId.valid) return { success: false, error: vId.error };
+
       const store = loadWorkflowStore();
       const workflowId = input.workflowId as string;
       const workflow = store.workflows[workflowId];
@@ -365,6 +396,12 @@ export const workflowTools: MCPTool[] = [
       },
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      if (input.status) {
+        const v = validateIdentifier(input.status, 'status');
+        if (!v.valid) return { success: false, error: v.error };
+      }
+
       const store = loadWorkflowStore();
       let workflows = Object.values(store.workflows);
 
@@ -406,6 +443,10 @@ export const workflowTools: MCPTool[] = [
       required: ['workflowId'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vId = validateIdentifier(input.workflowId, 'workflowId');
+      if (!vId.valid) return { success: false, error: vId.error };
+
       const store = loadWorkflowStore();
       const workflowId = input.workflowId as string;
       const workflow = store.workflows[workflowId];
@@ -441,6 +482,10 @@ export const workflowTools: MCPTool[] = [
       required: ['workflowId'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vId = validateIdentifier(input.workflowId, 'workflowId');
+      if (!vId.valid) return { success: false, error: vId.error };
+
       const store = loadWorkflowStore();
       const workflowId = input.workflowId as string;
       const workflow = store.workflows[workflowId];
@@ -489,6 +534,14 @@ export const workflowTools: MCPTool[] = [
       required: ['workflowId'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vId = validateIdentifier(input.workflowId, 'workflowId');
+      if (!vId.valid) return { success: false, error: vId.error };
+      if (input.reason) {
+        const v = validateText(input.reason, 'reason');
+        if (!v.valid) return { success: false, error: v.error };
+      }
+
       const store = loadWorkflowStore();
       const workflowId = input.workflowId as string;
       const workflow = store.workflows[workflowId];
@@ -533,6 +586,10 @@ export const workflowTools: MCPTool[] = [
       required: ['workflowId'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      const vId = validateIdentifier(input.workflowId, 'workflowId');
+      if (!vId.valid) return { success: false, error: vId.error };
+
       const store = loadWorkflowStore();
       const workflowId = input.workflowId as string;
 
@@ -571,6 +628,24 @@ export const workflowTools: MCPTool[] = [
       required: ['action'],
     },
     handler: async (input) => {
+      // Validate user-provided input (#1425)
+      if (input.workflowId) {
+        const v = validateIdentifier(input.workflowId, 'workflowId');
+        if (!v.valid) return { success: false, error: v.error };
+      }
+      if (input.templateId) {
+        const v = validateIdentifier(input.templateId, 'templateId');
+        if (!v.valid) return { success: false, error: v.error };
+      }
+      if (input.templateName) {
+        const v = validateText(input.templateName, 'templateName', 256);
+        if (!v.valid) return { success: false, error: v.error };
+      }
+      if (input.newName) {
+        const v = validateText(input.newName, 'newName', 256);
+        if (!v.valid) return { success: false, error: v.error };
+      }
+
       const store = loadWorkflowStore();
       const action = input.action as string;
 

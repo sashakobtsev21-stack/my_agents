@@ -6,6 +6,7 @@
 import { mkdirSync, writeFileSync, existsSync, readFileSync, statSync, unlinkSync, readdirSync, rmSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { type MCPTool, getProjectCwd } from './types.js';
+import { validateIdentifier, validateText, validatePath } from './validate-input.js';
 
 // Real vector search functions - lazy loaded to avoid circular imports
 let searchEntriesFn: ((options: {
@@ -709,6 +710,8 @@ export const hooksPreEdit: MCPTool = {
     const filePath = params.filePath as string;
     const operation = (params.operation as string) || 'update';
 
+    { const v = validatePath(filePath, 'filePath'); if (!v.valid) return { success: false, error: v.error }; }
+
     const suggestedAgents = suggestAgentsForFile(filePath);
     const ext = getFileExtension(filePath);
 
@@ -749,6 +752,9 @@ export const hooksPostEdit: MCPTool = {
     const filePath = params.filePath as string;
     const success = params.success !== false;
     const agent = params.agent as string | undefined;
+
+    { const v = validatePath(filePath, 'filePath'); if (!v.valid) return { success: false, error: v.error }; }
+    if (agent) { const v = validateIdentifier(agent, 'agent'); if (!v.valid) return { success: false, error: v.error }; }
 
     // Wire recordFeedback through bridge (issue #1209)
     let feedbackResult: { success: boolean; controller: string; updated: number } | null = null;
@@ -791,6 +797,9 @@ export const hooksPreCommand: MCPTool = {
   },
   handler: async (params: Record<string, unknown>) => {
     const command = params.command as string;
+
+    { const v = validateText(command, 'command'); if (!v.valid) return { success: false, error: v.error }; }
+
     const assessment = assessCommandRisk(command);
 
     const riskLevel = assessment.level >= 0.8 ? 'critical'
@@ -830,6 +839,8 @@ export const hooksPostCommand: MCPTool = {
     const command = params.command as string;
     const exitCode = (params.exitCode as number) || 0;
     const success = exitCode === 0;
+
+    { const v = validateText(command, 'command'); if (!v.valid) return { success: false, error: v.error }; }
 
     // Persist command outcome via AgentDB
     let _storedIn: 'agentdb' | 'json-store' | 'none' = 'none';
@@ -882,6 +893,9 @@ export const hooksRoute: MCPTool = {
     const task = params.task as string;
     const context = params.context as string | undefined;
     const useSemanticRouter = params.useSemanticRouter !== false;
+
+    { const v = validateText(task, 'task'); if (!v.valid) return { success: false, error: v.error }; }
+    if (context) { const v = validateText(context, 'context'); if (!v.valid) return { success: false, error: v.error }; }
 
     // Phase 5: Try AgentDB's SemanticRouter / LearningSystem first
     if (useSemanticRouter) {
@@ -1164,6 +1178,11 @@ export const hooksPreTask: MCPTool = {
     const taskId = params.taskId as string;
     const description = params.description as string;
     const filePath = params.filePath as string | undefined;
+
+    { const v = validateIdentifier(taskId, 'taskId'); if (!v.valid) return { success: false, error: v.error }; }
+    { const v = validateText(description, 'description'); if (!v.valid) return { success: false, error: v.error }; }
+    if (filePath) { const v = validatePath(filePath, 'filePath'); if (!v.valid) return { success: false, error: v.error }; }
+
     const suggestion = suggestAgentsForTask(description);
 
     // Determine complexity
@@ -1255,6 +1274,9 @@ export const hooksPostTask: MCPTool = {
     const agent = params.agent as string | undefined;
     const quality = (params.quality as number) || (success ? 0.85 : 0.3);
     const startTime = Date.now();
+
+    { const v = validateIdentifier(taskId, 'taskId'); if (!v.valid) return { success: false, error: v.error }; }
+    if (agent) { const v = validateIdentifier(agent, 'agent'); if (!v.valid) return { success: false, error: v.error }; }
 
     // Phase 3: Wire recordFeedback through bridge → LearningSystem + ReasoningBank
     let feedbackResult: { success: boolean; controller: string; updated: number } | null = null;
@@ -1394,6 +1416,9 @@ export const hooksExplain: MCPTool = {
   },
   handler: async (params: Record<string, unknown>) => {
     const task = params.task as string;
+
+    { const v = validateText(task, 'task'); if (!v.valid) return { success: false, error: v.error }; }
+
     const suggestion = suggestAgentsForTask(task);
     const taskLower = task.toLowerCase();
 
@@ -1638,6 +1663,9 @@ export const hooksTransfer: MCPTool = {
     const minConfidence = (params.minConfidence as number) || 0.7;
     const filter = params.filter as string;
 
+    { const v = validatePath(sourcePath, 'sourcePath'); if (!v.valid) return { success: false, error: v.error }; }
+    if (filter) { const v = validateIdentifier(filter, 'filter'); if (!v.valid) return { success: false, error: v.error }; }
+
     // Try to load patterns from source project's memory store
     const sourceMemoryPath = join(resolve(sourcePath), MEMORY_DIR, MEMORY_FILE);
     let sourceStore: MemoryStore = { entries: {}, version: '3.0.0' };
@@ -1715,6 +1743,8 @@ export const hooksSessionStart: MCPTool = {
     const sessionId = (params.sessionId as string) || `session-${Date.now()}`;
     const restoreLatest = params.restoreLatest as boolean;
     const shouldStartDaemon = params.startDaemon === true;
+
+    if (params.sessionId) { const v = validateIdentifier(params.sessionId as string, 'sessionId'); if (!v.valid) return { success: false, error: v.error }; }
 
     // Auto-regenerate statusline if outdated (fixes older installs)
     // Checks for the old fake heuristic: "Math.floor(sizeKB / 2)"
@@ -1942,6 +1972,8 @@ export const hooksSessionRestore: MCPTool = {
     const restoreAgents = params.restoreAgents !== false;
     const restoreTasks = params.restoreTasks !== false;
 
+    if (params.sessionId) { const v = validateIdentifier(params.sessionId as string, 'sessionId'); if (!v.valid) return { success: false, error: v.error }; }
+
     const originalSessionId = requestedId === 'latest' ? `session-${Date.now() - 86400000}` : requestedId;
     const newSessionId = `session-${Date.now()}`;
 
@@ -1985,6 +2017,9 @@ export const hooksNotify: MCPTool = {
     const message = params.message as string;
     const target = (params.target as string) || 'all';
     const priority = (params.priority as string) || 'normal';
+
+    { const v = validateText(message, 'message'); if (!v.valid) return { success: false, error: v.error }; }
+    if (params.target) { const v = validateIdentifier(target, 'target'); if (!v.valid) return { success: false, error: v.error }; }
 
     return {
       notificationId: `notify-${Date.now()}`,
@@ -2229,6 +2264,10 @@ export const hooksTrajectoryStart: MCPTool = {
   handler: async (params: Record<string, unknown>) => {
     const task = params.task as string;
     const agent = (params.agent as string) || 'coder';
+
+    { const v = validateText(task, 'task'); if (!v.valid) return { success: false, error: v.error }; }
+    if (params.agent) { const v = validateIdentifier(params.agent as string, 'agent'); if (!v.valid) return { success: false, error: v.error }; }
+
     const trajectoryId = `traj-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     const startedAt = new Date().toISOString();
 
@@ -2276,6 +2315,9 @@ export const hooksTrajectoryStep: MCPTool = {
     const timestamp = new Date().toISOString();
     const stepId = `step-${Date.now()}`;
 
+    { const v = validateIdentifier(trajectoryId, 'trajectoryId'); if (!v.valid) return { success: false, error: v.error }; }
+    { const v = validateText(action, 'action'); if (!v.valid) return { success: false, error: v.error }; }
+
     // Add step to real trajectory if it exists
     const trajectory = activeTrajectories.get(trajectoryId);
     if (trajectory) {
@@ -2315,6 +2357,9 @@ export const hooksTrajectoryEnd: MCPTool = {
   },
   handler: async (params: Record<string, unknown>) => {
     const trajectoryId = params.trajectoryId as string;
+
+    { const v = validateIdentifier(trajectoryId, 'trajectoryId'); if (!v.valid) return { success: false, error: v.error }; }
+
     const success = params.success !== false;
     const feedback = params.feedback as string | undefined;
     const endedAt = new Date().toISOString();
@@ -2463,6 +2508,9 @@ export const hooksPatternStore: MCPTool = {
     const confidence = (params.confidence as number) || 0.8;
     const metadata = params.metadata as Record<string, unknown> | undefined;
     const timestamp = new Date().toISOString();
+
+    { const v = validateText(pattern, 'pattern'); if (!v.valid) return { success: false, error: v.error }; }
+    if (params.type) { const v = validateIdentifier(params.type as string, 'type'); if (!v.valid) return { success: false, error: v.error }; }
     const patternId = `pattern-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
     // Phase 3: Try ReasoningBank via bridge first
@@ -2532,6 +2580,9 @@ export const hooksPatternSearch: MCPTool = {
     const topK = (params.topK as number) || 5;
     const minConfidence = (params.minConfidence as number) || 0.3;
     const namespace = (params.namespace as string) || 'pattern';
+
+    { const v = validateText(query, 'query'); if (!v.valid) return { success: false, error: v.error }; }
+    if (params.namespace) { const v = validateIdentifier(params.namespace as string, 'namespace'); if (!v.valid) return { success: false, error: v.error }; }
 
     // Phase 3: Try ReasoningBank search via bridge first
     try {
@@ -2887,6 +2938,8 @@ export const hooksIntelligenceAttention: MCPTool = {
     const mode = (params.mode as string) || 'flash';
     const topK = (params.topK as number) || 5;
     const startTime = performance.now();
+
+    { const v = validateText(query, 'query'); if (!v.valid) return { success: false, error: v.error }; }
 
     let implementation = 'placeholder';
     const results: Array<{ index: number; weight: number; pattern: string; expert?: string }> = [];
@@ -3312,6 +3365,8 @@ export const hooksWorkerDispatch: MCPTool = {
     const priority = (params.priority as string) || WORKER_CONFIGS[trigger]?.priority || 'normal';
     const background = params.background !== false;
 
+    if (params.context) { const v = validateText(params.context as string, 'context'); if (!v.valid) return { success: false, error: v.error }; }
+
     if (!WORKER_CONFIGS[trigger]) {
       return {
         success: false,
@@ -3403,6 +3458,8 @@ export const hooksWorkerStatus: MCPTool = {
     const workerId = params.workerId as string;
     const includeCompleted = params.includeCompleted !== false;
 
+    if (workerId) { const v = validateIdentifier(workerId, 'workerId'); if (!v.valid) return { success: false, error: v.error }; }
+
     if (workerId) {
       const worker = activeWorkers.get(workerId);
       if (!worker) {
@@ -3461,6 +3518,8 @@ export const hooksWorkerDetect: MCPTool = {
     const prompt = params.prompt as string;
     const autoDispatch = params.autoDispatch as boolean;
     const minConfidence = (params.minConfidence as number) || 0.5;
+
+    { const v = validateText(prompt, 'prompt'); if (!v.valid) return { success: false, error: v.error }; }
 
     const detection = detectWorkerTriggers(prompt);
 
@@ -3540,6 +3599,9 @@ export const hooksModelRoute: MCPTool = {
   },
   handler: async (params: Record<string, unknown>) => {
     const task = params.task as string;
+
+    { const v = validateText(task, 'task'); if (!v.valid) return { success: false, error: v.error }; }
+
     const router = await getModelRouterInstance();
 
     if (!router) {
@@ -3586,6 +3648,8 @@ export const hooksModelOutcome: MCPTool = {
     const task = params.task as string;
     const model = params.model as 'haiku' | 'sonnet' | 'opus';
     const outcome = params.outcome as 'success' | 'failure' | 'escalated';
+
+    { const v = validateText(task, 'task'); if (!v.valid) return { success: false, error: v.error }; }
 
     const router = await getModelRouterInstance();
     if (router) {
@@ -3659,6 +3723,9 @@ export const hooksWorkerCancel: MCPTool = {
   },
   handler: async (params: Record<string, unknown>) => {
     const workerId = params.workerId as string;
+
+    { const v = validateIdentifier(workerId, 'workerId'); if (!v.valid) return { success: false, error: v.error }; }
+
     const worker = activeWorkers.get(workerId);
 
     if (!worker) {

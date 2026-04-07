@@ -6,6 +6,7 @@
  */
 
 import type { MCPTool } from './types.js';
+import { validateIdentifier, validateText } from './validate-input.js';
 import type { ChatMessage } from '../ruvector/ruvllm-wasm.js';
 
 async function loadRuvllmWasm() {
@@ -70,6 +71,8 @@ export const ruvllmWasmTools: MCPTool[] = [
       required: ['routerId', 'name', 'embedding'],
     },
     handler: async (args: Record<string, unknown>) => {
+      { const v = validateIdentifier(args.routerId, 'routerId'); if (!v.valid) return { content: [{ type: 'text', text: JSON.stringify({ error: v.error }) }], isError: true }; }
+      { const v = validateIdentifier(args.name, 'name'); if (!v.valid) return { content: [{ type: 'text', text: JSON.stringify({ error: v.error }) }], isError: true }; }
       try {
         const router = hnswRouters.get(args.routerId as string);
         if (!router) return { content: [{ type: 'text', text: JSON.stringify({ error: `Router not found: ${args.routerId}` }) }], isError: true };
@@ -98,6 +101,7 @@ export const ruvllmWasmTools: MCPTool[] = [
       required: ['routerId', 'query'],
     },
     handler: async (args: Record<string, unknown>) => {
+      { const v = validateIdentifier(args.routerId, 'routerId'); if (!v.valid) return { content: [{ type: 'text', text: JSON.stringify({ error: v.error }) }], isError: true }; }
       try {
         const router = hnswRouters.get(args.routerId as string);
         if (!router) return { content: [{ type: 'text', text: JSON.stringify({ error: `Router not found: ${args.routerId}` }) }], isError: true };
@@ -148,6 +152,7 @@ export const ruvllmWasmTools: MCPTool[] = [
       required: ['sonaId', 'quality'],
     },
     handler: async (args: Record<string, unknown>) => {
+      { const v = validateIdentifier(args.sonaId, 'sonaId'); if (!v.valid) return { content: [{ type: 'text', text: JSON.stringify({ error: v.error }) }], isError: true }; }
       try {
         const sona = sonaInstances.get(args.sonaId as string);
         if (!sona) return { content: [{ type: 'text', text: JSON.stringify({ error: `SONA not found: ${args.sonaId}` }) }], isError: true };
@@ -202,6 +207,7 @@ export const ruvllmWasmTools: MCPTool[] = [
       required: ['loraId', 'quality'],
     },
     handler: async (args: Record<string, unknown>) => {
+      { const v = validateIdentifier(args.loraId, 'loraId'); if (!v.valid) return { content: [{ type: 'text', text: JSON.stringify({ error: v.error }) }], isError: true }; }
       try {
         const lora = loraInstances.get(args.loraId as string);
         if (!lora) return { content: [{ type: 'text', text: JSON.stringify({ error: `MicroLoRA not found: ${args.loraId}` }) }], isError: true };
@@ -232,6 +238,7 @@ export const ruvllmWasmTools: MCPTool[] = [
       required: ['messages', 'template'],
     },
     handler: async (args: Record<string, unknown>) => {
+      { const v = validateText(args.template, 'template', 256); if (!v.valid) return { content: [{ type: 'text', text: JSON.stringify({ error: v.error }) }], isError: true }; }
       try {
         const mod = await loadRuvllmWasm();
         const messages = args.messages as ChatMessage[];
