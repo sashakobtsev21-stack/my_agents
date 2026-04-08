@@ -59,9 +59,8 @@ function concurrencyRules(): string {
   return `## Concurrency: 1 MESSAGE = ALL RELATED OPERATIONS
 
 - All operations MUST be concurrent/parallel in a single message
-- Use Claude Code's Task tool for spawning agents, not just MCP
-- ALWAYS batch ALL todos in ONE TodoWrite call (5-10+ minimum)
-- ALWAYS spawn ALL agents in ONE message with full instructions via Task tool
+- Use Claude Code's Agent tool for spawning agents, not just MCP
+- ALWAYS spawn ALL agents in ONE message with full instructions via Agent tool
 - ALWAYS batch ALL file reads/writes/edits in ONE message
 - ALWAYS batch ALL Bash commands in ONE message`;
 }
@@ -70,9 +69,9 @@ function swarmOrchestration(): string {
   return `## Swarm Orchestration
 
 - MUST initialize the swarm using CLI tools when starting complex tasks
-- MUST spawn concurrent agents using Claude Code's Task tool
-- Never use CLI tools alone for execution — Task tool agents do the actual work
-- MUST call CLI tools AND Task tool in ONE message for complex work
+- MUST spawn concurrent agents using Claude Code's Agent tool
+- Never use CLI tools alone for execution — Agent tool agents do the actual work
+- MUST call CLI tools AND Agent tool in ONE message for complex work
 
 ### 3-Tier Model Routing (ADR-026)
 
@@ -82,8 +81,7 @@ function swarmOrchestration(): string {
 | **2** | Haiku | ~500ms | $0.0002 | Simple tasks, low complexity (<30%) |
 | **3** | Sonnet/Opus | 2-5s | $0.003-0.015 | Complex reasoning, architecture, security (>30%) |
 
-- Always check for \`[AGENT_BOOSTER_AVAILABLE]\` or \`[TASK_MODEL_RECOMMENDATION]\` before spawning agents
-- Use Edit tool directly when \`[AGENT_BOOSTER_AVAILABLE]\``;
+- For Tier 1 simple transforms, use Edit tool directly — no LLM agent needed`;
 }
 
 function antiDriftConfig(): string {
@@ -113,11 +111,11 @@ When the user requests a complex task, spawn agents in background and WAIT:
 Bash("npx @claude-flow/cli@latest swarm init --topology hierarchical --max-agents 8 --strategy specialized")
 
 // STEP 2: Spawn ALL agents IN BACKGROUND in a SINGLE message
-Task({prompt: "Research requirements...", subagent_type: "researcher", run_in_background: true})
-Task({prompt: "Design architecture...", subagent_type: "system-architect", run_in_background: true})
-Task({prompt: "Implement solution...", subagent_type: "coder", run_in_background: true})
-Task({prompt: "Write tests...", subagent_type: "tester", run_in_background: true})
-Task({prompt: "Review code quality...", subagent_type: "reviewer", run_in_background: true})
+Agent("Research requirements", "Analyze codebase patterns and store findings in memory", {subagent_type: "researcher", run_in_background: true})
+Agent("Design architecture", "Design architecture based on research", {subagent_type: "system-architect", run_in_background: true})
+Agent("Implement solution", "Implement the solution following the design", {subagent_type: "coder", run_in_background: true})
+Agent("Write tests", "Write comprehensive tests for the implementation", {subagent_type: "tester", run_in_background: true})
+Agent("Review code quality", "Review code quality, security, and best practices", {subagent_type: "reviewer", run_in_background: true})
 \`\`\`
 
 ### Agent Routing
@@ -139,10 +137,10 @@ Task({prompt: "Review code quality...", subagent_type: "reviewer", run_in_backgr
 function executionRules(): string {
   return `## Swarm Execution Rules
 
-- ALWAYS use \`run_in_background: true\` for all agent Task calls
-- ALWAYS put ALL agent Task calls in ONE message for parallel execution
+- ALWAYS use \`run_in_background: true\` for all Agent tool calls
+- ALWAYS put ALL Agent calls in ONE message for parallel execution
 - After spawning, STOP — do NOT add more tool calls or check status
-- Never poll TaskOutput or check swarm status — trust agents to return
+- Never poll agent status repeatedly — trust agents to return
 - When agent results arrive, review ALL results before proceeding`;
 }
 
@@ -431,7 +429,7 @@ npx @claude-flow/cli@latest doctor --fix
 
 ## Claude Code vs MCP Tools
 
-- **Claude Code Task tool** handles execution: agents, file ops, code generation, git
+- **Claude Code Agent tool** handles execution: agents, file ops, code generation, git
 - **MCP tools** (via ToolSearch) handle coordination: swarm, memory, hooks, routing, hive-mind
 - **CLI commands** (via Bash) are the same tools with terminal output
 - Use \`ToolSearch("keyword")\` to discover available MCP tools

@@ -302,6 +302,17 @@ const trainCommand: Command = {
       flushPatterns();
       const persistence = getPersistenceStatus();
 
+      // Save LoRA checkpoint via ruvllm TrainingPipeline if available
+      try {
+        const { LoRAAdapter } = await import('../ruvector/lora-adapter.js');
+        const path = await import('path');
+        const cpDir = path.join(process.cwd(), '.claude-flow', 'neural');
+        const cpPath = path.join(cpDir, `lora-checkpoint-${Date.now()}.json`);
+        const adapter = new LoRAAdapter({ inputDim: dim, outputDim: dim, rank: 4 });
+        await adapter.initBackend();
+        await adapter.saveCheckpoint(cpPath);
+      } catch { /* checkpoint save is best-effort */ }
+
       output.writeln();
 
       // Display results
@@ -495,6 +506,40 @@ const statusCommand: Command = {
             status: output.success('Available'),
             details: '~4x memory reduction',
           },
+          {
+            component: 'ruvllm Coordinator',
+            status: stats._ruvllmBackend === 'active' ? output.success('Active') : output.dim('Unavailable'),
+            details: stats._ruvllmBackend === 'active'
+              ? `SonaCoordinator | ${stats._ruvllmTrajectories} trajectories`
+              : 'Install @ruvector/ruvllm',
+          },
+          {
+            component: 'Contrastive Trainer',
+            status: stats._contrastiveTrainer && stats._contrastiveTrainer !== 'unavailable' ? output.success('Active') : output.dim('Unavailable'),
+            details: stats._contrastiveTrainer && stats._contrastiveTrainer !== 'unavailable'
+              ? `${(stats._contrastiveTrainer as any).triplets ?? 0} triplets, ${(stats._contrastiveTrainer as any).agents ?? 0} agents`
+              : 'Install @ruvector/ruvllm',
+          },
+          {
+            component: 'Training Pipeline',
+            status: stats._trainingBackend === 'ruvllm' ? output.success('Active') : output.dim(stats._trainingBackend || 'Unavailable'),
+            details: stats._trainingBackend === 'ruvllm'
+              ? 'ruvllm checkpoints enabled'
+              : 'JS fallback (no checkpoints)',
+          },
+          await (async () => {
+            try {
+              const { getGraphStats } = await import('../ruvector/graph-backend.js');
+              const gs = await getGraphStats();
+              return {
+                component: 'Graph Database',
+                status: gs.backend === 'graph-node' ? output.success('Active') : output.dim('Unavailable'),
+                details: gs.backend === 'graph-node'
+                  ? `${gs.totalNodes} nodes, ${gs.totalEdges} edges`
+                  : 'Install @ruvector/graph-node',
+              };
+            } catch { return { component: 'Graph Database', status: output.dim('Unavailable'), details: 'Not loaded' }; }
+          })(),
         ],
       });
 
@@ -794,6 +839,12 @@ const optimizeCommand: Command = {
       await initializeIntelligence();
       const patterns = await getAllPatterns();
       const stats = getIntelligenceStats();
+
+      // Trigger ruvllm background learning if available
+      try {
+        const { runBackgroundLearning } = await import('../memory/intelligence.js');
+        await runBackgroundLearning();
+      } catch { /* background learning is best-effort */ }
 
       // Get actual pattern storage size
       const patternDir = path.join(process.cwd(), '.claude-flow', 'neural');

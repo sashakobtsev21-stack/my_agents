@@ -54,10 +54,10 @@
     "zod": "^3.23.0"
   },
   "peerDependencies": {
-    "@claude-flow/plugins": ">=3.0.0",
-    "@claude-flow/memory": ">=3.0.0",
-    "@claude-flow/security": ">=3.0.0",
-    "@claude-flow/embeddings": ">=3.0.0"
+    "@claude-flow/plugins": ">=3.0.0-0",
+    "@claude-flow/memory": ">=3.0.0-0",
+    "@claude-flow/security": ">=3.0.0-0",
+    "@claude-flow/embeddings": ">=3.0.0-0"
   },
   "peerDependenciesMeta": {
     "@claude-flow/plugins": {

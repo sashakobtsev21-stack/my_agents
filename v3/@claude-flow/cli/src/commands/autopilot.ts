@@ -212,9 +212,9 @@ const logCommand: Command = {
   ],
   action: async (ctx: CommandContext): Promise<CommandResult> => {
     if (ctx.flags?.clear) {
-      const fs = require('fs') as typeof import('fs');
-      const path = require('path') as typeof import('path');
-      try { fs.writeFileSync(path.resolve(LOG_FILE), '[]'); } catch { /* ignore */ }
+      const { writeFileSync } = await import('node:fs');
+      const { resolve } = await import('node:path');
+      try { writeFileSync(resolve(LOG_FILE), '[]'); } catch { /* ignore */ }
       output.writeln('Autopilot log cleared');
       return { success: true };
     }

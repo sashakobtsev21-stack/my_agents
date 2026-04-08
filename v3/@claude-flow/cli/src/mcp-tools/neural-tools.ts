@@ -165,7 +165,11 @@ async function generateEmbedding(text?: string, dims: number = 384): Promise<num
   }
 
   // Hash-based deterministic embedding (better than pure random for consistency)
+  // NOTE: No semantic meaning — only useful for consistent deduplication, not similarity search
   if (text) {
+    if (embeddingServiceName === 'none') {
+      embeddingServiceName = 'hash-fallback';
+    }
     const hash = text.split('').reduce((acc, char, i) => {
       return acc + char.charCodeAt(0) * (i + 1);
     }, 0);
@@ -278,6 +282,7 @@ export const neuralTools: MCPTool[] = [
       return {
         success: true,
         _realEmbedding: !!realEmbeddings,
+        _embeddingSource: embeddingServiceName,
         embeddingProvider: embeddingServiceName,
         modelId,
         type: modelType,
@@ -345,6 +350,7 @@ export const neuralTools: MCPTool[] = [
       return {
         success: true,
         _realEmbedding: !!realEmbeddings,
+        _embeddingSource: embeddingServiceName,
         embeddingProvider: embeddingServiceName,
         _hasStoredPatterns: storedPatterns.length > 0,
         modelId: model?.id || 'default',
@@ -428,6 +434,7 @@ export const neuralTools: MCPTool[] = [
         return {
           success: true,
           _realEmbedding: !!realEmbeddings,
+          _embeddingSource: embeddingServiceName,
           embeddingProvider: embeddingServiceName,
           patternId,
           name: pattern.name,
@@ -455,6 +462,7 @@ export const neuralTools: MCPTool[] = [
         return {
           _realSimilarity: true,
           _realEmbedding: !!realEmbeddings,
+          _embeddingSource: embeddingServiceName,
           embeddingProvider: embeddingServiceName,
           query,
           results: results.map(r => ({
