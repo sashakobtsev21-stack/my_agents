@@ -18,8 +18,8 @@
  */
 
 import { EventEmitter } from 'events';
-import { spawn, ChildProcess } from 'child_process';
-import { createServer, Server } from 'http';
+import { spawn, ChildProcess, execFileSync } from 'child_process';
+import { createServer, Server, request as httpRequestFn } from 'http';
 import { randomUUID } from 'crypto';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -713,13 +713,11 @@ export class MCPServerManager extends EventEmitter {
     // Verify it's actually a node process (guards against PID reuse)
     // DA-CRIT-3: Use execFileSync to prevent command injection via PID values
     try {
-      const { execFileSync } = require('child_process') as typeof import('child_process');
       const safePid = String(Math.floor(Math.abs(pid)));
       let cmdline = '';
       try {
         // Try /proc on Linux
-        const { readFileSync } = require('fs') as typeof import('fs');
-        cmdline = readFileSync(`/proc/${safePid}/cmdline`, 'utf8');
+        cmdline = fs.readFileSync(`/proc/${safePid}/cmdline`, 'utf8');
       } catch {
         // Fall back to ps on macOS/other
         try {
@@ -750,9 +748,8 @@ export class MCPServerManager extends EventEmitter {
   ): Promise<any> {
     return new Promise((resolve, reject) => {
       const urlObj = new URL(url);
-      const http = require('http');
 
-      const req = http.request(
+      const req = httpRequestFn(
         {
           hostname: urlObj.hostname,
           port: urlObj.port,

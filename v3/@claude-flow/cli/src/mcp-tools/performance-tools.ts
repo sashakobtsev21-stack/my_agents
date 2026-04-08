@@ -14,7 +14,7 @@
 
 import { type MCPTool, getProjectCwd } from './types.js';
 import { validateIdentifier } from './validate-input.js';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import * as os from 'node:os';
 
@@ -222,7 +222,7 @@ export const performanceTools: MCPTool[] = [
         writeFileSync(probeFile, payload);
         readFileSync(probeFile);
         diskLatencyMs = Math.round((performance.now() - t0) * 100) / 100;
-        try { const { unlinkSync } = require('node:fs'); unlinkSync(probeFile); } catch { /* best-effort */ }
+        try { unlinkSync(probeFile); } catch { /* best-effort */ }
       } catch { /* disk probe failed, leave -1 */ }
 
       // Check stored benchmark history for slow operations
@@ -464,7 +464,7 @@ export const performanceTools: MCPTool[] = [
         .sort((a, b) => b.percentOfTotal - a.percentOfTotal);
 
       // Cleanup probe file
-      try { const { unlinkSync } = require('node:fs'); unlinkSync(join(getPerfDir(), '.profile-probe')); } catch { /* ok */ }
+      try { unlinkSync(join(getPerfDir(), '.profile-probe')); } catch { /* ok */ }
 
       return {
         success: true,
@@ -514,7 +514,7 @@ export const performanceTools: MCPTool[] = [
         writeFileSync(probe, Buffer.alloc(4096, 0x42));
         readFileSync(probe);
         diskLatencyBefore = Math.round((performance.now() - t0) * 100) / 100;
-        try { const { unlinkSync } = require('node:fs'); unlinkSync(probe); } catch { /* ok */ }
+        try { unlinkSync(probe); } catch { /* ok */ }
       } catch { /* ok */ }
 
       const optimizations: Array<{ action: string; applied: boolean; effect?: string; recommendation?: string }> = [];
@@ -559,9 +559,8 @@ export const performanceTools: MCPTool[] = [
       if (aggressive) {
         try {
           const dir = getPerfDir();
-          const { readdirSync, unlinkSync: ul } = require('node:fs');
           const probes = readdirSync(dir).filter((f: string) => f.startsWith('.'));
-          probes.forEach((f: string) => { try { ul(join(dir, f)); } catch { /* ok */ } });
+          probes.forEach((f: string) => { try { unlinkSync(join(dir, f)); } catch { /* ok */ } });
           if (probes.length > 0) optimizations.push({ action: 'clear-probe-files', applied: true, effect: `Removed ${probes.length} probe file(s)` });
         } catch { /* ok */ }
       }

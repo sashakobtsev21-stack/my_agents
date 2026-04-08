@@ -7,6 +7,7 @@
 
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
+import { execSync } from 'node:child_process';
 
 // Scan subcommand
 const scanCommand: Command = {
@@ -353,7 +354,6 @@ const threatsCommand: Command = {
     // Check for .env files committed to git
     const checkEnvInGit = () => {
       try {
-        const { execSync } = require('child_process');
         const tracked = execSync('git ls-files --cached', { cwd: rootDir, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
         const envFiles = tracked.split('\n').filter((f: string) => /(?:^|\/)\.env(?:\.|$)/.test(f));
         for (const envFile of envFiles) {
