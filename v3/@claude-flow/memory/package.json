@@ -1,6 +1,6 @@
 {
   "name": "@claude-flow/memory",
-  "version": "3.0.0-alpha.13",
+  "version": "3.0.0-alpha.14",
   "type": "module",
   "description": "Memory module - AgentDB unification, HNSW indexing, vector search, hybrid SQLite+AgentDB backend (ADR-009)",
   "main": "dist/index.js",
@@ -13,7 +13,7 @@
     "test": "vitest run",
     "bench": "vitest bench",
     "build": "tsc",
-    "prebuild": "rm -rf dist",
+    "prebuild": "rm -rf dist tsconfig.tsbuildinfo",
     "prepublishOnly": "npm run build && node -e \"const m = await import('./dist/index.js'); const required = ['ControllerRegistry','HnswLite','PersistentSonaCoordinator','RvfBackend','RvfLearningStore','RvfMigrator']; const missing = required.filter(k => !m[k]); if (missing.length) { console.error('Missing exports:', missing); process.exit(1); } console.log('All required exports present');\""
   },
   "dependencies": {

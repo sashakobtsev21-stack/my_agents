@@ -124,17 +124,23 @@ export async function validateAgentSpawn(input: Record<string, unknown>): Promis
     if (!r.valid) errors.push(r.error!);
   }
 
-  // Try enhanced Zod validation if available
+  // Try enhanced Zod validation if available.
+  // Fix for #1567: @claude-flow/security's SpawnAgentSchema expects `type` and
+  // `id` (not `agentType`/`name`), so the previous call always failed with
+  // "type: Required". Also swallow `invalid_enum_value` errors because the
+  // schema enumerates only 15 built-in agent types — we support custom types
+  // (the inline validator already checked the identifier is safe).
   const sec = await getSecurityModule();
   if (sec?.SpawnAgentSchema) {
     try {
       sec.SpawnAgentSchema.parse({
-        agentType: input.agentType,
-        name: input.agentId,
+        type: input.agentType,
+        id: input.agentId,
       });
     } catch (zodErr: any) {
       if (zodErr.issues) {
         for (const issue of zodErr.issues) {
+          if (issue.code === 'invalid_enum_value') continue;
           errors.push(`${issue.path.join('.')}: ${issue.message}`);
         }
       }

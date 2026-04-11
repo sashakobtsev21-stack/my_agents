@@ -11,7 +11,7 @@ import { dirname, join } from 'path';
 import type { Command, CommandContext, CommandResult, V3Config, CLIError } from './types.js';
 import { CommandParser, commandParser } from './parser.js';
 import { OutputFormatter, output } from './output.js';
-import { commands, commandsByCategory, getCommandsByCategory, commandRegistry, getCommand, getCommandAsync, getCommandNames, hasCommand } from './commands/index.js';
+import { commands, commandsByCategory, getCommandsByCategory, commandRegistry, getCommand, getCommandAsync, getCommandNames, getLazyCommandNames, hasCommand } from './commands/index.js';
 import { suggestCommand } from './suggest.js';
 import { runStartupUpdateCheck } from './update/index.js';
 
@@ -57,9 +57,16 @@ export class CLI {
     this.output = output;
     this.interactive = options.interactive ?? process.stdin.isTTY ?? false;
 
-    // Register all commands
+    // Register all core (synchronously loaded) commands with full definitions
     for (const cmd of commands) {
       this.parser.registerCommand(cmd);
+    }
+
+    // Register lazy command names so the parser can recognize them during
+    // argument resolution without importing their modules. Fix for #1596:
+    // prevents `daemon start` from being mis-routed to the `start` command.
+    for (const name of getLazyCommandNames()) {
+      this.parser.registerLazyCommandName(name);
     }
   }
 

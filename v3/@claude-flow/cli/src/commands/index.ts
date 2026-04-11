@@ -319,6 +319,16 @@ export function hasCommand(name: string): boolean {
 }
 
 /**
+ * Get the names of all lazy-loadable commands (the commandLoaders keys).
+ * Used by the CLI constructor to register these names with the parser so
+ * the two-pass argument walker can recognize them as commands before their
+ * modules have been imported. Fix for #1596.
+ */
+export function getLazyCommandNames(): string[] {
+  return Object.keys(commandLoaders);
+}
+
+/**
  * Get all command names (including aliases and lazy-loadable)
  */
 export function getCommandNames(): string[] {
