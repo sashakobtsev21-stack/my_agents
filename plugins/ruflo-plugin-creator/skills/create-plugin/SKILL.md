@@ -30,7 +30,7 @@ When you want to create a new plugin that extends Claude Code with skills, comma
    │   └── <agent-name>.md
    └── README.md
    ```
-4. **Generate plugin.json** with name, description, version, author, skills, commands, agents arrays
+4. **Generate plugin.json** with name, description, version, author (do NOT include `skills`, `commands`, or `agents` arrays — Claude Code auto-discovers these from directory structure)
 5. **Generate SKILL.md files** with proper frontmatter:
    ```yaml
    ---
@@ -54,9 +54,8 @@ Required fields:
 Recommended fields:
 - `author` — `{ "name": "...", "url": "..." }`
 - `homepage`, `license`, `keywords`
-- `skills` — array of skill directory names
-- `commands` — array of command file names (without .md)
-- `agents` — array of agent file names (without .md)
+
+**Do NOT include** `skills`, `commands`, or `agents` arrays in plugin.json — these are auto-discovered from the directory structure by Claude Code and will cause validation errors if present.
 
 ## Available MCP tools to wire
 
