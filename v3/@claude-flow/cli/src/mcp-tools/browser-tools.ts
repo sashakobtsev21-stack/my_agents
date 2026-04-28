@@ -87,18 +87,25 @@ async function execBrowserCommand(args: string[], session = 'default'): Promise<
 }
 
 /**
- * Detect if Linux needs --no-sandbox for Chrome.
+ * Read a sysctl value, returning the trimmed string or null.
  */
-function needsNoSandbox(): boolean {
+function readSysctl(name: string): string | null {
   try {
     const { readFileSync, existsSync } = require('fs');
-    if (process.platform !== 'linux') return false;
-    const clonePath = '/proc/sys/kernel/unprivileged_userns_clone';
-    if (existsSync(clonePath)) {
-      return readFileSync(clonePath, 'utf-8').trim() === '0';
-    }
+    const p = `/proc/sys/kernel/${name}`;
+    if (existsSync(p)) return readFileSync(p, 'utf-8').trim();
   } catch { /* not Linux or can't read */ }
-  return false;
+  return null;
+}
+
+/**
+ * Detect if Linux needs --no-sandbox for Chrome.
+ * Checks both legacy userns flag and Ubuntu 24.04+ AppArmor restriction.
+ */
+function needsNoSandbox(): boolean {
+  if (process.platform !== 'linux') return false;
+  return readSysctl('unprivileged_userns_clone') === '0' ||
+    readSysctl('apparmor_restrict_unprivileged_userns') === '1';
 }
 
 /**
@@ -146,7 +153,7 @@ export const browserTools: MCPTool[] = [
       }
       const args = ['open', url];
       if (waitUntil) args.push('--wait-until', waitUntil);
-      for (const a of launchArgs) args.push('--arg', a);
+      if (launchArgs.length > 0) args.push('--args', launchArgs.join(' '));
 
       // Create session if new
       const sessionId = session || 'default';
