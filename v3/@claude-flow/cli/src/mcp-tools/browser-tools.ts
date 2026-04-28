@@ -5,6 +5,7 @@
  * Provides browser automation tools for web navigation, interaction, and data extraction.
  */
 
+import { readFileSync, existsSync } from 'node:fs';
 import type { MCPTool, MCPToolResult } from './types.js';
 import { validateIdentifier, validateText } from './validate-input.js';
 
@@ -91,7 +92,6 @@ async function execBrowserCommand(args: string[], session = 'default'): Promise<
  */
 function readSysctl(name: string): string | null {
   try {
-    const { readFileSync, existsSync } = require('fs');
     const p = `/proc/sys/kernel/${name}`;
     if (existsSync(p)) return readFileSync(p, 'utf-8').trim();
   } catch { /* not Linux or can't read */ }
@@ -153,7 +153,7 @@ export const browserTools: MCPTool[] = [
       }
       const args = ['open', url];
       if (waitUntil) args.push('--wait-until', waitUntil);
-      if (launchArgs.length > 0) args.push('--args', launchArgs.join(' '));
+      if (launchArgs.length > 0) args.push('--args', launchArgs.join(','));
 
       // Create session if new
       const sessionId = session || 'default';
