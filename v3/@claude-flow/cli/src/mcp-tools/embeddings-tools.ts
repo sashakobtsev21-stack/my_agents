@@ -471,7 +471,7 @@ export const embeddingsTools: MCPTool[] = [
           query,
           limit: topK,
           threshold,
-          namespace: namespace || 'default'
+          namespace: namespace || 'all'
         });
 
         const searchTime = (performance.now() - startTime).toFixed(2);
@@ -489,7 +489,7 @@ export const embeddingsTools: MCPTool[] = [
             model: config.model,
             topK,
             threshold,
-            namespace: namespace || 'default',
+            namespace: namespace || 'all',
             searchTime: `${searchTime}ms`,
             indexType: config.hyperbolic.enabled ? 'HNSW (hyperbolic)' : 'HNSW (euclidean)',
             resultCount: searchResult.results.length
@@ -506,7 +506,7 @@ export const embeddingsTools: MCPTool[] = [
             model: config.model,
             topK,
             threshold,
-            namespace: namespace || 'default',
+            namespace: namespace || 'all',
             searchTime: `${searchTime}ms`,
             indexType: config.hyperbolic.enabled ? 'HNSW (hyperbolic)' : 'HNSW (euclidean)',
           },

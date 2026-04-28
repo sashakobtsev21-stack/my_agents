@@ -16,49 +16,89 @@ const browserSessions = new Map<string, {
 }>();
 
 /**
- * Execute agent-browser CLI command
+ * Execute agent-browser CLI command.
+ * Tries global agent-browser first, falls back to npx if ENOENT.
  */
 async function execBrowserCommand(args: string[], session = 'default'): Promise<MCPToolResult> {
   const { execFileSync } = await import('child_process');
+  const fullArgs = ['--session', session, '--json', ...args];
 
+  let result: string;
   try {
-    const fullArgs = ['--session', session, '--json', ...args];
-    const result = execFileSync('agent-browser', fullArgs, {
+    result = execFileSync('agent-browser', fullArgs, {
       encoding: 'utf-8',
       timeout: 30000,
     });
-
-    let data;
-    try {
-      data = JSON.parse(result);
-    } catch {
-      data = result.trim();
-    }
-
-    // Update session activity
-    const sessionInfo = browserSessions.get(session);
-    if (sessionInfo) {
-      sessionInfo.lastActivity = new Date().toISOString();
-    }
-
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(data, null, 2),
-      }],
-    };
   } catch (error) {
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify({
-          success: false,
-          error: error instanceof Error ? error.message : String(error),
-        }),
-      }],
-      isError: true,
-    };
+    const err = error as NodeJS.ErrnoException;
+    if (err.code === 'ENOENT') {
+      try {
+        result = execFileSync('npx', ['--yes', 'agent-browser', ...fullArgs], {
+          encoding: 'utf-8',
+          timeout: 60000,
+        });
+      } catch (npxError) {
+        const npxErr = npxError as NodeJS.ErrnoException;
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: npxErr.code === 'ENOENT'
+                ? 'Neither agent-browser nor npx found. Install with: npm i -g agent-browser'
+                : npxErr instanceof Error ? npxErr.message : String(npxError),
+            }),
+          }],
+          isError: true,
+        };
+      }
+    } else {
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: err instanceof Error ? err.message : String(error),
+          }),
+        }],
+        isError: true,
+      };
+    }
   }
+
+  let data;
+  try {
+    data = JSON.parse(result);
+  } catch {
+    data = result.trim();
+  }
+
+  const sessionInfo = browserSessions.get(session);
+  if (sessionInfo) {
+    sessionInfo.lastActivity = new Date().toISOString();
+  }
+
+  return {
+    content: [{
+      type: 'text',
+      text: JSON.stringify(data, null, 2),
+    }],
+  };
+}
+
+/**
+ * Detect if Linux needs --no-sandbox for Chrome.
+ */
+function needsNoSandbox(): boolean {
+  try {
+    const { readFileSync, existsSync } = require('fs');
+    if (process.platform !== 'linux') return false;
+    const clonePath = '/proc/sys/kernel/unprivileged_userns_clone';
+    if (existsSync(clonePath)) {
+      return readFileSync(clonePath, 'utf-8').trim() === '0';
+    }
+  } catch { /* not Linux or can't read */ }
+  return false;
 }
 
 /**
@@ -83,6 +123,11 @@ export const browserTools: MCPTool[] = [
           enum: ['load', 'domcontentloaded', 'networkidle'],
           description: 'Wait condition',
         },
+        args: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Additional Chrome launch args (e.g., ["--no-sandbox", "--disable-dev-shm-usage"])',
+        },
       },
       required: ['url'],
     },
@@ -95,8 +140,13 @@ export const browserTools: MCPTool[] = [
         session?: string;
         waitUntil?: string;
       };
+      const launchArgs = (input.args as string[] | undefined) || [];
+      if (needsNoSandbox() && !launchArgs.includes('--no-sandbox')) {
+        launchArgs.push('--no-sandbox');
+      }
       const args = ['open', url];
       if (waitUntil) args.push('--wait-until', waitUntil);
+      for (const a of launchArgs) args.push('--arg', a);
 
       // Create session if new
       const sessionId = session || 'default';
@@ -359,13 +409,13 @@ export const browserTools: MCPTool[] = [
   },
   {
     name: 'browser_hover',
-    description: 'Hover over an element',
+    description: 'Hover over an element using ref (@e1) or CSS selector',
     category: 'browser',
     tags: ['interaction'],
     inputSchema: {
       type: 'object',
       properties: {
-        target: { type: 'string', description: 'Element ref or CSS selector' },
+        target: { type: 'string', description: 'Element ref (@e1) or CSS selector' },
         session: { type: 'string', description: 'Session ID' },
       },
       required: ['target'],

@@ -1829,6 +1829,62 @@ export async function bridgeSemanticRoute(params: { input: string }): Promise<an
   } catch (e: any) { return { route: null, error: e.message }; }
 }
 
+// ===== RaBitQ data export =====
+
+/**
+ * Export all embeddings from the bridge's better-sqlite3 connection.
+ * Used by RaBitQ to build its index from the same data that memory_store writes.
+ * Returns null if bridge is unavailable (caller falls back to sql.js).
+ */
+export async function bridgeGetAllEmbeddings(options?: {
+  dimensions?: number;
+  limit?: number;
+  dbPath?: string;
+}): Promise<Array<{
+  id: string;
+  key: string;
+  namespace: string;
+  embedding: number[];
+}> | null> {
+  const registry = await getRegistry(options?.dbPath);
+  if (!registry) return null;
+
+  const ctx = getDb(registry);
+  if (!ctx) return null;
+
+  try {
+    const dims = options?.dimensions ?? 384;
+    const maxRows = options?.limit ?? 50000;
+
+    const rows: any[] = ctx.db.prepare(`
+      SELECT id, key, namespace, embedding
+      FROM memory_entries
+      WHERE status = 'active' AND embedding IS NOT NULL
+      LIMIT ?
+    `).all(maxRows);
+
+    const results: Array<{ id: string; key: string; namespace: string; embedding: number[] }> = [];
+
+    for (const row of rows) {
+      if (!row.embedding) continue;
+      try {
+        const emb = JSON.parse(row.embedding) as number[];
+        if (emb.length !== dims) continue;
+        results.push({
+          id: String(row.id),
+          key: row.key || String(row.id),
+          namespace: row.namespace || 'default',
+          embedding: emb,
+        });
+      } catch { /* skip invalid */ }
+    }
+
+    return results;
+  } catch {
+    return null;
+  }
+}
+
 // ===== Utility =====
 
 function cosineSim(a: number[], b: number[]): number {
