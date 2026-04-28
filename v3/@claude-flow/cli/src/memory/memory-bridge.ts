@@ -365,6 +365,7 @@ export async function bridgeStoreEntry(options: {
   success: boolean;
   id: string;
   embedding?: { dimensions: number; model: string };
+  rawEmbedding?: number[];
   guarded?: boolean;
   cached?: boolean;
   attested?: boolean;
@@ -444,6 +445,7 @@ export async function bridgeStoreEntry(options: {
       success: true,
       id,
       embedding: embeddingJson ? { dimensions, model } : undefined,
+      rawEmbedding: embeddingJson ? JSON.parse(embeddingJson) as number[] : undefined,
       guarded: true,
       cached: true,
       attested: true,
@@ -548,10 +550,11 @@ export async function bridgeSearchEntries(options: {
       }
 
       // Reciprocal rank fusion: combine semantic and BM25
-      // Weight: 0.7 semantic + 0.3 BM25 (semantic preferred when embeddings available)
-      const score = queryEmbedding
+      // Weight: 0.7 semantic + 0.3 BM25 when both embeddings present
+      // Fall back to BM25-only when either query or row lacks an embedding
+      const score = semanticScore > 0
         ? (0.7 * semanticScore + 0.3 * bm25ScoreVal)
-        : bm25ScoreVal;  // BM25-only when no embeddings
+        : bm25ScoreVal;
 
       if (score >= threshold) {
         // Phase 4: ExplainableRecall provenance
@@ -1189,16 +1192,32 @@ export async function bridgeStorePattern(options: {
     }
 
     // Fallback: store via bridge SQL
+    const patternValue = JSON.stringify({ pattern: options.pattern, type: options.type, confidence: options.confidence, metadata: options.metadata });
     const result = await bridgeStoreEntry({
       key: patternId,
-      value: JSON.stringify({ pattern: options.pattern, type: options.type, confidence: options.confidence, metadata: options.metadata }),
+      value: patternValue,
       namespace: 'pattern',
       generateEmbeddingFlag: true,
       tags: [options.type, 'reasoning-pattern'],
       dbPath: options.dbPath,
     });
 
-    return result ? { success: true, patternId: result.id, controller: 'bridge-fallback' } : null;
+    if (!result) return null;
+
+    // Add to HNSW index for fast semantic search (bridgeStoreEntry stores SQL only)
+    if (result.rawEmbedding) {
+      try {
+        const { addToHNSWIndex } = await import('./memory-initializer.js');
+        await addToHNSWIndex(result.id, result.rawEmbedding, {
+          id: result.id,
+          key: patternId,
+          namespace: 'pattern',
+          content: patternValue,
+        });
+      } catch { /* HNSW is best-effort */ }
+    }
+
+    return { success: true, patternId: result.id, controller: 'bridge-fallback' };
   } catch {
     return null;
   }

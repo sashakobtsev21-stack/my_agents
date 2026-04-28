@@ -2595,6 +2595,7 @@ export const hooksPatternStore: MCPTool = {
 
     const success = reasoningResult?.success || storeResult.success;
     const controller = reasoningResult?.controller || (storeResult.success ? 'bridge-store' : 'none');
+    const hasEmbedding = !!storeResult.embedding || controller === 'reasoningBank' || controller === 'bridge-fallback';
 
     return {
       patternId: reasoningResult?.patternId || storeResult.id || patternId,
@@ -2602,14 +2603,18 @@ export const hooksPatternStore: MCPTool = {
       type,
       confidence,
       indexed: success,
-      hnswIndexed: success && (!!storeResult.embedding || controller === 'reasoningBank'),
+      hnswIndexed: success && hasEmbedding,
       embedding: storeResult.embedding,
       timestamp,
       controller,
-      implementation: controller === 'reasoningBank' ? 'reasoning-bank-controller' : (storeResult.success ? 'real-hnsw-indexed' : 'memory-only'),
+      implementation: (controller === 'reasoningBank' || controller === 'bridge-fallback')
+        ? 'reasoning-bank-controller'
+        : (storeResult.success ? 'real-hnsw-indexed' : 'memory-only'),
       note: controller === 'reasoningBank'
         ? 'Pattern stored via ReasoningBank controller with HNSW indexing'
-        : (storeResult.success ? 'Pattern stored with vector embedding for semantic search' : (storeResult.error || 'Store function unavailable')),
+        : controller === 'bridge-fallback'
+          ? 'Pattern stored via bridge with embedding and HNSW indexing'
+          : (storeResult.success ? 'Pattern stored with vector embedding for semantic search' : (storeResult.error || 'Store function unavailable')),
     };
   },
 };
