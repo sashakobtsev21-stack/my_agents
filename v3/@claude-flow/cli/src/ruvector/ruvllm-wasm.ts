@@ -178,7 +178,12 @@ export async function createHnswRouter(config: HnswRouterConfig): Promise<{
       return ok;
     },
     route(query: Float32Array, k = 3): HnswRouteResult[] {
-      return router.route(query, k);
+      const raw = router.route(query, k);
+      return Array.from(raw).map((r: any) => ({
+        name: r.name ?? r.pattern_name ?? '',
+        score: r.score ?? r.distance ?? 0,
+        metadata: r.metadata ? (typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata) : undefined,
+      }));
     },
     clear(): void {
       router.clear();
@@ -277,11 +282,19 @@ export async function createMicroLora(config: MicroLoraConfig): Promise<{
       const feedback = new mod.AdaptFeedbackWasm();
       feedback.quality = quality;
       feedback.learningRate = learningRate;
-      // Note: feedback.success not on prototype in v2.0.2, set via property
       try { (feedback as any).success = success; } catch { /* v2.0.2 quirk */ }
-      // Create a dummy input vector matching the configured inputDim
       const input = new Float32Array(config.inputDim);
-      lora.adapt(input, feedback);
+      try {
+        lora.adapt(input, feedback);
+      } catch (e: any) {
+        if (e?.message?.includes('Input size mismatch')) {
+          throw new Error(
+            `MicroLoRA adapt failed: WASM expects inputDim=768 but this adapter was created with inputDim=${config.inputDim}. ` +
+            `Recreate with inputDim=768 or a multiple of 768.`
+          );
+        }
+        throw e;
+      }
     },
     applyUpdates(gradients: Float32Array): void {
       lora.applyUpdates(gradients);

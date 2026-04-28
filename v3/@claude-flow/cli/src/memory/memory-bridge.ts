@@ -1717,12 +1717,21 @@ export async function bridgeBatchOperation(params: { operation: string; entries:
     let result;
     switch (params.operation) {
       case 'insert': {
-        // insertEpisodes expects [{content, metadata?, embedding?}]
+        if (typeof batch.insertEpisodes !== 'function') {
+          return { success: false, error: 'BatchOperations.insertEpisodes not available — embedder may not be initialized. Use memory_store instead.' };
+        }
         const episodes = params.entries.map((e: any) => ({
           content: e.value || e.content || JSON.stringify(e),
           metadata: e.metadata || { key: e.key },
         }));
-        result = await batch.insertEpisodes(episodes);
+        try {
+          result = await batch.insertEpisodes(episodes);
+        } catch (insertErr: any) {
+          if (insertErr?.message?.includes('null') || insertErr?.message?.includes('embedBatch')) {
+            return { success: false, error: 'Embedder not initialized for batch insert. Use memory_store for individual entries or run embeddings_init first.' };
+          }
+          throw insertErr;
+        }
         break;
       }
       case 'delete': {
