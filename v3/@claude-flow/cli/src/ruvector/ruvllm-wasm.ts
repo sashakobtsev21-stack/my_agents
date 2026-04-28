@@ -24,6 +24,9 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
+// WASM binary requires at least 768-dim input for MicroLoRA adapt()
+const MICROLORA_WASM_MIN_DIM = 768;
+
 // ── Types ────────────────────────────────────────────────────
 
 export interface HnswRouterConfig {
@@ -278,23 +281,12 @@ export async function createMicroLora(config: MicroLoraConfig): Promise<{
       return lora.apply(input);
     },
     adapt(quality: number, learningRate = 0.01, success = true): void {
-      // v2.0.2: adapt(input, feedback) — two args
       const feedback = new mod.AdaptFeedbackWasm();
       feedback.quality = quality;
       feedback.learningRate = learningRate;
       try { (feedback as any).success = success; } catch { /* v2.0.2 quirk */ }
-      const input = new Float32Array(config.inputDim);
-      try {
-        lora.adapt(input, feedback);
-      } catch (e: any) {
-        if (e?.message?.includes('Input size mismatch')) {
-          throw new Error(
-            `MicroLoRA adapt failed: WASM expects inputDim=768 but this adapter was created with inputDim=${config.inputDim}. ` +
-            `Recreate with inputDim=768 or a multiple of 768.`
-          );
-        }
-        throw e;
-      }
+      const input = new Float32Array(Math.max(config.inputDim, MICROLORA_WASM_MIN_DIM));
+      lora.adapt(input, feedback);
     },
     applyUpdates(gradients: Float32Array): void {
       lora.applyUpdates(gradients);
