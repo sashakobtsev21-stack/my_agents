@@ -8,13 +8,23 @@
 
 # Ruflo
 
-**Self-learning multi-agent AI orchestration for Claude Code**
+**Multi-agent AI orchestration for Claude Code**
 
 </div>
 
-Ruflo turns Claude Code into a self-optimizing multi-agent platform. Deploy specialized AI agents in coordinated swarms that learn from every task, build persistent vector memory, and automate workflows -- with fault-tolerant consensus and intelligent routing that gets smarter over time.
+Deploy 16 specialized agent roles + custom types in coordinated swarms with self-learning capabilities, fault-tolerant consensus, and enterprise-grade security.
+
+### Why Ruflo?
+
+Claude Flow is now Ruflo -- named by Ruv, who loves Rust, flow states, and building things that feel inevitable. The "Ru" is the Ruv. The "flo" is the flow. Underneath, WASM kernels written in Rust power the policy engine, embeddings, and proof system. 6,000+ commits later, this is v3.5.
+
+### Getting into the Flow
+
+Ruflo is a comprehensive AI agent orchestration framework that transforms Claude Code into a powerful multi-agent development platform. It enables teams to deploy, coordinate, and optimize specialized AI agents working together on complex software engineering tasks.
 
 ```
+Self-Learning / Self-Optimizing Agent Architecture
+
 User --> Ruflo (CLI/MCP) --> Router --> Swarm --> Agents --> Memory --> LLM Providers
                           ^                           |
                           +---- Learning Loop <-------+
