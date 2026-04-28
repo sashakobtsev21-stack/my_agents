@@ -16,7 +16,7 @@ Deploy 16 specialized agent roles + custom types in coordinated swarms with self
 
 ### Why Ruflo?
 
-Claude Flow is now Ruflo -- named by Ruv, who loves Rust, flow states, and building things that feel inevitable. The "Ru" is the Ruv. The "flo" is the flow. Underneath, WASM kernels written in Rust power the policy engine, embeddings, and proof system. 6,000+ commits later, this is v3.5.
+> **Why Ruflo?** Claude Flow is now Ruflo — named by Ruv, who loves Rust, flow states, and building things that feel inevitable. The "Ru" is the Ruv. The "flo" is the flow. Underneath, WASM kernels written in Rust power the policy engine, embeddings, and proof system. 
 
 ### Getting into the Flow
 
