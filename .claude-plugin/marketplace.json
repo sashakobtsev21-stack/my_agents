@@ -100,6 +100,11 @@
       "name": "ruflo-plugin-creator",
       "source": "./plugins/ruflo-plugin-creator",
       "description": "Scaffold, validate, and publish new Claude Code plugins with proper structure"
+    },
+    {
+      "name": "ruflo-goals",
+      "source": "./plugins/ruflo-goals",
+      "description": "Long-horizon goal planning, deep research orchestration, and adaptive replanning using GOAP"
     }
   ]
 }

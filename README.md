@@ -51,7 +51,7 @@ Install Ruflo as a native Claude Code plugin -- adds skills, commands, agents, a
 ```
 
 <details>
-<summary><strong>All 19 plugins</strong></summary>
+<summary><strong>All 20 plugins</strong></summary>
 
 | Plugin | What it adds |
 |--------|-------------|
@@ -74,6 +74,7 @@ Install Ruflo as a native Claude Code plugin -- adds skills, commands, agents, a
 | **ruflo-testgen** | Test gap detection, TDD workflow, tester agent |
 | **ruflo-docs** | Doc generation, drift detection, docs-writer agent |
 | **ruflo-plugin-creator** | Scaffold, validate, and publish new plugins |
+| **ruflo-goals** | GOAP planning, deep research, long-horizon tracking |
 
 </details>
 
@@ -108,7 +109,7 @@ claude mcp add ruflo -- npx -y @claude-flow/cli@latest
 | 🧠 **Self-Learning** | SONA neural patterns, ReasoningBank, trajectory learning |
 | 💾 **Vector Memory** | HNSW-indexed AgentDB with 150x-12,500x faster search |
 | ⚡ **Background Workers** | 12 auto-triggered workers (audit, optimize, testgaps, etc.) |
-| 🧩 **Plugin Marketplace** | 19 native Claude Code plugins + 20 npm plugins |
+| 🧩 **Plugin Marketplace** | 20 native Claude Code plugins + 20 npm plugins |
 | 🔌 **Multi-Provider** | Claude, GPT, Gemini, Cohere, Ollama with smart routing |
 | 🛡️ **Security** | AIDefence, input validation, CVE remediation, path traversal prevention |
 
