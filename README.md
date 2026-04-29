@@ -112,6 +112,20 @@ claude mcp add ruflo -- npx -y @claude-flow/cli@latest
 | 🧩 **Plugin Marketplace** | 20 native Claude Code plugins + 20 npm plugins |
 | 🔌 **Multi-Provider** | Claude, GPT, Gemini, Cohere, Ollama with smart routing |
 | 🛡️ **Security** | AIDefence, input validation, CVE remediation, path traversal prevention |
+| 🌐 **Agent Federation** | Cross-installation agent collaboration with zero-trust security ([#1669](https://github.com/ruvnet/ruflo/issues/1669)) |
+
+### Coming Soon: Agent Federation
+
+[`@claude-flow/plugin-agent-federation`](https://github.com/ruvnet/ruflo/issues/1669) -- cross-installation agent collaboration with production-grade security.
+
+- **Zero-trust by default** -- remote agents are untrusted until cryptographically verified (mTLS + ed25519)
+- **PII-gated data flow** -- 14-type detection with per-trust-level BLOCK/REDACT/HASH/PASS policies
+- **5-tier trust model** -- from discovery-only to full remote agent spawning
+- **Compliance built-in** -- HIPAA, SOC2, GDPR audit trails as first-class primitives
+
+```bash
+npx claude-flow@latest plugins install @claude-flow/plugin-agent-federation
+```
 
 <details>
 <summary><strong>Claude Code: With vs Without Ruflo</strong></summary>
