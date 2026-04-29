@@ -24,7 +24,7 @@ export class AgentFederationPlugin implements ClaudeFlowPlugin {
   readonly version = '1.0.0-alpha.1';
   readonly description = 'Cross-installation agent federation with PII protection and AI defence';
   readonly author = 'Claude Flow Team';
-  readonly dependencies = ['@claude-flow/security'];
+  readonly dependencies = ['@claude-flow/security', '@claude-flow/aidefence'];
 
   private coordinator: FederationCoordinator | null = null;
   private context: PluginContext | null = null;

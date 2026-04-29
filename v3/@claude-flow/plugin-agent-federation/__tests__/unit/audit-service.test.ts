@@ -1,410 +1,560 @@
 /**
  * AuditService Tests
  *
- * Validates audit event creation with UUID and timestamp, event categorization,
- * HIPAA/SOC2/GDPR compliance modes, filtering/querying, and PII event logging.
- *
- * London School TDD: all dependencies are mocked.
+ * Tests the real AuditService from source with real dependency implementations.
+ * No mocks, no simulations, no local reimplementations.
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  AuditService,
+  type FederationAuditEventType,
+  type AuditSeverity,
+  type AuditCategory,
+  type ComplianceMode,
+  type FederationAuditEvent,
+  type AuditQuery,
+  type AuditExportFormat,
+  type AuditServiceDeps,
+} from '../../src/domain/services/audit-service.js';
 
-// --- Types expected from the not-yet-implemented AuditService ---
+// ---------------------------------------------------------------------------
+// Real dependency implementations for testing
+// ---------------------------------------------------------------------------
 
-type AuditEventCategory =
-  | 'discovery'
-  | 'handshake'
-  | 'message'
-  | 'pii'
-  | 'security'
-  | 'consensus';
+function createTestDeps(overrides?: Partial<AuditServiceDeps>): {
+  deps: AuditServiceDeps;
+  persisted: FederationAuditEvent[];
+} {
+  let idCounter = 0;
+  const persisted: FederationAuditEvent[] = [];
 
-type AuditSeverity = 'info' | 'warning' | 'error' | 'critical';
-type ComplianceMode = 'hipaa' | 'soc2' | 'gdpr';
-
-interface AuditEvent {
-  id: string;
-  timestamp: string;
-  nodeId: string;
-  category: AuditEventCategory;
-  severity: AuditSeverity;
-  action: string;
-  details: Record<string, unknown>;
-  complianceTags: string[];
-}
-
-interface AuditQueryOptions {
-  eventType?: AuditEventCategory;
-  severity?: AuditSeverity;
-  dateRange?: { start: Date; end: Date };
-  limit?: number;
-}
-
-interface IAuditService {
-  log(params: {
-    category: AuditEventCategory;
-    severity: AuditSeverity;
-    action: string;
-    details?: Record<string, unknown>;
-  }): AuditEvent;
-
-  query(options: AuditQueryOptions): AuditEvent[];
-  getAll(): AuditEvent[];
-  getComplianceMode(): ComplianceMode;
-}
-
-// --- Mock implementation matching ADR-078 spec ---
-
-function createAuditService(
-  nodeId: string,
-  complianceMode: ComplianceMode = 'soc2',
-): IAuditService {
-  const events: AuditEvent[] = [];
-  let counter = 0;
-
-  function generateId(): string {
-    counter++;
-    return `audit_${Date.now()}_${counter}_${Math.random().toString(36).slice(2, 10)}`;
-  }
-
-  function getComplianceTags(
-    category: AuditEventCategory,
-    mode: ComplianceMode,
-  ): string[] {
-    const tags: string[] = [mode];
-
-    switch (mode) {
-      case 'hipaa':
-        tags.push('full-audit-trail');
-        if (category === 'pii') tags.push('no-pii-in-logs');
-        if (category === 'security') tags.push('access-monitoring');
-        break;
-      case 'soc2':
-        tags.push('access-control');
-        if (category === 'security') tags.push('security-event');
-        if (category === 'handshake') tags.push('authentication');
-        break;
-      case 'gdpr':
-        tags.push('data-processing-record');
-        if (category === 'pii') tags.push('data-subject-rights');
-        if (category === 'message') tags.push('data-transfer');
-        break;
-    }
-
-    return tags;
-  }
-
-  return {
-    log(params) {
-      const event: AuditEvent = {
-        id: generateId(),
-        timestamp: new Date().toISOString(),
-        nodeId,
-        category: params.category,
-        severity: params.severity,
-        action: params.action,
-        details: params.details ?? {},
-        complianceTags: getComplianceTags(params.category, complianceMode),
-      };
-
-      // HIPAA mode: strip PII from details
-      if (complianceMode === 'hipaa' && params.category === 'pii') {
-        const sanitized = { ...event.details };
-        delete sanitized['rawValue'];
-        delete sanitized['value'];
-        event.details = sanitized;
-      }
-
-      events.push(event);
-      return event;
+  const deps: AuditServiceDeps = {
+    generateEventId: () => `evt-${++idCounter}`,
+    getLocalNodeId: () => 'test-node-1',
+    persistEvent: async (event: FederationAuditEvent) => {
+      persisted.push(event);
     },
-
-    query(options: AuditQueryOptions): AuditEvent[] {
-      let result = [...events];
-
-      if (options.eventType) {
-        result = result.filter((e) => e.category === options.eventType);
+    queryEvents: async (query: AuditQuery) => {
+      let results = [...persisted];
+      if (query.eventType) results = results.filter(e => e.eventType === query.eventType);
+      if (query.severity) results = results.filter(e => e.severity === query.severity);
+      if (query.category) results = results.filter(e => e.category === query.category);
+      if (query.nodeId) results = results.filter(e => e.nodeId === query.nodeId);
+      if (query.sessionId) results = results.filter(e => e.sessionId === query.sessionId);
+      if (query.since) {
+        const since = query.since.getTime();
+        results = results.filter(e => new Date(e.timestamp).getTime() >= since);
       }
-
-      if (options.severity) {
-        result = result.filter((e) => e.severity === options.severity);
+      if (query.until) {
+        const until = query.until.getTime();
+        results = results.filter(e => new Date(e.timestamp).getTime() <= until);
       }
-
-      if (options.dateRange) {
-        const start = options.dateRange.start.getTime();
-        const end = options.dateRange.end.getTime();
-        result = result.filter((e) => {
-          const ts = new Date(e.timestamp).getTime();
-          return ts >= start && ts <= end;
-        });
-      }
-
-      if (options.limit) {
-        result = result.slice(0, options.limit);
-      }
-
-      return result;
+      if (query.offset) results = results.slice(query.offset);
+      if (query.limit) results = results.slice(0, query.limit);
+      return results;
     },
-
-    getAll(): AuditEvent[] {
-      return [...events];
-    },
-
-    getComplianceMode(): ComplianceMode {
-      return complianceMode;
-    },
+    ...overrides,
   };
+
+  return { deps, persisted };
 }
+
+// ---------------------------------------------------------------------------
+// Expected severity and category mappings (from source)
+// ---------------------------------------------------------------------------
+
+const EXPECTED_SEVERITY: Record<FederationAuditEventType, AuditSeverity> = {
+  peer_discovered: 'info',
+  peer_manifest_published: 'info',
+  handshake_initiated: 'info',
+  handshake_completed: 'info',
+  handshake_failed: 'warn',
+  handshake_rejected: 'warn',
+  session_created: 'info',
+  session_renewed: 'info',
+  session_expired: 'info',
+  session_terminated: 'info',
+  message_sent: 'info',
+  message_received: 'info',
+  message_rejected: 'warn',
+  message_timeout: 'warn',
+  pii_detected: 'warn',
+  pii_stripped: 'info',
+  pii_blocked: 'warn',
+  threat_detected: 'error',
+  threat_blocked: 'critical',
+  threat_learned: 'info',
+  claim_checked: 'info',
+  claim_denied: 'warn',
+  trust_level_changed: 'warn',
+  consensus_proposed: 'info',
+  consensus_voted: 'info',
+  consensus_reached: 'info',
+  consensus_failed: 'warn',
+};
+
+const EXPECTED_CATEGORY: Record<FederationAuditEventType, AuditCategory> = {
+  peer_discovered: 'discovery',
+  peer_manifest_published: 'discovery',
+  handshake_initiated: 'handshake',
+  handshake_completed: 'handshake',
+  handshake_failed: 'handshake',
+  handshake_rejected: 'handshake',
+  session_created: 'handshake',
+  session_renewed: 'handshake',
+  session_expired: 'handshake',
+  session_terminated: 'handshake',
+  message_sent: 'message',
+  message_received: 'message',
+  message_rejected: 'message',
+  message_timeout: 'message',
+  pii_detected: 'pii',
+  pii_stripped: 'pii',
+  pii_blocked: 'pii',
+  threat_detected: 'security',
+  threat_blocked: 'security',
+  threat_learned: 'security',
+  claim_checked: 'security',
+  claim_denied: 'security',
+  trust_level_changed: 'security',
+  consensus_proposed: 'consensus',
+  consensus_voted: 'consensus',
+  consensus_reached: 'consensus',
+  consensus_failed: 'consensus',
+};
+
+const ALL_EVENT_TYPES: FederationAuditEventType[] = Object.keys(EXPECTED_SEVERITY) as FederationAuditEventType[];
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 describe('AuditService', () => {
+  // -----------------------------------------------------------------------
+  // log — basic event creation
+  // -----------------------------------------------------------------------
   describe('log', () => {
-    let service: IAuditService;
+    let service: AuditService;
+    let persisted: FederationAuditEvent[];
 
     beforeEach(() => {
-      service = createAuditService('node-A');
+      const t = createTestDeps();
+      persisted = t.persisted;
+      service = new AuditService(t.deps);
     });
 
-    it('should create an audit event with a unique id', () => {
-      const event = service.log({
-        category: 'discovery',
-        severity: 'info',
-        action: 'peer-discovered',
+    it('should create an event with eventId from generateEventId', async () => {
+      const event = await service.log('peer_discovered');
+      expect(event.eventId).toBe('evt-1');
+    });
+
+    it('should generate unique ids for consecutive events', async () => {
+      const e1 = await service.log('peer_discovered');
+      const e2 = await service.log('peer_discovered');
+      expect(e1.eventId).not.toBe(e2.eventId);
+    });
+
+    it('should include an ISO 8601 timestamp', async () => {
+      const event = await service.log('handshake_initiated');
+      expect(event.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+    });
+
+    it('should include the nodeId from getLocalNodeId', async () => {
+      const event = await service.log('message_sent');
+      expect(event.nodeId).toBe('test-node-1');
+    });
+
+    it('should set complianceMode from config (default none)', async () => {
+      const event = await service.log('peer_discovered');
+      expect(event.complianceMode).toBe('none');
+    });
+
+    it('should set complianceMode from config when provided', async () => {
+      const t = createTestDeps();
+      const svc = new AuditService(t.deps, { complianceMode: 'soc2' });
+      const event = await svc.log('peer_discovered');
+      expect(event.complianceMode).toBe('soc2');
+    });
+
+    it('should merge additional details into the event', async () => {
+      const event = await service.log('message_sent', {
+        sourceNodeId: 'node-A',
+        targetNodeId: 'node-B',
+        latencyMs: 42,
       });
-      expect(event.id).toBeDefined();
-      expect(event.id.length).toBeGreaterThan(0);
+      expect(event.sourceNodeId).toBe('node-A');
+      expect(event.targetNodeId).toBe('node-B');
+      expect(event.latencyMs).toBe(42);
     });
 
-    it('should generate unique ids for consecutive events', () => {
-      const e1 = service.log({ category: 'discovery', severity: 'info', action: 'a' });
-      const e2 = service.log({ category: 'discovery', severity: 'info', action: 'b' });
-      expect(e1.id).not.toBe(e2.id);
-    });
-
-    it('should include an ISO 8601 timestamp', () => {
-      const event = service.log({
-        category: 'handshake',
-        severity: 'info',
-        action: 'handshake-initiated',
-      });
-      const iso8601 = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
-      expect(event.timestamp).toMatch(iso8601);
-    });
-
-    it('should include the nodeId', () => {
-      const event = service.log({
-        category: 'message',
-        severity: 'info',
-        action: 'message-sent',
-      });
-      expect(event.nodeId).toBe('node-A');
-    });
-
-    it('should correctly categorize discovery events', () => {
-      const event = service.log({ category: 'discovery', severity: 'info', action: 'peer-found' });
-      expect(event.category).toBe('discovery');
-    });
-
-    it('should correctly categorize handshake events', () => {
-      const event = service.log({ category: 'handshake', severity: 'info', action: 'tls-complete' });
-      expect(event.category).toBe('handshake');
-    });
-
-    it('should correctly categorize message events', () => {
-      const event = service.log({ category: 'message', severity: 'info', action: 'routed' });
-      expect(event.category).toBe('message');
-    });
-
-    it('should correctly categorize pii events', () => {
-      const event = service.log({ category: 'pii', severity: 'warning', action: 'pii-detected' });
-      expect(event.category).toBe('pii');
-    });
-
-    it('should correctly categorize security events', () => {
-      const event = service.log({ category: 'security', severity: 'critical', action: 'hmac-failure' });
-      expect(event.category).toBe('security');
-    });
-
-    it('should correctly categorize consensus events', () => {
-      const event = service.log({ category: 'consensus', severity: 'info', action: 'vote-cast' });
-      expect(event.category).toBe('consensus');
-    });
-
-    it('should store action and details', () => {
-      const event = service.log({
-        category: 'pii',
-        severity: 'warning',
-        action: 'pii-detected',
-        details: { typesFound: ['email', 'ssn'], actionTaken: 'redact' },
-      });
-      expect(event.action).toBe('pii-detected');
-      expect(event.details).toEqual({ typesFound: ['email', 'ssn'], actionTaken: 'redact' });
-    });
-
-    it('should default details to empty object when not provided', () => {
-      const event = service.log({ category: 'discovery', severity: 'info', action: 'ping' });
-      expect(event.details).toEqual({});
+    it('should return a FederationAuditEvent with correct eventType', async () => {
+      const event = await service.log('consensus_proposed');
+      expect(event.eventType).toBe('consensus_proposed');
     });
   });
 
-  describe('HIPAA compliance mode', () => {
-    let service: IAuditService;
+  // -----------------------------------------------------------------------
+  // Severity and category mappings for all 26 event types
+  // -----------------------------------------------------------------------
+  describe('severity mapping', () => {
+    let service: AuditService;
 
     beforeEach(() => {
-      service = createAuditService('node-H', 'hipaa');
+      const t = createTestDeps();
+      service = new AuditService(t.deps);
     });
 
-    it('should tag events with hipaa and full-audit-trail', () => {
-      const event = service.log({ category: 'discovery', severity: 'info', action: 'scan' });
-      expect(event.complianceTags).toContain('hipaa');
-      expect(event.complianceTags).toContain('full-audit-trail');
+    it.each(ALL_EVENT_TYPES)(
+      'should assign severity "%s" -> %s',
+      async (eventType) => {
+        const event = await service.log(eventType);
+        expect(event.severity).toBe(EXPECTED_SEVERITY[eventType]);
+      },
+    );
+  });
+
+  describe('category mapping', () => {
+    let service: AuditService;
+
+    beforeEach(() => {
+      const t = createTestDeps();
+      service = new AuditService(t.deps);
     });
 
-    it('should tag pii events with no-pii-in-logs', () => {
-      const event = service.log({ category: 'pii', severity: 'warning', action: 'pii-detected' });
-      expect(event.complianceTags).toContain('no-pii-in-logs');
+    it.each(ALL_EVENT_TYPES)(
+      'should assign category "%s" -> %s',
+      async (eventType) => {
+        const event = await service.log(eventType);
+        expect(event.category).toBe(EXPECTED_CATEGORY[eventType]);
+      },
+    );
+  });
+
+  // -----------------------------------------------------------------------
+  // Buffer and flush behavior
+  // -----------------------------------------------------------------------
+  describe('buffer', () => {
+    it('should track buffer size via getBufferSize', async () => {
+      const t = createTestDeps();
+      const service = new AuditService(t.deps, { batchSize: 200 });
+      expect(service.getBufferSize()).toBe(0);
+      await service.log('peer_discovered');
+      expect(service.getBufferSize()).toBe(1);
+      await service.log('peer_discovered');
+      expect(service.getBufferSize()).toBe(2);
     });
 
-    it('should strip raw PII values from pii event details', () => {
-      const event = service.log({
-        category: 'pii',
-        severity: 'warning',
-        action: 'pii-detected',
-        details: { rawValue: '123-45-6789', value: 'secret', typesFound: ['ssn'] },
+    it('should flush buffer when it reaches batchSize', async () => {
+      const t = createTestDeps();
+      const service = new AuditService(t.deps, { batchSize: 3 });
+
+      await service.log('peer_discovered');
+      await service.log('peer_discovered');
+      expect(service.getBufferSize()).toBe(2);
+      expect(t.persisted).toHaveLength(0);
+
+      // Third event triggers flush
+      await service.log('peer_discovered');
+      expect(service.getBufferSize()).toBe(0);
+      expect(t.persisted).toHaveLength(3);
+    });
+
+    it('should flush immediately on critical severity', async () => {
+      const t = createTestDeps();
+      const service = new AuditService(t.deps, { batchSize: 100 });
+
+      await service.log('peer_discovered'); // info — stays in buffer
+      expect(service.getBufferSize()).toBe(1);
+      expect(t.persisted).toHaveLength(0);
+
+      // threat_blocked is critical — triggers immediate flush
+      await service.log('threat_blocked');
+      expect(service.getBufferSize()).toBe(0);
+      expect(t.persisted).toHaveLength(2);
+    });
+
+    it('should flush all buffered events via flush()', async () => {
+      const t = createTestDeps();
+      const service = new AuditService(t.deps, { batchSize: 200 });
+
+      await service.log('peer_discovered');
+      await service.log('message_sent');
+      await service.log('handshake_initiated');
+      expect(service.getBufferSize()).toBe(3);
+      expect(t.persisted).toHaveLength(0);
+
+      await service.flush();
+      expect(service.getBufferSize()).toBe(0);
+      expect(t.persisted).toHaveLength(3);
+    });
+
+    it('should persist events via deps.persistEvent', async () => {
+      const persistEvent = vi.fn(async () => {});
+      const t = createTestDeps({ persistEvent });
+      const service = new AuditService(t.deps, { batchSize: 1 });
+
+      await service.log('peer_discovered');
+      expect(persistEvent).toHaveBeenCalledTimes(1);
+      expect(persistEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ eventType: 'peer_discovered' }),
+      );
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // onAuditEvent callback
+  // -----------------------------------------------------------------------
+  describe('onAuditEvent callback', () => {
+    it('should call onAuditEvent for every logged event', async () => {
+      const onAuditEvent = vi.fn();
+      const t = createTestDeps({ onAuditEvent });
+      const service = new AuditService(t.deps, { batchSize: 200 });
+
+      const event = await service.log('peer_discovered');
+      expect(onAuditEvent).toHaveBeenCalledTimes(1);
+      expect(onAuditEvent).toHaveBeenCalledWith(event);
+    });
+
+    it('should fire onAuditEvent before flushing', async () => {
+      const callOrder: string[] = [];
+      const onAuditEvent = vi.fn(() => callOrder.push('callback'));
+      const persistEvent = vi.fn(async () => { callOrder.push('persist'); });
+      const t = createTestDeps({ onAuditEvent, persistEvent });
+      const service = new AuditService(t.deps, { batchSize: 1 });
+
+      await service.log('peer_discovered');
+      expect(callOrder[0]).toBe('callback');
+      expect(callOrder[1]).toBe('persist');
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // HIPAA compliance
+  // -----------------------------------------------------------------------
+  describe('HIPAA compliance', () => {
+    let service: AuditService;
+    let persisted: FederationAuditEvent[];
+
+    beforeEach(() => {
+      const t = createTestDeps();
+      persisted = t.persisted;
+      service = new AuditService(t.deps, { complianceMode: 'hipaa' });
+    });
+
+    it('should strip rawContent from metadata on PII events', async () => {
+      const event = await service.log('pii_detected', {
+        piiDetected: true,
+        metadata: { rawContent: 'SSN: 123-45-6789', context: 'scan' },
       });
-      expect(event.details).not.toHaveProperty('rawValue');
-      expect(event.details).not.toHaveProperty('value');
-      expect(event.details).toHaveProperty('typesFound');
+      expect(event.metadata).not.toHaveProperty('rawContent');
+      expect(event.metadata).toHaveProperty('context', 'scan');
     });
 
-    it('should tag security events with access-monitoring', () => {
-      const event = service.log({ category: 'security', severity: 'critical', action: 'breach-attempt' });
-      expect(event.complianceTags).toContain('access-monitoring');
-    });
-  });
-
-  describe('SOC2 compliance mode', () => {
-    let service: IAuditService;
-
-    beforeEach(() => {
-      service = createAuditService('node-S', 'soc2');
+    it('should strip originalValue from metadata on PII events', async () => {
+      const event = await service.log('pii_stripped', {
+        piiDetected: true,
+        metadata: { originalValue: 'john@example.com', action: 'strip' },
+      });
+      expect(event.metadata).not.toHaveProperty('originalValue');
+      expect(event.metadata).toHaveProperty('action', 'strip');
     });
 
-    it('should tag events with soc2 and access-control', () => {
-      const event = service.log({ category: 'discovery', severity: 'info', action: 'scan' });
-      expect(event.complianceTags).toContain('soc2');
-      expect(event.complianceTags).toContain('access-control');
-    });
-
-    it('should tag security events with security-event', () => {
-      const event = service.log({ category: 'security', severity: 'error', action: 'unauthorized' });
-      expect(event.complianceTags).toContain('security-event');
-    });
-
-    it('should tag handshake events with authentication', () => {
-      const event = service.log({ category: 'handshake', severity: 'info', action: 'auth-complete' });
-      expect(event.complianceTags).toContain('authentication');
-    });
-  });
-
-  describe('GDPR compliance mode', () => {
-    let service: IAuditService;
-
-    beforeEach(() => {
-      service = createAuditService('node-G', 'gdpr');
-    });
-
-    it('should tag events with gdpr and data-processing-record', () => {
-      const event = service.log({ category: 'discovery', severity: 'info', action: 'scan' });
-      expect(event.complianceTags).toContain('gdpr');
-      expect(event.complianceTags).toContain('data-processing-record');
-    });
-
-    it('should tag pii events with data-subject-rights', () => {
-      const event = service.log({ category: 'pii', severity: 'warning', action: 'pii-found' });
-      expect(event.complianceTags).toContain('data-subject-rights');
-    });
-
-    it('should tag message events with data-transfer', () => {
-      const event = service.log({ category: 'message', severity: 'info', action: 'cross-border' });
-      expect(event.complianceTags).toContain('data-transfer');
-    });
-  });
-
-  describe('query', () => {
-    let service: IAuditService;
-
-    beforeEach(() => {
-      service = createAuditService('node-Q');
-      service.log({ category: 'discovery', severity: 'info', action: 'a' });
-      service.log({ category: 'security', severity: 'critical', action: 'b' });
-      service.log({ category: 'pii', severity: 'warning', action: 'c' });
-      service.log({ category: 'discovery', severity: 'info', action: 'd' });
-      service.log({ category: 'message', severity: 'info', action: 'e' });
-    });
-
-    it('should filter by eventType', () => {
-      const results = service.query({ eventType: 'discovery' });
-      expect(results).toHaveLength(2);
-      expect(results.every((e) => e.category === 'discovery')).toBe(true);
-    });
-
-    it('should filter by severity', () => {
-      const results = service.query({ severity: 'critical' });
-      expect(results).toHaveLength(1);
-      expect(results[0].category).toBe('security');
-    });
-
-    it('should respect limit', () => {
-      const results = service.query({ limit: 2 });
-      expect(results).toHaveLength(2);
-    });
-
-    it('should filter by dateRange', () => {
-      const now = new Date();
-      const tenSecondsAgo = new Date(now.getTime() - 10000);
-      const results = service.query({ dateRange: { start: tenSecondsAgo, end: now } });
-      // All events were logged within the last few milliseconds
-      expect(results.length).toBeGreaterThan(0);
-    });
-
-    it('should return empty array when no events match filter', () => {
-      const results = service.query({ eventType: 'consensus' });
-      expect(results).toHaveLength(0);
-    });
-
-    it('should return all events when no filters applied', () => {
-      const results = service.query({});
-      expect(results).toHaveLength(5);
-    });
-  });
-
-  describe('PII detection audit events', () => {
-    it('should log PII types found and action taken', () => {
-      const service = createAuditService('node-P');
-      const event = service.log({
-        category: 'pii',
-        severity: 'warning',
-        action: 'pii-detected',
-        details: {
-          typesFound: ['email', 'phone'],
-          actionTaken: 'redact',
-          messageId: 'msg-123',
+    it('should strip both rawContent and originalValue together', async () => {
+      const event = await service.log('pii_blocked', {
+        piiDetected: true,
+        metadata: {
+          rawContent: 'sensitive',
+          originalValue: 'also-sensitive',
+          typesFound: ['email'],
         },
       });
-      expect(event.details.typesFound).toEqual(['email', 'phone']);
-      expect(event.details.actionTaken).toBe('redact');
+      expect(event.metadata).not.toHaveProperty('rawContent');
+      expect(event.metadata).not.toHaveProperty('originalValue');
+      expect(event.metadata).toHaveProperty('typesFound');
     });
 
-    it('should log blocked PII with critical severity', () => {
-      const service = createAuditService('node-P');
-      const event = service.log({
-        category: 'pii',
-        severity: 'critical',
-        action: 'pii-blocked',
-        details: { typesFound: ['ssn'], actionTaken: 'block' },
+    it('should not strip metadata when piiDetected is false', async () => {
+      const event = await service.log('message_sent', {
+        metadata: { rawContent: 'keep-me' },
       });
-      expect(event.severity).toBe('critical');
-      expect(event.details.actionTaken).toBe('block');
+      expect(event.metadata).toHaveProperty('rawContent', 'keep-me');
+    });
+
+    it('should not strip metadata when there is no metadata', async () => {
+      const event = await service.log('pii_detected', { piiDetected: true });
+      expect(event.metadata).toBeUndefined();
+    });
+
+    it('should set complianceMode to hipaa on all events', async () => {
+      const event = await service.log('peer_discovered');
+      expect(event.complianceMode).toBe('hipaa');
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // query
+  // -----------------------------------------------------------------------
+  describe('query', () => {
+    let service: AuditService;
+    let persisted: FederationAuditEvent[];
+
+    beforeEach(async () => {
+      const t = createTestDeps();
+      persisted = t.persisted;
+      service = new AuditService(t.deps, { batchSize: 200 });
+
+      await service.log('peer_discovered');
+      // threat_blocked is critical — triggers immediate flush of buffer (2 events)
+      await service.log('threat_blocked', { metadata: { reason: 'malicious' } });
+      await service.log('pii_detected', { piiDetected: true });
+      await service.log('peer_manifest_published');
+      await service.log('message_sent');
+    });
+
+    it('should flush the buffer before querying', async () => {
+      // 3 events remain buffered (pii_detected, peer_manifest_published, message_sent)
+      // The first 2 were flushed when threat_blocked (critical) was logged
+      expect(service.getBufferSize()).toBe(3);
+      const results = await service.query({});
+      expect(service.getBufferSize()).toBe(0);
+      // All 5 events are now persisted and queryable
+      expect(results).toHaveLength(5);
+    });
+
+    it('should filter by eventType', async () => {
+      const results = await service.query({ eventType: 'peer_discovered' });
+      expect(results).toHaveLength(1);
+      expect(results[0].eventType).toBe('peer_discovered');
+    });
+
+    it('should filter by severity', async () => {
+      const results = await service.query({ severity: 'critical' });
+      expect(results).toHaveLength(1);
+      expect(results[0].eventType).toBe('threat_blocked');
+    });
+
+    it('should filter by category', async () => {
+      const results = await service.query({ category: 'discovery' });
+      expect(results).toHaveLength(2);
+    });
+
+    it('should respect limit', async () => {
+      const results = await service.query({ limit: 2 });
+      expect(results).toHaveLength(2);
+    });
+
+    it('should return empty array when no events match', async () => {
+      const results = await service.query({ eventType: 'consensus_failed' });
+      expect(results).toHaveLength(0);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // export
+  // -----------------------------------------------------------------------
+  describe('export', () => {
+    let service: AuditService;
+
+    beforeEach(async () => {
+      const t = createTestDeps();
+      service = new AuditService(t.deps, { batchSize: 200 });
+      await service.log('peer_discovered', { sourceNodeId: 'node-A' });
+      await service.log('message_sent', { targetNodeId: 'node-B' });
+    });
+
+    it('should export as json (pretty-printed array)', async () => {
+      const output = await service.export({}, 'json');
+      const parsed = JSON.parse(output);
+      expect(Array.isArray(parsed)).toBe(true);
+      expect(parsed).toHaveLength(2);
+      expect(parsed[0].eventType).toBe('peer_discovered');
+    });
+
+    it('should export as ndjson (one JSON object per line)', async () => {
+      const output = await service.export({}, 'ndjson');
+      const lines = output.split('\n');
+      expect(lines).toHaveLength(2);
+      expect(JSON.parse(lines[0]).eventType).toBe('peer_discovered');
+      expect(JSON.parse(lines[1]).eventType).toBe('message_sent');
+    });
+
+    it('should export as csv with headers', async () => {
+      const output = await service.export({}, 'csv');
+      const lines = output.split('\n');
+      expect(lines[0]).toContain('eventId');
+      expect(lines[0]).toContain('timestamp');
+      expect(lines[0]).toContain('severity');
+      expect(lines).toHaveLength(3); // header + 2 data rows
+    });
+
+    it('should return empty string for csv with no matching events', async () => {
+      const output = await service.export({ eventType: 'consensus_failed' }, 'csv');
+      expect(output).toBe('');
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // getBufferSize
+  // -----------------------------------------------------------------------
+  describe('getBufferSize', () => {
+    it('should return 0 initially', () => {
+      const t = createTestDeps();
+      const service = new AuditService(t.deps);
+      expect(service.getBufferSize()).toBe(0);
+    });
+
+    it('should increment after each log (when batchSize is large)', async () => {
+      const t = createTestDeps();
+      const service = new AuditService(t.deps, { batchSize: 500 });
+      await service.log('peer_discovered');
+      expect(service.getBufferSize()).toBe(1);
+      await service.log('message_sent');
+      expect(service.getBufferSize()).toBe(2);
+    });
+
+    it('should reset to 0 after flush', async () => {
+      const t = createTestDeps();
+      const service = new AuditService(t.deps, { batchSize: 500 });
+      await service.log('peer_discovered');
+      await service.log('peer_discovered');
+      await service.flush();
+      expect(service.getBufferSize()).toBe(0);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Config defaults
+  // -----------------------------------------------------------------------
+  describe('config defaults', () => {
+    it('should default complianceMode to none', async () => {
+      const t = createTestDeps();
+      const service = new AuditService(t.deps);
+      const event = await service.log('peer_discovered');
+      expect(event.complianceMode).toBe('none');
+    });
+
+    it('should default batchSize to 100', async () => {
+      const t = createTestDeps();
+      const service = new AuditService(t.deps);
+      // Log 99 events — buffer should not flush
+      for (let i = 0; i < 99; i++) {
+        await service.log('peer_discovered');
+      }
+      expect(service.getBufferSize()).toBe(99);
+      expect(t.persisted).toHaveLength(0);
+
+      // 100th event triggers flush
+      await service.log('peer_discovered');
+      expect(service.getBufferSize()).toBe(0);
+      expect(t.persisted).toHaveLength(100);
+    });
+
+    it('should allow overriding dataResidency', async () => {
+      const t = createTestDeps();
+      const service = new AuditService(t.deps, { dataResidency: 'us-east-1' });
+      const event = await service.log('peer_discovered');
+      expect(event.dataResidency).toBe('us-east-1');
     });
   });
 });

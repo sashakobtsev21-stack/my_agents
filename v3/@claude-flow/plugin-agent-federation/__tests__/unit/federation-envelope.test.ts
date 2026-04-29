@@ -1,362 +1,250 @@
 /**
  * FederationEnvelope Tests
  *
- * Validates envelope creation with required fields, unique nonce generation,
- * HMAC signature creation and verification, serialization/deserialization,
- * and ISO 8601 timestamps.
- *
- * London School TDD: all dependencies are mocked.
+ * Tests the ACTUAL FederationEnvelope class, CONSENSUS_REQUIRED_TYPES,
+ * and FederationMessageType from the real source module.
+ * No mocks, no simulations, no local reimplementations.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { createHmac } from 'crypto';
+import { describe, it, expect } from 'vitest';
+import {
+  FederationEnvelope,
+  type FederationEnvelopeProps,
+  type FederationMessageType,
+  CONSENSUS_REQUIRED_TYPES,
+  type PIIScanResult,
+} from '../../src/domain/entities/federation-envelope.js';
 
-// --- Types expected from the not-yet-implemented FederationEnvelope ---
-
-interface FederationEnvelope {
-  id: string;
-  nonce: string;
-  timestamp: string;
-  sourceNodeId: string;
-  targetNodeId: string;
-  sessionId: string;
-  payload: unknown;
-  signature: string;
-  protocolVersion: string;
-}
-
-interface IEnvelopeFactory {
-  create(params: {
-    sourceNodeId: string;
-    targetNodeId: string;
-    sessionId: string;
-    payload: unknown;
-    signingKey: string;
-  }): FederationEnvelope;
-
-  verify(envelope: FederationEnvelope, key: string): boolean;
-  serialize(envelope: FederationEnvelope): string;
-  deserialize(data: string): FederationEnvelope;
-}
-
-// --- Mock implementation matching ADR-078 spec ---
-
-function createEnvelopeFactory(): IEnvelopeFactory {
-  let nonceCounter = 0;
-
-  function generateNonce(): string {
-    nonceCounter++;
-    return `nonce_${Date.now()}_${nonceCounter}_${Math.random().toString(36).slice(2, 10)}`;
-  }
-
-  function computeHmac(envelope: Omit<FederationEnvelope, 'signature'>, key: string): string {
-    const data = `${envelope.id}:${envelope.nonce}:${envelope.timestamp}:${envelope.sourceNodeId}:${envelope.targetNodeId}:${envelope.sessionId}:${JSON.stringify(envelope.payload)}`;
-    return createHmac('sha256', key).update(data).digest('hex');
-  }
-
+function makeScanResult(overrides: Partial<PIIScanResult> = {}): PIIScanResult {
   return {
-    create(params) {
-      const id = `env_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-      const nonce = generateNonce();
-      const timestamp = new Date().toISOString();
-      const protocolVersion = '1.0';
+    scanned: false,
+    piiFound: false,
+    detections: [],
+    actionsApplied: [],
+    scanDurationMs: 0,
+    ...overrides,
+  };
+}
 
-      const partial = {
-        id,
-        nonce,
-        timestamp,
-        sourceNodeId: params.sourceNodeId,
-        targetNodeId: params.targetNodeId,
-        sessionId: params.sessionId,
-        payload: params.payload,
-        protocolVersion,
-      };
-
-      const signature = computeHmac(partial, params.signingKey);
-
-      return { ...partial, signature };
-    },
-
-    verify(envelope: FederationEnvelope, key: string): boolean {
-      const { signature, ...rest } = envelope;
-      const expected = computeHmac(rest, key);
-      return signature === expected;
-    },
-
-    serialize(envelope: FederationEnvelope): string {
-      return JSON.stringify(envelope);
-    },
-
-    deserialize(data: string): FederationEnvelope {
-      return JSON.parse(data) as FederationEnvelope;
-    },
+function makeProps<T = unknown>(overrides: Partial<FederationEnvelopeProps<T>> = {}): FederationEnvelopeProps<T> {
+  return {
+    envelopeId: 'env-001',
+    sourceNodeId: 'node-A',
+    targetNodeId: 'node-B',
+    sessionId: 'session-1',
+    messageType: 'task-assignment' as FederationMessageType,
+    payload: { action: 'ping' } as T,
+    timestamp: new Date('2026-01-15T12:00:00.000Z'),
+    nonce: 'nonce-abc123',
+    hmacSignature: 'sig-deadbeef',
+    piiScanResult: makeScanResult(),
+    ...overrides,
   };
 }
 
 describe('FederationEnvelope', () => {
-  let factory: IEnvelopeFactory;
-  const signingKey = 'test-secret-key-256bit';
+  describe('construction', () => {
+    it('should construct with all required fields', () => {
+      const props = makeProps();
+      const envelope = new FederationEnvelope(props);
 
-  beforeEach(() => {
-    factory = createEnvelopeFactory();
-  });
-
-  describe('create', () => {
-    it('should create an envelope with all required fields', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: { action: 'ping' },
-        signingKey,
-      });
-
-      expect(envelope.id).toBeDefined();
-      expect(envelope.nonce).toBeDefined();
-      expect(envelope.timestamp).toBeDefined();
+      expect(envelope.envelopeId).toBe('env-001');
       expect(envelope.sourceNodeId).toBe('node-A');
       expect(envelope.targetNodeId).toBe('node-B');
       expect(envelope.sessionId).toBe('session-1');
+      expect(envelope.messageType).toBe('task-assignment');
       expect(envelope.payload).toEqual({ action: 'ping' });
-      expect(envelope.signature).toBeDefined();
-      expect(envelope.protocolVersion).toBeDefined();
+      expect(envelope.timestamp).toEqual(new Date('2026-01-15T12:00:00.000Z'));
+      expect(envelope.nonce).toBe('nonce-abc123');
+      expect(envelope.hmacSignature).toBe('sig-deadbeef');
+      expect(envelope.piiScanResult).toEqual(makeScanResult());
     });
 
-    it('should generate a non-empty id', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
+    it('should preserve generic payload type', () => {
+      const props = makeProps<{ code: number }>({
+        payload: { code: 42 },
       });
-      expect(envelope.id.length).toBeGreaterThan(0);
-    });
-
-    it('should generate a non-empty signature', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
-      });
-      expect(envelope.signature.length).toBeGreaterThan(0);
-    });
-
-    it('should set protocolVersion', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
-      });
-      expect(envelope.protocolVersion).toBe('1.0');
+      const envelope = new FederationEnvelope(props);
+      expect(envelope.payload.code).toBe(42);
     });
   });
 
-  describe('nonce uniqueness', () => {
-    it('should generate unique nonces for consecutive envelopes', () => {
-      const e1 = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
-      });
-      const e2 = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
-      });
-      expect(e1.nonce).not.toBe(e2.nonce);
+  describe('isExpired', () => {
+    it('should return true when envelope age exceeds maxAgeMs', () => {
+      const oldTimestamp = new Date(Date.now() - 60_000); // 60 seconds ago
+      const envelope = new FederationEnvelope(makeProps({ timestamp: oldTimestamp }));
+      expect(envelope.isExpired(30_000)).toBe(true); // 30s max age
     });
 
-    it('should generate unique nonces across many envelopes', () => {
-      const nonces = new Set<string>();
-      for (let i = 0; i < 100; i++) {
-        const env = factory.create({
-          sourceNodeId: 'node-A',
-          targetNodeId: 'node-B',
-          sessionId: `session-${i}`,
-          payload: { i },
-          signingKey,
-        });
-        nonces.add(env.nonce);
+    it('should return false when envelope age is within maxAgeMs', () => {
+      const freshTimestamp = new Date(); // just now
+      const envelope = new FederationEnvelope(makeProps({ timestamp: freshTimestamp }));
+      expect(envelope.isExpired(60_000)).toBe(false); // 60s max age
+    });
+
+    it('should return true when maxAgeMs is zero and timestamp is in the past', () => {
+      const pastTimestamp = new Date(Date.now() - 1);
+      const envelope = new FederationEnvelope(makeProps({ timestamp: pastTimestamp }));
+      expect(envelope.isExpired(0)).toBe(true);
+    });
+  });
+
+  describe('toJSON', () => {
+    it('should return a plain object with all fields', () => {
+      const envelope = new FederationEnvelope(makeProps());
+      const json = envelope.toJSON();
+
+      expect(json['envelopeId']).toBe('env-001');
+      expect(json['sourceNodeId']).toBe('node-A');
+      expect(json['targetNodeId']).toBe('node-B');
+      expect(json['sessionId']).toBe('session-1');
+      expect(json['messageType']).toBe('task-assignment');
+      expect(json['payload']).toEqual({ action: 'ping' });
+      expect(json['nonce']).toBe('nonce-abc123');
+      expect(json['hmacSignature']).toBe('sig-deadbeef');
+      expect(json['piiScanResult']).toEqual(makeScanResult());
+    });
+
+    it('should serialize timestamp as ISO 8601 string', () => {
+      const envelope = new FederationEnvelope(makeProps({
+        timestamp: new Date('2026-01-15T12:00:00.000Z'),
+      }));
+      const json = envelope.toJSON();
+      expect(json['timestamp']).toBe('2026-01-15T12:00:00.000Z');
+      expect(typeof json['timestamp']).toBe('string');
+    });
+
+    it('should include all 10 expected keys', () => {
+      const envelope = new FederationEnvelope(makeProps());
+      const json = envelope.toJSON();
+      const keys = Object.keys(json);
+      expect(keys).toContain('envelopeId');
+      expect(keys).toContain('sourceNodeId');
+      expect(keys).toContain('targetNodeId');
+      expect(keys).toContain('sessionId');
+      expect(keys).toContain('messageType');
+      expect(keys).toContain('payload');
+      expect(keys).toContain('timestamp');
+      expect(keys).toContain('nonce');
+      expect(keys).toContain('hmacSignature');
+      expect(keys).toContain('piiScanResult');
+      expect(keys).toHaveLength(10);
+    });
+  });
+
+  describe('toSignablePayload', () => {
+    it('should return a JSON string', () => {
+      const envelope = new FederationEnvelope(makeProps());
+      const signable = envelope.toSignablePayload();
+      expect(() => JSON.parse(signable)).not.toThrow();
+    });
+
+    it('should exclude hmacSignature from signable payload', () => {
+      const envelope = new FederationEnvelope(makeProps());
+      const parsed = JSON.parse(envelope.toSignablePayload());
+      expect(parsed).not.toHaveProperty('hmacSignature');
+    });
+
+    it('should exclude piiScanResult from signable payload', () => {
+      const envelope = new FederationEnvelope(makeProps());
+      const parsed = JSON.parse(envelope.toSignablePayload());
+      expect(parsed).not.toHaveProperty('piiScanResult');
+    });
+
+    it('should include envelopeId, sourceNodeId, targetNodeId, sessionId, messageType, payload, timestamp, and nonce', () => {
+      const envelope = new FederationEnvelope(makeProps());
+      const parsed = JSON.parse(envelope.toSignablePayload());
+
+      expect(parsed['envelopeId']).toBe('env-001');
+      expect(parsed['sourceNodeId']).toBe('node-A');
+      expect(parsed['targetNodeId']).toBe('node-B');
+      expect(parsed['sessionId']).toBe('session-1');
+      expect(parsed['messageType']).toBe('task-assignment');
+      expect(parsed['payload']).toEqual({ action: 'ping' });
+      expect(parsed['timestamp']).toBe('2026-01-15T12:00:00.000Z');
+      expect(parsed['nonce']).toBe('nonce-abc123');
+    });
+
+    it('should contain exactly 8 keys (everything except hmacSignature and piiScanResult)', () => {
+      const envelope = new FederationEnvelope(makeProps());
+      const parsed = JSON.parse(envelope.toSignablePayload());
+      expect(Object.keys(parsed)).toHaveLength(8);
+    });
+  });
+
+  describe('emptyScanResult', () => {
+    it('should return scanned=false', () => {
+      const result = FederationEnvelope.emptyScanResult();
+      expect(result.scanned).toBe(false);
+    });
+
+    it('should return piiFound=false', () => {
+      const result = FederationEnvelope.emptyScanResult();
+      expect(result.piiFound).toBe(false);
+    });
+
+    it('should return empty detections array', () => {
+      const result = FederationEnvelope.emptyScanResult();
+      expect(result.detections).toEqual([]);
+    });
+
+    it('should return empty actionsApplied array', () => {
+      const result = FederationEnvelope.emptyScanResult();
+      expect(result.actionsApplied).toEqual([]);
+    });
+
+    it('should return scanDurationMs=0', () => {
+      const result = FederationEnvelope.emptyScanResult();
+      expect(result.scanDurationMs).toBe(0);
+    });
+  });
+
+  describe('CONSENSUS_REQUIRED_TYPES', () => {
+    it('should contain trust-change', () => {
+      expect(CONSENSUS_REQUIRED_TYPES.has('trust-change')).toBe(true);
+    });
+
+    it('should contain topology-change', () => {
+      expect(CONSENSUS_REQUIRED_TYPES.has('topology-change')).toBe(true);
+    });
+
+    it('should contain agent-spawn', () => {
+      expect(CONSENSUS_REQUIRED_TYPES.has('agent-spawn')).toBe(true);
+    });
+
+    it('should contain exactly 3 entries', () => {
+      expect(CONSENSUS_REQUIRED_TYPES.size).toBe(3);
+    });
+  });
+
+  describe('FederationMessageType coverage', () => {
+    const allMessageTypes: FederationMessageType[] = [
+      'task-assignment',
+      'memory-query',
+      'memory-response',
+      'context-share',
+      'status-broadcast',
+      'trust-change',
+      'topology-change',
+      'agent-spawn',
+      'heartbeat',
+      'challenge',
+      'challenge-response',
+      'handshake-init',
+      'handshake-accept',
+      'handshake-reject',
+      'session-terminate',
+    ];
+
+    it('should accept all 15 message types as valid', () => {
+      for (const msgType of allMessageTypes) {
+        const envelope = new FederationEnvelope(makeProps({ messageType: msgType }));
+        expect(envelope.messageType).toBe(msgType);
       }
-      expect(nonces.size).toBe(100);
     });
 
-    it('should also generate unique ids for consecutive envelopes', () => {
-      const e1 = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
-      });
-      const e2 = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
-      });
-      expect(e1.id).not.toBe(e2.id);
-    });
-  });
-
-  describe('HMAC signature verification', () => {
-    it('should verify envelope with the correct key', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: { data: 'hello' },
-        signingKey,
-      });
-      expect(factory.verify(envelope, signingKey)).toBe(true);
-    });
-
-    it('should fail verification with a wrong key', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: { data: 'hello' },
-        signingKey,
-      });
-      expect(factory.verify(envelope, 'wrong-key')).toBe(false);
-    });
-
-    it('should fail verification when payload is tampered', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: { data: 'original' },
-        signingKey,
-      });
-      const tampered = { ...envelope, payload: { data: 'tampered' } };
-      expect(factory.verify(tampered, signingKey)).toBe(false);
-    });
-
-    it('should fail verification when sourceNodeId is tampered', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
-      });
-      const tampered = { ...envelope, sourceNodeId: 'node-EVIL' };
-      expect(factory.verify(tampered, signingKey)).toBe(false);
-    });
-
-    it('should fail verification when nonce is tampered', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
-      });
-      const tampered = { ...envelope, nonce: 'forged-nonce' };
-      expect(factory.verify(tampered, signingKey)).toBe(false);
-    });
-  });
-
-  describe('serialization and deserialization', () => {
-    it('should serialize to a valid JSON string', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: { key: 'value' },
-        signingKey,
-      });
-      const json = factory.serialize(envelope);
-      expect(() => JSON.parse(json)).not.toThrow();
-    });
-
-    it('should preserve all fields through serialize/deserialize round-trip', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: { nested: { a: 1, b: [2, 3] } },
-        signingKey,
-      });
-      const json = factory.serialize(envelope);
-      const restored = factory.deserialize(json);
-
-      expect(restored.id).toBe(envelope.id);
-      expect(restored.nonce).toBe(envelope.nonce);
-      expect(restored.timestamp).toBe(envelope.timestamp);
-      expect(restored.sourceNodeId).toBe(envelope.sourceNodeId);
-      expect(restored.targetNodeId).toBe(envelope.targetNodeId);
-      expect(restored.sessionId).toBe(envelope.sessionId);
-      expect(restored.payload).toEqual(envelope.payload);
-      expect(restored.signature).toBe(envelope.signature);
-      expect(restored.protocolVersion).toBe(envelope.protocolVersion);
-    });
-
-    it('should verify a deserialized envelope with the correct key', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: { test: true },
-        signingKey,
-      });
-      const json = factory.serialize(envelope);
-      const restored = factory.deserialize(json);
-      expect(factory.verify(restored, signingKey)).toBe(true);
-    });
-  });
-
-  describe('timestamp format', () => {
-    it('should produce ISO 8601 formatted timestamps', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
-      });
-      // ISO 8601 regex: YYYY-MM-DDTHH:mm:ss.sssZ
-      const iso8601 = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
-      expect(envelope.timestamp).toMatch(iso8601);
-    });
-
-    it('should produce a timestamp parseable by Date constructor', () => {
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
-      });
-      const date = new Date(envelope.timestamp);
-      expect(date.getTime()).not.toBeNaN();
-    });
-
-    it('should produce a recent timestamp (within 5 seconds)', () => {
-      const before = Date.now();
-      const envelope = factory.create({
-        sourceNodeId: 'node-A',
-        targetNodeId: 'node-B',
-        sessionId: 'session-1',
-        payload: {},
-        signingKey,
-      });
-      const after = Date.now();
-      const ts = new Date(envelope.timestamp).getTime();
-      expect(ts).toBeGreaterThanOrEqual(before);
-      expect(ts).toBeLessThanOrEqual(after + 5000);
+    it('should have exactly 15 known message types', () => {
+      expect(allMessageTypes).toHaveLength(15);
     });
   });
 });

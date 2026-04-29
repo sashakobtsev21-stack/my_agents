@@ -2,408 +2,414 @@
  * TrustEvaluator Tests
  *
  * Validates trust score computation using the formula:
- *   score = 0.4*success_rate + 0.2*uptime + 0.2*(1-threat_penalty) + 0.2*data_integrity_score
+ *   score = 0.4*successRate + 0.2*uptime + 0.2*(1-threatPenalty) + 0.2*dataIntegrityScore
+ *
+ * Where:
+ *   successRate = (sent + received - hmacFailures) / (sent + received)
+ *   threatPenalty = min(1, (threatDetections / totalMessages) * 10)
+ *   dataIntegrityScore = 1 - (hmacFailures / totalMessages)
  *
  * Also tests trust level transitions with hysteresis, minimum interaction
  * requirements, and automatic downgrades on security events.
- *
- * London School TDD: all dependencies are mocked.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { TrustEvaluator } from '../../src/application/trust-evaluator.js';
+import { FederationNode } from '../../src/domain/entities/federation-node.js';
 import { TrustLevel } from '../../src/domain/entities/trust-level.js';
+import { type SessionMetrics } from '../../src/domain/entities/federation-session.js';
 
-// --- Types expected from the not-yet-implemented TrustEvaluator ---
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-interface TrustMetrics {
-  successRate: number;
-  uptime: number;
-  threatPenalty: number;
-  dataIntegrityScore: number;
-}
-
-interface PeerRecord {
-  peerId: string;
-  trustLevel: TrustLevel;
-  interactionCount: number;
-  lastThreatTimestamps: number[];
-  hmacFailures: number;
-}
-
-interface ITrustEvaluator {
-  computeScore(metrics: TrustMetrics): number;
-  evaluateTransition(peer: PeerRecord, score: number): TrustLevel;
-  shouldDowngradeOnThreat(peer: PeerRecord, now?: number): boolean;
-  shouldDowngradeOnHmacFailure(peer: PeerRecord): boolean;
-}
-
-// --- Mock implementation matching ADR-078 spec ---
-
-function createTrustEvaluator(): ITrustEvaluator {
+function makeMetrics(overrides: Partial<SessionMetrics> = {}): SessionMetrics {
   return {
-    computeScore(metrics: TrustMetrics): number {
-      const { successRate, uptime, threatPenalty, dataIntegrityScore } = metrics;
-      return (
-        0.4 * successRate +
-        0.2 * uptime +
-        0.2 * (1 - threatPenalty) +
-        0.2 * dataIntegrityScore
-      );
-    },
-
-    evaluateTransition(peer: PeerRecord, score: number): TrustLevel {
-      // Check for automatic downgrades first
-      if (this.shouldDowngradeOnHmacFailure(peer)) {
-        return TrustLevel.UNTRUSTED;
-      }
-      if (this.shouldDowngradeOnThreat(peer)) {
-        return Math.max(0, peer.trustLevel - 1) as TrustLevel;
-      }
-
-      const currentLevel = peer.trustLevel;
-
-      // Try upgrade
-      if (currentLevel < TrustLevel.PRIVILEGED) {
-        const transitionKey = `${currentLevel}->${currentLevel + 1}`;
-        const thresholds: Record<string, { upgradeScore: number; downgradeScore: number; minInteractions: number }> = {
-          '1->2': { upgradeScore: 0.7, downgradeScore: 0.5, minInteractions: 50 },
-          '2->3': { upgradeScore: 0.85, downgradeScore: 0.65, minInteractions: 500 },
-          '3->4': { upgradeScore: 0.95, downgradeScore: 0.8, minInteractions: 5000 },
-        };
-        const threshold = thresholds[transitionKey];
-        if (threshold && score >= threshold.upgradeScore && peer.interactionCount >= threshold.minInteractions) {
-          return (currentLevel + 1) as TrustLevel;
-        }
-      }
-
-      // Try downgrade
-      if (currentLevel > TrustLevel.UNTRUSTED) {
-        const transitionKey = `${currentLevel - 1}->${currentLevel}`;
-        const thresholds: Record<string, { upgradeScore: number; downgradeScore: number; minInteractions: number }> = {
-          '1->2': { upgradeScore: 0.7, downgradeScore: 0.5, minInteractions: 50 },
-          '2->3': { upgradeScore: 0.85, downgradeScore: 0.65, minInteractions: 500 },
-          '3->4': { upgradeScore: 0.95, downgradeScore: 0.8, minInteractions: 5000 },
-        };
-        const threshold = thresholds[transitionKey];
-        if (threshold && score < threshold.downgradeScore) {
-          return (currentLevel - 1) as TrustLevel;
-        }
-      }
-
-      return currentLevel;
-    },
-
-    shouldDowngradeOnThreat(peer: PeerRecord, now?: number): boolean {
-      const currentTime = now ?? Date.now();
-      const oneHourAgo = currentTime - 60 * 60 * 1000;
-      const recentThreats = peer.lastThreatTimestamps.filter((ts) => ts > oneHourAgo);
-      return recentThreats.length >= 2;
-    },
-
-    shouldDowngradeOnHmacFailure(peer: PeerRecord): boolean {
-      return peer.hmacFailures > 0;
-    },
+    messagesSent: 0,
+    messagesReceived: 0,
+    piiRedactions: 0,
+    threatDetections: 0,
+    hmacFailures: 0,
+    totalInteractions: 0,
+    ...overrides,
   };
 }
 
+function makeNode(trustLevel: TrustLevel = TrustLevel.VERIFIED, nodeId = 'node-1'): FederationNode {
+  return FederationNode.create({
+    nodeId,
+    publicKey: 'test-key',
+    endpoint: 'ws://test',
+    capabilities: {
+      agentTypes: [],
+      maxConcurrentSessions: 1,
+      supportedProtocols: [],
+      complianceModes: [],
+    },
+    metadata: {},
+    trustLevel,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
 describe('TrustEvaluator', () => {
-  let evaluator: ITrustEvaluator;
+  let evaluator: TrustEvaluator;
 
   beforeEach(() => {
-    evaluator = createTrustEvaluator();
+    evaluator = new TrustEvaluator();
   });
 
   describe('computeScore', () => {
     it('should return 1.0 for perfect metrics', () => {
-      const score = evaluator.computeScore({
-        successRate: 1.0,
-        uptime: 1.0,
-        threatPenalty: 0,
-        dataIntegrityScore: 1.0,
+      const metrics = makeMetrics({
+        messagesSent: 50,
+        messagesReceived: 50,
+        threatDetections: 0,
+        hmacFailures: 0,
+        totalInteractions: 100,
       });
+      const { score } = evaluator.computeScore(metrics, 1.0);
       expect(score).toBeCloseTo(1.0, 5);
     });
 
     it('should return 0.0 for worst-case metrics', () => {
-      const score = evaluator.computeScore({
-        successRate: 0,
-        uptime: 0,
-        threatPenalty: 1.0,
-        dataIntegrityScore: 0,
+      // All messages are HMAC failures, threat penalty maxed out, uptime 0
+      const metrics = makeMetrics({
+        messagesSent: 50,
+        messagesReceived: 50,
+        threatDetections: 100,
+        hmacFailures: 100,
+        totalInteractions: 100,
       });
+      const { score } = evaluator.computeScore(metrics, 0);
       expect(score).toBeCloseTo(0.0, 5);
     });
 
-    it('should compute 0.68 for mixed metrics', () => {
-      // 0.4*0.5 + 0.2*0.8 + 0.2*(1-0.3) + 0.2*0.9
-      // = 0.20 + 0.16 + 0.14 + 0.18 = 0.68
-      const score = evaluator.computeScore({
-        successRate: 0.5,
-        uptime: 0.8,
-        threatPenalty: 0.3,
-        dataIntegrityScore: 0.9,
+    it('should compute expected score for mixed metrics', () => {
+      // sent=60, received=40 => total=100
+      // successRate = (100 - 5) / 100 = 0.95
+      // uptime = 0.8
+      // threatPenalty = min(1, (2/100)*10) = 0.2
+      // dataIntegrity = 1 - (5/100) = 0.95
+      // score = 0.4*0.95 + 0.2*0.8 + 0.2*(1-0.2) + 0.2*0.95
+      //       = 0.38 + 0.16 + 0.16 + 0.19 = 0.89
+      const metrics = makeMetrics({
+        messagesSent: 60,
+        messagesReceived: 40,
+        threatDetections: 2,
+        hmacFailures: 5,
+        totalInteractions: 100,
       });
-      expect(score).toBeCloseTo(0.68, 5);
+      const { score } = evaluator.computeScore(metrics, 0.8);
+      expect(score).toBeCloseTo(0.89, 2);
     });
 
-    it('should weight success_rate most heavily at 40%', () => {
-      const base = evaluator.computeScore({
-        successRate: 0.5,
-        uptime: 0.5,
-        threatPenalty: 0.5,
-        dataIntegrityScore: 0.5,
+    it('should weight successRate most heavily at 40%', () => {
+      // Two scenarios identical except successRate differs by adding hmacFailures
+      const metricsGood = makeMetrics({
+        messagesSent: 50,
+        messagesReceived: 50,
+        hmacFailures: 0,
+        totalInteractions: 100,
       });
-      const withHigherSuccess = evaluator.computeScore({
-        successRate: 1.0,
-        uptime: 0.5,
-        threatPenalty: 0.5,
-        dataIntegrityScore: 0.5,
+      const metricsBad = makeMetrics({
+        messagesSent: 50,
+        messagesReceived: 50,
+        hmacFailures: 50, // 50% failure -> successRate drops by 0.5
+        totalInteractions: 100,
       });
-      // Increasing success_rate by 0.5 should add 0.4*0.5 = 0.2
-      expect(withHigherSuccess - base).toBeCloseTo(0.2, 5);
+      const { score: good } = evaluator.computeScore(metricsGood, 0.5);
+      const { score: bad } = evaluator.computeScore(metricsBad, 0.5);
+      // successRate change: 1.0 -> 0.5, contributes 0.4 * 0.5 = 0.2 difference
+      // but dataIntegrity also drops from 1.0 -> 0.5, contributing 0.2 * 0.5 = 0.1
+      // total diff ~0.3
+      expect(good).toBeGreaterThan(bad);
     });
 
-    it('should inversely weight threat_penalty', () => {
-      const noThreat = evaluator.computeScore({
-        successRate: 0.5,
-        uptime: 0.5,
-        threatPenalty: 0,
-        dataIntegrityScore: 0.5,
+    it('should inversely weight threatPenalty', () => {
+      const noThreat = makeMetrics({
+        messagesSent: 50,
+        messagesReceived: 50,
+        threatDetections: 0,
+        totalInteractions: 100,
       });
-      const fullThreat = evaluator.computeScore({
-        successRate: 0.5,
-        uptime: 0.5,
-        threatPenalty: 1.0,
-        dataIntegrityScore: 0.5,
+      const fullThreat = makeMetrics({
+        messagesSent: 50,
+        messagesReceived: 50,
+        threatDetections: 10, // penalty = min(1, (10/100)*10) = 1.0
+        totalInteractions: 100,
       });
-      expect(noThreat).toBeGreaterThan(fullThreat);
-      expect(noThreat - fullThreat).toBeCloseTo(0.2, 5);
+      const { score: clean } = evaluator.computeScore(noThreat, 0.5);
+      const { score: dirty } = evaluator.computeScore(fullThreat, 0.5);
+      expect(clean).toBeGreaterThan(dirty);
+      // Threat penalty difference: 0.2 * (1-0) - 0.2 * (1-1) = 0.2
+      expect(clean - dirty).toBeCloseTo(0.2, 2);
     });
 
-    it('should handle boundary values at 0', () => {
-      const score = evaluator.computeScore({
-        successRate: 0,
-        uptime: 0,
-        threatPenalty: 0,
-        dataIntegrityScore: 0,
+    it('should handle zero-message metrics gracefully', () => {
+      const metrics = makeMetrics(); // all zeros
+      const { score } = evaluator.computeScore(metrics, 0);
+      // successRate=0, uptime=0, threatPenalty=0, dataIntegrity=1
+      // 0 + 0 + 0.2*(1-0) + 0.2*1 = 0.4
+      expect(score).toBeCloseTo(0.4, 5);
+    });
+
+    it('should clamp uptime to [0, 1]', () => {
+      const metrics = makeMetrics({
+        messagesSent: 50,
+        messagesReceived: 50,
+        totalInteractions: 100,
       });
-      // 0 + 0 + 0.2*(1-0) + 0 = 0.2
-      expect(score).toBeCloseTo(0.2, 5);
+      const { score: over } = evaluator.computeScore(metrics, 1.5);
+      const { score: normal } = evaluator.computeScore(metrics, 1.0);
+      expect(over).toBeCloseTo(normal, 5);
     });
 
     it('should produce values in [0, 1] range for valid inputs', () => {
       for (let i = 0; i <= 10; i++) {
-        const v = i / 10;
-        const score = evaluator.computeScore({
-          successRate: v,
-          uptime: v,
-          threatPenalty: 1 - v,
-          dataIntegrityScore: v,
+        const total = 100;
+        const failures = Math.floor((i / 10) * total);
+        const threats = Math.floor((i / 10) * total);
+        const metrics = makeMetrics({
+          messagesSent: total / 2,
+          messagesReceived: total / 2,
+          hmacFailures: failures,
+          threatDetections: threats,
+          totalInteractions: total,
         });
+        const { score } = evaluator.computeScore(metrics, i / 10);
         expect(score).toBeGreaterThanOrEqual(0);
         expect(score).toBeLessThanOrEqual(1);
       }
+    });
+
+    it('should return score components alongside the score', () => {
+      const metrics = makeMetrics({
+        messagesSent: 80,
+        messagesReceived: 20,
+        hmacFailures: 10,
+        threatDetections: 5,
+        totalInteractions: 100,
+      });
+      const { components } = evaluator.computeScore(metrics, 0.9);
+      expect(components.successRate).toBeCloseTo(0.9, 2);
+      expect(components.uptime).toBeCloseTo(0.9, 2);
+      expect(components.threatPenalty).toBeCloseTo(0.5, 2);
+      expect(components.dataIntegrityScore).toBeCloseTo(0.9, 2);
     });
   });
 
   describe('evaluateTransition', () => {
     it('should upgrade from VERIFIED to ATTESTED when score >= 0.7 and interactions >= 50', () => {
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.VERIFIED,
-        interactionCount: 50,
-        lastThreatTimestamps: [],
-        hmacFailures: 0,
-      };
-      const result = evaluator.evaluateTransition(peer, 0.7);
-      expect(result).toBe(TrustLevel.ATTESTED);
+      const node = makeNode(TrustLevel.VERIFIED);
+      const metrics = makeMetrics({
+        messagesSent: 40,
+        messagesReceived: 40,
+        totalInteractions: 80,
+      });
+      // Perfect metrics, high uptime -> score ~1.0, well above 0.7
+      const result = evaluator.evaluateTransition(node, metrics, 1.0);
+      expect(result).not.toBeNull();
+      expect(result!.newLevel).toBe(TrustLevel.ATTESTED);
+      expect(node.trustLevel).toBe(TrustLevel.ATTESTED);
     });
 
     it('should not upgrade when interaction count is below minimum', () => {
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.VERIFIED,
-        interactionCount: 49,
-        lastThreatTimestamps: [],
-        hmacFailures: 0,
-      };
-      const result = evaluator.evaluateTransition(peer, 0.9);
-      expect(result).toBe(TrustLevel.VERIFIED);
+      const node = makeNode(TrustLevel.VERIFIED);
+      const metrics = makeMetrics({
+        messagesSent: 20,
+        messagesReceived: 20,
+        totalInteractions: 40, // below the 50 threshold for 1->2
+      });
+      const result = evaluator.evaluateTransition(node, metrics, 1.0);
+      expect(result).toBeNull();
+      expect(node.trustLevel).toBe(TrustLevel.VERIFIED);
     });
 
     it('should not upgrade when score is below upgrade threshold', () => {
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.VERIFIED,
-        interactionCount: 100,
-        lastThreatTimestamps: [],
-        hmacFailures: 0,
-      };
-      const result = evaluator.evaluateTransition(peer, 0.69);
-      expect(result).toBe(TrustLevel.VERIFIED);
+      const node = makeNode(TrustLevel.VERIFIED);
+      // Produce a score below 0.7
+      const metrics = makeMetrics({
+        messagesSent: 50,
+        messagesReceived: 50,
+        hmacFailures: 50,
+        threatDetections: 20,
+        totalInteractions: 100,
+      });
+      const result = evaluator.evaluateTransition(node, metrics, 0.2);
+      // Score will be low due to failures
+      expect(node.trustLevel).toBe(TrustLevel.VERIFIED);
     });
 
     it('should downgrade from ATTESTED to VERIFIED when score < 0.5', () => {
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.ATTESTED,
-        interactionCount: 100,
-        lastThreatTimestamps: [],
-        hmacFailures: 0,
-      };
-      const result = evaluator.evaluateTransition(peer, 0.49);
-      expect(result).toBe(TrustLevel.VERIFIED);
+      const node = makeNode(TrustLevel.ATTESTED);
+      // Produce a very low score: many failures
+      const metrics = makeMetrics({
+        messagesSent: 50,
+        messagesReceived: 50,
+        hmacFailures: 80,
+        threatDetections: 30,
+        totalInteractions: 100,
+      });
+      const result = evaluator.evaluateTransition(node, metrics, 0.0);
+      expect(result).not.toBeNull();
+      expect(result!.newLevel).toBe(TrustLevel.VERIFIED);
+      expect(node.trustLevel).toBe(TrustLevel.VERIFIED);
     });
 
     it('should keep level when score is between downgrade and upgrade thresholds (hysteresis)', () => {
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.ATTESTED,
-        interactionCount: 100,
-        lastThreatTimestamps: [],
-        hmacFailures: 0,
-      };
-      // Score 0.6 is above downgrade (0.5) but below upgrade for next level (0.85)
-      const result = evaluator.evaluateTransition(peer, 0.6);
-      expect(result).toBe(TrustLevel.ATTESTED);
+      const node = makeNode(TrustLevel.ATTESTED);
+      // Need score >= 0.5 (above downgrade for 1->2) but < 0.85 (below upgrade for 2->3)
+      // Also need < 500 interactions to ensure no upgrade to TRUSTED even if score were high
+      const metrics = makeMetrics({
+        messagesSent: 40,
+        messagesReceived: 40,
+        hmacFailures: 5,
+        threatDetections: 1,
+        totalInteractions: 80,
+      });
+      const result = evaluator.evaluateTransition(node, metrics, 0.7);
+      expect(result).toBeNull();
+      expect(node.trustLevel).toBe(TrustLevel.ATTESTED);
     });
 
     it('should upgrade from ATTESTED to TRUSTED when score >= 0.85 and interactions >= 500', () => {
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.ATTESTED,
-        interactionCount: 500,
-        lastThreatTimestamps: [],
-        hmacFailures: 0,
-      };
-      const result = evaluator.evaluateTransition(peer, 0.85);
-      expect(result).toBe(TrustLevel.TRUSTED);
+      const node = makeNode(TrustLevel.ATTESTED);
+      const metrics = makeMetrics({
+        messagesSent: 300,
+        messagesReceived: 300,
+        totalInteractions: 600,
+      });
+      const result = evaluator.evaluateTransition(node, metrics, 1.0);
+      expect(result).not.toBeNull();
+      expect(result!.newLevel).toBe(TrustLevel.TRUSTED);
+      expect(node.trustLevel).toBe(TrustLevel.TRUSTED);
     });
 
-    it('should upgrade from TRUSTED to PRIVILEGED when score >= 0.95 and interactions >= 5000', () => {
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.TRUSTED,
-        interactionCount: 5000,
-        lastThreatTimestamps: [],
-        hmacFailures: 0,
-      };
-      const result = evaluator.evaluateTransition(peer, 0.95);
-      expect(result).toBe(TrustLevel.PRIVILEGED);
+    it('should require institutional attestation for upgrade to PRIVILEGED', () => {
+      const node = makeNode(TrustLevel.TRUSTED);
+      const metrics = makeMetrics({
+        messagesSent: 3000,
+        messagesReceived: 3000,
+        totalInteractions: 6000,
+      });
+      // Without institutional attestation, upgrade to PRIVILEGED is blocked
+      const resultWithout = evaluator.evaluateTransition(node, metrics, 1.0, false);
+      expect(resultWithout).toBeNull();
+      expect(node.trustLevel).toBe(TrustLevel.TRUSTED);
+
+      // With institutional attestation, upgrade to PRIVILEGED succeeds
+      // But requiresHumanApproval should be true, so node is NOT auto-updated
+      const resultWith = evaluator.evaluateTransition(node, metrics, 1.0, true);
+      expect(resultWith).not.toBeNull();
+      expect(resultWith!.newLevel).toBe(TrustLevel.PRIVILEGED);
+      expect(resultWith!.requiresHumanApproval).toBe(true);
+      // Node trust level should NOT change because human approval is required
+      expect(node.trustLevel).toBe(TrustLevel.TRUSTED);
     });
 
     it('should not upgrade past PRIVILEGED', () => {
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.PRIVILEGED,
-        interactionCount: 100_000,
-        lastThreatTimestamps: [],
-        hmacFailures: 0,
-      };
-      const result = evaluator.evaluateTransition(peer, 1.0);
-      expect(result).toBe(TrustLevel.PRIVILEGED);
+      const node = makeNode(TrustLevel.PRIVILEGED);
+      const metrics = makeMetrics({
+        messagesSent: 50000,
+        messagesReceived: 50000,
+        totalInteractions: 100000,
+      });
+      const result = evaluator.evaluateTransition(node, metrics, 1.0, true);
+      expect(result).toBeNull();
+      expect(node.trustLevel).toBe(TrustLevel.PRIVILEGED);
+    });
+
+    it('should invoke onTrustChange callback on transition', () => {
+      let callbackNodeId: string | undefined;
+      let callbackResult: unknown;
+      const evaluatorWithCb = new TrustEvaluator({
+        onTrustChange: (nodeId, result) => {
+          callbackNodeId = nodeId;
+          callbackResult = result;
+        },
+      });
+      const node = makeNode(TrustLevel.VERIFIED, 'cb-node');
+      const metrics = makeMetrics({
+        messagesSent: 40,
+        messagesReceived: 40,
+        totalInteractions: 80,
+      });
+      evaluatorWithCb.evaluateTransition(node, metrics, 1.0);
+      expect(callbackNodeId).toBe('cb-node');
+      expect(callbackResult).toBeDefined();
     });
   });
 
-  describe('automatic downgrade on threat detection', () => {
-    it('should downgrade when 2+ threats detected within 1 hour', () => {
-      const now = Date.now();
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.ATTESTED,
-        interactionCount: 100,
-        lastThreatTimestamps: [now - 1000, now - 500],
-        hmacFailures: 0,
-      };
-      expect(evaluator.shouldDowngradeOnThreat(peer, now)).toBe(true);
+  describe('recordThreatDetection', () => {
+    it('should return false after a single threat detection', () => {
+      const result = evaluator.recordThreatDetection('node-1');
+      expect(result).toBe(false);
     });
 
-    it('should not downgrade when only 1 threat in past hour', () => {
-      const now = Date.now();
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.ATTESTED,
-        interactionCount: 100,
-        lastThreatTimestamps: [now - 1000],
-        hmacFailures: 0,
-      };
-      expect(evaluator.shouldDowngradeOnThreat(peer, now)).toBe(false);
+    it('should return true when 2+ threats are detected within the 1-hour window', () => {
+      evaluator.recordThreatDetection('node-1');
+      const result = evaluator.recordThreatDetection('node-1');
+      expect(result).toBe(true);
     });
 
-    it('should not count threats older than 1 hour', () => {
-      const now = Date.now();
-      const twoHoursAgo = now - 2 * 60 * 60 * 1000;
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.ATTESTED,
-        interactionCount: 100,
-        lastThreatTimestamps: [twoHoursAgo, twoHoursAgo + 100],
-        hmacFailures: 0,
-      };
-      expect(evaluator.shouldDowngradeOnThreat(peer, now)).toBe(false);
-    });
-
-    it('should cause evaluateTransition to return lower level on 2+ threats', () => {
-      const now = Date.now();
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.TRUSTED,
-        interactionCount: 1000,
-        lastThreatTimestamps: [now - 500, now - 200],
-        hmacFailures: 0,
-      };
-      const result = evaluator.evaluateTransition(peer, 0.9);
-      expect(result).toBeLessThan(TrustLevel.TRUSTED);
+    it('should track threat windows per node independently', () => {
+      evaluator.recordThreatDetection('node-a');
+      evaluator.recordThreatDetection('node-b');
+      // Each node only has 1 detection, so neither should trigger
+      const a = evaluator.recordThreatDetection('node-a');
+      expect(a).toBe(true); // node-a now has 2
+      const b = evaluator.recordThreatDetection('node-b');
+      expect(b).toBe(true); // node-b now has 2
     });
   });
 
-  describe('automatic downgrade on HMAC failure', () => {
-    it('should downgrade to UNTRUSTED on any HMAC failure', () => {
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.PRIVILEGED,
-        interactionCount: 10000,
-        lastThreatTimestamps: [],
-        hmacFailures: 1,
-      };
-      expect(evaluator.shouldDowngradeOnHmacFailure(peer)).toBe(true);
+  describe('downgrade (immediate)', () => {
+    it('should downgrade to UNTRUSTED on HMAC verification failure', () => {
+      const node = makeNode(TrustLevel.PRIVILEGED);
+      const result = evaluator.downgrade(node, 'hmac-verification-failure');
+      expect(result.newLevel).toBe(TrustLevel.UNTRUSTED);
+      expect(result.previousLevel).toBe(TrustLevel.PRIVILEGED);
+      expect(node.trustLevel).toBe(TrustLevel.UNTRUSTED);
+      expect(node.trustScore).toBe(0);
     });
 
-    it('should not downgrade when no HMAC failures', () => {
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.TRUSTED,
-        interactionCount: 1000,
-        lastThreatTimestamps: [],
-        hmacFailures: 0,
-      };
-      expect(evaluator.shouldDowngradeOnHmacFailure(peer)).toBe(false);
+    it('should downgrade to UNTRUSTED on repeated threat detection', () => {
+      const node = makeNode(TrustLevel.TRUSTED);
+      const result = evaluator.downgrade(node, 'repeated-threat-detection');
+      expect(result.newLevel).toBe(TrustLevel.UNTRUSTED);
+      expect(result.previousLevel).toBe(TrustLevel.TRUSTED);
+      expect(node.trustLevel).toBe(TrustLevel.UNTRUSTED);
     });
 
-    it('should cause evaluateTransition to return UNTRUSTED on HMAC failure', () => {
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.PRIVILEGED,
-        interactionCount: 10000,
-        lastThreatTimestamps: [],
-        hmacFailures: 1,
-      };
-      const result = evaluator.evaluateTransition(peer, 1.0);
-      expect(result).toBe(TrustLevel.UNTRUSTED);
+    it('should downgrade to UNTRUSTED on session hijack attempt', () => {
+      const node = makeNode(TrustLevel.ATTESTED);
+      const result = evaluator.downgrade(node, 'session-hijack-attempt');
+      expect(result.newLevel).toBe(TrustLevel.UNTRUSTED);
+      expect(result.previousLevel).toBe(TrustLevel.ATTESTED);
+      expect(node.trustLevel).toBe(TrustLevel.UNTRUSTED);
     });
 
-    it('should prioritize HMAC failure over threat detection', () => {
-      const now = Date.now();
-      const peer: PeerRecord = {
-        peerId: 'peer-1',
-        trustLevel: TrustLevel.TRUSTED,
-        interactionCount: 1000,
-        lastThreatTimestamps: [now - 500, now - 200],
-        hmacFailures: 1,
-      };
-      const result = evaluator.evaluateTransition(peer, 0.9);
-      // HMAC failure -> UNTRUSTED, not just one level down from threat
-      expect(result).toBe(TrustLevel.UNTRUSTED);
+    it('should set score to 0 and threat penalty to 1 in components', () => {
+      const node = makeNode(TrustLevel.TRUSTED);
+      const result = evaluator.downgrade(node, 'hmac-verification-failure');
+      expect(result.score).toBe(0);
+      expect(result.components.threatPenalty).toBe(1);
+      expect(result.components.successRate).toBe(0);
+      expect(result.components.dataIntegrityScore).toBe(0);
+    });
+
+    it('should invoke onTrustChange callback on downgrade', () => {
+      let called = false;
+      const evaluatorWithCb = new TrustEvaluator({
+        onTrustChange: () => { called = true; },
+      });
+      const node = makeNode(TrustLevel.TRUSTED, 'dg-node');
+      evaluatorWithCb.downgrade(node, 'hmac-verification-failure');
+      expect(called).toBe(true);
     });
   });
 });

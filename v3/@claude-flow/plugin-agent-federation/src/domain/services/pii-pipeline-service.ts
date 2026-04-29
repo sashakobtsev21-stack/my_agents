@@ -87,6 +87,7 @@ const DEFAULT_POLICY_MATRIX: Record<PIIType, Record<TrustLevel, PIIAction>> = {
   private_key:  { [TrustLevel.UNTRUSTED]: 'block', [TrustLevel.VERIFIED]: 'block', [TrustLevel.ATTESTED]: 'block', [TrustLevel.TRUSTED]: 'block', [TrustLevel.PRIVILEGED]: 'block' },
   database_url: { [TrustLevel.UNTRUSTED]: 'block', [TrustLevel.VERIFIED]: 'block', [TrustLevel.ATTESTED]: 'block', [TrustLevel.TRUSTED]: 'block', [TrustLevel.PRIVILEGED]: 'redact' },
   github_token: { [TrustLevel.UNTRUSTED]: 'block', [TrustLevel.VERIFIED]: 'block', [TrustLevel.ATTESTED]: 'block', [TrustLevel.TRUSTED]: 'block', [TrustLevel.PRIVILEGED]: 'redact' },
+  address:      { [TrustLevel.UNTRUSTED]: 'block', [TrustLevel.VERIFIED]: 'block', [TrustLevel.ATTESTED]: 'redact', [TrustLevel.TRUSTED]: 'redact', [TrustLevel.PRIVILEGED]: 'pass' },
 };
 
 export interface PIIPipelineServiceDeps {
