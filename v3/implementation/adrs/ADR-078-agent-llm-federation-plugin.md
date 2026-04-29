@@ -10,6 +10,44 @@ Claude Flow v3.5 operates within single installations. Agents spawned on one mac
 
 No existing multi-agent framework solves this with production-grade security. LangGraph, CrewAI, and AutoGen all assume a single trust domain. The novelty here is a **federated trust model with Byzantine fault tolerance, PII-gated data flow, and adversarial AI defence** -- treating remote agents as untrusted by default, with graduated trust via cryptographic attestation.
 
+### Strategic Framing
+
+This is not a plugin. This is **the TCP/IP layer for agent trust.**
+
+Every framework is scaling agents. Nobody is defining how they **negotiate trust before they talk**. That's the shift. Most systems start with "agents talk to each other" and bolt on security later. This ADR defines a **federated agent control plane** with:
+
+- Zero trust by default
+- Structured data egress control via PII pipeline
+- Adversarial message filtering at the protocol level
+- Cryptographic identity per node
+- Auditability as a first-class primitive
+
+If Claude Flow ships this, it becomes the reference implementation. Federation becomes the standard.
+
+### Architecture Evaluation
+
+| Dimension | Score | Why |
+|-----------|-------|-----|
+| Security | 9/10 | mTLS + claims + dual AI defence is strong |
+| Compliance | 9/10 | Built-in audit + PII pipeline is rare |
+| Practicality | 7/10 | Operational overhead will be non-trivial |
+| Differentiation | 10/10 | Nobody is doing this cleanly |
+| Risk | Medium | Complexity and false positives |
+
+### Business Impact
+
+**Cross-org agent workflows** -- Bank A agent + Bank B agent share fraud signals without leaking customer data. The PII pipeline + trust levels make this monetizable.
+
+**Sovereign AI collaboration** -- Local agents stay local. Only sanitized deltas move across boundaries. Aligns with the delta engine framing.
+
+**Agent marketplaces that don't leak data** -- Safely expose MCP tools, agent capabilities, and partial memory without giving away full context. This is the RuFlo marketplace path.
+
+### Design Stance: Enterprise Compliance First
+
+Federation ships as **invisible infrastructure** -- agents discover and negotiate trust automatically. Operators configure policies (PII rules, compliance mode, peer allowlists) but don't manually manage handshakes. The system is observable via audit logs but not a visible product feature users interact with directly.
+
+Enterprise compliance is the initial optimization target. Open network adoption follows once the trust model is proven in controlled environments.
+
 ## Decision
 
 Build `@claude-flow/plugin-agent-federation` as a first-class Claude Flow plugin that enables cross-installation agent collaboration with security-first design.
@@ -42,11 +80,25 @@ The protocol operates in four phases:
 **Phase D: Message Routing**
 - Messages are typed envelopes: `FederationEnvelope<T>` with source/target node IDs, session ID, timestamp, nonce, and HMAC signature.
 - Three routing modes:
-  1. **Direct** -- node-to-node for targeted agent communication
+  1. **Direct** -- node-to-node for targeted agent communication (default mode)
   2. **Broadcast** -- to all federated peers (extends `FederationHub.broadcast()`)
   3. **Consensus** -- BFT proposal via existing hive-mind consensus (extends `FederationHub.propose()`)
 - Messages pass through the **PII Pipeline** before leaving the local node.
 - Messages pass through the **AI Defence Pipeline** on arrival at the receiving node.
+
+**Consensus mode selection:** BFT consensus is expensive and only required for operations that mutate shared state. The routing service selects the mode automatically:
+
+| Operation | Mode | Rationale |
+|-----------|------|-----------|
+| Task assignment | Direct | No shared state mutation |
+| Memory query | Direct | Read-only, PII-gated |
+| Context sharing | Direct | Peer-to-peer, trust-gated |
+| Status broadcast | Broadcast | Informational, no quorum needed |
+| Trust level change | Consensus | Shared state: trust graph |
+| Federation topology change | Consensus | Shared state: peer membership |
+| Coordinated agent spawn | Consensus | Resource commitment across nodes |
+
+Direct mode is the default. Consensus mode is invoked only when the message type is in the `consensus-required` set, keeping latency low for the 90%+ of messages that are read-only or peer-to-peer.
 
 ### 1.2 Data Flow
 
@@ -117,6 +169,39 @@ Trust levels map to capability gates:
 | 2 | Send/receive task messages, query memory (redacted) |
 | 3 | Share agent context, collaborative task execution |
 | 4 | Full memory sharing, direct agent spawning on remote node |
+
+### 2.1.1 Trust Scoring Formula
+
+Trust scores are computed continuously from interaction history, not assigned statically:
+
+```
+trust_score = 0.4 * success_rate
+            + 0.2 * uptime
+            + 0.2 * (1 - threat_penalty)
+            + 0.2 * data_integrity_score
+```
+
+| Component | Calculation | Range |
+|-----------|------------|-------|
+| `success_rate` | Messages successfully delivered / total attempted | 0.0 - 1.0 |
+| `uptime` | Seconds session healthy / total session seconds | 0.0 - 1.0 |
+| `threat_penalty` | Weighted count of threat detections (decays over time) | 0.0 - 1.0 |
+| `data_integrity_score` | HMAC verification success rate + schema conformance | 0.0 - 1.0 |
+
+**Trust level transitions** are driven by score thresholds with hysteresis to prevent oscillation:
+
+| Transition | Upgrade Threshold | Downgrade Threshold | Min Interaction |
+|-----------|-------------------|---------------------|-----------------|
+| 1 → 2 | score ≥ 0.7 | score < 0.5 | 50 messages |
+| 2 → 3 | score ≥ 0.85 | score < 0.65 | 500 messages |
+| 3 → 4 | Requires institutional attestation + score ≥ 0.95 | score < 0.8 | 5000 messages |
+
+**Automatic downgrade** occurs immediately (no hysteresis) when:
+- Threat detection triggers on inbound messages (2 or more in 1 hour)
+- HMAC verification failure (any single failure)
+- Session hijack attempt detected
+
+All trust transitions are logged as `trust_level_changed` audit events and downgrades are irreversible without human authority approval via `AuthorityGate`.
 
 ### 2.2 Cryptographic Primitives
 
@@ -237,6 +322,44 @@ Default policy:
 | phone | block | redact | hash | pass |
 | name | block | redact | redact | pass |
 | ip_address | block | hash | hash | pass |
+
+### 3.4 Detection Confidence Scoring
+
+Each PII detection carries a confidence score (0.0-1.0). Policy evaluation uses confidence to reduce false positive friction:
+
+```typescript
+interface PIIDetection {
+  type: PIIType;
+  value: string;
+  confidence: number;      // 0.0 - 1.0
+  offset: number;          // Character position in message
+  context: string;         // Surrounding text for review
+}
+```
+
+**Confidence thresholds:**
+
+| Action | Confidence Required |
+|--------|-------------------|
+| Auto-block | ≥ 0.95 |
+| Auto-redact | ≥ 0.85 |
+| Flag for review | 0.6 - 0.85 |
+| Ignore | < 0.6 |
+
+**Adaptive calibration:** The PII pipeline tracks operator overrides (cases where a human marks a detection as false positive or false negative) and adjusts confidence thresholds per PII type over time:
+
+```typescript
+interface PIICalibration {
+  type: PIIType;
+  falsePositiveRate: number;  // Rolling 30-day window
+  falseNegativeRate: number;
+  adjustedThreshold: number;  // Moves toward lower FP rate
+  totalOverrides: number;
+  lastCalibrated: string;     // ISO 8601
+}
+```
+
+This closes the feedback loop -- a system that ships too strict loosens itself based on evidence, and one that ships too loose tightens. Calibration state is persisted in AgentDB under namespace `federation-pii-calibration` and exported as part of the compliance audit trail.
 
 ---
 
@@ -615,17 +738,87 @@ Existing multi-agent frameworks share these limitations that this plugin address
 
 ---
 
-## 9. Risks and Mitigations
+## 9. Stretch Direction: RuVector / MinCut / RVF Integration
+
+These are not v1 deliverables. They represent the path from "federation that works" to "federation that reasons about its own trust topology."
+
+### 9.1 Trust Graph Analysis via RuVector
+
+The trust scores computed in Section 2.1.1 produce a weighted directed graph. RuVector's HNSW indexing can surface structural properties:
+
+- **Cluster detection** -- identify tightly-coupled trust groups that could become single points of failure
+- **Influence ranking** -- PageRank-style analysis of which nodes are most trusted (and therefore most valuable attack targets)
+- **Anomaly detection** -- SONA pattern matching on trust score trajectories to detect slow-burn trust escalation attacks
+
+### 9.2 MinCut for Compromised Node Isolation
+
+If a node is confirmed compromised (trust score drops to 0 via automatic downgrade), MinCut analysis identifies the minimum set of sessions to terminate to isolate the compromised node while preserving maximum federation connectivity.
+
+### 9.3 RVF: Portable Signed Agent State
+
+The `.rvf` (RuVector Format) file format provides a signed, versioned container for agent state. In the federation context:
+
+- **Agent migration** -- an agent's state can be serialized to RVF, signed by the source node, and transmitted to a destination node for execution continuity
+- **State attestation** -- the RVF signature chain proves provenance: which node created the agent, which nodes it has visited, what trust levels were active at each hop
+- **Offline verification** -- RVF files can be verified without network access, enabling air-gapped audit scenarios
+
+### 9.4 When to Build This
+
+Build these only after Phase 4 (consensus + trust) is stable and there is evidence of multi-org adoption. The trust graph must have real data before analysis is useful.
+
+---
+
+## 10. Risks and Mitigations
 
 | Risk | Probability | Impact | Mitigation |
 |------|------------|--------|------------|
 | mTLS complexity across platforms | Medium | High | Use Node.js native `tls` module; self-signed cert generation in `federation init` |
-| PII false positives blocking data | Medium | Medium | Configurable sensitivity; allowlisting; feedback via `aidefence.learnFromDetection()` |
-| Network latency degrading coordination | Medium | Medium | Async message queuing; local cache; configurable timeout |
-| Byzantine node poisoning consensus | Low | High | BFT with n/3 threshold; trust score decay on suspicious behavior |
+| PII false positives blocking data | Medium | Medium | Confidence scoring (Section 3.4); adaptive calibration from operator overrides; per-type allowlisting |
+| Network latency degrading coordination | Medium | Medium | Async message queuing; local cache; configurable timeout; direct mode as default |
+| Byzantine node poisoning consensus | Low | High | BFT with n/3 threshold; trust score decay on suspicious behavior; automatic downgrade |
 | Key compromise | Low | Critical | Key rotation support; revocation via federation broadcast |
+| Over-engineering the trust model | Medium | Medium | Ship 3-tier trust (UNTRUSTED/VERIFIED/TRUSTED) first. Add ATTESTED and PRIVILEGED when operators request it. The 5-tier model is the ceiling, not the floor. |
+| PII pipeline too aggressive | High | Medium | Default to `flag-for-review` in the 0.6-0.85 confidence band rather than auto-block. Let operators tighten, not loosen. Adaptive calibration (Section 3.4) self-corrects. |
+| Trust formula too complex to debug | Medium | Low | Expose trust score components in `federation trust <node-id> --review` CLI output and audit events. Operators see the breakdown, not just the number. |
 
-## Consequences
+---
+
+## 11. Validation Benchmark
+
+The following benchmark validates that the federation protocol meets its core promise: **two independent nodes exchange tasks with zero PII leaks, while a malicious node is automatically detected and downgraded.**
+
+### Test Scenario
+
+```
+Setup:
+  - Node A (honest): Trust Level 2
+  - Node B (honest): Trust Level 2
+  - Node C (malicious): Trust Level 2 (will attempt injection + PII exfiltration)
+
+Phase 1: Baseline Exchange (A ↔ B)
+  - 10,000 messages exchanged
+  - Messages contain synthetic PII (emails, SSNs, API keys) in 30% of payloads
+  - Verify: 0 PII items cross the trust boundary
+  - Verify: message latency p99 < 200ms
+  - Verify: all 10,000 messages produce audit events
+
+Phase 2: Malicious Node (C → A, C → B)
+  - C sends 100 messages with embedded prompt injection payloads
+  - C sends 50 messages attempting PII exfiltration probes
+  - Verify: all injection attempts detected by AI Defence
+  - Verify: C's trust score drops below downgrade threshold
+  - Verify: C is automatically downgraded to Trust Level 0
+  - Verify: A and B continue communicating normally after C is isolated
+
+Phase 3: Recovery
+  - C's sessions are terminated
+  - A ↔ B message exchange continues with 0 interruption
+  - Federation audit trail contains complete incident record
+```
+
+**Pass criteria:** All verify statements pass. This is the minimum bar for declaring Phase 3 (Secure Messaging) complete.
+
+## 12. Consequences
 
 **Positive:**
 - Claude Flow becomes the first multi-agent framework with production-grade federated security
