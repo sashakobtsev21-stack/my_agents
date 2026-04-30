@@ -19,11 +19,11 @@ Subcommands:
 
 Steps by subcommand:
 
-**init**: `npx @claude-flow/cli@latest federation init`
-**join**: `npx @claude-flow/cli@latest federation join ENDPOINT`
-**leave**: `npx @claude-flow/cli@latest federation leave`
-**peers**: `npx @claude-flow/cli@latest federation peers`
-**status**: `npx @claude-flow/cli@latest federation status`
-**audit**: `npx @claude-flow/cli@latest federation audit --compliance MODE --since DATE`
-**trust**: `npx @claude-flow/cli@latest federation trust NODE_ID --review`
-**config**: `npx @claude-flow/cli@latest federation config --pii-policy PATH`
+**init**: `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation init`
+**join**: `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation join ENDPOINT`
+**leave**: `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation leave`
+**peers**: `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation peers`
+**status**: `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation status`
+**audit**: `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation audit --compliance MODE --since DATE`
+**trust**: `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation trust NODE_ID --review`
+**config**: `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation config --pii-policy PATH`

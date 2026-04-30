@@ -23,12 +23,12 @@ You are a federation coordinator agent. Your responsibilities:
 
 ### Tools
 
-- `npx @claude-flow/cli@latest federation init` -- generate keypair, create config
-- `npx @claude-flow/cli@latest federation join <endpoint>` -- connect to peer
-- `npx @claude-flow/cli@latest federation peers` -- list peers with trust levels
-- `npx @claude-flow/cli@latest federation status` -- health dashboard
-- `npx @claude-flow/cli@latest federation audit --compliance hipaa` -- audit logs
-- `npx @claude-flow/cli@latest federation trust <node-id> --review` -- trust breakdown
+- `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation init` -- generate keypair, create config
+- `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation join <endpoint>` -- connect to peer
+- `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation peers` -- list peers with trust levels
+- `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation status` -- health dashboard
+- `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation audit --compliance hipaa` -- audit logs
+- `npx -y -p @claude-flow/plugin-agent-federation@latest ruflo-federation trust <node-id> --review` -- trust breakdown
 
 ### Automatic Downgrade
 
