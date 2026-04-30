@@ -47,17 +47,28 @@ if (isMCPMode) {
 
     for (const line of lines) {
       if (line.trim()) {
+        let message;
         try {
-          const message = JSON.parse(line);
+          message = JSON.parse(line);
+        } catch {
+          console.log(JSON.stringify({
+            jsonrpc: '2.0',
+            id: null,
+            error: { code: -32700, message: 'Parse error' },
+          }));
+          continue;
+        }
+        try {
           const response = await handleMessage(message);
           if (response) {
             console.log(JSON.stringify(response));
           }
         } catch (error) {
+          // #1606: Return proper internal error instead of parse error
           console.log(JSON.stringify({
             jsonrpc: '2.0',
-            id: null,
-            error: { code: -32700, message: 'Parse error' },
+            id: message.id ?? null,
+            error: { code: -32603, message: error instanceof Error ? error.message : 'Internal error' },
           }));
         }
       }
