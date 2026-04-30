@@ -1,20 +1,23 @@
 {
   "name": "ruflo-ruvector",
-  "description": "RuVector operations — HNSW indexing, embedding generation, vector clustering, and hyperbolic space reasoning",
-  "version": "0.1.0",
+  "description": "Self-learning vector database via npx ruvector — HNSW, FlashAttention-3, Graph RAG, hybrid search, DiskANN, 103 MCP tools, Brain AGI",
+  "version": "0.2.0",
   "author": {
     "name": "ruvnet",
     "url": "https://github.com/ruvnet"
   },
-  "homepage": "https://github.com/ruvnet/ruflo",
+  "homepage": "https://github.com/ruvnet/ruvector",
   "license": "MIT",
   "keywords": [
     "ruflo",
     "ruvector",
-    "embeddings",
+    "vector-database",
     "hnsw",
-    "vector",
-    "hyperbolic",
-    "clustering"
+    "flash-attention",
+    "graph-rag",
+    "hybrid-search",
+    "diskann",
+    "mcp",
+    "brain-agi"
   ]
 }

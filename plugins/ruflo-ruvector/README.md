@@ -1,10 +1,16 @@
 # ruflo-ruvector
 
-RuVector operations -- HNSW indexing, embedding generation, vector clustering, and hyperbolic space reasoning.
+Self-learning vector database powered by [`ruvector`](https://www.npmjs.com/package/ruvector) — HNSW, FlashAttention-3, Graph RAG, hybrid search, DiskANN, 103 MCP tools, Brain AGI, and 50+ attention mechanisms.
 
 ## Overview
 
-Vector operations specialist for the RuVector system. Generates 384-dimensional embeddings via ONNX all-MiniLM-L6-v2, manages HNSW approximate nearest-neighbor indexes, performs k-means and density-based clustering, and supports hyperbolic embeddings in the Poincare ball model for hierarchical data (taxonomies, dependency trees, org charts).
+Wraps the `ruvector` npm package as a Ruflo plugin, providing vector embedding, semantic search, clustering, hyperbolic space reasoning, self-learning hooks, and Brain AGI diagnostics. ruvector's Rust backend delivers sub-millisecond queries and 52,000+ inserts/sec.
+
+## Prerequisites
+
+```bash
+npm install ruvector
+```
 
 ## Installation
 
@@ -12,21 +18,29 @@ Vector operations specialist for the RuVector system. Generates 384-dimensional 
 claude --plugin-dir plugins/ruflo-ruvector
 ```
 
+## MCP Integration (103 Tools)
+
+```bash
+claude mcp add ruvector -- npx ruvector mcp start
+```
+
+Key tool categories: hooks routing, AST analysis, diff classification, coverage routing, graph clustering, security scanning, RAG context, brain knowledge, AGI diagnostics, midstream analytics.
+
 ## Agents
 
 | Agent | Model | Role |
 |-------|-------|------|
-| `vector-engineer` | sonnet | Embedding generation, HNSW index management, similarity search, clustering, hyperbolic space reasoning |
+| `vector-engineer` | sonnet | Embedding, HNSW indexing, FlashAttention-3, Graph RAG, hybrid search, clustering, hyperbolic space, Brain AGI |
 
 ## Skills
 
 | Skill | Usage | Description |
 |-------|-------|-------------|
-| `vector-embed` | `/vector-embed <text-or-file>` | Generate ONNX embeddings (384-dim), normalize, and store in HNSW index |
-| `vector-cluster` | `/vector-cluster <namespace> [--k N]` | Cluster vectors using k-means or density-based methods |
-| `vector-hyperbolic` | `/vector-hyperbolic <text> [--model poincare]` | Embed hierarchical data in hyperbolic space (Poincare ball) |
+| `vector-embed` | `/vector-embed <text-or-file>` | ONNX embeddings (384-dim), normalize, store in HNSW |
+| `vector-cluster` | `/vector-cluster <namespace> [--k N]` | k-means or density clustering with labeled summaries |
+| `vector-hyperbolic` | `/vector-hyperbolic <text>` | Poincare ball hierarchical embeddings |
 
-## Commands (9 subcommands)
+## Commands
 
 ```bash
 # Embedding
@@ -35,10 +49,10 @@ vector batch <glob-pattern>
 vector compare <text1> <text2>
 
 # Search
-vector search <query> [--limit N]
+vector search <query> [--limit N] [--hybrid] [--graph-rag]
 
 # Clustering
-vector cluster <namespace> [--k N]
+vector cluster <namespace> [--k N | --density]
 
 # Index management
 vector index create <name>
@@ -46,30 +60,73 @@ vector index stats <name>
 
 # Hyperbolic
 vector hyperbolic embed <text>
+
+# Self-learning hooks
+vector hooks init
+vector hooks route <task>
+vector ast <file>
+
+# Brain AGI
+vector brain status
+vector midstream status
 ```
 
-## HNSW Parameters
+## Search Capabilities (ruvector v2.1+)
 
-| Parameter | Default | Purpose |
-|-----------|---------|---------|
-| `M` | 16 | Graph connectivity (edges per node) |
-| `efConstruction` | 200 | Build-time search quality |
-| `efSearch` | 50 | Query-time search quality |
+| Feature | Description | Improvement |
+|---------|-------------|-------------|
+| FlashAttention-3 | IO-aware tiled attention | O(N) memory vs O(N^2) |
+| Graph RAG | Knowledge graph + community detection | 30-60% better multi-hop |
+| Hybrid Search | Sparse + dense with RRF fusion | 20-49% better retrieval |
+| DiskANN / Vamana | SSD-friendly ANN with PQ compression | Large-scale search |
+| ColBERT | Per-token late interaction | Fine-grained matching |
+| Matryoshka | Adaptive-dimension with cascade | Flexible precision |
+| MLA | Multi-Head Latent Attention | ~93% KV-cache compression |
+| TurboQuant | 2-4 bit quantization | 6-8x memory reduction |
 
-## Normalization Options
+## Self-Learning Hooks
 
-| Method | Use Case |
-|--------|----------|
-| L2 (unit sphere) | Cosine similarity -- default for semantic search |
-| L1 (manhattan) | Sparse feature comparison |
-| min-max | Bounded [0,1] range for visualization |
-| z-score | Standardized distribution for statistical analysis |
+```bash
+# Full 9-phase pretrain pipeline
+npx ruvector hooks init --pretrain --build-agents quality
+
+# Smart agent routing
+npx ruvector hooks route --task "description"
+
+# Code analysis
+npx ruvector hooks ast-analyze --file src/module.ts
+npx ruvector hooks diff-analyze --file src/module.ts
+npx ruvector hooks coverage-route --task "description"
+npx ruvector hooks security-scan --path src/
+```
+
+## Brain AGI
+
+Access 8 AGI subsystems:
+
+```bash
+npx ruvector brain agi status      # Combined diagnostics
+npx ruvector brain agi sona        # SONA patterns and trajectories
+npx ruvector brain agi temporal    # Knowledge evolution velocity
+npx ruvector brain agi explore     # Meta-learning curiosity & regret
+npx ruvector brain search "query"  # Shared brain knowledge search
+```
+
+## Performance
+
+| Operation | Latency | Notes |
+|-----------|---------|-------|
+| HNSW search | ~0.045ms | 8,800x vs inference |
+| Memory cache | ~0.01ms | 40,000x vs inference |
+| Insert | 52,000+/sec | Rust backend |
+| Memory per vector | ~50 bytes | Efficient storage |
 
 ## Related Plugins
 
-- `ruflo-knowledge-graph` -- HNSW-backed semantic search across graph nodes
-- `ruflo-market-data` -- Pattern vector indexing for candlestick similarity
-- `ruflo-neural-trader` -- Strategy pattern similarity search
+- `ruflo-agentdb` — HNSW storage backend in AgentDB
+- `ruflo-intelligence` — SONA pattern learning integration
+- `ruflo-knowledge-graph` — Graph RAG for multi-hop retrieval
+- `ruflo-rag-memory` — Simple semantic search via ruvector
 
 ## License
 
