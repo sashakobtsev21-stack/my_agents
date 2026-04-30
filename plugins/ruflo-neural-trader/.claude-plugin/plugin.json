@@ -1,0 +1,21 @@
+{
+  "name": "ruflo-neural-trader",
+  "description": "Neural trading strategies — time-series anomaly detection, backtesting, risk scoring, and portfolio optimization via SONA trajectories",
+  "version": "0.1.0",
+  "author": {
+    "name": "ruvnet",
+    "url": "https://github.com/ruvnet"
+  },
+  "homepage": "https://github.com/ruvnet/ruflo",
+  "license": "MIT",
+  "keywords": [
+    "ruflo",
+    "trading",
+    "neural",
+    "backtesting",
+    "risk",
+    "portfolio",
+    "sona",
+    "time-series"
+  ]
+}

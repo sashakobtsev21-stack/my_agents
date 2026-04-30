@@ -20,3 +20,11 @@ Use these MCP tools:
 - `mcp__claude-flow__ruvllm_chat_format` for prompt formatting
 
 Optimize for the right balance of quality, speed, and cost per task.
+
+### Memory Learning
+
+Store successful model configurations and prompt templates:
+```bash
+npx @claude-flow/cli@latest memory store --namespace llm-configs --key "config-PROVIDER-MODEL" --value "PARAMS_AND_RESULTS"
+npx @claude-flow/cli@latest memory search --query "config for PROVIDER" --namespace llm-configs
+```

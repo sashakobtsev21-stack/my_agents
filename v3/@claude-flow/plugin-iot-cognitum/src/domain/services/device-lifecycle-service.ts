@@ -37,6 +37,11 @@ export interface DeviceLifecycleDeps {
   getCustodyEpoch: (deviceId: string) => Promise<{
     epoch: number;
   }>;
+  pairDevice: (deviceId: string, clientName: string) => Promise<{
+    paired: boolean;
+    token?: string;
+  }>;
+  unpairDevice: (deviceId: string, clientName?: string) => Promise<void>;
   onDeviceRegistered?: (device: DeviceAgent) => void;
   onTrustChange?: (
     deviceId: string,
@@ -96,6 +101,74 @@ export class DeviceLifecycleService {
 
     this.deps.onDeviceRegistered?.(device);
     return device;
+  }
+
+  /**
+   * Pair a device using the SDK's pair.create() and promote its trust level.
+   */
+  async pairDevice(
+    device: DeviceAgent,
+    clientName: string,
+  ): Promise<DeviceAgent> {
+    const result = await this.deps.pairDevice(device.deviceId, clientName);
+
+    if (!result.paired) {
+      throw new Error(`Pairing failed for device ${device.deviceId}`);
+    }
+
+    const oldLevel = device.trustLevel;
+    const newLevel =
+      device.trustLevel < DeviceTrustLevel.PROVISIONED
+        ? DeviceTrustLevel.PROVISIONED
+        : device.trustLevel;
+
+    const updated: DeviceAgent = {
+      ...device,
+      trustLevel: newLevel,
+      trustScore: {
+        ...device.trustScore,
+        overall: this.computeTrustScore(device, 0, 0, true).overall,
+        components: {
+          ...device.trustScore.components,
+          pairingIntegrity: 1.0,
+        },
+      },
+    };
+
+    if (oldLevel !== newLevel) {
+      this.deps.onTrustChange?.(device.deviceId, oldLevel, newLevel);
+    }
+
+    return updated;
+  }
+
+  /**
+   * Unpair a device and demote its trust level.
+   */
+  async unpairDevice(device: DeviceAgent): Promise<DeviceAgent> {
+    await this.deps.unpairDevice(device.deviceId);
+
+    const oldLevel = device.trustLevel;
+    const newLevel = DeviceTrustLevel.REGISTERED;
+
+    const updated: DeviceAgent = {
+      ...device,
+      trustLevel: newLevel,
+      trustScore: {
+        ...device.trustScore,
+        overall: this.computeTrustScore(device, 0, 0, false).overall,
+        components: {
+          ...device.trustScore.components,
+          pairingIntegrity: 0.0,
+        },
+      },
+    };
+
+    if (oldLevel !== newLevel) {
+      this.deps.onTrustChange?.(device.deviceId, oldLevel, newLevel);
+    }
+
+    return updated;
   }
 
   /**

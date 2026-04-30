@@ -1,6 +1,7 @@
 ---
 name: memory-bridge
 description: Bridge Claude Code auto-memory into AgentDB with ONNX vector embeddings
+argument-hint: "[--all-projects]"
 allowed-tools: mcp__claude-flow__memory_import_claude mcp__claude-flow__memory_bridge_status mcp__claude-flow__memory_search_unified Bash(npx *)
 ---
 Import Claude Code memories into AgentDB for semantic search across sessions.

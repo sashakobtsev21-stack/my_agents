@@ -23,3 +23,17 @@ You are a memory specialist agent. Your responsibilities:
 2. Consolidate duplicate or overlapping entries
 3. Verify HNSW index health via memory stats
 4. Bridge new Claude Code auto-memory files into AgentDB
+
+### Related Plugins
+
+- **ruflo-agentdb**: Full AgentDB with HNSW vector search for semantic retrieval (150x–12,500x faster)
+- **ruflo-rvf**: RVF portable memory format for cross-machine export/import
+
+
+### Neural Learning
+
+After completing tasks, store successful patterns:
+```bash
+npx @claude-flow/cli@latest hooks post-task --task-id "TASK_ID" --success true --train-neural true
+npx @claude-flow/cli@latest memory search --query "TASK_TYPE patterns" --namespace patterns
+```

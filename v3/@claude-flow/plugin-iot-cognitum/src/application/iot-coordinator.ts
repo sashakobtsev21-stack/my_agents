@@ -9,7 +9,26 @@ import type {
 } from '../domain/services/telemetry-service.js';
 import { MeshService } from '../domain/services/mesh-service.js';
 import type { MeshTopology } from '../domain/services/mesh-service.js';
-import type { DeviceAgent, DeviceTrustLevel } from '../domain/entities/index.js';
+import { AnomalyDetectionService } from '../domain/services/anomaly-detection-service.js';
+import type { TelemetryBaseline, AnomalyDetectionConfig } from '../domain/services/anomaly-detection-service.js';
+import { TelemetryIngestionService } from '../domain/services/telemetry-ingestion-service.js';
+import type { IngestionResult } from '../domain/services/telemetry-ingestion-service.js';
+import { FleetTopologyService } from '../domain/services/fleet-topology-service.js';
+import type { CreateFleetOptions, FleetSummary } from '../domain/services/fleet-topology-service.js';
+import { InMemoryFleetRepository } from '../infrastructure/in-memory-fleet-repository.js';
+import { FirmwareOrchestrationService } from '../domain/services/firmware-orchestration-service.js';
+import type { FirmwareRollout } from '../domain/services/firmware-orchestration-service.js';
+import { WitnessVerificationService } from '../domain/services/witness-verification-service.js';
+import type { WitnessVerificationResult } from '../domain/services/witness-verification-service.js';
+import { SONAIntegrationService } from '../domain/services/sona-integration-service.js';
+import type { SONAClient } from '../domain/services/sona-integration-service.js';
+import type { TelemetryRepository } from '../domain/repositories/telemetry-repository.js';
+import type { DeviceAgent, DeviceTrustLevel, TelemetryReading, AnomalyDetection, DeviceFleet, FleetTopology, FirmwarePolicy } from '../domain/entities/index.js';
+import type {
+  DeviceRepository,
+  TrustHistoryRepository,
+  FleetRepository,
+} from '../domain/repositories/index.js';
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -24,6 +43,18 @@ export interface IoTCoordinatorConfig {
   defaultTls?: { insecure?: boolean; ca?: string };
   /** Active health-probe interval (ms) for each SeedClient. */
   healthInterval?: number;
+  /** Optional device persistence repository. */
+  deviceRepository?: DeviceRepository;
+  /** Optional trust history repository. */
+  trustHistoryRepository?: TrustHistoryRepository;
+  /** Anomaly detection configuration. */
+  anomalyDetection?: Partial<AnomalyDetectionConfig>;
+  /** Optional fleet persistence repository. */
+  fleetRepository?: FleetRepository;
+  /** Optional SONA neural learning client. */
+  sonaClient?: SONAClient;
+  /** Optional HNSW-indexed telemetry repository. */
+  telemetryRepository?: TelemetryRepository;
 }
 
 export interface IoTCoordinatorCallbacks {
@@ -54,13 +85,24 @@ export class IoTCoordinator {
   private readonly lifecycle: DeviceLifecycleService;
   private readonly telemetry: TelemetryService;
   private readonly mesh: MeshService;
+  private readonly anomalyDetection: AnomalyDetectionService;
+  private readonly ingestion: TelemetryIngestionService;
+  private readonly fleet: FleetTopologyService;
+  private readonly firmware: FirmwareOrchestrationService;
+  private readonly witnessVerification: WitnessVerificationService;
+  private readonly sona: SONAIntegrationService;
+  private readonly telemetryRepo?: TelemetryRepository;
   private readonly config: IoTCoordinatorConfig;
+  private readonly deviceRepo?: DeviceRepository;
+  private readonly trustRepo?: TrustHistoryRepository;
 
   constructor(
     config: IoTCoordinatorConfig,
     callbacks?: IoTCoordinatorCallbacks,
   ) {
     this.config = config;
+    this.deviceRepo = config.deviceRepository;
+    this.trustRepo = config.trustHistoryRepository;
     this.factory = new SeedClientFactory({
       defaultTls: config.defaultTls,
       healthInterval: config.healthInterval,
@@ -95,6 +137,15 @@ export class IoTCoordinator {
       getCustodyEpoch: async (deviceId: string) => {
         const client = this.resolveClient(deviceId);
         return client.custody.epoch();
+      },
+      pairDevice: async (deviceId: string, clientName: string) => {
+        const client = this.resolveClient(deviceId);
+        const resp = await client.pair.create({ clientName });
+        return { paired: true, token: resp.token.reveal() };
+      },
+      unpairDevice: async (deviceId: string, clientName?: string) => {
+        const client = this.resolveClient(deviceId);
+        await client.pair.delete(clientName ?? 'claude-flow');
       },
       onDeviceRegistered: callbacks?.onDeviceRegistered,
       onTrustChange: callbacks?.onTrustChange,
@@ -133,6 +184,52 @@ export class IoTCoordinator {
         return client.mesh.clusterHealth();
       },
     });
+
+    this.anomalyDetection = new AnomalyDetectionService(config.anomalyDetection);
+    this.ingestion = new TelemetryIngestionService(
+      {
+        queryDeviceStore: async (deviceId, vector, k) => {
+          const client = this.resolveClient(deviceId);
+          const result = await client.store.query({ vector, k });
+          return result.results;
+        },
+        getStoreStatus: async (deviceId) => {
+          const client = this.resolveClient(deviceId);
+          return client.store.status();
+        },
+      },
+      this.anomalyDetection,
+    );
+
+    this.fleet = new FleetTopologyService(
+      config.fleetRepository ?? new InMemoryFleetRepository(),
+    );
+
+    this.firmware = new FirmwareOrchestrationService({
+      getDeviceFirmwareVersion: async (deviceId: string) => {
+        const entry = this.requireEntry(deviceId);
+        return entry.agent.firmwareVersion;
+      },
+      deployFirmware: async (_deviceId: string, _version: string) => {
+        // OTA deployment requires Cognitum Cloud API (not available via local Seed SDK).
+        // Stub returns success; real implementation will use cloud control plane.
+        return { success: true };
+      },
+      getDeviceAnomalyScore: async (deviceId: string) => {
+        const entry = this.requireEntry(deviceId);
+        return 1 - entry.agent.trustScore.overall;
+      },
+    });
+
+    this.witnessVerification = new WitnessVerificationService({
+      getWitnessChain: async (deviceId: string) => {
+        const client = this.resolveClient(deviceId);
+        return client.witness.chain();
+      },
+    });
+
+    this.sona = new SONAIntegrationService(config.sonaClient ?? null);
+    this.telemetryRepo = config.telemetryRepository;
   }
 
   // -------------------------------------------------------------------------
@@ -176,6 +273,7 @@ export class IoTCoordinator {
     this.devices.delete(endpoint);
     this.devices.set(agent.deviceId, { agent, client });
 
+    await this.deviceRepo?.save(agent);
     return agent;
   }
 
@@ -185,9 +283,55 @@ export class IoTCoordinator {
    */
   async getDeviceStatus(deviceId: string): Promise<DeviceAgent> {
     const entry = this.requireEntry(deviceId);
+    const oldLevel = entry.agent.trustLevel;
     const refreshed = await this.lifecycle.refreshDeviceState(entry.agent);
     entry.agent = refreshed;
+    await this.deviceRepo?.save(refreshed);
+    if (oldLevel !== refreshed.trustLevel) {
+      await this.trustRepo?.append({
+        deviceId, timestamp: new Date(),
+        oldLevel, newLevel: refreshed.trustLevel,
+        score: refreshed.trustScore, trigger: 'refresh',
+      });
+    }
     return refreshed;
+  }
+
+  /** Pair a registered device, promoting its trust level. */
+  async pairDevice(
+    deviceId: string,
+    clientName: string,
+  ): Promise<DeviceAgent> {
+    const entry = this.requireEntry(deviceId);
+    const oldLevel = entry.agent.trustLevel;
+    const updated = await this.lifecycle.pairDevice(entry.agent, clientName);
+    entry.agent = updated;
+    await this.deviceRepo?.save(updated);
+    if (oldLevel !== updated.trustLevel) {
+      await this.trustRepo?.append({
+        deviceId, timestamp: new Date(),
+        oldLevel, newLevel: updated.trustLevel,
+        score: updated.trustScore, trigger: 'pair',
+      });
+    }
+    return updated;
+  }
+
+  /** Unpair a registered device, demoting its trust level. */
+  async unpairDevice(deviceId: string): Promise<DeviceAgent> {
+    const entry = this.requireEntry(deviceId);
+    const oldLevel = entry.agent.trustLevel;
+    const updated = await this.lifecycle.unpairDevice(entry.agent);
+    entry.agent = updated;
+    await this.deviceRepo?.save(updated);
+    if (oldLevel !== updated.trustLevel) {
+      await this.trustRepo?.append({
+        deviceId, timestamp: new Date(),
+        oldLevel, newLevel: updated.trustLevel,
+        score: updated.trustScore, trigger: 'unpair',
+      });
+    }
+    return updated;
   }
 
   // -------------------------------------------------------------------------
@@ -247,6 +391,131 @@ export class IoTCoordinator {
     return client.custody.epoch();
   }
 
+  /** Verify witness chain integrity for a device. */
+  async verifyWitnessChain(deviceId: string): Promise<WitnessVerificationResult> {
+    this.requireEntry(deviceId);
+    return this.witnessVerification.verifyChain(deviceId);
+  }
+
+  // -------------------------------------------------------------------------
+  // Anomaly detection
+  // -------------------------------------------------------------------------
+
+  /** Detect anomalies in a batch of telemetry readings for a device. */
+  detectAnomalies(
+    deviceId: string,
+    readings: TelemetryReading[],
+  ): { anomalies: AnomalyDetection[]; total: number; anomalous: number } {
+    const result = this.ingestion.processBatch(deviceId, readings);
+
+    if (result.anomalies.length > 0) {
+      const baseline = this.ingestion.getBaseline(deviceId);
+      for (const anomaly of result.anomalies) {
+        void this.sona.learnAnomalyPattern(anomaly, baseline);
+      }
+      void this.sona.recordTelemetryTrajectory(deviceId, readings, result.anomalies);
+    }
+
+    if (this.telemetryRepo) {
+      void this.telemetryRepo.storeBatch(readings);
+      for (const anomaly of result.anomalies) {
+        void this.telemetryRepo.storeAnomaly(anomaly);
+      }
+    }
+
+    return {
+      anomalies: result.anomalies,
+      total: result.readingsProcessed,
+      anomalous: result.anomaliesDetected,
+    };
+  }
+
+  /** Compute a telemetry baseline for a device from readings. */
+  computeBaseline(
+    deviceId: string,
+    readings: TelemetryReading[],
+  ): TelemetryBaseline {
+    const oldBaseline = this.ingestion.getBaseline(deviceId);
+    const newBaseline = this.ingestion.refreshBaseline(deviceId, readings);
+    void this.sona.learnBaselineShift(deviceId, oldBaseline, newBaseline);
+    return newBaseline;
+  }
+
+  /** Get the current baseline for a device, if computed. */
+  getBaseline(deviceId: string): TelemetryBaseline | undefined {
+    return this.ingestion.getBaseline(deviceId);
+  }
+
+  // -------------------------------------------------------------------------
+  // Firmware orchestration
+  // -------------------------------------------------------------------------
+
+  async createFirmwareRollout(
+    fleetId: string,
+    firmwareVersion: string,
+  ): Promise<FirmwareRollout> {
+    const fleet = await this.fleet.getFleet(fleetId);
+    return this.firmware.createRollout(
+      fleetId,
+      firmwareVersion,
+      fleet.deviceIds,
+      fleet.firmwarePolicy,
+    );
+  }
+
+  async advanceFirmwareRollout(rolloutId: string): Promise<FirmwareRollout> {
+    return this.firmware.advanceRollout(rolloutId);
+  }
+
+  rollbackFirmwareRollout(rolloutId: string): FirmwareRollout {
+    return this.firmware.rollbackRollout(rolloutId);
+  }
+
+  getFirmwareRollout(rolloutId: string): FirmwareRollout {
+    return this.firmware.getRollout(rolloutId);
+  }
+
+  listFirmwareRollouts(fleetId?: string): FirmwareRollout[] {
+    return this.firmware.listRollouts(fleetId);
+  }
+
+  // -------------------------------------------------------------------------
+  // Fleet management
+  // -------------------------------------------------------------------------
+
+  async createFleet(options: CreateFleetOptions): Promise<DeviceFleet> {
+    return this.fleet.createFleet(options);
+  }
+
+  async getFleet(fleetId: string): Promise<DeviceFleet> {
+    return this.fleet.getFleet(fleetId);
+  }
+
+  async listFleets(): Promise<FleetSummary[]> {
+    return this.fleet.listFleets();
+  }
+
+  async addDeviceToFleet(fleetId: string, deviceId: string): Promise<DeviceFleet> {
+    this.requireEntry(deviceId);
+    return this.fleet.addDeviceToFleet(fleetId, deviceId);
+  }
+
+  async removeDeviceFromFleet(fleetId: string, deviceId: string): Promise<DeviceFleet> {
+    return this.fleet.removeDeviceFromFleet(fleetId, deviceId);
+  }
+
+  async updateFleetTopology(fleetId: string, topology: FleetTopology): Promise<DeviceFleet> {
+    return this.fleet.updateTopology(fleetId, topology);
+  }
+
+  async updateFleetFirmwarePolicy(fleetId: string, policy: Partial<FirmwarePolicy>): Promise<DeviceFleet> {
+    return this.fleet.updateFirmwarePolicy(fleetId, policy);
+  }
+
+  async deleteFleet(fleetId: string): Promise<void> {
+    return this.fleet.deleteFleet(fleetId);
+  }
+
   // -------------------------------------------------------------------------
   // Inventory
   // -------------------------------------------------------------------------
@@ -263,6 +532,8 @@ export class IoTCoordinator {
 
     await entry.client.close();
     this.devices.delete(deviceId);
+    await this.deviceRepo?.delete(deviceId);
+    await this.trustRepo?.deleteByDevice(deviceId);
   }
 
   /** Shut down all SDK clients and clear internal state. */

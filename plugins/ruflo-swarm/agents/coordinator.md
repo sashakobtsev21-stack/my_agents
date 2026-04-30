@@ -17,3 +17,8 @@ Anti-drift rules:
 - Use specialized strategy so roles do not overlap.
 - Run `post-task` hooks after every task completion for learning.
 - Store coordination decisions in memory namespace "swarm".
+
+### Related Plugins
+
+- **ruflo-goals**: GOAP planning for complex multi-session objectives that swarms execute
+- **ruflo-autopilot**: Autonomous /loop execution of swarm-coordinated work
