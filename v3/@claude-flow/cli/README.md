@@ -52,31 +52,42 @@ Install Ruflo as a native Claude Code plugin -- adds skills, commands, agents, a
 ```
 
 <details>
-<summary><strong>All 21 plugins</strong></summary>
+<summary><strong>All 32 plugins</strong></summary>
 
 | Plugin | What it adds |
 |--------|-------------|
 | **ruflo-core** | MCP server, `/status`, `/doctor`, plugin discovery, base agents |
 | **ruflo-swarm** | Swarm coordination, Monitor streams, worktree isolation |
 | **ruflo-autopilot** | Autonomous `/loop` completion with learning and prediction |
-| **ruflo-intelligence** | Self-learning SONA patterns, trajectory learning, model routing |
+| **ruflo-loop-workers** | Background `/loop` workers, CronCreate scheduling |
+| **ruflo-workflows** | Workflow templates, orchestration, lifecycle management |
 | **ruflo-agentdb** | AgentDB controllers, HNSW vector search, RuVector embeddings |
+| **ruflo-rag-memory** | SOTA RAG — hybrid search (RRF), Graph RAG multi-hop, MMR diversity |
+| **ruflo-rvf** | RVF portable memory, session persistence, transfer |
+| **ruflo-ruvector** | [`ruvector`](https://npmjs.com/package/ruvector) — FlashAttention-3, Graph RAG, 103 MCP tools, Brain AGI |
+| **ruflo-knowledge-graph** | Entity extraction, relation mapping, pathfinder traversal |
+| **ruflo-intelligence** | Self-learning SONA patterns, trajectory learning, model routing |
+| **ruflo-daa** | Dynamic Agentic Architecture, cognitive patterns |
+| **ruflo-adr** | ADR lifecycle — create, index, supersede, compliance checking |
+| **ruflo-ddd** | DDD scaffolding — bounded contexts, aggregates, domain events |
+| **ruflo-sparc** | SPARC methodology with 5 phases and quality gates |
+| **ruflo-security-audit** | Security scanning, CVE checks, dependency audit |
 | **ruflo-aidefence** | AI safety scanning, PII detection, prompt injection defense |
+| **ruflo-testgen** | Test gap detection, TDD workflow, tester agent |
 | **ruflo-browser** | Playwright browser automation for testing and scraping |
 | **ruflo-jujutsu** | Git diff analysis, risk scoring, reviewer recommendations |
-| **ruflo-wasm** | Sandboxed WASM agent creation and gallery sharing |
-| **ruflo-workflows** | Workflow templates, orchestration, lifecycle management |
-| **ruflo-daa** | Dynamic Agentic Architecture, cognitive patterns |
-| **ruflo-ruvllm** | Local LLM inference, MicroLoRA, multi-provider chat |
-| **ruflo-rvf** | RVF portable memory, session persistence, transfer |
-| **ruflo-loop-workers** | Background `/loop` workers, CronCreate scheduling |
-| **ruflo-security-audit** | Security scanning, CVE checks, dependency audit |
-| **ruflo-rag-memory** | Memory bridge, simple store/search/recall interface |
-| **ruflo-testgen** | Test gap detection, TDD workflow, tester agent |
 | **ruflo-docs** | Doc generation, drift detection, docs-writer agent |
+| **ruflo-ruvllm** | Local LLM inference, MicroLoRA, multi-provider chat |
+| **ruflo-wasm** | Sandboxed WASM agent creation and gallery sharing |
 | **ruflo-plugin-creator** | Scaffold, validate, and publish new plugins |
-| **ruflo-federation** | Zero-trust agent federation, PII pipeline, cross-installation comms |
+| **ruflo-migrations** | Database schema migration management |
+| **ruflo-observability** | Structured logging, tracing, metrics correlation |
+| **ruflo-cost-tracker** | Token usage tracking, budget alerts, cost optimization |
 | **ruflo-goals** | GOAP planning, deep research, long-horizon tracking |
+| **ruflo-federation** | Zero-trust agent federation, PII pipeline, cross-installation comms |
+| **ruflo-iot-cognitum** | Cognitum Seed IoT — trust scoring, anomaly detection, fleet management |
+| **ruflo-neural-trader** | [`neural-trader`](https://npmjs.com/package/neural-trader) — 4 agents, Rust/NAPI backtesting, 112+ MCP tools |
+| **ruflo-market-data** | Market data ingestion, OHLCV vectorization, pattern matching |
 
 </details>
 
@@ -112,7 +123,7 @@ claude mcp add ruflo -- npx -y @claude-flow/cli@latest
 | 🧠 **Self-Learning** | SONA neural patterns, ReasoningBank, trajectory learning |
 | 💾 **Vector Memory** | HNSW-indexed AgentDB with 150x-12,500x faster search |
 | ⚡ **Background Workers** | 12 auto-triggered workers (audit, optimize, testgaps, etc.) |
-| 🧩 **Plugin Marketplace** | 21 native Claude Code plugins + 21 npm plugins |
+| 🧩 **Plugin Marketplace** | 32 native Claude Code plugins + 21 npm plugins |
 | 🔌 **Multi-Provider** | Claude, GPT, Gemini, Cohere, Ollama with smart routing |
 | 🛡️ **Security** | AIDefence, input validation, CVE remediation, path traversal prevention |
 | 🌐 **Agent Federation** | Cross-installation agent collaboration with zero-trust security 
