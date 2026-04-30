@@ -54,40 +54,82 @@ Install Ruflo as a native Claude Code plugin -- adds skills, commands, agents, a
 <details>
 <summary><strong>All 32 plugins</strong></summary>
 
-| Plugin | What it adds |
+#### Core & Orchestration
+
+| Plugin | What it does |
 |--------|-------------|
-| **ruflo-core** | MCP server, `/status`, `/doctor`, plugin discovery, base agents |
-| **ruflo-swarm** | Swarm coordination, Monitor streams, worktree isolation |
-| **ruflo-autopilot** | Autonomous `/loop` completion with learning and prediction |
-| **ruflo-loop-workers** | Background `/loop` workers, CronCreate scheduling |
-| **ruflo-workflows** | Workflow templates, orchestration, lifecycle management |
-| **ruflo-agentdb** | AgentDB controllers, HNSW vector search, RuVector embeddings |
-| **ruflo-rag-memory** | SOTA RAG — hybrid search (RRF), Graph RAG multi-hop, MMR diversity |
-| **ruflo-rvf** | RVF portable memory, session persistence, transfer |
-| **ruflo-ruvector** | [`ruvector`](https://npmjs.com/package/ruvector) — FlashAttention-3, Graph RAG, 103 MCP tools, Brain AGI |
-| **ruflo-knowledge-graph** | Entity extraction, relation mapping, pathfinder traversal |
-| **ruflo-intelligence** | Self-learning SONA patterns, trajectory learning, model routing |
-| **ruflo-daa** | Dynamic Agentic Architecture, cognitive patterns |
-| **ruflo-adr** | ADR lifecycle — create, index, supersede, compliance checking |
-| **ruflo-ddd** | DDD scaffolding — bounded contexts, aggregates, domain events |
-| **ruflo-sparc** | SPARC methodology with 5 phases and quality gates |
-| **ruflo-security-audit** | Security scanning, CVE checks, dependency audit |
-| **ruflo-aidefence** | AI safety scanning, PII detection, prompt injection defense |
-| **ruflo-testgen** | Test gap detection, TDD workflow, tester agent |
-| **ruflo-browser** | Playwright browser automation for testing and scraping |
-| **ruflo-jujutsu** | Git diff analysis, risk scoring, reviewer recommendations |
-| **ruflo-docs** | Doc generation, drift detection, docs-writer agent |
-| **ruflo-ruvllm** | Local LLM inference, MicroLoRA, multi-provider chat |
-| **ruflo-wasm** | Sandboxed WASM agent creation and gallery sharing |
-| **ruflo-plugin-creator** | Scaffold, validate, and publish new plugins |
-| **ruflo-migrations** | Database schema migration management |
-| **ruflo-observability** | Structured logging, tracing, metrics correlation |
-| **ruflo-cost-tracker** | Token usage tracking, budget alerts, cost optimization |
-| **ruflo-goals** | GOAP planning, deep research, long-horizon tracking |
-| **ruflo-federation** | Zero-trust agent federation, PII pipeline, cross-installation comms |
-| **ruflo-iot-cognitum** | Cognitum Seed IoT — trust scoring, anomaly detection, fleet management |
-| **ruflo-neural-trader** | [`neural-trader`](https://npmjs.com/package/neural-trader) — 4 agents, Rust/NAPI backtesting, 112+ MCP tools |
-| **ruflo-market-data** | Market data ingestion, OHLCV vectorization, pattern matching |
+| **ruflo-core** | Foundation — server, health checks, plugin discovery |
+| **ruflo-swarm** | Coordinate multiple agents as a team |
+| **ruflo-autopilot** | Let agents run autonomously in a loop |
+| **ruflo-loop-workers** | Schedule background tasks on a timer |
+| **ruflo-workflows** | Reusable multi-step task templates |
+| **ruflo-federation** | Agents on different machines collaborate securely |
+
+#### Memory & Knowledge
+
+| Plugin | What it does |
+|--------|-------------|
+| **ruflo-agentdb** | Fast vector database for agent memory |
+| **ruflo-rag-memory** | Smart retrieval — hybrid search, graph hops, diversity ranking |
+| **ruflo-rvf** | Save and restore agent memory across sessions |
+| **ruflo-ruvector** | [`ruvector`](https://npmjs.com/package/ruvector) — GPU-accelerated search, Graph RAG, 103 tools |
+| **ruflo-knowledge-graph** | Build and traverse entity relationship maps |
+
+#### Intelligence & Learning
+
+| Plugin | What it does |
+|--------|-------------|
+| **ruflo-intelligence** | Agents learn from past successes and get smarter |
+| **ruflo-daa** | Dynamic agent behavior and cognitive patterns |
+| **ruflo-ruvllm** | Run local LLMs (Ollama, etc.) with smart routing |
+| **ruflo-goals** | Break big goals into plans and track progress |
+
+#### Code Quality & Testing
+
+| Plugin | What it does |
+|--------|-------------|
+| **ruflo-testgen** | Find missing tests and generate them automatically |
+| **ruflo-browser** | Automate browser testing with Playwright |
+| **ruflo-jujutsu** | Analyze git diffs, score risk, suggest reviewers |
+| **ruflo-docs** | Generate and maintain documentation automatically |
+
+#### Security & Compliance
+
+| Plugin | What it does |
+|--------|-------------|
+| **ruflo-security-audit** | Scan for vulnerabilities and CVEs |
+| **ruflo-aidefence** | Block prompt injection, detect PII, safety scanning |
+
+#### Architecture & Methodology
+
+| Plugin | What it does |
+|--------|-------------|
+| **ruflo-adr** | Track architecture decisions with a living record |
+| **ruflo-ddd** | Scaffold domain-driven design — contexts, aggregates, events |
+| **ruflo-sparc** | Guided 5-phase development methodology with quality gates |
+
+#### DevOps & Observability
+
+| Plugin | What it does |
+|--------|-------------|
+| **ruflo-migrations** | Manage database schema changes safely |
+| **ruflo-observability** | Structured logs, traces, and metrics in one place |
+| **ruflo-cost-tracker** | Track token usage, set budgets, get cost alerts |
+
+#### Extensibility
+
+| Plugin | What it does |
+|--------|-------------|
+| **ruflo-wasm** | Run sandboxed WebAssembly agents |
+| **ruflo-plugin-creator** | Scaffold, validate, and publish your own plugins |
+
+#### Domain-Specific
+
+| Plugin | What it does |
+|--------|-------------|
+| **ruflo-iot-cognitum** | IoT device management — trust scoring, anomaly detection, fleets |
+| **ruflo-neural-trader** | [`neural-trader`](https://npmjs.com/package/neural-trader) — AI trading with 4 agents, backtesting, 112+ tools |
+| **ruflo-market-data** | Ingest market data, vectorize OHLCV, detect patterns |
 
 </details>
 
