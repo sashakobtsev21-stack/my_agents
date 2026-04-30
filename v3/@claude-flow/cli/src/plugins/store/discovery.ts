@@ -224,6 +224,7 @@ export class PluginDiscoveryService {
         { id: 'devops', name: 'DevOps', description: 'CI/CD and deployment plugins', pluginCount: 1 },
         { id: 'integrations', name: 'Integrations', description: 'Third-party integrations', pluginCount: 2 },
         { id: 'agents', name: 'Agents', description: 'Custom agent types', pluginCount: 1 },
+        { id: 'iot', name: 'IoT', description: 'IoT device management and fleet orchestration', pluginCount: 1 },
       ],
       authors: [
         {
@@ -238,10 +239,10 @@ export class PluginDiscoveryService {
       totalPlugins: plugins.length,
       totalDownloads: plugins.reduce((sum, p) => sum + p.downloads, 0),
       totalAuthors: 1,
-      featured: ['@claude-flow/plugin-agent-federation', '@claude-flow/plugin-agentic-qe', '@claude-flow/plugin-prime-radiant', '@claude-flow/security', '@claude-flow/claims', '@claude-flow/teammate-plugin'],
-      trending: ['@claude-flow/plugin-agent-federation', '@claude-flow/plugin-agentic-qe', '@claude-flow/plugin-prime-radiant'],
-      newest: ['@claude-flow/plugin-agent-federation', '@claude-flow/plugin-agentic-qe', '@claude-flow/plugin-prime-radiant'],
-      official: ['@claude-flow/plugin-agent-federation', '@claude-flow/plugin-agentic-qe', '@claude-flow/plugin-prime-radiant', '@claude-flow/security', '@claude-flow/claims'],
+      featured: ['@claude-flow/plugin-iot-cognitum', '@claude-flow/plugin-agent-federation', '@claude-flow/plugin-agentic-qe', '@claude-flow/plugin-prime-radiant', '@claude-flow/security', '@claude-flow/claims', '@claude-flow/teammate-plugin'],
+      trending: ['@claude-flow/plugin-iot-cognitum', '@claude-flow/plugin-agent-federation', '@claude-flow/plugin-agentic-qe', '@claude-flow/plugin-prime-radiant'],
+      newest: ['@claude-flow/plugin-iot-cognitum', '@claude-flow/plugin-agent-federation', '@claude-flow/plugin-agentic-qe', '@claude-flow/plugin-prime-radiant'],
+      official: ['@claude-flow/plugin-iot-cognitum', '@claude-flow/plugin-agent-federation', '@claude-flow/plugin-agentic-qe', '@claude-flow/plugin-prime-radiant', '@claude-flow/security', '@claude-flow/claims'],
       compatibilityMatrix: [
         { pluginId: '@claude-flow/neural', pluginVersion: '3.0.0', claudeFlowVersions: ['3.x'], tested: true },
         { pluginId: '@claude-flow/security', pluginVersion: '3.0.0', claudeFlowVersions: ['3.x'], tested: true },
@@ -1033,6 +1034,46 @@ export class PluginDiscoveryService {
           issues: [],
         },
       },
+      // IoT Cognitum - Cognitum Seed device-agent bridge
+      {
+        id: '@claude-flow/plugin-iot-cognitum',
+        name: '@claude-flow/plugin-iot-cognitum',
+        displayName: 'IoT Cognitum',
+        description: 'Cognitum Seed device-agent bridge — treat every Seed as a Ruflo agent with 5-tier trust scoring, Ed25519 witness chains, mesh networking, and fleet management.',
+        version: '1.0.0-alpha.1',
+        cid: 'bafybeiiotcognitumplugin2026',
+        size: 340000,
+        checksum: 'sha256:iotcognitum2026xyz',
+        author: officialAuthor,
+        license: 'MIT',
+        categories: ['integrations', 'agents'],
+        tags: ['iot', 'cognitum', 'seed', 'device', 'fleet', 'mesh', 'trust', 'witness', 'edge'],
+        keywords: ['iot', 'cognitum', 'device', 'fleet'],
+        downloads: 0,
+        rating: 0,
+        ratingCount: 0,
+        lastUpdated: baseTime,
+        createdAt: '2026-04-29T00:00:00Z',
+        minClaudeFlowVersion: '3.0.0',
+        dependencies: [
+          { name: '@claude-flow/shared', version: '^3.0.0' },
+          { name: '@cognitum-one/sdk', version: '^0.2.1' },
+        ],
+        type: 'integration',
+        hooks: ['iot:device-registered', 'iot:trust-change', 'iot:device-offline', 'iot:device-online', 'iot:anomaly-detected', 'iot:mesh-partition', 'iot:firmware-mismatch', 'iot:witness-gap'],
+        commands: ['iot init', 'iot register', 'iot status', 'iot list', 'iot remove', 'iot pair', 'iot unpair', 'iot query', 'iot ingest', 'iot mesh', 'iot witness', 'iot witness verify', 'iot fleet', 'iot fleet create', 'iot fleet list', 'iot fleet add', 'iot fleet remove', 'iot fleet delete', 'iot firmware deploy', 'iot firmware advance', 'iot firmware rollback', 'iot firmware status', 'iot firmware list', 'iot anomalies', 'iot baseline'],
+        permissions: ['network', 'memory', 'hooks'],
+        exports: ['IoTCognitumPlugin', 'IoTCoordinator', 'SeedClientFactory', 'HealthProbeWorker', 'TelemetryIngestWorker', 'AnomalyScanWorker', 'MeshSyncWorker', 'FirmwareWatchWorker', 'WitnessAuditWorker', 'AnomalyDetectionService', 'TelemetryIngestionService', 'FleetTopologyService', 'FirmwareOrchestrationService', 'WitnessVerificationService', 'SONAIntegrationService', 'AgentDBTelemetryRepository'],
+        verified: true,
+        trustLevel: 'official',
+        securityAudit: {
+          auditor: 'claude-flow-security-team',
+          auditDate: '2026-04-29T00:00:00Z',
+          auditVersion: '1.0.0-alpha.1',
+          passed: true,
+          issues: [],
+        },
+      },
       // Teammate Plugin - Claude Code v2.1.19+ integration
       {
         id: '@claude-flow/teammate-plugin',
@@ -1109,6 +1150,8 @@ export class PluginDiscoveryService {
       '@claude-flow/plugin-gastown-bridge',
       // Agent Federation
       '@claude-flow/plugin-agent-federation',
+      // IoT Cognitum
+      '@claude-flow/plugin-iot-cognitum',
     ];
 
     // Fetch stats in parallel

@@ -19,3 +19,16 @@ Use these MCP tools:
 - `mcp__claude-flow__ruvllm_sona_*` for SONA adaptation
 
 Always record outcomes so the system learns from every interaction.
+
+### Memory Learning
+
+Store routing outcomes for continuous improvement:
+```bash
+npx @claude-flow/cli@latest memory store --namespace routing-outcomes --key "route-TASK_TYPE" --value "MODEL_AND_OUTCOME"
+npx @claude-flow/cli@latest memory search --query "routing for TASK_TYPE" --namespace routing-outcomes
+```
+
+### Related Plugins
+
+- **ruflo-agentdb**: HNSW-indexed pattern storage backing the intelligence pipeline's RETRIEVE step
+- **ruflo-daa**: Dynamic Agentic Architecture — cognitive patterns that feed into intelligence routing

@@ -19,3 +19,20 @@ Use these MCP tools:
 - `mcp__claude-flow__wasm_gallery_*` for gallery operations
 
 Always verify sandbox isolation before running untrusted code.
+
+### Memory Learning
+
+Store successful WASM agent configurations:
+```bash
+npx @claude-flow/cli@latest memory store --namespace wasm-patterns --key "agent-TYPE" --value "CONFIG_AND_PERFORMANCE"
+npx @claude-flow/cli@latest memory search --query "wasm agent for TASK" --namespace wasm-patterns
+```
+
+
+### Neural Learning
+
+After completing tasks, store successful patterns:
+```bash
+npx @claude-flow/cli@latest hooks post-task --task-id "TASK_ID" --success true --train-neural true
+npx @claude-flow/cli@latest memory search --query "TASK_TYPE patterns" --namespace patterns
+```

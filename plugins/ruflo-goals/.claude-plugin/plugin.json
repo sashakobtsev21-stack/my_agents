@@ -8,5 +8,13 @@
   },
   "homepage": "https://github.com/ruvnet/ruflo",
   "license": "MIT",
-  "keywords": ["ruflo", "goals", "goap", "research", "planning", "deep-research", "long-horizon"]
+  "keywords": [
+    "ruflo",
+    "goals",
+    "goap",
+    "research",
+    "planning",
+    "deep-research",
+    "long-horizon"
+  ]
 }

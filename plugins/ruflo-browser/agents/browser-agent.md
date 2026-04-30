@@ -20,3 +20,20 @@ Use these MCP tools:
 - `mcp__claude-flow__browser_wait` for synchronization
 
 Always wait for elements before interacting and take screenshots to document results.
+
+### Memory Learning
+
+Store successful scraping selectors and test patterns:
+```bash
+npx @claude-flow/cli@latest memory store --namespace browser-patterns --key "site-DOMAIN" --value "SELECTORS_AND_STRATEGY"
+npx @claude-flow/cli@latest memory search --query "scraping pattern for DOMAIN" --namespace browser-patterns
+```
+
+
+### Neural Learning
+
+After completing tasks, store successful patterns:
+```bash
+npx @claude-flow/cli@latest hooks post-task --task-id "TASK_ID" --success true --train-neural true
+npx @claude-flow/cli@latest memory search --query "TASK_TYPE patterns" --namespace patterns
+```
