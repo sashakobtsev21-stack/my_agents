@@ -3,14 +3,65 @@
  * Standalone CLI shim for @claude-flow/plugin-iot-cognitum.
  * Maps `cognitum-iot <subcommand> [args]` -> CLICommandDefinition handlers.
  *
- * Endpoint default: when --endpoint/-e is omitted on `register`,
- * defaults to http://169.254.42.1 (the Cognitum Seed link-local USB address).
+ * Endpoint defaults:
+ *   - http://169.254.42.1 (USB-C link-local, no auth — read-only paths)
+ *   - https://169.254.42.1:8443 (LAN/HTTPS + bearer — full access including writes)
+ *
+ * Auth: COGNITUM_SEED_TOKEN is read from process.env (loaded from .env in CWD
+ * if present) and passed to register as the pairing/bearer token. When set,
+ * the default endpoint switches to the HTTPS LAN address.
  */
 
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { IoTCognitumPlugin } from './plugin.js';
 import type { PluginContext } from '@claude-flow/shared/src/plugin-interface.js';
 
-const SEED_DEFAULT_ENDPOINT = 'http://169.254.42.1';
+const SEED_LINK_LOCAL = 'http://169.254.42.1';
+const SEED_LAN_HTTPS = 'https://169.254.42.1:8443';
+
+/**
+ * Tiny .env loader. Walks up from CWD looking for a .env, reads KEY=VALUE
+ * lines (ignoring blanks and # comments), and applies them to process.env
+ * WITHOUT overwriting variables already set in the real environment.
+ */
+function loadDotenv(): { loaded: string | null; count: number } {
+  let dir = process.cwd();
+  for (let i = 0; i < 8; i++) {
+    const candidate = resolve(dir, '.env');
+    if (existsSync(candidate)) {
+      const text = readFileSync(candidate, 'utf8');
+      let count = 0;
+      for (const rawLine of text.split('\n')) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith('#')) continue;
+        const eq = line.indexOf('=');
+        if (eq < 1) continue;
+        const key = line.slice(0, eq).trim();
+        let val = line.slice(eq + 1).trim();
+        // Strip surrounding quotes
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        if (process.env[key] === undefined) {
+          process.env[key] = val;
+          count++;
+        }
+      }
+      return { loaded: candidate, count };
+    }
+    const parent = resolve(dir, '..');
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return { loaded: null, count: 0 };
+}
+
+loadDotenv();
+
+const SEED_TOKEN = process.env.COGNITUM_SEED_TOKEN;
+const SEED_DEFAULT_ENDPOINT =
+  process.env.COGNITUM_SEED_ENDPOINT ?? (SEED_TOKEN ? SEED_LAN_HTTPS : SEED_LINK_LOCAL);
 
 function makeContext(): PluginContext {
   // Minimal in-memory context for standalone CLI use.
@@ -131,7 +182,15 @@ function printHelp(commandNames: string[]): void {
   console.log('');
   console.log('Usage: cognitum-iot <subcommand> [options]');
   console.log('');
-  console.log('Default endpoint: ' + SEED_DEFAULT_ENDPOINT + ' (Seed link-local USB address)');
+  console.log('Default endpoint: ' + SEED_DEFAULT_ENDPOINT);
+  console.log('  - http://169.254.42.1 (USB-C link-local, no auth, read-only)');
+  console.log('  - https://169.254.42.1:8443 (LAN/HTTPS, COGNITUM_SEED_TOKEN required, full access)');
+  console.log('');
+  console.log('Auth: set COGNITUM_SEED_TOKEN in .env or environment to use the bearer-protected');
+  console.log('      LAN endpoint and unlock writes (ingest, unpair, etc).');
+  console.log('      Status: ' + (SEED_TOKEN ? '✓ token loaded' : '✗ no token (link-local only)'));
+  console.log('');
+  console.log('Hardware: get a Seed at https://cognitum.one');
   console.log('');
   console.log('Subcommands:');
   for (const n of commandNames) {
@@ -171,10 +230,16 @@ async function main(): Promise<void> {
   const cmd = commands.find((c) => c.name === resolved.name)!;
   const args = aliasShortToLong(parseArgs(resolved.rest));
 
-  // Endpoint default for `iot register`: fall back to Seed link-local address.
-  if (resolved.name === 'iot register' && !args['endpoint']) {
-    args['endpoint'] = SEED_DEFAULT_ENDPOINT;
-    console.error(`[info] No --endpoint supplied; defaulting to ${SEED_DEFAULT_ENDPOINT}`);
+  // Endpoint + token defaults for `iot register`.
+  if (resolved.name === 'iot register') {
+    if (!args['endpoint']) {
+      args['endpoint'] = SEED_DEFAULT_ENDPOINT;
+      console.error(`[info] No --endpoint supplied; defaulting to ${SEED_DEFAULT_ENDPOINT}`);
+    }
+    if (!args['token'] && SEED_TOKEN) {
+      args['token'] = SEED_TOKEN;
+      console.error('[info] Using COGNITUM_SEED_TOKEN from environment');
+    }
   }
 
   try {

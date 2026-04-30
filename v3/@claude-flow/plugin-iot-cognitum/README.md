@@ -18,6 +18,26 @@ The Seed is an edge appliance with on-device vector store, Ed25519 cryptographic
 npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot --help
 ```
 
+## Authentication via `.env`
+
+Create a `.env` file in your project root (or any parent directory):
+
+```bash
+COGNITUM_SEED_TOKEN=your-bearer-token-here
+# Optional overrides:
+COGNITUM_SEED_ENDPOINT=https://169.254.42.1:8443    # default when token is set
+IOT_FLEET_ID=my-fleet
+IOT_ZONE_ID=zone-1
+IOT_TLS_INSECURE=true                                # accept self-signed cert (default: true)
+```
+
+The bin walks up from CWD looking for `.env`, loads it without overwriting existing process.env vars, then:
+
+- When `COGNITUM_SEED_TOKEN` is present → default endpoint switches to `https://169.254.42.1:8443` (LAN/HTTPS) and the token is passed as the bearer/pairing token on `register`.
+- When no token → default endpoint stays at `http://169.254.42.1` (USB-C link-local, read-only).
+
+Token scope on Seed varies — read endpoints work with most tokens; `store/ingest` and some admin operations require a write-scoped token. See https://cognitum.one for token tier documentation.
+
 ## Commands
 
 | Command | Description |

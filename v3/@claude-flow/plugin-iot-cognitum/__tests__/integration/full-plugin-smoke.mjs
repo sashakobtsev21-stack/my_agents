@@ -12,8 +12,47 @@
  * Run from the plugin directory after `npm run build`.
  */
 import { IoTCognitumPlugin } from '../../dist/plugin.js';
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-const SEED_ENDPOINT = process.env.SEED_ENDPOINT ?? 'http://169.254.42.1';
+// Load .env from CWD (or walk up) so COGNITUM_SEED_TOKEN is available.
+function loadDotenv() {
+  let dir = process.cwd();
+  for (let i = 0; i < 8; i++) {
+    const f = resolve(dir, '.env');
+    if (existsSync(f)) {
+      for (const line of readFileSync(f, 'utf8').split('\n')) {
+        const t = line.trim();
+        if (!t || t.startsWith('#')) continue;
+        const eq = t.indexOf('=');
+        if (eq < 1) continue;
+        const k = t.slice(0, eq).trim();
+        let v = t.slice(eq + 1).trim();
+        if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) v = v.slice(1, -1);
+        if (process.env[k] === undefined) process.env[k] = v;
+      }
+      return f;
+    }
+    const parent = resolve(dir, '..');
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return null;
+}
+const envFile = loadDotenv();
+
+const SEED_TOKEN = process.env.COGNITUM_SEED_TOKEN;
+const SEED_ENDPOINT =
+  process.env.SEED_ENDPOINT ?? (SEED_TOKEN ? 'https://169.254.42.1:8443' : 'http://169.254.42.1');
+
+console.log(`[smoke] env: ${envFile ?? '(none)'}`);
+console.log(`[smoke] endpoint: ${SEED_ENDPOINT}`);
+console.log(`[smoke] bearer token: ${SEED_TOKEN ? 'loaded' : 'absent'}`);
+
+// Self-signed cert tolerance for pair-window fetch (https port uses dev cert).
+if (SEED_ENDPOINT.startsWith('https://')) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
 
 const plugin = new IoTCognitumPlugin();
 const noop = () => undefined;
@@ -66,8 +105,14 @@ const run = async (label, fn) => {
 section('iot init');
 await run('init', () => cmd('iot init').handler({ _: [], 'fleet-id': 'test-fleet', 'zone-id': 'zone-test' }));
 
-section('iot register (default endpoint)');
-await run('register', () => cmd('iot register').handler({ _: [], endpoint: SEED_ENDPOINT }));
+section(`iot register (${SEED_ENDPOINT}${SEED_TOKEN ? ' + bearer' : ''})`);
+await run('register', () =>
+  cmd('iot register').handler({
+    _: [],
+    endpoint: SEED_ENDPOINT,
+    ...(SEED_TOKEN ? { token: SEED_TOKEN } : {}),
+  }),
+);
 
 const coord = plugin['coordinator'];
 const devices = coord ? coord.listDevices() : [];
@@ -120,14 +165,23 @@ await run('query (k=3)', () =>
 );
 
 section(`iot ingest ${deviceId} (1 tagged test vector)`);
-await run('ingest 1 vector', () =>
-  cmd('iot ingest').handler(
-    dArgs({
-      vector: '[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8]',
-      metadata: JSON.stringify({ tag: 'smoke-test', ts: new Date().toISOString() }),
-    }),
-  ),
-);
+await run('ingest 1 vector (requires write-scoped token)', async () => {
+  try {
+    await cmd('iot ingest').handler(
+      dArgs({
+        vector: '[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8]',
+        metadata: JSON.stringify({ tag: 'smoke-test', ts: new Date().toISOString() }),
+      }),
+    );
+  } catch (err) {
+    const msg = err?.message ?? String(err);
+    if (/not authorized|forbidden|401|403/i.test(msg)) {
+      console.log(`[expected] token lacks ingest scope: ${msg}`);
+      return;
+    }
+    throw err;
+  }
+});
 
 // ============================================================
 // Tier 4: pair / unpair round-trip with unique client-name
@@ -139,9 +193,23 @@ const pairClient = `smoke-test-${Date.now()}`;
 
 section('open pair window (direct API)');
 await run('open pair window (90s)', async () => {
+  // Check first — avoid 429 if window is already open
+  const statusResp = await fetch(`${SEED_ENDPOINT}/api/v1/pair/status`, {
+    headers: SEED_TOKEN ? { authorization: `Bearer ${SEED_TOKEN}` } : {},
+  });
+  if (statusResp.ok) {
+    const s = await statusResp.json();
+    if (s.pairing_window_open) {
+      console.log(`[ok] window already open (${s.window_remaining_secs}s remaining); skipping reopen`);
+      return;
+    }
+  }
   const resp = await fetch(`${SEED_ENDPOINT}/api/v1/pair/window`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      'content-type': 'application/json',
+      ...(SEED_TOKEN ? { authorization: `Bearer ${SEED_TOKEN}` } : {}),
+    },
     body: JSON.stringify({ duration_secs: 90 }),
   });
   if (!resp.ok) throw new Error(`open window: HTTP ${resp.status}`);
