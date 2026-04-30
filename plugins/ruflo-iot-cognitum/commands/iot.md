@@ -8,7 +8,7 @@ Manage IoT Cognitum Seed devices. Parse subcommand from $ARGUMENTS.
 Usage: /iot <subcommand> [options]
 
 Subcommands:
-- `register <endpoint>` — Register a Seed device by HTTP endpoint
+- `register [endpoint]` — Register a Seed device by HTTP endpoint (defaults to `http://169.254.42.1/` — the Cognitum Seed link-local address)
 - `status <device-id>` — Refresh device state and trust score
 - `list` — List all registered devices
 - `pair <device-id>` — Pair device, promote trust level
@@ -34,26 +34,26 @@ Subcommands:
 
 Steps by subcommand:
 
-**register**: `npx @claude-flow/cli@latest iot register ENDPOINT`
-**status**: `npx @claude-flow/cli@latest iot status DEVICE_ID`
-**list**: `npx @claude-flow/cli@latest iot list`
-**pair**: `npx @claude-flow/cli@latest iot pair DEVICE_ID`
-**unpair**: `npx @claude-flow/cli@latest iot unpair DEVICE_ID`
-**remove**: `npx @claude-flow/cli@latest iot remove DEVICE_ID`
-**query**: `npx @claude-flow/cli@latest iot query DEVICE_ID --vector "VECTOR" --k K`
-**ingest**: `npx @claude-flow/cli@latest iot ingest DEVICE_ID`
-**mesh**: `npx @claude-flow/cli@latest iot mesh DEVICE_ID`
-**witness**: `npx @claude-flow/cli@latest iot witness DEVICE_ID`
-**witness verify**: `npx @claude-flow/cli@latest iot witness verify DEVICE_ID`
-**fleet create**: `npx @claude-flow/cli@latest iot fleet create --name NAME`
-**fleet list**: `npx @claude-flow/cli@latest iot fleet list`
-**fleet add**: `npx @claude-flow/cli@latest iot fleet add FLEET_ID DEVICE_ID`
-**fleet remove**: `npx @claude-flow/cli@latest iot fleet remove FLEET_ID DEVICE_ID`
-**fleet delete**: `npx @claude-flow/cli@latest iot fleet delete FLEET_ID`
-**firmware deploy**: `npx @claude-flow/cli@latest iot firmware deploy FLEET_ID --version VERSION`
-**firmware advance**: `npx @claude-flow/cli@latest iot firmware advance ROLLOUT_ID`
-**firmware rollback**: `npx @claude-flow/cli@latest iot firmware rollback ROLLOUT_ID`
-**firmware status**: `npx @claude-flow/cli@latest iot firmware status ROLLOUT_ID`
-**firmware list**: `npx @claude-flow/cli@latest iot firmware list`
-**anomalies**: `npx @claude-flow/cli@latest iot anomalies DEVICE_ID`
-**baseline**: `npx @claude-flow/cli@latest iot baseline DEVICE_ID --compute`
+**register**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot register ENDPOINT` (default ENDPOINT=`http://169.254.42.1/` if not supplied — the Cognitum Seed link-local USB Ethernet address)
+**status**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot status DEVICE_ID`
+**list**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot list`
+**pair**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot pair DEVICE_ID`
+**unpair**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot unpair DEVICE_ID`
+**remove**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot remove DEVICE_ID`
+**query**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot query DEVICE_ID --vector "VECTOR" --k K`
+**ingest**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot ingest DEVICE_ID`
+**mesh**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot mesh DEVICE_ID`
+**witness**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot witness DEVICE_ID`
+**witness verify**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot witness verify DEVICE_ID`
+**fleet create**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot fleet create --name NAME`
+**fleet list**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot fleet list`
+**fleet add**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot fleet add FLEET_ID DEVICE_ID`
+**fleet remove**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot fleet remove FLEET_ID DEVICE_ID`
+**fleet delete**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot fleet delete FLEET_ID`
+**firmware deploy**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot firmware deploy FLEET_ID --version VERSION`
+**firmware advance**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot firmware advance ROLLOUT_ID`
+**firmware rollback**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot firmware rollback ROLLOUT_ID`
+**firmware status**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot firmware status ROLLOUT_ID`
+**firmware list**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot firmware list`
+**anomalies**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot anomalies DEVICE_ID`
+**baseline**: `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot baseline DEVICE_ID --compute`

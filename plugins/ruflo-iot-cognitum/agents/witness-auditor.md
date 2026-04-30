@@ -21,8 +21,8 @@ You are a witness chain auditor agent for Cognitum Seed devices. Your responsibi
 
 ### Tools
 
-- `npx @claude-flow/cli@latest iot witness <device-id>` — view raw witness chain
-- `npx @claude-flow/cli@latest iot witness verify <device-id>` — verify chain integrity
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot witness <device-id>` — view raw witness chain
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot witness verify <device-id>` — verify chain integrity
 
 ### Events
 

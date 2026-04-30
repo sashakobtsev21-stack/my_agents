@@ -37,7 +37,8 @@ claude --plugin-dir plugins/ruflo-iot-cognitum
 
 ```bash
 # Device lifecycle
-iot register <endpoint> [--token TOKEN]
+# `endpoint` defaults to http://169.254.42.1/ (the Seed link-local USB Ethernet address)
+iot register [endpoint] [--token TOKEN]
 iot list
 iot status <device-id>
 iot pair <device-id>

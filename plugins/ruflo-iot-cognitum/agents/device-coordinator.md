@@ -23,15 +23,15 @@ You are a Cognitum Seed device coordinator agent. Your responsibilities:
 
 ### Tools
 
-- `npx @claude-flow/cli@latest iot register <endpoint>` — register a Seed device
-- `npx @claude-flow/cli@latest iot status <device-id>` — refresh device state and trust score
-- `npx @claude-flow/cli@latest iot list` — list all registered devices
-- `npx @claude-flow/cli@latest iot pair <device-id>` — pair device, promote trust
-- `npx @claude-flow/cli@latest iot unpair <device-id>` — unpair device, demote trust
-- `npx @claude-flow/cli@latest iot remove <device-id>` — deregister device
-- `npx @claude-flow/cli@latest iot mesh <device-id>` — view mesh topology
-- `npx @claude-flow/cli@latest iot witness <device-id>` — view witness chain
-- `npx @claude-flow/cli@latest iot witness verify <device-id>` — verify chain integrity
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot register [endpoint]` — register a Seed device (defaults to `http://169.254.42.1/`, the Cognitum Seed link-local USB Ethernet address, when no endpoint is supplied)
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot status <device-id>` — refresh device state and trust score
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot list` — list all registered devices
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot pair <device-id>` — pair device, promote trust
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot unpair <device-id>` — unpair device, demote trust
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot remove <device-id>` — deregister device
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot mesh <device-id>` — view mesh topology
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot witness <device-id>` — view witness chain
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot witness verify <device-id>` — verify chain integrity
 
 ### Anomaly Response
 

@@ -37,16 +37,16 @@ pending → canary → rolling → complete
 
 ### Tools
 
-- `npx @claude-flow/cli@latest iot fleet create --name "my-fleet"` — create fleet
-- `npx @claude-flow/cli@latest iot fleet list` — list all fleets
-- `npx @claude-flow/cli@latest iot fleet add <fleet-id> <device-id>` — add device
-- `npx @claude-flow/cli@latest iot fleet remove <fleet-id> <device-id>` — remove device
-- `npx @claude-flow/cli@latest iot fleet delete <fleet-id>` — delete fleet
-- `npx @claude-flow/cli@latest iot firmware deploy <fleet-id> --version "2.0.0"` — start rollout
-- `npx @claude-flow/cli@latest iot firmware advance <rollout-id>` — advance to next stage
-- `npx @claude-flow/cli@latest iot firmware rollback <rollout-id>` — force rollback
-- `npx @claude-flow/cli@latest iot firmware status <rollout-id>` — rollout status
-- `npx @claude-flow/cli@latest iot firmware list` — list all rollouts
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot fleet create --name "my-fleet"` — create fleet
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot fleet list` — list all fleets
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot fleet add <fleet-id> <device-id>` — add device
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot fleet remove <fleet-id> <device-id>` — remove device
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot fleet delete <fleet-id>` — delete fleet
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot firmware deploy <fleet-id> --version "2.0.0"` — start rollout
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot firmware advance <rollout-id>` — advance to next stage
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot firmware rollback <rollout-id>` — force rollback
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot firmware status <rollout-id>` — rollout status
+- `npx -y -p @claude-flow/plugin-iot-cognitum@latest cognitum-iot firmware list` — list all rollouts
 
 ### Background Workers & Events
 
