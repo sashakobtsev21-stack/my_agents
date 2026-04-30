@@ -1,6 +1,6 @@
 {
   "name": "@claude-flow/plugin-iot-cognitum",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "IoT Cognitum Seed device-agent bridge — treat every Seed as a Ruflo agent",
   "type": "module",
   "main": "dist/index.js",
@@ -32,9 +32,19 @@
     "multicast-dns": "^7.2.5"
   },
   "peerDependenciesMeta": {
-    "multicast-dns": { "optional": true }
+    "multicast-dns": {
+      "optional": true
+    }
   },
-  "keywords": ["iot", "cognitum", "seed", "device", "fleet", "agent", "swarm"],
+  "keywords": [
+    "iot",
+    "cognitum",
+    "seed",
+    "device",
+    "fleet",
+    "agent",
+    "swarm"
+  ],
   "author": "Claude Flow Team",
   "license": "MIT"
 }

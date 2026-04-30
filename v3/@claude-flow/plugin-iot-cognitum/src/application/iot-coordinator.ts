@@ -247,14 +247,16 @@ export class IoTCoordinator {
   ): Promise<DeviceAgent> {
     const client = await this.factory.createClient(endpoint, pairingToken);
 
-    // During initial registration the lifecycle service calls
-    // getStatus(endpoint) and getIdentity(device_id). We temporarily
-    // store the client under the endpoint key so resolveClient() can
-    // find it before the real device ID is known.
-    this.devices.set(endpoint, {
-      agent: {} as DeviceAgent,
-      client,
-    });
+    // The lifecycle service makes two SDK calls during registration:
+    // getStatus(endpoint) -> returns the real device_id, then
+    // getIdentity(device_id) -> looked up by the device_id key.
+    // We need the client reachable under BOTH keys before lifecycle runs,
+    // so pre-fetch the device_id and register the client under both.
+    const initialStatus = await client.status();
+    const initialDeviceId = initialStatus.device_id;
+
+    this.devices.set(endpoint, { agent: {} as DeviceAgent, client });
+    this.devices.set(initialDeviceId, { agent: {} as DeviceAgent, client });
 
     let agent: DeviceAgent;
     try {
@@ -265,11 +267,12 @@ export class IoTCoordinator {
       );
     } catch (err) {
       this.devices.delete(endpoint);
+      this.devices.delete(initialDeviceId);
       throw err;
     }
 
-    // Promote: remove the temporary endpoint key and store under the
-    // real device ID returned by the hardware.
+    // Promote: drop the temporary endpoint key and keep the device_id key
+    // (with the real agent attached).
     this.devices.delete(endpoint);
     this.devices.set(agent.deviceId, { agent, client });
 
