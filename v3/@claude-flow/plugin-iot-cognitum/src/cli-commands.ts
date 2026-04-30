@@ -11,6 +11,14 @@ function requireCoordinator(get: CoordinatorGetter): IoTCoordinator {
   return c;
 }
 
+function parseVector(raw: string): number[] {
+  const parsed = JSON.parse(raw) as unknown;
+  if (!Array.isArray(parsed) || !parsed.every((n) => typeof n === 'number')) {
+    throw new Error(`--vector must be a JSON array of numbers, got: ${raw}`);
+  }
+  return parsed as number[];
+}
+
 export function createCliCommands(
   getCoordinator: CoordinatorGetter,
   _getContext: ContextGetter,
@@ -151,25 +159,53 @@ export function createCliCommands(
       options: [
         { name: 'device-id', short: 'd', description: 'Device identifier', type: 'string', required: true },
         { name: 'k', short: 'k', description: 'Number of nearest neighbours', type: 'number', default: 5 },
+        { name: 'vector', short: 'v', description: 'JSON array of numbers, e.g. "[0.1,0.2,...]"', type: 'string' },
       ],
       handler: async (args) => {
         const coordinator = requireCoordinator(getCoordinator);
-        // CLI cannot easily pass a vector; use a zero vector as placeholder
-        const k = (args['k'] as number) ?? 5;
-        const result = await coordinator.queryDeviceVectors(args['device-id'] as string, [], k);
+        const k = Number(args['k'] ?? 5);
+        const raw = args['vector'] as string | undefined;
+        const vector = raw ? parseVector(raw) : [];
+        const result = await coordinator.queryDeviceVectors(args['device-id'] as string, vector, k);
         console.log(JSON.stringify(result, null, 2));
       },
     },
     {
       name: 'iot ingest',
-      description: 'Ingest vectors into device store from stdin (JSON array)',
+      description: 'Ingest vectors into device store. Pass --vector "[..]" or pipe a JSON array on stdin.',
       options: [
         { name: 'device-id', short: 'd', description: 'Device identifier', type: 'string', required: true },
+        { name: 'vector', short: 'v', description: 'Single JSON-array vector to ingest', type: 'string' },
+        { name: 'metadata', short: 'm', description: 'JSON metadata object for the vector', type: 'string' },
       ],
       handler: async (args) => {
         const coordinator = requireCoordinator(getCoordinator);
-        // In a real implementation this would read stdin; stub for now
-        const result = await coordinator.ingestDeviceTelemetry(args['device-id'] as string, []);
+        const raw = args['vector'] as string | undefined;
+        const metaRaw = args['metadata'] as string | undefined;
+        let vectors: Array<{ values: number[]; metadata?: Record<string, unknown> }> = [];
+        if (raw) {
+          const v = parseVector(raw);
+          const meta = metaRaw ? (JSON.parse(metaRaw) as Record<string, unknown>) : undefined;
+          vectors = [{ values: v, ...(meta ? { metadata: meta } : {}) }];
+        } else if (!process.stdin.isTTY) {
+          // Stdin path: expect a JSON array of {values, metadata?} or raw number[][]
+          const chunks: Buffer[] = [];
+          for await (const chunk of process.stdin) chunks.push(chunk as Buffer);
+          const text = Buffer.concat(chunks).toString('utf8').trim();
+          if (text) {
+            const parsed = JSON.parse(text) as unknown;
+            if (Array.isArray(parsed)) {
+              vectors = (parsed as unknown[]).map((entry) => {
+                if (Array.isArray(entry)) return { values: entry as number[] };
+                return entry as { values: number[]; metadata?: Record<string, unknown> };
+              });
+            }
+          }
+        }
+        if (vectors.length === 0) {
+          throw new Error('No vectors to ingest. Pass --vector "[..]" or pipe a JSON array on stdin.');
+        }
+        const result = await coordinator.ingestDeviceTelemetry(args['device-id'] as string, vectors);
         console.log(`Ingested ${result.ingested} vector(s) for device ${result.deviceId}`);
       },
     },

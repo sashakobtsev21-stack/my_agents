@@ -2,6 +2,10 @@
 
 IoT device lifecycle, telemetry anomaly detection, fleet management, and witness chain verification for Cognitum Seed hardware.
 
+## Hardware
+
+This plugin requires a **Cognitum Seed** device. Get one at **https://cognitum.one** — the Seed is an edge appliance with on-device vector store, Ed25519 identity, OTA firmware, mesh networking, and a witness chain. Default address when attached via USB-C is `http://169.254.42.1` (link-local, no auth) or `https://169.254.42.1:8443` (LAN, bearer auth required for state-mutating operations).
+
 ## Overview
 
 Treats every Cognitum Seed device as a Ruflo agent with hardware capabilities. Devices progress through a 5-tier trust model, emit telemetry vectors for anomaly detection, participate in mesh networks, and maintain Ed25519 witness chains for provenance.
