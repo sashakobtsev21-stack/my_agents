@@ -34,6 +34,8 @@ User --> Ruflo (CLI/MCP) --> Router --> Swarm --> Agents --> Memory --> LLM Prov
 
 ---
 
+![Ruflo Plugins](./ruflo-plugins.gif)
+
 ## Quick Start
 
 ### Claude Code Plugin (Recommended)
