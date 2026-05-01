@@ -7,6 +7,7 @@
 import { writable, derived, get } from "svelte/store";
 import { browser } from "$app/environment";
 import { loadWasm, isWasmLoaded, getWasm } from "$lib/wasm";
+import { isWorkerEnabled, callMcpInWorker } from "$lib/wasm/workerClient";
 import type { WasmMcpServer, WasmGallery, GalleryTemplate, SearchResult } from "$lib/wasm";
 import * as idb from "$lib/wasm/idb";
 
@@ -161,6 +162,23 @@ function callMcpInternal(
  * Call an MCP method on the WASM server
  */
 export async function callMcp(method: string, params?: unknown): Promise<JsonRpcResponse> {
+	// Off-main-thread path (opt-in via ?worker=1 or
+	// localStorage.setItem("ruflo:wasm-worker","true")) — see workerClient.ts.
+	if (isWorkerEnabled()) {
+		try {
+			return (await callMcpInWorker(method, params)) as JsonRpcResponse;
+		} catch (err) {
+			return {
+				jsonrpc: "2.0",
+				id: null,
+				error: {
+					code: -32603,
+					message: err instanceof Error ? err.message : "worker call failed",
+				},
+			};
+		}
+	}
+
 	const state = get(wasmMcpState);
 
 	if (!state.loaded || !state.mcpServer) {
