@@ -157,13 +157,17 @@ npm install -g ruflo@latest
 claude mcp add ruflo -- npx -y @claude-flow/cli@latest
 ```
 
+<a href="https://flo.ruv.io/">
+  <img src="v3/docs/assets/ruVocal.png" alt="RuFlo Web UI showing parallel MCP tool calls in flight (memory_store + memory_search) with the 'Step 1 — 2 tools completed' parallel indicator, model dropdown set to Qwen 3.6 Max" width="100%" />
+</a>
+
 ### Web UI (Beta) — [flo.ruv.io](https://flo.ruv.io/)
 
 A multi-model chat surface that talks to the same MCP backbone as the CLI — no install required.
 
-- **Multi-model**: Claude Sonnet/Opus/Haiku 4, Gemini 2.5 Pro/Flash, GPT-4o (via OpenRouter)
+- **Multi-model**: Qwen 3.6 Max, Claude Sonnet/Haiku 4, Gemini 2.5 Pro/Flash, GPT-4o (via OpenRouter)
 - **~210 MCP tools** across 5 server groups (Core, Intelligence, Agents, Memory, DevTools) plus an in-browser WASM gallery
-- **Parallel tool calling**: a single response can fan out 4–6+ tool_calls and the UI streams each result as it lands
+- **Parallel tool calling**: a single response can fan out 4–6+ tool_calls and the UI streams each result as it lands (see the *Step 1 — 2 tools completed* card in the screenshot above)
 - **Persistent memory**: cross-session storage via AgentDB + HNSW
 - **Help icon → "RuFlo Capabilities" modal** with the full tool catalog and quick-start
 
