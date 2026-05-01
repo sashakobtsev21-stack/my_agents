@@ -157,6 +157,18 @@ npm install -g ruflo@latest
 claude mcp add ruflo -- npx -y @claude-flow/cli@latest
 ```
 
+### Web UI (Beta) — [flo.ruv.io](https://flo.ruv.io/)
+
+A multi-model chat surface that talks to the same MCP backbone as the CLI — no install required.
+
+- **Multi-model**: Claude Sonnet/Opus/Haiku 4, Gemini 2.5 Pro/Flash, GPT-4o (via OpenRouter)
+- **~210 MCP tools** across 5 server groups (Core, Intelligence, Agents, Memory, DevTools) plus an in-browser WASM gallery
+- **Parallel tool calling**: a single response can fan out 4–6+ tool_calls and the UI streams each result as it lands
+- **Persistent memory**: cross-session storage via AgentDB + HNSW
+- **Help icon → "RuFlo Capabilities" modal** with the full tool catalog and quick-start
+
+Open it directly: **[https://flo.ruv.io/](https://flo.ruv.io/)** (or `ruflo.ruv.io` / `ruvocal.ruv.io`). See [ADR-033](ruflo/docs/adr/ADR-033-RUVOCAL-WASM-MCP-INTEGRATION.md) for the architecture.
+
 ---
 
 ## What You Get
@@ -172,7 +184,8 @@ claude mcp add ruflo -- npx -y @claude-flow/cli@latest
 | 🧩 **Plugin Marketplace** | 32 native Claude Code plugins + 21 npm plugins |
 | 🔌 **Multi-Provider** | Claude, GPT, Gemini, Cohere, Ollama with smart routing |
 | 🛡️ **Security** | AIDefence, input validation, CVE remediation, path traversal prevention |
-| 🌐 **Agent Federation** | Cross-installation agent collaboration with zero-trust security 
+| 🌐 **Agent Federation** | Cross-installation agent collaboration with zero-trust security |
+| 💬 **[Web UI Beta](https://flo.ruv.io/)** | Multi-model chat at flo.ruv.io with parallel MCP tool calling and an in-browser WASM tool gallery |
 
 ### Agent Federation — Slack for Agents
 
