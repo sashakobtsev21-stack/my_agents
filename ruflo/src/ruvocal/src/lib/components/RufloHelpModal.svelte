@@ -153,6 +153,41 @@
 		'"Run ruflo__system_status, ruflo__performance_metrics, and ruflo__memory_list in parallel and summarize."',
 		'"Spawn a 5-agent hierarchical swarm (architect, coder, tester, reviewer, security-auditor) for a Python→TypeScript refactor."',
 		'"Use ruvector__hooks_route on the task: add OAuth to a SvelteKit API. Then spawn the recommended agent."',
+		'"Search RuFlo memory for prior decisions about authentication, then web_research recent OAuth2 best practices, in parallel."',
+		'"Analyze the diff at github.com/ruvnet/ruflo/pull/1687 — risk score, classify, and suggest reviewers."',
+	];
+
+	const stack: { name: string; role: string }[] = [
+		{ name: "SvelteKit + adapter-node", role: "UI runtime, SSR + streaming MCP responses" },
+		{ name: "OpenRouter", role: "Single OAI-compatible endpoint, 6 models, smart fail-over" },
+		{ name: "ruflo backend (npx ruflo mcp start)", role: "Agents, memory, swarm, devtools (~158 tools)" },
+		{ name: "ruvector backend (npx ruvector mcp start)", role: "Intelligence, routing, trajectories (~49 tools)" },
+		{ name: "AgentDB (sql.js + HNSW)", role: "Persistent memory, 384-dim ONNX embeddings, 150x–12 500x search speedup" },
+		{ name: "rvagent-wasm (in-browser, ~588 KB)", role: "18-tool gallery with IndexedDB persistence, optional Web Worker" },
+		{ name: "MongoDB (embedded)", role: "Conversation + session storage (ephemeral on Cloud Run cold starts today)" },
+		{ name: "Cloud Run (us-central1)", role: "Both ruvocal chat-ui and mcp-bridge services with min-instance=1 warm" },
+	];
+
+	const domains: { url: string; note: string }[] = [
+		{ url: "flo.ruv.io", note: "Primary — shortest URL, recommended" },
+		{ url: "ruflo.ruv.io", note: "Brand alias" },
+		{ url: "ruvocal.ruv.io", note: "Original alias (matches the upstream chat-ui fork name)" },
+		{ url: "ruvocal-875130704813.us-central1.run.app", note: "Raw Cloud Run URL — always available, no DNS dependency" },
+	];
+
+	const shortcuts: { keys: string; action: string }[] = [
+		{ keys: "Enter", action: "Send the current message" },
+		{ keys: "Shift + Enter", action: "Insert a newline" },
+		{ keys: "Esc", action: "Close any open modal" },
+		{ keys: "?worker=1 (URL flag)", action: "Run WASM MCP off the main thread (experimental)" },
+	];
+
+	const cardLegend: { mark: string; meaning: string }[] = [
+		{ mark: "✓ Called tool", meaning: "Tool returned successfully — click the row to expand the JSON result" },
+		{ mark: "Step N — M tools completed", meaning: "Parallel batch indicator. M tools fired in one model turn via Promise.all" },
+		{ mark: "Retry", meaning: "Last response had no content. Click to re-run with the same prompt and model" },
+		{ mark: "AUTO (green)", meaning: "Autopilot ON — model auto-continues after each tool result" },
+		{ mark: "AUTO (gray)", meaning: "Autopilot OFF — model stops after each tool result so you can inspect" },
 	];
 
 	let openGroup = $state<string | null>("memory");
@@ -264,6 +299,60 @@
 					{#each examplePrompts as prompt}
 						<li class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
 							{prompt}
+						</li>
+					{/each}
+				</ul>
+			</section>
+
+			<section class="mb-6">
+				<h3 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Tool-call cards — what the icons mean</h3>
+				<ul class="space-y-1 text-xs">
+					{#each cardLegend as legend}
+						<li class="flex gap-2">
+							<code class="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">{legend.mark}</code>
+							<span class="text-gray-700 dark:text-gray-300">{legend.meaning}</span>
+						</li>
+					{/each}
+				</ul>
+			</section>
+
+			<section class="mb-6">
+				<h3 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Under the hood</h3>
+				<p class="mb-2 text-xs text-gray-600 dark:text-gray-400">RuFlo's web UI is a fork of the open-source HuggingFace chat-ui (SvelteKit) wired to a custom MCP bridge that fans out to two backend kernels. Everything runs on Google Cloud Run.</p>
+				<div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+					<table class="w-full text-xs">
+						<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+							{#each stack as layer}
+								<tr>
+									<td class="whitespace-nowrap px-3 py-1.5 align-top font-mono font-medium">{layer.name}</td>
+									<td class="px-3 py-1.5 align-top text-gray-600 dark:text-gray-400">{layer.role}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</section>
+
+			<section class="mb-6">
+				<h3 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Domain aliases — pick one, they all work</h3>
+				<ul class="space-y-1 text-xs">
+					{#each domains as d}
+						<li class="flex flex-wrap gap-2">
+							<code class="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">{d.url}</code>
+							<span class="text-gray-600 dark:text-gray-400">{d.note}</span>
+						</li>
+					{/each}
+				</ul>
+				<p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">Custom domains DNS through Cloudflare unproxied so Google issues + auto-renews the TLS certificate. All four endpoints serve the same Cloud Run revision.</p>
+			</section>
+
+			<section class="mb-6">
+				<h3 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Keyboard shortcuts</h3>
+				<ul class="space-y-1 text-xs">
+					{#each shortcuts as s}
+						<li class="flex gap-2">
+							<code class="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 font-mono dark:bg-gray-800">{s.keys}</code>
+							<span class="text-gray-700 dark:text-gray-300">{s.action}</span>
 						</li>
 					{/each}
 				</ul>
