@@ -3,6 +3,8 @@
 [![Ruflo Banner](ruflo/assets/ruflo-small.jpeg)](https://flo.ruv.io/)
 
 [![✨ Try the UI Beta — flo.ruv.io](https://img.shields.io/badge/✨_Try_the_UI_Beta-flo.ruv.io-6366f1?style=for-the-badge&logoColor=white&logo=svelte)](https://flo.ruv.io/)
+[![🎯 Goal Planner — goal.ruv.io](https://img.shields.io/badge/🎯_Goal_Planner-goal.ruv.io-8b5cf6?style=for-the-badge&logoColor=white&logo=react)](https://goal.ruv.io/)
+[![🤖 Live Agents — goal.ruv.io/agents](https://img.shields.io/badge/🤖_Live_Agents-goal.ruv.io%2Fagents-10b981?style=for-the-badge&logoColor=white&logo=react)](https://goal.ruv.io/agents)
 
 [![Star on GitHub](https://img.shields.io/github/stars/ruvnet/claude-flow?style=for-the-badge&logo=github&color=gold)](https://github.com/ruvnet/claude-flow)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
