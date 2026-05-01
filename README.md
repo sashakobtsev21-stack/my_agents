@@ -157,21 +157,36 @@ npm install -g ruflo@latest
 claude mcp add ruflo -- npx -y @claude-flow/cli@latest
 ```
 
-<a href="https://flo.ruv.io/">
-  <img src="v3/docs/assets/ruVocal.png" alt="RuFlo Web UI showing parallel MCP tool calls in flight (memory_store + memory_search) with the 'Step 1 — 2 tools completed' parallel indicator, model dropdown set to Qwen 3.6 Max" width="100%" />
-</a>
+<p align="center">
+  <a href="https://flo.ruv.io/">
+    <img src="v3/docs/assets/ruVocal-welcome.png" alt="RuFlo Web UI welcome screen at flo.ruv.io — multi-agent AI chat with MCP tools, Model Context Protocol orchestration, persistent vector memory (AgentDB + HNSW), parallel tool calling, and 6 frontier models including Qwen 3.6 Max, Claude Sonnet 4.6, Gemini 2.5 Pro, and GPT-4o" width="520" />
+  </a>
+</p>
 
 ### Web UI (Beta) — [flo.ruv.io](https://flo.ruv.io/)
 
-A multi-model chat surface that talks to the same MCP backbone as the CLI — no install required.
+**RuFlo's web UI is a multi-model AI chat with built-in Model Context Protocol (MCP) tool calling.** Talk to Qwen, Claude, Gemini, or GPT-4o while RuFlo invokes the same ~210 MCP tools the CLI uses — agent orchestration, persistent vector memory, swarm coordination, code analysis, GitHub ops — directly from the chat. No install, no API key required to try it.
 
-- **Multi-model**: Qwen 3.6 Max, Claude Sonnet/Haiku 4, Gemini 2.5 Pro/Flash, GPT-4o (via OpenRouter)
-- **~210 MCP tools** across 5 server groups (Core, Intelligence, Agents, Memory, DevTools) plus an in-browser WASM gallery
-- **Parallel tool calling**: a single response can fan out 4–6+ tool_calls and the UI streams each result as it lands (see the *Step 1 — 2 tools completed* card in the screenshot above)
-- **Persistent memory**: cross-session storage via AgentDB + HNSW
-- **Help icon → "RuFlo Capabilities" modal** with the full tool catalog and quick-start
+- **6 frontier models**: Qwen 3.6 Max (default), Claude Sonnet 4.6, Claude Haiku 4.5, Gemini 2.5 Pro, Gemini 2.5 Flash, GPT-4o — all via OpenRouter
+- **~210 MCP tools** across 5 server groups (Core, Intelligence, Agents, Memory, DevTools) plus an 18-tool in-browser WASM gallery
+- **Parallel tool calling**: a single model response can fan out 4–6+ `tool_calls` simultaneously. The UI streams each tool's result as a card with a *Step N — M tools completed* parallel indicator
+- **Persistent memory** across sessions via AgentDB + HNSW vector search
+- **Help icon → "RuFlo Capabilities"** modal with the full tool catalog, model lineup, and quick-start
 
-Open it directly: **[https://flo.ruv.io/](https://flo.ruv.io/)** (or `ruflo.ruv.io` / `ruvocal.ruv.io`). See [ADR-033](ruflo/docs/adr/ADR-033-RUVOCAL-WASM-MCP-INTEGRATION.md) for the architecture.
+<details>
+<summary><strong>See it in action</strong> — parallel <code>memory_store</code> + <code>memory_search</code> with thinking process visible</summary>
+
+<p align="center">
+  <a href="https://flo.ruv.io/">
+    <img src="v3/docs/assets/ruVocal.png" alt="RuFlo Web UI executing parallel MCP tool calls — ruflo__memory_store and ruflo__memory_search firing in one model turn with the 'Step 1 — 2 tools completed' parallel-execution indicator, thinking process panel visible, Qwen 3.6 Max active model" width="100%" />
+  </a>
+</p>
+
+</details>
+
+Open it directly: **[https://flo.ruv.io/](https://flo.ruv.io/)** (also `ruflo.ruv.io` / `ruvocal.ruv.io`). See [ADR-033](ruflo/docs/adr/ADR-033-RUVOCAL-WASM-MCP-INTEGRATION.md) for the architecture and [issue #1689](https://github.com/ruvnet/ruflo/issues/1689) for the roadmap.
+
+> **Keywords**: AI chat UI · MCP server · Model Context Protocol · multi-agent orchestration · Claude · Gemini · Qwen · GPT-4o · vector memory · HNSW · agent swarms · parallel tool calling · LLM tool use · OpenRouter
 
 ---
 
