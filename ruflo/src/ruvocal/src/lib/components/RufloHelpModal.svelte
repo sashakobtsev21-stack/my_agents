@@ -258,7 +258,7 @@
 				<p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">Cloud models route through OpenRouter — switch any time via <strong>Models</strong> in the sidebar.</p>
 				<div class="mt-3 rounded-lg border border-emerald-300/40 bg-emerald-50/50 px-3 py-2 text-xs dark:border-emerald-700/40 dark:bg-emerald-900/10">
 					<p class="font-semibold text-emerald-900 dark:text-emerald-200">🦾 Any model — including local + self-learning</p>
-					<p class="mt-1 text-emerald-900/80 dark:text-emerald-200/80">RuFlo speaks any OpenAI-compatible endpoint: vLLM, Ollama, LM Studio, Together, Groq, or self-hosted. Native support for <a href="https://github.com/ruvnet/ruvllm" target="_blank" rel="noopener" class="underline">ruvLLM</a> — RuFlo's self-improving local model layer with MicroLoRA adapters that learn from your trajectories via SONA. Pair cloud + local, or run fully offline.</p>
+					<p class="mt-1 text-emerald-900/80 dark:text-emerald-200/80">RuFlo speaks any OpenAI-compatible endpoint: vLLM, Ollama, LM Studio, Together, Groq, or self-hosted. Native support for <a href="https://github.com/ruvnet/RuVector/tree/main/examples/ruvLLM" target="_blank" rel="noopener" class="underline">ruvLLM</a> (lives in <code>ruvnet/RuVector/examples/ruvLLM</code>) — RuFlo's self-improving local model layer with MicroLoRA adapters that learn from your trajectories via SONA. Pair cloud + local, or run fully offline.</p>
 				</div>
 			</section>
 
