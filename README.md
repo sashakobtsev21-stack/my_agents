@@ -197,17 +197,6 @@ claude mcp add ruflo -- npx -y @claude-flow/cli@latest
 | 🏠 | **Self-hostable** | Web UI is shipped as Docker (`ruflo/src/ruvocal/Dockerfile`) with embedded Mongo. Deploy to your own Cloud Run / Fly / Kubernetes / docker-compose. The hosted [flo.ruv.io](https://flo.ruv.io/) demo is one option; running your own is fully supported. |
 | 🚀 | **Zero install to try** | Open the hosted URL, pick a model, type a question. That's the whole onboarding. |
 
-<details>
-<summary><strong>Welcome screen preview</strong> — RuFlo branding and entry modal</summary>
-
-<p align="center">
-  <a href="https://flo.ruv.io/">
-    <img src="v3/docs/assets/ruVocal-welcome.png" alt="RuFlo Web UI welcome modal — RuFlo Intelligent Workflows branding with MCP Tools badge, welcome copy, and Start chatting CTA" width="520" />
-  </a>
-</p>
-
-</details>
-
 **Try the hosted demo:** [https://flo.ruv.io/](https://flo.ruv.io/) — no account, no API key. **Run your own:** the source lives in [`ruflo/src/ruvocal/`](ruflo/src/ruvocal/) with a multi-stage Dockerfile (`INCLUDE_DB=true` builds in MongoDB) and a `cloudbuild.yaml` for Google Cloud Run. See [ADR-033](ruflo/docs/adr/ADR-033-RUVOCAL-WASM-MCP-INTEGRATION.md) for the architecture and [issue #1689](https://github.com/ruvnet/ruflo/issues/1689) for the roadmap.
 
 > **Keywords**: AI chat UI · MCP server · Model Context Protocol · multi-agent orchestration · Claude · Gemini · Qwen · GPT-4o · vector memory · HNSW · agent swarms · parallel tool calling · LLM tool use · OpenRouter · AgentDB · semantic search · ruvocal · ruflo.ruv.io
