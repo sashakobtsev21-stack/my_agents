@@ -71,18 +71,19 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-05-03T21:55:25.955Z",
-    "gitCommit": "43fda1110416b301766cd1a283f6e60bf748c101",
+    "issuedAt": "2026-05-03T23:02:25.136Z",
+    "gitCommit": "db210a93a6b3ed6f35e83071771d06eda870169c",
     "branch": "fix/issues-may-1-3",
     "releases": {
-      "@claude-flow/cli": "3.6.20",
-      "claude-flow": "3.6.20",
-      "ruflo": "3.6.20",
-      "@claude-flow/embeddings": "3.0.0-alpha.15"
+      "@claude-flow/cli": "3.6.22",
+      "claude-flow": "3.6.22",
+      "ruflo": "3.6.22",
+      "@claude-flow/embeddings": "3.0.0-alpha.15",
+      "@claude-flow/plugin-agent-federation": "1.0.0-alpha.4"
     },
     "summary": {
-      "totalFixes": 18,
-      "verified": 18,
+      "totalFixes": 24,
+      "verified": 24,
       "failed": 0
     },
     "fixes": [
@@ -154,7 +155,7 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "id": "F9",
         "desc": "F9 router probe + actionable error",
         "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
-        "sha256": "bdadb33f02c98b8546dd3d9e1ba9975e7f35e2c70ed22e5c0109d558a924cfbb",
+        "sha256": "98235d47b3f779dc7d5bf1504a92ee9246c46987cb488694e6ef41e09d618f81",
         "marker": "IntentRouter",
         "markerVerified": true
       },
@@ -186,7 +187,7 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "id": "#1697",
         "desc": "rvf-wasm overrides",
         "file": "package.json",
-        "sha256": "9d11d5f941113b4fa674078c637a08ed4123987d9e3068489164e2e8e279a354",
+        "sha256": "21cfbfe06f940b8487aa881e6e2ba905567c1e7b60531ab9785c53b219fb34a9",
         "marker": "@ruvector/rvf-wasm",
         "markerVerified": true
       },
@@ -210,8 +211,8 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "id": "#1721",
         "desc": "postinstall copies all dist/src/* siblings",
         "file": "v3/@claude-flow/cli/package.json",
-        "sha256": "701eb03ab56a376392a7689884c1caa17e6b943fc79dfcc46e15ec77e66bcb2f",
-        "marker": "srcDist",
+        "sha256": "866b57857a26b43b2020420de89934ff4418ad3a5e838ec58a595f04435fdd45",
+        "marker": "postinstall.cjs",
         "markerVerified": true
       },
       {
@@ -223,21 +224,69 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "markerVerified": true
       },
       {
+        "id": "G1",
+        "desc": "agent_execute wires real Anthropic Messages API",
+        "file": "v3/@claude-flow/cli/dist/src/mcp-tools/agent-execute-core.js",
+        "sha256": "2990ff3e385b728df623d85d4e1954721fbe3bc07c206a288a2498b5c714bb9f",
+        "marker": "callAnthropicMessages",
+        "markerVerified": true
+      },
+      {
+        "id": "G3",
+        "desc": "workflow runtime walks task/wait/condition steps",
+        "file": "v3/@claude-flow/cli/dist/src/mcp-tools/workflow-tools.js",
+        "sha256": "b562d739deb768e58bfd21d79cf30c7898a0c9a3d944d8fabebd218b4c4c305e",
+        "marker": "executeAgentTask",
+        "markerVerified": true
+      },
+      {
+        "id": "G4",
+        "desc": "WASM agent prompt routes to Anthropic on echo",
+        "file": "v3/@claude-flow/cli/dist/src/ruvector/agent-wasm.js",
+        "sha256": "36915b20914ed3ab3a050b78c8e2169c01b293ef2ec0cc78e3484bc26131f1d5",
+        "marker": "isEchoStub",
+        "markerVerified": true
+      },
+      {
         "id": "G6",
         "desc": "auto-memory content-hash dedup",
         "file": "v3/@claude-flow/cli/.claude/helpers/intelligence.cjs",
         "sha256": "84a6159b384b8118f0beaa1089c417cab6d1116cd77d3882a607715ef7679ea8",
         "marker": "deduplicateByContent",
         "markerVerified": true
+      },
+      {
+        "id": "G7-gnn",
+        "desc": "gnnService activated via file:// import",
+        "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
+        "sha256": "98235d47b3f779dc7d5bf1504a92ee9246c46987cb488694e6ef41e09d618f81",
+        "marker": "GNNService",
+        "markerVerified": true
+      },
+      {
+        "id": "G7-rvf",
+        "desc": "rvfOptimizer activated via file:// import",
+        "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
+        "sha256": "98235d47b3f779dc7d5bf1504a92ee9246c46987cb488694e6ef41e09d618f81",
+        "marker": "RVFOptimizer",
+        "markerVerified": true
+      },
+      {
+        "id": "G2",
+        "desc": "federation real Ed25519 signing + verification",
+        "file": "v3/@claude-flow/plugin-agent-federation/dist/plugin.js",
+        "sha256": "881dad4fa9dc19a539c1a46dfe27c77984596cdd05759937909aacf028378acc",
+        "marker": "@noble/ed25519",
+        "markerVerified": true
       }
     ]
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "f886378b34a00af241943bb8c808a0d5eaf5c5e0984d3e18b9d466129829c64e",
+    "manifestHash": "83a4cdf4d0ff8f28219a69dd71b4cd0090fd27e97acb80239517ed818adffaa3",
     "signatureAlgo": "ed25519",
-    "publicKey": "778d617bea39d24dcc40e22acb7b4914bd5d81847f426b030e2ee52240dd7299",
-    "signature": "458c003632adf895979bf9e9756dacb975181102b2313737ac2f2662bddcbbe84f3cf8fa0d7407b7d6acf6fb6ef86afd12fdc2ad3445e9ea81c2365a3c38830a",
+    "publicKey": "fb5c9c3d8ef2b691880b558583416e2ecd87a0f3911bdc4bc57e3ad935d9aa6a",
+    "signature": "5ab05a9be7795a537ed1dddf2ab1635fd078d428d99ee5754bfd2cf6c96b398c2e220c7d23fded1c20bf337eab6d1f830b9a18398ae7eb6ae84a0248aa557506",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }
@@ -280,6 +329,6 @@ The deterministic seed derivation means the signing key is reproducible from the
 
 ## Coverage so far
 
-The current witness covers **18 fixes** spanning ADR-093 F1–F12, four GitHub-issue fixes (#1697, #1698, #1691, #1721), one ADR (#094 transformers loader), and one ADR-095 gap closure (G6 auto-memory dedup).
+The current witness covers **24 fixes** spanning ADR-093 F1–F12, four GitHub-issue fixes (#1697, #1698, #1691, #1721), one ADR (#094 transformers loader), and one ADR-095 gap closure (G6 auto-memory dedup).
 
 The 6 remaining ADR-095 architectural gaps (G1, G2, G3, G4, G5/handed off to ADR-094, G7) are tracked in [`v3/docs/adr/ADR-095-architectural-gaps-from-april-audit.md`](v3/docs/adr/ADR-095-architectural-gaps-from-april-audit.md). When their per-gap ADRs land, they will be added to this manifest with their own fingerprints.
