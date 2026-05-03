@@ -1,19 +1,19 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-05-03T23:02:25.136Z",
-    "gitCommit": "db210a93a6b3ed6f35e83071771d06eda870169c",
+    "issuedAt": "2026-05-03T23:17:05.741Z",
+    "gitCommit": "892f54a785a815e36721482e6c8a5bb1c1af1f40",
     "branch": "fix/issues-may-1-3",
     "releases": {
-      "@claude-flow/cli": "3.6.22",
-      "claude-flow": "3.6.22",
-      "ruflo": "3.6.22",
+      "@claude-flow/cli": "3.6.23",
+      "claude-flow": "3.6.23",
+      "ruflo": "3.6.23",
       "@claude-flow/embeddings": "3.0.0-alpha.15",
       "@claude-flow/plugin-agent-federation": "1.0.0-alpha.4"
     },
     "summary": {
-      "totalFixes": 24,
-      "verified": 24,
+      "totalFixes": 26,
+      "verified": 26,
       "failed": 0
     },
     "fixes": [
@@ -85,7 +85,7 @@
         "id": "F9",
         "desc": "F9 router probe + actionable error",
         "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
-        "sha256": "98235d47b3f779dc7d5bf1504a92ee9246c46987cb488694e6ef41e09d618f81",
+        "sha256": "028dacbefbbe63d4466f8c226bf93d03e109a4dd48983e1f1839cb4772a68bcd",
         "marker": "IntentRouter",
         "markerVerified": true
       },
@@ -117,7 +117,7 @@
         "id": "#1697",
         "desc": "rvf-wasm overrides",
         "file": "package.json",
-        "sha256": "21cfbfe06f940b8487aa881e6e2ba905567c1e7b60531ab9785c53b219fb34a9",
+        "sha256": "da2446da56edef5a5773877beda41303d03174b6b457f77dfa6d61c1576f3d5e",
         "marker": "@ruvector/rvf-wasm",
         "markerVerified": true
       },
@@ -141,7 +141,7 @@
         "id": "#1721",
         "desc": "postinstall copies all dist/src/* siblings",
         "file": "v3/@claude-flow/cli/package.json",
-        "sha256": "866b57857a26b43b2020420de89934ff4418ad3a5e838ec58a595f04435fdd45",
+        "sha256": "5b9156a3bc09949b677f8a1c095eaf1b80ab182e1f6bbc0bad191fc7545ecc0d",
         "marker": "postinstall.cjs",
         "markerVerified": true
       },
@@ -155,7 +155,7 @@
       },
       {
         "id": "G1",
-        "desc": "agent_execute wires real Anthropic Messages API",
+        "desc": "agent_execute wires Anthropic Messages API",
         "file": "v3/@claude-flow/cli/dist/src/mcp-tools/agent-execute-core.js",
         "sha256": "2990ff3e385b728df623d85d4e1954721fbe3bc07c206a288a2498b5c714bb9f",
         "marker": "callAnthropicMessages",
@@ -163,7 +163,7 @@
       },
       {
         "id": "G3",
-        "desc": "workflow runtime walks task/wait/condition steps",
+        "desc": "workflow runtime task/wait/condition",
         "file": "v3/@claude-flow/cli/dist/src/mcp-tools/workflow-tools.js",
         "sha256": "b562d739deb768e58bfd21d79cf30c7898a0c9a3d944d8fabebd218b4c4c305e",
         "marker": "executeAgentTask",
@@ -171,7 +171,7 @@
       },
       {
         "id": "G4",
-        "desc": "WASM agent prompt routes to Anthropic on echo",
+        "desc": "WASM agent prompt routes to Anthropic",
         "file": "v3/@claude-flow/cli/dist/src/ruvector/agent-wasm.js",
         "sha256": "36915b20914ed3ab3a050b78c8e2169c01b293ef2ec0cc78e3484bc26131f1d5",
         "marker": "isEchoStub",
@@ -187,23 +187,39 @@
       },
       {
         "id": "G7-gnn",
-        "desc": "gnnService activated via file:// import",
+        "desc": "gnnService activated",
         "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
-        "sha256": "98235d47b3f779dc7d5bf1504a92ee9246c46987cb488694e6ef41e09d618f81",
+        "sha256": "028dacbefbbe63d4466f8c226bf93d03e109a4dd48983e1f1839cb4772a68bcd",
         "marker": "GNNService",
         "markerVerified": true
       },
       {
         "id": "G7-rvf",
-        "desc": "rvfOptimizer activated via file:// import",
+        "desc": "rvfOptimizer activated",
         "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
-        "sha256": "98235d47b3f779dc7d5bf1504a92ee9246c46987cb488694e6ef41e09d618f81",
+        "sha256": "028dacbefbbe63d4466f8c226bf93d03e109a4dd48983e1f1839cb4772a68bcd",
         "marker": "RVFOptimizer",
         "markerVerified": true
       },
       {
+        "id": "G7-mut",
+        "desc": "mutationGuard activated",
+        "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
+        "sha256": "028dacbefbbe63d4466f8c226bf93d03e109a4dd48983e1f1839cb4772a68bcd",
+        "marker": "MutationGuard",
+        "markerVerified": true
+      },
+      {
+        "id": "G7-att",
+        "desc": "attestationLog activated with sqlite db",
+        "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
+        "sha256": "028dacbefbbe63d4466f8c226bf93d03e109a4dd48983e1f1839cb4772a68bcd",
+        "marker": "attestation.db",
+        "markerVerified": true
+      },
+      {
         "id": "G2",
-        "desc": "federation real Ed25519 signing + verification",
+        "desc": "federation real Ed25519 signing/verification",
         "file": "v3/@claude-flow/plugin-agent-federation/dist/plugin.js",
         "sha256": "881dad4fa9dc19a539c1a46dfe27c77984596cdd05759937909aacf028378acc",
         "marker": "@noble/ed25519",
@@ -213,10 +229,10 @@
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "83a4cdf4d0ff8f28219a69dd71b4cd0090fd27e97acb80239517ed818adffaa3",
+    "manifestHash": "6e593a0dff639a5074dbe9b7ad2995925f5531b0a6f36676f4bc6995f36093ac",
     "signatureAlgo": "ed25519",
-    "publicKey": "fb5c9c3d8ef2b691880b558583416e2ecd87a0f3911bdc4bc57e3ad935d9aa6a",
-    "signature": "5ab05a9be7795a537ed1dddf2ab1635fd078d428d99ee5754bfd2cf6c96b398c2e220c7d23fded1c20bf337eab6d1f830b9a18398ae7eb6ae84a0248aa557506",
+    "publicKey": "94442c97f519cf3f2cb3f10f555f61c5fec7351717c226aec47241ddce0b0d39",
+    "signature": "f752cacfc24c64f3dbba738f6201032197b7a5f6976a3108480f393faa92dd2ba77c335555648291f0dccba82e0809e960c86cd22d950060a125138b0dd5920d",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }
