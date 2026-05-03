@@ -98,73 +98,90 @@ async function getRegistry(dbPath?: string): Promise<any | null> {
           console.log = origLog;
         }
 
-        // Wire intelligence module as the learning backend
-        // AgentDB's ReasoningBank/LearningSystem need a better-sqlite3 db handle
-        // which ControllerRegistry doesn't expose. Instead, use the local intelligence
-        // module (SONA + LocalReasoningBank + file persistence) for learning.
+        // Wire intelligence module as the learning backend.
+        // AgentDB's ReasoningBank/LearningSystem need a better-sqlite3 db
+        // handle which ControllerRegistry doesn't expose. Instead, use the
+        // local intelligence module (SONA + LocalReasoningBank + file
+        // persistence) for learning.
+        //
+        // PERF: parallelize the two independent post-init paths
+        // (intelligence module load + agentdb import). Previously these
+        // ran serially, adding ~50-150ms to cold start. Both can resolve
+        // concurrently because they touch disjoint controller slots.
         try {
-          const intelligence = await import('./intelligence.js');
-          const initResult = await intelligence.initializeIntelligence();
           const reg = registry as any;
 
-          if (initResult.reasoningBankEnabled) {
-            const rb = intelligence.getReasoningBank();
-            if (rb && !reg.get('reasoningBank')) {
-              if (typeof reg.set === 'function') reg.set('reasoningBank', rb);
-              else reg._controllers = { ...(reg._controllers || {}), reasoningBank: rb };
-            }
-          }
+          const intelligencePromise = (async () => {
+            try {
+              const intelligence = await import('./intelligence.js');
+              const initResult = await intelligence.initializeIntelligence();
 
-          if (initResult.sonaEnabled) {
-            const sona = intelligence.getSonaCoordinator();
-            if (sona && !reg.get('learningSystem')) {
-              if (typeof reg.set === 'function') reg.set('learningSystem', sona);
-              else reg._controllers = { ...(reg._controllers || {}), learningSystem: sona };
-            }
-          }
-
-          // SkillLibrary from AgentDB (no db required)
-          try {
-            const agentdb = await import('agentdb');
-            if (agentdb.SkillLibrary && !reg.get('skills')) {
-              const sk = new (agentdb.SkillLibrary as any)();
-              if (typeof reg.set === 'function') reg.set('skills', sk);
-              else reg._controllers = { ...(reg._controllers || {}), skills: sk };
-            }
-          } catch { /* AgentDB not available */ }
-
-          // ADR-093 F9: post-init injection of low-risk disabled controllers.
-          // Try multiple constructor names because the agentdb API renamed
-          // SemanticRouter across alpha versions (alpha.10 had SemanticRouter,
-          // alpha.11+ removed it in favor of @ruvector/router separately;
-          // future versions may reintroduce). If the cwd's agentdb has a
-          // viable router-shaped controller, wire it; otherwise leave it
-          // unbound and let bridgeSemanticRoute return its actionable error.
-          try {
-            const agentdb = await import('agentdb');
-            const candidates = ['SemanticRouter', 'IntentRouter', 'TaskRouter'] as const;
-            let routerInstance: { route?: (input: string) => Promise<unknown> | unknown } | null = null;
-            for (const name of candidates) {
-              const Ctor = (agentdb as Record<string, unknown>)[name];
-              if (typeof Ctor === 'function') {
-                try {
-                  // Try with dimension config first (newer router classes), then no-args
-                  const inst = (() => {
-                    try { return new (Ctor as new (cfg: { dimension: number }) => unknown)({ dimension: 384 }); }
-                    catch { return new (Ctor as new () => unknown)(); }
-                  })() as { route?: (input: string) => Promise<unknown> | unknown };
-                  if (inst && typeof inst.route === 'function') {
-                    routerInstance = inst;
-                    break;
-                  }
-                } catch { /* try next candidate */ }
+              if (initResult.reasoningBankEnabled) {
+                const rb = intelligence.getReasoningBank();
+                if (rb && !reg.get('reasoningBank')) {
+                  if (typeof reg.set === 'function') reg.set('reasoningBank', rb);
+                  else reg._controllers = { ...(reg._controllers || {}), reasoningBank: rb };
+                }
               }
-            }
-            if (routerInstance && !reg.get('semanticRouter')) {
-              if (typeof reg.set === 'function') reg.set('semanticRouter', routerInstance);
-              else reg._controllers = { ...(reg._controllers || {}), semanticRouter: routerInstance };
-            }
-          } catch { /* SemanticRouter optional — bridgeSemanticRoute will surface "not available" */ }
+
+              if (initResult.sonaEnabled) {
+                const sona = intelligence.getSonaCoordinator();
+                if (sona && !reg.get('learningSystem')) {
+                  if (typeof reg.set === 'function') reg.set('learningSystem', sona);
+                  else reg._controllers = { ...(reg._controllers || {}), learningSystem: sona };
+                }
+              }
+            } catch { /* intelligence module not available — learning stays unwired */ }
+          })();
+
+          const agentdbPromise = (async () => {
+            // Single import shared across SkillLibrary + SemanticRouter probe.
+            let agentdb: Record<string, unknown> | null = null;
+            try { agentdb = (await import('agentdb')) as unknown as Record<string, unknown>; }
+            catch { return; /* AgentDB not available */ }
+
+            // SkillLibrary (no db required)
+            try {
+              const SkillCtor = agentdb.SkillLibrary as (new () => unknown) | undefined;
+              if (SkillCtor && !reg.get('skills')) {
+                const sk = new SkillCtor();
+                if (typeof reg.set === 'function') reg.set('skills', sk);
+                else reg._controllers = { ...(reg._controllers || {}), skills: sk };
+              }
+            } catch { /* SkillLibrary optional */ }
+
+            // ADR-093 F9: probe multiple router class names across agentdb
+            // alpha versions (alpha.10 had SemanticRouter; alpha.11+ removed
+            // it in favor of @ruvector/router; future versions may
+            // reintroduce). Wire only if .route() is callable.
+            try {
+              const candidates = ['SemanticRouter', 'IntentRouter', 'TaskRouter'] as const;
+              let routerInstance: { route?: (input: string) => Promise<unknown> | unknown } | null = null;
+              for (const name of candidates) {
+                const Ctor = agentdb[name];
+                if (typeof Ctor === 'function') {
+                  try {
+                    const inst = (() => {
+                      try { return new (Ctor as new (cfg: { dimension: number }) => unknown)({ dimension: 384 }); }
+                      catch { return new (Ctor as new () => unknown)(); }
+                    })() as { route?: (input: string) => Promise<unknown> | unknown };
+                    if (inst && typeof inst.route === 'function') {
+                      routerInstance = inst;
+                      break;
+                    }
+                  } catch { /* try next candidate */ }
+                }
+              }
+              if (routerInstance && !reg.get('semanticRouter')) {
+                if (typeof reg.set === 'function') reg.set('semanticRouter', routerInstance);
+                else reg._controllers = { ...(reg._controllers || {}), semanticRouter: routerInstance };
+              }
+            } catch { /* router optional */ }
+          })();
+
+          // Run both in parallel; settle either way so a single failing
+          // path doesn't tear down the rest of the post-init wiring.
+          await Promise.allSettled([intelligencePromise, agentdbPromise]);
 
           // Other disabled controllers remain disabled and tracked in
           // ADR-093 F9 for future enablement:
@@ -177,7 +194,7 @@ async function getRegistry(dbPath?: string): Promise<any | null> {
           //   - rvfOptimizer (RVF format optimizer — needs RVF storage)
           //   - graphAdapter (graph DB adapter — needs graph DB)
         } catch {
-          // Intelligence module not available — learning stays unwired
+          // Top-level catch — registry stays usable even if post-init wiring fails wholesale.
         }
 
         registryInstance = registry;
