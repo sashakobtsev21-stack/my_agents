@@ -20,7 +20,8 @@ Orchestrate 100+ specialized AI agents across machines, teams, and trust boundar
 
 ### Why Ruflo?
 
-> Claude Flow is now Ruflo — named by Ruv, who loves Rust, flow states, and building things that feel inevitable. The "Ru" is the Ruv. The "flo" is the flow. Underneath, WASM kernels written in Rust power the policy engine, embeddings, and proof system. 
+> Claude Flow is now Ruflo — named by rUv, who loves Rust, flow states, and building things that feel inevitable. The "Ru" is the Ruv. The "flo" is the flow. Underneath, WASM kernels written in Rust power the policy engine, embeddings, and proof system. 
+
 
 ### What Ruflo Does
 
