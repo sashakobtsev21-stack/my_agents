@@ -197,15 +197,18 @@ async function getRegistry(dbPath?: string): Promise<any | null> {
               if (adbPkgJsonPath) {
                 const adbDir = path.dirname(adbPkgJsonPath);
                 const candidates: Array<{ name: string; relPath: string; configurable: boolean }> = [
-                  // AttestationLog needs a db handle — too risky to wire
-                  // without a per-install audit, leave for follow-up ADR.
-                  // MutationGuard needs a write-policy config; skipped
-                  // here for the same reason.
-                  // GuardedVectorBackend needs key material; skipped.
                   // GNNService and RVFOptimizer can construct with no args
-                  // in current agentdb — wire those.
+                  // in current agentdb — safe to activate as-is.
                   { name: 'gnnService', relPath: 'dist/src/services/GNNService.js', configurable: false },
                   { name: 'rvfOptimizer', relPath: 'dist/src/optimizations/RVFOptimizer.js', configurable: false },
+                  // ADR-095 G7 follow-up: MutationGuard constructs cleanly
+                  // with no args and exposes WASM-backed proof generation.
+                  // No external deps; safe-default activation.
+                  { name: 'mutationGuard', relPath: 'dist/src/security/MutationGuard.js', configurable: false },
+                  // AttestationLog needs a sqlite db handle — wired below
+                  // separately because we have to construct a db too.
+                  // GuardedVectorBackend needs key material — leave for
+                  // follow-up ADR.
                 ];
                 for (const cand of candidates) {
                   if (reg.get(cand.name)) continue;
@@ -225,6 +228,32 @@ async function getRegistry(dbPath?: string): Promise<any | null> {
                     else reg._controllers = { ...(reg._controllers || {}), [cand.name]: inst };
                   } catch { /* skip controllers that fail to construct */ }
                 }
+
+                // AttestationLog activation — needs a better-sqlite3
+                // database. We open a dedicated file at .swarm/attestation.db
+                // (separate from the main memory.db so the audit trail
+                // is isolated). Best-effort: if better-sqlite3 isn't
+                // resolvable in this env, skip cleanly.
+                if (!reg.get('attestationLog')) {
+                  try {
+                    const attestationFile = path.join(adbDir, 'dist/src/security/AttestationLog.js');
+                    if (fs.existsSync(attestationFile)) {
+                      const Database = (cjsRequire('better-sqlite3') as unknown) as new (p: string) => unknown;
+                      const swarmDir = path.resolve(process.cwd(), '.swarm');
+                      if (!fs.existsSync(swarmDir)) fs.mkdirSync(swarmDir, { recursive: true });
+                      const dbPath = path.join(swarmDir, 'attestation.db');
+                      const db = new Database(dbPath);
+                      const url = pathToFileURL(attestationFile).href;
+                      const mod = await import(url) as Record<string, unknown>;
+                      const Ctor = mod.AttestationLog as (new (cfg: { db: unknown }) => unknown) | undefined;
+                      if (typeof Ctor === 'function') {
+                        const inst = new Ctor({ db });
+                        if (typeof reg.set === 'function') reg.set('attestationLog', inst);
+                        else reg._controllers = { ...(reg._controllers || {}), attestationLog: inst };
+                      }
+                    }
+                  } catch { /* better-sqlite3 missing or schema init failed — skip silently */ }
+                }
               }
             } catch { /* G7 wiring optional */ }
           })();
@@ -235,10 +264,7 @@ async function getRegistry(dbPath?: string): Promise<any | null> {
 
           // Remaining disabled controllers tracked in ADR-095 G7 for
           // per-controller activation ADRs (each needs config / key
-          // material / db handle that we don't pass blindly):
-          //   - mutationGuard (write protection — needs config schema)
-          //   - attestationLog (needs sqlite db handle the registry
-          //     does not currently expose to non-builtin controllers)
+          // material that we don't pass blindly):
           //   - guardedVectorBackend (secured backend — needs key material)
           //   - graphAdapter (graph DB adapter — needs graph DB connection)
         } catch {
