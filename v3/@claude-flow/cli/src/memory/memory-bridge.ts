@@ -177,22 +177,70 @@ async function getRegistry(dbPath?: string): Promise<any | null> {
                 else reg._controllers = { ...(reg._controllers || {}), semanticRouter: routerInstance };
               }
             } catch { /* router optional */ }
+
+            // ADR-095 G7: load disabled-by-default controllers via direct
+            // file:// URLs from the bundled agentdb. agentdb's exports
+            // field doesn't expose these subpaths and we can't reliably
+            // patch it across pnpm-hoisted multi-version trees, so we
+            // sidestep the exports field entirely and import the file
+            // by absolute URL. Only loads controllers whose constructor
+            // is safe with no special prerequisites — others remain off
+            // pending per-controller activation ADRs.
+            try {
+              const { createRequire } = await import('node:module');
+              const { pathToFileURL } = await import('node:url');
+              const path = await import('node:path');
+              const fs = await import('node:fs');
+              const cjsRequire = createRequire(import.meta.url);
+              let adbPkgJsonPath: string | null = null;
+              try { adbPkgJsonPath = cjsRequire.resolve('agentdb/package.json'); } catch { adbPkgJsonPath = null; }
+              if (adbPkgJsonPath) {
+                const adbDir = path.dirname(adbPkgJsonPath);
+                const candidates: Array<{ name: string; relPath: string; configurable: boolean }> = [
+                  // AttestationLog needs a db handle — too risky to wire
+                  // without a per-install audit, leave for follow-up ADR.
+                  // MutationGuard needs a write-policy config; skipped
+                  // here for the same reason.
+                  // GuardedVectorBackend needs key material; skipped.
+                  // GNNService and RVFOptimizer can construct with no args
+                  // in current agentdb — wire those.
+                  { name: 'gnnService', relPath: 'dist/src/services/GNNService.js', configurable: false },
+                  { name: 'rvfOptimizer', relPath: 'dist/src/optimizations/RVFOptimizer.js', configurable: false },
+                ];
+                for (const cand of candidates) {
+                  if (reg.get(cand.name)) continue;
+                  const abs = path.join(adbDir, cand.relPath);
+                  if (!fs.existsSync(abs)) continue;
+                  try {
+                    const url = pathToFileURL(abs).href;
+                    const mod = await import(url) as Record<string, unknown>;
+                    // Look for a default export, named export matching the
+                    // file basename, or any class-typed export.
+                    const baseName = path.basename(cand.relPath, '.js');
+                    const Ctor = (mod[baseName] || mod.default ||
+                      Object.values(mod).find(v => typeof v === 'function')) as (new () => unknown) | undefined;
+                    if (typeof Ctor !== 'function') continue;
+                    const inst = new Ctor();
+                    if (typeof reg.set === 'function') reg.set(cand.name, inst);
+                    else reg._controllers = { ...(reg._controllers || {}), [cand.name]: inst };
+                  } catch { /* skip controllers that fail to construct */ }
+                }
+              }
+            } catch { /* G7 wiring optional */ }
           })();
 
           // Run both in parallel; settle either way so a single failing
           // path doesn't tear down the rest of the post-init wiring.
           await Promise.allSettled([intelligencePromise, agentdbPromise]);
 
-          // Other disabled controllers remain disabled and tracked in
-          // ADR-093 F9 for future enablement:
-          //   - mutationGuard (write protection — needs config)
-          //   - attestationLog (needs sqlite db handle the registry does
-          //     not currently expose)
-          //   - gnnService (graph neural net — heavy deps, needs WASM/CUDA)
-          //   - guardedVectorBackend (secured vector backend variant —
-          //     needs key material)
-          //   - rvfOptimizer (RVF format optimizer — needs RVF storage)
-          //   - graphAdapter (graph DB adapter — needs graph DB)
+          // Remaining disabled controllers tracked in ADR-095 G7 for
+          // per-controller activation ADRs (each needs config / key
+          // material / db handle that we don't pass blindly):
+          //   - mutationGuard (write protection — needs config schema)
+          //   - attestationLog (needs sqlite db handle the registry
+          //     does not currently expose to non-builtin controllers)
+          //   - guardedVectorBackend (secured backend — needs key material)
+          //   - graphAdapter (graph DB adapter — needs graph DB connection)
         } catch {
           // Top-level catch — registry stays usable even if post-init wiring fails wholesale.
         }
