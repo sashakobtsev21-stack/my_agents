@@ -1535,17 +1535,37 @@ export async function loadEmbeddingModel(options?: {
   }
 
   try {
-    // Try to import @xenova/transformers for ONNX embeddings
-    const transformers = await import('@xenova/transformers').catch(() => null);
+    // ADR-094: prefer @huggingface/transformers (clears protobufjs <7.5.5
+    // critical RCE chain), fall back to legacy @xenova/transformers.
+    // Inlined here rather than depending on @claude-flow/embeddings to
+    // avoid a circular optional-dep at install time; the logic mirrors
+    // @claude-flow/embeddings/src/transformers-loader.ts.
+    let transformersSource: '@huggingface/transformers' | '@xenova/transformers' | null = null;
+    let pipelineFn: ((task: string, model?: string) => Promise<unknown>) | null = null;
 
-    if (transformers) {
-      if (verbose) {
-        console.log('Loading ONNX embedding model (all-MiniLM-L6-v2)...');
+    {
+      const tryLoad = async (specifier: string): Promise<Record<string, unknown> | null> => {
+        try { return (await import(specifier)) as Record<string, unknown>; }
+        catch { return null; }
+      };
+      const hf = await tryLoad('@huggingface/transformers');
+      if (hf && typeof hf.pipeline === 'function') {
+        pipelineFn = hf.pipeline as (t: string, m?: string) => Promise<unknown>;
+        transformersSource = '@huggingface/transformers';
+      } else {
+        const xen = await tryLoad('@xenova/transformers');
+        if (xen && typeof xen.pipeline === 'function') {
+          pipelineFn = xen.pipeline as (t: string, m?: string) => Promise<unknown>;
+          transformersSource = '@xenova/transformers';
+        }
       }
+    }
 
-      // Use small, fast model for local embeddings
-      const { pipeline } = transformers;
-      const embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+    if (pipelineFn && transformersSource) {
+      if (verbose) {
+        console.log(`Loading ONNX embedding model via ${transformersSource} (all-MiniLM-L6-v2)...`);
+      }
+      const embedder = await pipelineFn('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
 
       embeddingModelState = {
         loaded: true,
