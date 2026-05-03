@@ -61,6 +61,109 @@ const MODEL_MAP: Record<string, string> = {
   inherit: 'claude-3-5-sonnet-latest',
 };
 
+export interface AnthropicCallInput {
+  prompt: string;
+  systemPrompt?: string;
+  model?: string;          // already-resolved Anthropic model id (e.g. 'claude-3-5-sonnet-latest')
+  maxTokens?: number;
+  temperature?: number;
+  timeoutMs?: number;
+}
+
+export interface AnthropicCallResult {
+  success: boolean;
+  model?: string;
+  messageId?: string;
+  stopReason?: string;
+  output?: string;
+  usage?: { inputTokens: number; outputTokens: number; totalTokens: number };
+  durationMs?: number;
+  error?: string;
+}
+
+/**
+ * Generic Anthropic Messages API call. No agent registry coupling — used
+ * by agent_execute (with the agent's configured model) and by the WASM
+ * agent runtime (G4) when the bundled WASM only echoes input.
+ */
+export async function callAnthropicMessages(input: AnthropicCallInput): Promise<AnthropicCallResult> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return { success: false, error: 'ANTHROPIC_API_KEY not set in environment' };
+  }
+  const model = input.model || 'claude-3-5-sonnet-latest';
+  const startedAt = Date.now();
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), input.timeoutMs || 60000);
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: input.maxTokens || 1024,
+        temperature: typeof input.temperature === 'number' ? input.temperature : 0.7,
+        ...(input.systemPrompt ? { system: input.systemPrompt } : {}),
+        messages: [{ role: 'user', content: input.prompt }],
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '<unreadable error body>');
+      return { success: false, model, error: `Anthropic API error ${res.status}: ${errText.slice(0, 400)}` };
+    }
+    const data = await res.json() as {
+      id: string;
+      model: string;
+      content: Array<{ type: string; text?: string }>;
+      stop_reason: string;
+      usage: { input_tokens: number; output_tokens: number };
+    };
+    const textOut = data.content
+      .filter(c => c.type === 'text' && typeof c.text === 'string')
+      .map(c => c.text as string)
+      .join('');
+    return {
+      success: true,
+      model: data.model,
+      messageId: data.id,
+      stopReason: data.stop_reason,
+      output: textOut,
+      usage: {
+        inputTokens: data.usage.input_tokens,
+        outputTokens: data.usage.output_tokens,
+        totalTokens: data.usage.input_tokens + data.usage.output_tokens,
+      },
+      durationMs: Date.now() - startedAt,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      model,
+      error: err instanceof Error ? err.message : String(err),
+      durationMs: Date.now() - startedAt,
+    };
+  }
+}
+
+/**
+ * Resolve a model identifier to an Anthropic model ID. Accepts:
+ * - logical names: 'haiku', 'sonnet', 'opus', 'inherit'
+ * - prefixed: 'anthropic:claude-3-5-sonnet-latest'
+ * - direct: 'claude-3-5-sonnet-latest'
+ */
+export function resolveAnthropicModel(input: string | undefined): string {
+  if (!input) return 'claude-3-5-sonnet-latest';
+  if (input in MODEL_MAP) return MODEL_MAP[input];
+  if (input.startsWith('anthropic:')) return input.slice('anthropic:'.length);
+  return input;
+}
+
 export interface AgentExecuteInput {
   agentId: string;
   prompt: string;
