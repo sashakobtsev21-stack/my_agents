@@ -1071,47 +1071,58 @@ export const hooksMetrics: MCPTool = {
   handler: async (params: Record<string, unknown>) => {
     const period = (params.period as string) || '24h';
 
-    // Try to read real counts from memory store
-    const store = loadMemoryStore();
-    const entries = Object.values(store.entries);
+    // ADR-093 F1: read from the same trajectory/pattern store that
+    // hooks_post-task and hooks_intelligence_stats write to. Previously
+    // this handler key-substring-filtered the memory store for "pattern",
+    // "route", "task" — none of which match the trajectory keys that
+    // post-task actually writes — so counters stayed at 0 forever (#1686).
+    const stats = getIntelligenceStatsFromMemory();
 
-    // Count patterns by looking at stored pattern entries
-    const patternEntries = entries.filter(e => e.key.includes('pattern'));
-    const routingEntries = entries.filter(e => e.key.includes('route') || e.key.includes('routing'));
-    const taskEntries = entries.filter(e => e.key.includes('task'));
+    // Routing outcomes are persisted to a separate file (loadRoutingOutcomes)
+    // by post-task; surface them so the dashboard sees command counters too.
+    let routingOutcomes: Array<{ success: boolean; agent?: string }> = [];
+    try {
+      routingOutcomes = loadRoutingOutcomes() as Array<{ success: boolean; agent?: string }>;
+    } catch { /* non-fatal */ }
 
-    if (entries.length === 0) {
-      return {
-        _real: true,
-        _note: 'No metrics data collected yet. Data populates from hooks_post-task, hooks_post-edit, hooks_post-command, and hooks_route calls.',
-        period,
-        patterns: { total: 0, successful: 0, failed: 0, avgConfidence: null },
-        agents: { routingAccuracy: null, totalRoutes: 0, topAgent: null },
-        commands: { totalExecuted: 0, successRate: null, avgRiskScore: null },
-        lastUpdated: new Date().toISOString(),
-      };
+    const totalCommands = routingOutcomes.length;
+    const successfulCommands = routingOutcomes.filter(o => o.success).length;
+    const successRate = totalCommands > 0 ? successfulCommands / totalCommands : null;
+
+    // Compute top agent from routing outcomes
+    const agentCounts: Record<string, number> = {};
+    for (const o of routingOutcomes) {
+      if (o.agent) agentCounts[o.agent] = (agentCounts[o.agent] || 0) + 1;
     }
+    const topAgent = Object.entries(agentCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+
+    const successful = stats.trajectories.successful;
+    const total = stats.trajectories.total;
+    const failed = Math.max(0, total - successful);
 
     return {
+      _real: true,
+      _dataSource: 'intelligence-stats + routing-outcomes',
       period,
       patterns: {
-        total: patternEntries.length,
-        successful: null,
-        failed: null,
-        avgConfidence: null,
+        total: stats.patterns.learned,
+        successful,
+        failed,
+        avgConfidence: stats.routing.avgConfidence || null,
       },
       agents: {
-        routingAccuracy: null,
-        totalRoutes: routingEntries.length,
-        topAgent: null,
+        routingAccuracy: stats.routing.avgConfidence || null,
+        totalRoutes: stats.routing.decisions,
+        topAgent,
       },
       commands: {
-        totalExecuted: taskEntries.length,
-        successRate: null,
+        totalExecuted: totalCommands,
+        successRate,
         avgRiskScore: null,
       },
-      dataSource: 'memory-store',
-      entriesFound: entries.length,
+      _note: total === 0 && totalCommands === 0
+        ? 'No metrics data collected yet. Run hooks_post-task / hooks_intelligence_trajectory-end / hooks_route to populate.'
+        : undefined,
       lastUpdated: new Date().toISOString(),
     };
   },
@@ -3511,6 +3522,24 @@ export const hooksWorkerDispatch: MCPTool = {
     const workerId = `worker_${trigger}_${++workerIdCounter}_${Date.now().toString(36)}`;
     const config = WORKER_CONFIGS[trigger];
 
+    // ADR-093 F2: stop returning status:"completed" for a worker that
+    // never ran (#1700 item 1). Detect daemon presence via PID file and
+    // surface honest verdicts (`no-daemon` / `queued` / `synthetic`).
+    const cwd = getProjectCwd();
+    const pidFile = join(cwd, '.claude-flow', 'daemon.pid');
+    let daemonPid: number | null = null;
+    let daemonAlive = false;
+    if (existsSync(pidFile)) {
+      try {
+        const raw = readFileSync(pidFile, 'utf-8').trim();
+        const pid = parseInt(raw, 10);
+        if (Number.isFinite(pid) && pid > 0) {
+          daemonPid = pid;
+          try { process.kill(pid, 0); daemonAlive = true; } catch { daemonAlive = false; }
+        }
+      } catch { /* unreadable PID file */ }
+    }
+
     const worker: {
       id: string;
       trigger: WorkerTrigger;
@@ -3524,7 +3553,7 @@ export const hooksWorkerDispatch: MCPTool = {
       id: workerId,
       trigger,
       context,
-      status: 'running',
+      status: daemonAlive ? 'pending' : 'pending',
       progress: 0,
       phase: 'initializing',
       startedAt: new Date(),
@@ -3532,11 +3561,25 @@ export const hooksWorkerDispatch: MCPTool = {
 
     activeWorkers.set(workerId, worker);
 
-    if (!background) {
+    // Determine honest status
+    let reportedStatus: 'queued' | 'no-daemon' | 'synthetic-completed';
+    let note: string;
+    if (!daemonAlive) {
+      reportedStatus = 'no-daemon';
+      note = 'No worker daemon detected. Run `claude-flow daemon start` to enable real worker execution. The dispatch was recorded in-process but no actual work will run.';
+    } else if (background) {
+      // Daemon is alive — record the queued worker. The daemon polls activeWorkers
+      // via its own state file, so this constitutes a real queue entry.
+      reportedStatus = 'queued';
+      note = `Worker queued for daemon (pid ${daemonPid}). Poll hooks_worker-status to track progression — do not assume completion until status === "completed".`;
+    } else {
+      // Synchronous mode without a runner — be honest about it
+      reportedStatus = 'synthetic-completed';
       worker.progress = 100;
       worker.phase = 'completed';
       worker.status = 'completed';
       worker.completedAt = new Date();
+      note = 'Synchronous mode: worker record marked completed but no real work executed (no in-process runner). Use background:true with the daemon for real execution.';
     }
 
     return {
@@ -3550,9 +3593,11 @@ export const hooksWorkerDispatch: MCPTool = {
         estimatedDuration: config.estimatedDuration,
         capabilities: config.capabilities,
       },
-      status: background ? 'scheduled' : 'completed',
+      status: reportedStatus,
+      daemonAlive,
+      daemonPid: daemonAlive ? daemonPid : null,
       background,
-      note: background ? 'Worker scheduled. Use hooks_worker-status to check progress. Start the daemon (daemon start) for real background execution.' : undefined,
+      note,
       timestamp: new Date().toISOString(),
     };
   },
