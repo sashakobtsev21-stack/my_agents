@@ -132,6 +132,50 @@ async function getRegistry(dbPath?: string): Promise<any | null> {
               else reg._controllers = { ...(reg._controllers || {}), skills: sk };
             }
           } catch { /* AgentDB not available */ }
+
+          // ADR-093 F9: post-init injection of low-risk disabled controllers.
+          // Try multiple constructor names because the agentdb API renamed
+          // SemanticRouter across alpha versions (alpha.10 had SemanticRouter,
+          // alpha.11+ removed it in favor of @ruvector/router separately;
+          // future versions may reintroduce). If the cwd's agentdb has a
+          // viable router-shaped controller, wire it; otherwise leave it
+          // unbound and let bridgeSemanticRoute return its actionable error.
+          try {
+            const agentdb = await import('agentdb');
+            const candidates = ['SemanticRouter', 'IntentRouter', 'TaskRouter'] as const;
+            let routerInstance: { route?: (input: string) => Promise<unknown> | unknown } | null = null;
+            for (const name of candidates) {
+              const Ctor = (agentdb as Record<string, unknown>)[name];
+              if (typeof Ctor === 'function') {
+                try {
+                  // Try with dimension config first (newer router classes), then no-args
+                  const inst = (() => {
+                    try { return new (Ctor as new (cfg: { dimension: number }) => unknown)({ dimension: 384 }); }
+                    catch { return new (Ctor as new () => unknown)(); }
+                  })() as { route?: (input: string) => Promise<unknown> | unknown };
+                  if (inst && typeof inst.route === 'function') {
+                    routerInstance = inst;
+                    break;
+                  }
+                } catch { /* try next candidate */ }
+              }
+            }
+            if (routerInstance && !reg.get('semanticRouter')) {
+              if (typeof reg.set === 'function') reg.set('semanticRouter', routerInstance);
+              else reg._controllers = { ...(reg._controllers || {}), semanticRouter: routerInstance };
+            }
+          } catch { /* SemanticRouter optional — bridgeSemanticRoute will surface "not available" */ }
+
+          // Other disabled controllers remain disabled and tracked in
+          // ADR-093 F9 for future enablement:
+          //   - mutationGuard (write protection — needs config)
+          //   - attestationLog (needs sqlite db handle the registry does
+          //     not currently expose)
+          //   - gnnService (graph neural net — heavy deps, needs WASM/CUDA)
+          //   - guardedVectorBackend (secured vector backend variant —
+          //     needs key material)
+          //   - rvfOptimizer (RVF format optimizer — needs RVF storage)
+          //   - graphAdapter (graph DB adapter — needs graph DB)
         } catch {
           // Intelligence module not available — learning stays unwired
         }
@@ -1823,10 +1867,20 @@ export async function bridgeSemanticRoute(params: { input: string }): Promise<an
   if (!registry) return null;
   try {
     const router = registry.get('semanticRouter');
-    if (!router) return { route: null, error: 'SemanticRouter not available' };
+    if (!router) {
+      // ADR-093 F9: surface an actionable error pointing callers at the
+      // alternative routing surfaces that DO work, instead of just
+      // saying "not available".
+      return {
+        route: null,
+        error: 'SemanticRouter not available in current agentdb build',
+        recommendation: 'Use bridgeRouteTask (registers as `agentdb_route` MCP tool) for keyword+pattern routing, or hooks_model-route for ADR-026 model selection.',
+        controller: 'none',
+      };
+    }
     const result = await router.route(params.input);
     return { route: result, controller: 'semanticRouter' };
-  } catch (e: any) { return { route: null, error: e.message }; }
+  } catch (e: any) { return { route: null, error: e.message, controller: 'error' }; }
 }
 
 // ===== RaBitQ data export =====
