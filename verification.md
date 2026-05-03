@@ -71,19 +71,19 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-05-03T23:17:05.741Z",
-    "gitCommit": "892f54a785a815e36721482e6c8a5bb1c1af1f40",
+    "issuedAt": "2026-05-03T23:26:20.765Z",
+    "gitCommit": "dba6b54d615dc8e81c18fa52f1dc40c1d4c77d2e",
     "branch": "fix/issues-may-1-3",
     "releases": {
-      "@claude-flow/cli": "3.6.23",
-      "claude-flow": "3.6.23",
-      "ruflo": "3.6.23",
+      "@claude-flow/cli": "3.6.24",
+      "claude-flow": "3.6.24",
+      "ruflo": "3.6.24",
       "@claude-flow/embeddings": "3.0.0-alpha.15",
       "@claude-flow/plugin-agent-federation": "1.0.0-alpha.4"
     },
     "summary": {
-      "totalFixes": 26,
-      "verified": 26,
+      "totalFixes": 27,
+      "verified": 27,
       "failed": 0
     },
     "fixes": [
@@ -155,7 +155,7 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "id": "F9",
         "desc": "F9 router probe + actionable error",
         "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
-        "sha256": "028dacbefbbe63d4466f8c226bf93d03e109a4dd48983e1f1839cb4772a68bcd",
+        "sha256": "9a0c99e44636ce46ceecebad87e704ef57fea085246f87b9de1e9a6bc16644af",
         "marker": "IntentRouter",
         "markerVerified": true
       },
@@ -187,7 +187,7 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "id": "#1697",
         "desc": "rvf-wasm overrides",
         "file": "package.json",
-        "sha256": "da2446da56edef5a5773877beda41303d03174b6b457f77dfa6d61c1576f3d5e",
+        "sha256": "a7bbc8cd87bee2f4ec07fe17f787cd3cc57a27a9e9baf6b20cd1c4d4d2e749a7",
         "marker": "@ruvector/rvf-wasm",
         "markerVerified": true
       },
@@ -211,7 +211,7 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "id": "#1721",
         "desc": "postinstall copies all dist/src/* siblings",
         "file": "v3/@claude-flow/cli/package.json",
-        "sha256": "5b9156a3bc09949b677f8a1c095eaf1b80ab182e1f6bbc0bad191fc7545ecc0d",
+        "sha256": "810ba957c27353ac38e5778ac2f98dd211b1955bc9afdeeccf08c48d97422349",
         "marker": "postinstall.cjs",
         "markerVerified": true
       },
@@ -259,7 +259,7 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "id": "G7-gnn",
         "desc": "gnnService activated",
         "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
-        "sha256": "028dacbefbbe63d4466f8c226bf93d03e109a4dd48983e1f1839cb4772a68bcd",
+        "sha256": "9a0c99e44636ce46ceecebad87e704ef57fea085246f87b9de1e9a6bc16644af",
         "marker": "GNNService",
         "markerVerified": true
       },
@@ -267,7 +267,7 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "id": "G7-rvf",
         "desc": "rvfOptimizer activated",
         "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
-        "sha256": "028dacbefbbe63d4466f8c226bf93d03e109a4dd48983e1f1839cb4772a68bcd",
+        "sha256": "9a0c99e44636ce46ceecebad87e704ef57fea085246f87b9de1e9a6bc16644af",
         "marker": "RVFOptimizer",
         "markerVerified": true
       },
@@ -275,7 +275,7 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "id": "G7-mut",
         "desc": "mutationGuard activated",
         "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
-        "sha256": "028dacbefbbe63d4466f8c226bf93d03e109a4dd48983e1f1839cb4772a68bcd",
+        "sha256": "9a0c99e44636ce46ceecebad87e704ef57fea085246f87b9de1e9a6bc16644af",
         "marker": "MutationGuard",
         "markerVerified": true
       },
@@ -283,8 +283,16 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "id": "G7-att",
         "desc": "attestationLog activated with sqlite db",
         "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
-        "sha256": "028dacbefbbe63d4466f8c226bf93d03e109a4dd48983e1f1839cb4772a68bcd",
+        "sha256": "9a0c99e44636ce46ceecebad87e704ef57fea085246f87b9de1e9a6bc16644af",
         "marker": "attestation.db",
+        "markerVerified": true
+      },
+      {
+        "id": "G7-gvb",
+        "desc": "GuardedVectorBackend wraps mutationGuard+log",
+        "file": "v3/@claude-flow/cli/dist/src/memory/memory-bridge.js",
+        "sha256": "9a0c99e44636ce46ceecebad87e704ef57fea085246f87b9de1e9a6bc16644af",
+        "marker": "GuardedVectorBackend",
         "markerVerified": true
       },
       {
@@ -299,10 +307,10 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "6e593a0dff639a5074dbe9b7ad2995925f5531b0a6f36676f4bc6995f36093ac",
+    "manifestHash": "f45e9c4043a8fd768bb429e468780af8ca4d3b4f81ff327e66b21b1261487974",
     "signatureAlgo": "ed25519",
-    "publicKey": "94442c97f519cf3f2cb3f10f555f61c5fec7351717c226aec47241ddce0b0d39",
-    "signature": "f752cacfc24c64f3dbba738f6201032197b7a5f6976a3108480f393faa92dd2ba77c335555648291f0dccba82e0809e960c86cd22d950060a125138b0dd5920d",
+    "publicKey": "580673b45e51fe9ff937451383c5904bb6030df55924dd9b2f34e111c4ea63ee",
+    "signature": "453eceba13684329d829ea324bdbf1017166777f0ae8167f37629a4003706e31037d58b31a1f62792eb871f796b26f27adc723e24ba2af5770c2ba0c8fc78906",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }
@@ -345,6 +353,6 @@ The deterministic seed derivation means the signing key is reproducible from the
 
 ## Coverage so far
 
-The current witness covers **26 fixes** spanning ADR-093 F1–F12, four GitHub-issue fixes (#1697, #1698, #1691, #1721), one ADR (#094 transformers loader), and one ADR-095 gap closure (G6 auto-memory dedup).
+The current witness covers **27 fixes** spanning ADR-093 F1–F12, four GitHub-issue fixes (#1697, #1698, #1691, #1721), one ADR (#094 transformers loader), and one ADR-095 gap closure (G6 auto-memory dedup).
 
 The 6 remaining ADR-095 architectural gaps (G1, G2, G3, G4, G5/handed off to ADR-094, G7) are tracked in [`v3/docs/adr/ADR-095-architectural-gaps-from-april-audit.md`](v3/docs/adr/ADR-095-architectural-gaps-from-april-audit.md). When their per-gap ADRs land, they will be added to this manifest with their own fingerprints.
