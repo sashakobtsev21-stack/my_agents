@@ -3115,42 +3115,90 @@ export const hooksIntelligenceAttention: MCPTool = {
         }
       }
     } else if (mode === 'flash') {
-      // Try Flash Attention
+      // Try Flash Attention. ADR-093 F10: previously this attended over
+      // synthetic cosine-derived keys/values with constant-vector values,
+      // which produced uniform 0.333 weights and labels like "Flash
+      // attention target #1/2/3". Now we attend over actual stored
+      // patterns when available — real semantic content yields non-uniform
+      // weights and human-readable labels.
       const flash = await getFlashAttention();
       if (flash) {
         try {
           const embResult = await getQueryEmbedding(query, 384);
           embeddingSource = embResult.source;
           const q = embResult.embedding;
+
+          // Pull real stored patterns to attend over. If none exist yet,
+          // fall back to the synthetic harness but mark it honestly.
+          const realPatterns: Array<{ id: string; content: string; embedding?: number[] }> = [];
+          try {
+            const { searchEntries: searchFn } = await import('../memory/memory-initializer.js');
+            const hits = await searchFn({ query, limit: topK });
+            if (Array.isArray(hits)) {
+              for (const h of hits.slice(0, topK)) {
+                const content = (h as Record<string, unknown>).content ?? (h as Record<string, unknown>).value ?? '';
+                const id = String((h as Record<string, unknown>).id ?? (h as Record<string, unknown>).key ?? `pattern-${realPatterns.length}`);
+                realPatterns.push({ id, content: String(content) });
+              }
+            }
+          } catch { /* memory not initialized — fall through to synthetic */ }
+
+          const useReal = realPatterns.length > 0;
           const keys: Float32Array[] = [];
           const values: Float32Array[] = [];
+          const labels: string[] = [];
 
-          // Generate some keys/values
-          for (let k = 0; k < topK; k++) {
-            const key = new Float32Array(384);
-            const value = new Float32Array(384);
-            for (let i = 0; i < 384; i++) {
-              key[i] = Math.cos((k + 1) * (i + 1) * 0.01);
-              value[i] = k + 1;
+          if (useReal) {
+            // Build keys from real pattern embeddings (re-embed if no vector cached)
+            for (let k = 0; k < realPatterns.length; k++) {
+              const p = realPatterns[k];
+              let keyEmbedding: Float32Array;
+              if (p.embedding && p.embedding.length === 384) {
+                keyEmbedding = new Float32Array(p.embedding);
+              } else {
+                const enc = await getQueryEmbedding(p.content.slice(0, 1024), 384);
+                keyEmbedding = enc.embedding;
+              }
+              const value = new Float32Array(384);
+              // Value carries pattern identity strength — magnitude = recency proxy (k position)
+              const strength = 1 / (k + 1);
+              for (let i = 0; i < 384; i++) value[i] = keyEmbedding[i] * strength;
+              keys.push(keyEmbedding);
+              values.push(value);
+              const label = p.content.length > 0
+                ? `${p.id}: ${p.content.slice(0, 60)}${p.content.length > 60 ? '…' : ''}`
+                : p.id;
+              labels.push(label);
             }
-            keys.push(key);
-            values.push(value);
+          } else {
+            // No real patterns — surface a synthetic harness honestly.
+            for (let k = 0; k < topK; k++) {
+              const key = new Float32Array(384);
+              const value = new Float32Array(384);
+              for (let i = 0; i < 384; i++) {
+                key[i] = Math.cos((k + 1) * (i + 1) * 0.01);
+                value[i] = k + 1;
+              }
+              keys.push(key);
+              values.push(value);
+              labels.push(`(synthetic harness) pattern #${k + 1}`);
+            }
           }
 
           const attentionResult = flash.attention([q], keys, values);
           // Compute softmax weights from output magnitudes
           const outputMags = attentionResult.output[0]
-            ? Array.from(attentionResult.output[0]).slice(0, topK).map(v => Math.abs(v))
-            : new Array(topK).fill(1);
+            ? Array.from(attentionResult.output[0]).slice(0, keys.length).map(v => Math.abs(v))
+            : new Array(keys.length).fill(1);
           const sumMags = outputMags.reduce((a, b) => a + b, 0) || 1;
-          for (let i = 0; i < topK; i++) {
+          for (let i = 0; i < keys.length; i++) {
             results.push({
               index: i,
               weight: outputMags[i] / sumMags,
-              pattern: `Flash attention target #${i + 1}`,
+              pattern: labels[i],
             });
           }
-          implementation = 'real-flash-attention';
+          implementation = useReal ? 'real-flash-attention+memory' : 'real-flash-attention+synthetic-harness';
         } catch {
           // Fall back to placeholder
         }
