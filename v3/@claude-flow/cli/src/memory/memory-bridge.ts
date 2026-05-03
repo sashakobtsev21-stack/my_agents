@@ -234,6 +234,7 @@ async function getRegistry(dbPath?: string): Promise<any | null> {
                 // (separate from the main memory.db so the audit trail
                 // is isolated). Best-effort: if better-sqlite3 isn't
                 // resolvable in this env, skip cleanly.
+                let attestationInst: unknown = null;
                 if (!reg.get('attestationLog')) {
                   try {
                     const attestationFile = path.join(adbDir, 'dist/src/security/AttestationLog.js');
@@ -248,11 +249,40 @@ async function getRegistry(dbPath?: string): Promise<any | null> {
                       const Ctor = mod.AttestationLog as (new (cfg: { db: unknown }) => unknown) | undefined;
                       if (typeof Ctor === 'function') {
                         const inst = new Ctor({ db });
+                        attestationInst = inst;
                         if (typeof reg.set === 'function') reg.set('attestationLog', inst);
                         else reg._controllers = { ...(reg._controllers || {}), attestationLog: inst };
                       }
                     }
                   } catch { /* better-sqlite3 missing or schema init failed — skip silently */ }
+                }
+
+                // ADR-095 G7 follow-up: GuardedVectorBackend wraps the
+                // existing vectorBackend with mutationGuard + attestationLog
+                // for proof-gated state mutations (ADR-060). All three
+                // dependencies are reachable here — vectorBackend is in
+                // the baseline init, mutationGuard was just activated, and
+                // attestationLog is constructed above. Skip if any piece
+                // is missing rather than constructing with undefined.
+                if (!reg.get('guardedVectorBackend')) {
+                  try {
+                    const gvbFile = path.join(adbDir, 'dist/src/backends/ruvector/GuardedVectorBackend.js');
+                    if (fs.existsSync(gvbFile)) {
+                      const inner = reg.get('vectorBackend');
+                      const guard = reg.get('mutationGuard');
+                      const log = attestationInst ?? reg.get('attestationLog');
+                      if (inner && guard) {
+                        const url = pathToFileURL(gvbFile).href;
+                        const mod = await import(url) as Record<string, unknown>;
+                        const Ctor = mod.GuardedVectorBackend as (new (i: unknown, g: unknown, l: unknown) => unknown) | undefined;
+                        if (typeof Ctor === 'function') {
+                          const inst = new Ctor(inner, guard, log);
+                          if (typeof reg.set === 'function') reg.set('guardedVectorBackend', inst);
+                          else reg._controllers = { ...(reg._controllers || {}), guardedVectorBackend: inst };
+                        }
+                      }
+                    }
+                  } catch { /* GuardedVectorBackend optional */ }
                 }
               }
             } catch { /* G7 wiring optional */ }
@@ -263,9 +293,7 @@ async function getRegistry(dbPath?: string): Promise<any | null> {
           await Promise.allSettled([intelligencePromise, agentdbPromise]);
 
           // Remaining disabled controllers tracked in ADR-095 G7 for
-          // per-controller activation ADRs (each needs config / key
-          // material that we don't pass blindly):
-          //   - guardedVectorBackend (secured backend — needs key material)
+          // per-controller activation ADRs:
           //   - graphAdapter (graph DB adapter — needs graph DB connection)
         } catch {
           // Top-level catch — registry stays usable even if post-init wiring fails wholesale.
