@@ -9,6 +9,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { type MCPTool, getProjectCwd } from './types.js';
 import { validateIdentifier, validateText, validateAgentSpawn } from './validate-input.js';
+import { executeAgentTask } from './agent-execute-core.js';
 
 // Storage paths
 const STORAGE_DIR = '.claude-flow';
@@ -303,128 +304,15 @@ export const agentTools: MCPTool[] = [
       const vP = validateText(input.prompt as string, 'prompt');
       if (!vP.valid) return { success: false, error: `Input validation failed: ${vP.error}` };
 
-      const apiKey = process.env.ANTHROPIC_API_KEY;
-      if (!apiKey) {
-        return {
-          success: false,
-          error: 'ANTHROPIC_API_KEY not set in environment',
-          remediation: 'Set the env var with a valid Anthropic API key, then re-run. The key is read at call time, not at spawn time.',
-        };
-      }
-
-      const store = loadAgentStore();
-      const agentId = input.agentId as string;
-      const agent = store.agents[agentId];
-      if (!agent) {
-        return { success: false, error: 'Agent not found', agentId };
-      }
-      if (agent.status === 'terminated') {
-        return { success: false, error: 'Agent has been terminated', agentId };
-      }
-
-      // Map the agent's logical model name to the Anthropic model ID.
-      const modelMap: Record<string, string> = {
-        haiku: 'claude-3-5-haiku-latest',
-        sonnet: 'claude-3-5-sonnet-latest',
-        opus: 'claude-3-opus-latest',
-        inherit: 'claude-3-5-sonnet-latest',
-      };
-      const anthropicModel = modelMap[agent.model || 'sonnet'] || 'claude-3-5-sonnet-latest';
-
-      // Default system prompt reflects the agent's role.
-      const systemPrompt = (input.systemPrompt as string) ||
-        `You are a ${agent.agentType} agent operating as part of a Ruflo swarm. ` +
-        `Agent ID: ${agentId}. Domain: ${agent.domain ?? 'general'}. ` +
-        `Respond directly and stay focused on the task. If you need information you don\'t have, state that explicitly.`;
-
-      // Mark agent busy + bump task count.
-      agent.status = 'busy';
-      agent.taskCount = (agent.taskCount || 0) + 1;
-      saveAgentStore(store);
-
-      const startedAt = Date.now();
-      let result: Record<string, unknown>;
-
-      try {
-        const controller = new AbortController();
-        const timeoutMs = (input.timeoutMs as number) || 60000;
-        const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: anthropicModel,
-            max_tokens: (input.maxTokens as number) || 1024,
-            temperature: typeof input.temperature === 'number' ? input.temperature : 0.7,
-            system: systemPrompt,
-            messages: [{ role: 'user', content: input.prompt as string }],
-          }),
-          signal: controller.signal,
-        });
-        clearTimeout(timer);
-
-        if (!res.ok) {
-          const errText = await res.text().catch(() => '<unreadable error body>');
-          // Restore agent state on failure
-          agent.status = 'idle';
-          saveAgentStore(store);
-          return {
-            success: false,
-            error: `Anthropic API error ${res.status}: ${errText.slice(0, 400)}`,
-            agentId,
-            model: anthropicModel,
-          };
-        }
-
-        const data = await res.json() as {
-          id: string;
-          model: string;
-          content: Array<{ type: string; text?: string }>;
-          stop_reason: string;
-          usage: { input_tokens: number; output_tokens: number };
-        };
-
-        const textOut = data.content
-          .filter(c => c.type === 'text' && typeof c.text === 'string')
-          .map(c => c.text as string)
-          .join('');
-
-        result = {
-          messageId: data.id,
-          model: data.model,
-          stopReason: data.stop_reason,
-          output: textOut,
-          usage: {
-            inputTokens: data.usage.input_tokens,
-            outputTokens: data.usage.output_tokens,
-            totalTokens: data.usage.input_tokens + data.usage.output_tokens,
-          },
-          durationMs: Date.now() - startedAt,
-        };
-
-        // Persist on the agent record.
-        agent.status = 'idle';
-        agent.lastResult = result;
-        saveAgentStore(store);
-
-        return { success: true, agentId, ...result };
-      } catch (err) {
-        agent.status = 'idle';
-        saveAgentStore(store);
-        const msg = err instanceof Error ? err.message : String(err);
-        return {
-          success: false,
-          error: `agent_execute failed: ${msg}`,
-          agentId,
-          model: anthropicModel,
-          durationMs: Date.now() - startedAt,
-        };
-      }
+      // Delegate to the shared core (also used by the workflow runtime).
+      return executeAgentTask({
+        agentId: input.agentId as string,
+        prompt: input.prompt as string,
+        systemPrompt: input.systemPrompt as string | undefined,
+        maxTokens: input.maxTokens as number | undefined,
+        temperature: input.temperature as number | undefined,
+        timeoutMs: input.timeoutMs as number | undefined,
+      });
     },
   },
   {
