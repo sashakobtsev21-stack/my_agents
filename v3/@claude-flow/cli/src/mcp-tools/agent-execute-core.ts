@@ -85,11 +85,29 @@ export interface AnthropicCallResult {
  * Generic Anthropic Messages API call. No agent registry coupling — used
  * by agent_execute (with the agent's configured model) and by the WASM
  * agent runtime (G4) when the bundled WASM only echoes input.
+ *
+ * #1725 — falls back to Ollama Cloud (Tier-2, OpenAI-compat) when
+ * ANTHROPIC_API_KEY is unset and OLLAMA_API_KEY is present, or when
+ * RUFLO_PROVIDER=ollama is explicitly set. Response shape is normalized
+ * to the Anthropic-flavored AnthropicCallResult so existing callers
+ * don't need to know which provider answered.
  */
 export async function callAnthropicMessages(input: AnthropicCallInput): Promise<AnthropicCallResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return { success: false, error: 'ANTHROPIC_API_KEY not set in environment' };
+  const explicitProvider = (process.env.RUFLO_PROVIDER || '').toLowerCase();
+  const ollamaKey = process.env.OLLAMA_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const useOllama =
+    explicitProvider === 'ollama' || (!anthropicKey && !!ollamaKey);
+
+  if (useOllama && ollamaKey) {
+    return callOllamaCompat({ ...input, apiKey: ollamaKey });
+  }
+  if (!anthropicKey) {
+    return {
+      success: false,
+      error:
+        'No LLM provider configured. Set ANTHROPIC_API_KEY (Tier-3) or OLLAMA_API_KEY (Tier-2 Ollama Cloud — see issue #1725).',
+    };
   }
   const model = input.model || 'claude-3-5-sonnet-latest';
   const startedAt = Date.now();
@@ -99,7 +117,7 @@ export async function callAnthropicMessages(input: AnthropicCallInput): Promise<
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'x-api-key': apiKey,
+        'x-api-key': anthropicKey,
         'anthropic-version': '2023-06-01',
         'content-type': 'application/json',
       },
@@ -149,6 +167,111 @@ export async function callAnthropicMessages(input: AnthropicCallInput): Promise<
       durationMs: Date.now() - startedAt,
     };
   }
+}
+
+/**
+ * Ollama Cloud / OpenAI-compat provider — Tier-2 routing per ADR-026 + #1725.
+ *
+ * Endpoint: https://ollama.com/v1/chat/completions
+ * Auth: Authorization: Bearer <OLLAMA_API_KEY>
+ *
+ * Translates the Anthropic-flavored input shape onto OpenAI chat-completions
+ * and translates the response back so callers never see provider-specific
+ * fields. Logical model names are mapped to Ollama Cloud defaults:
+ *   - 'haiku'  / 'sonnet'  → 'gpt-oss:120b-cloud' (sensible single default)
+ *   - 'opus'              → 'gpt-oss:120b-cloud' (no opus tier on Ollama)
+ *   - explicit 'ollama:<model>' or bare provider-native name → passed through
+ */
+async function callOllamaCompat(
+  input: AnthropicCallInput & { apiKey: string },
+): Promise<AnthropicCallResult> {
+  const model = resolveOllamaModel(input.model);
+  const startedAt = Date.now();
+  // OLLAMA_BASE_URL lets users point at local/self-hosted endpoints
+  // (e.g. http://ruvultra:11434, http://localhost:11434) instead of
+  // Ollama Cloud. Default is the public cloud endpoint.
+  const base = (process.env.OLLAMA_BASE_URL || 'https://ollama.com').replace(/\/+$/, '');
+  const url = `${base}/v1/chat/completions`;
+  // Self-hosted endpoints typically don't need an Authorization header
+  // (the daemon binds to 11434 with no auth by default), but Ollama Cloud
+  // does. Send the bearer when the key is non-empty AND looks cloud-shaped.
+  const sendAuth = input.apiKey && input.apiKey !== 'local';
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), input.timeoutMs || 60000);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        ...(sendAuth ? { Authorization: `Bearer ${input.apiKey}` } : {}),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: input.maxTokens || 1024,
+        temperature: typeof input.temperature === 'number' ? input.temperature : 0.7,
+        messages: [
+          ...(input.systemPrompt
+            ? [{ role: 'system' as const, content: input.systemPrompt }]
+            : []),
+          { role: 'user' as const, content: input.prompt },
+        ],
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '<unreadable error body>');
+      return { success: false, model, error: `Ollama API error ${res.status} at ${url}: ${errText.slice(0, 400)}` };
+    }
+    const data = (await res.json()) as {
+      id?: string;
+      model?: string;
+      choices: Array<{
+        message: { role: string; content: string };
+        finish_reason?: string;
+      }>;
+      usage?: {
+        prompt_tokens?: number;
+        completion_tokens?: number;
+        total_tokens?: number;
+      };
+    };
+    const textOut = data.choices?.[0]?.message?.content ?? '';
+    const usage = data.usage ?? {};
+    return {
+      success: true,
+      model: data.model ?? model,
+      messageId: data.id ?? `ollama-${Date.now()}`,
+      stopReason: data.choices?.[0]?.finish_reason ?? 'end_turn',
+      output: textOut,
+      usage: {
+        inputTokens: usage.prompt_tokens ?? 0,
+        outputTokens: usage.completion_tokens ?? 0,
+        totalTokens: usage.total_tokens ?? 0,
+      },
+      durationMs: Date.now() - startedAt,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      model,
+      error: err instanceof Error ? err.message : String(err),
+      durationMs: Date.now() - startedAt,
+    };
+  }
+}
+
+function resolveOllamaModel(input: string | undefined): string {
+  const DEFAULT = 'gpt-oss:120b-cloud';
+  if (!input) return DEFAULT;
+  // Logical → cloud default
+  if (input === 'haiku' || input === 'sonnet' || input === 'opus' || input === 'inherit') {
+    return DEFAULT;
+  }
+  // Explicit provider prefix
+  if (input.startsWith('ollama:')) return input.slice('ollama:'.length);
+  // Bare name with cloud suffix (e.g. 'llama3:70b-cloud') passes through
+  return input;
 }
 
 /**
