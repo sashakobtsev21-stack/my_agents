@@ -81,8 +81,38 @@ Phase 1 of ADR-097 enforces at the **send** side. Two follow-up phases will tigh
 
 Until Phase 3 ships, federated spend is **not** counted in the host's cost-tracker — only local agent spend. Treat `cost-report` numbers as a lower bound when federation is in use.
 
+## Compatibility
+
+- **CLI:** pinned to `@claude-flow/cli` v3.6 major+minor.
+- **Verification:** `bash plugins/ruflo-cost-tracker/scripts/smoke.sh` is the contract.
+
+## Namespace coordination
+
+This plugin owns two AgentDB namespaces:
+
+- `cost-tracking` — usage records (consumed by `cost-report`)
+- `cost-patterns` — optimization recommendations (consumed by `cost-optimize`)
+
+Both follow the kebab-case `<plugin-stem>-<intent>` convention from [ruflo-agentdb ADR-0001 §"Namespace convention"](../ruflo-agentdb/docs/adrs/0001-agentdb-optimization.md). Both are accessed via the `memory_*` tool family which routes by namespace.
+
+> **Routing note:** The `agentdb_hierarchical-*` and `agentdb_pattern-*` tools route by tier / ReasoningBank, not by namespace string. Earlier versions of `cost-report` and `cost-optimize` passed namespace arguments to those tools and got silently-ignored behavior. ADR-0001 fixes this by switching the load path to `memory_*` and documenting the dual write path for optimization patterns.
+
+Reserved namespaces (`pattern`, `claude-memories`, `default`) MUST NOT be shadowed.
+
+## Verification
+
+```bash
+bash plugins/ruflo-cost-tracker/scripts/smoke.sh
+# Expected: "10 passed, 0 failed"
+```
+
+## Architecture Decisions
+
+- [`ADR-0001` — ruflo-cost-tracker plugin contract (namespace-routing fix, federation budget pairing, smoke as contract)](./docs/adrs/0001-cost-tracker-contract.md)
+
 ## Related Plugins
 
+- `ruflo-agentdb` — namespace convention owner; defines the routing rules ADR-0001 fixes a violation of
 - `ruflo-observability` -- Token usage metrics collected via observability instrumentation
 - `ruflo-neural-trader` -- PnL tracking and cost-adjusted return calculation
 - `ruflo-federation` -- Budget circuit breaker on outbound federation_send (ADR-097)
