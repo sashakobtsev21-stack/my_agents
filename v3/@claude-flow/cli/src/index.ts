@@ -5,6 +5,14 @@
  * Created with ❤️ by ruv.io
  */
 
+// MUST be the first import — installs console filter for the cosmetic
+// "[AgentDB Patch] Controller index not found" warning before any
+// agentic-flow / agentdb code can load. ES module imports are evaluated
+// in source order, so this file runs its side effects before any other
+// import in this module's import graph (including transitive imports of
+// agentic-flow via commands/index.js).
+import './log-filters.js';
+
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';

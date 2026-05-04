@@ -5,6 +5,9 @@
  * Created with ❤️ by ruv.io
  */
 
+import * as os from 'node:os';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
 
@@ -41,6 +44,7 @@ const benchmarkCommand: Command = {
       batchCosineSim,
       flashAttentionSearch,
       getHNSWStatus,
+      getHNSWIndex,
       storeEntry,
       searchEntries,
     } = await import('../memory/memory-initializer.js');
@@ -122,6 +126,10 @@ const benchmarkCommand: Command = {
     // 3. HNSW Search Benchmark
     if (suite === 'all' || suite === 'search') {
       spinner.setText('Benchmarking HNSW search...');
+      // Trigger lazy initialization before reading status (#1698) — without
+      // this the singleton stays null and we report "No index" even when
+      // @ruvector/core is loadable and the index has data on disk.
+      await getHNSWIndex().catch(() => null);
       const hnswStatus = getHNSWStatus();
 
       if (hnswStatus.available && hnswStatus.entryCount > 0) {
@@ -348,10 +356,6 @@ const metricsCommand: Command = {
     output.writeln();
     output.writeln(output.bold(`Performance Metrics (${timeframe})`));
     output.writeln(output.dim('─'.repeat(50)));
-
-    const os = await import('os');
-    const fs = await import('fs');
-    const path = await import('path');
 
     // Real system metrics
     const memUsage = process.memoryUsage();

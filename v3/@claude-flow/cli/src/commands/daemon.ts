@@ -6,7 +6,7 @@
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
 import { WorkerDaemon, getDaemon, startDaemon, stopDaemon, type WorkerType, type DaemonConfig } from '../services/worker-daemon.js';
-import { spawn, execFile } from 'child_process';
+import { spawn, execFile, fork } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join, resolve, isAbsolute } from 'path';
 import * as fs from 'fs';
@@ -256,40 +256,44 @@ async function startBackgroundDaemon(projectRoot: string, quiet: boolean, maxCpu
     return { success: false, exitCode: 1 };
   }
 
-  // Platform-aware spawn flags
+  // Platform-aware spawn flags. We use child_process.fork() because the daemon
+  // child is itself a Node script — fork() spawns Node directly and skips the
+  // cmd.exe interpretation pass that broke Windows + Node 25 when
+  // process.execPath contained a space (#1691). It also avoids the [DEP0190]
+  // shell:true security warning.
   const isWin = process.platform === 'win32';
-  const spawnOpts: Record<string, unknown> = {
+  const forkOpts: Record<string, unknown> = {
     cwd: resolvedRoot,
-    detached: !isWin,  // detached is POSIX-only; Windows uses windowsHide
-    // Use 'ignore' for all stdio — passing fs.openSync() FDs causes the child to
-    // die on Windows when the parent exits and closes the FDs (#1478 Bug 3).
-    // The daemon writes its own logs via appendFileSync to .claude-flow/logs/.
-    stdio: ['ignore', 'ignore', 'ignore'],
+    // detached is POSIX-only; on Windows we rely on windowsHide
+    detached: !isWin,
+    // Use 'ignore' for all stdio + 'ignore' for the IPC channel via silent:true off.
+    // fork() defaults to creating an IPC channel; we don't need it here, so we
+    // pass stdio explicitly. Passing fs.openSync() FDs causes the child to die
+    // on Windows when the parent exits and closes the FDs (#1478 Bug 3) — the
+    // daemon writes its own logs via appendFileSync to .claude-flow/logs/.
+    stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
+    windowsHide: true,
     env: {
       ...process.env,
       CLAUDE_FLOW_DAEMON: '1',
       // Prevent macOS SIGHUP kill when terminal closes
       ...(process.platform === 'darwin' ? { NOHUP: '1' } : {}),
     },
-    ...(isWin ? { shell: true, windowsHide: true } : {}),
   };
 
-  // Use spawn with explicit arguments instead of shell string interpolation
-  // This prevents command injection via paths
-  const spawnArgs = [
-    cliPath,
-    'daemon', 'start', '--foreground', '--quiet',
-  ];
-  // Forward resource threshold flags to the foreground child process
-  // Validate with strict numeric pattern to prevent shell injection on Windows (S1)
+  // Forward args to the foreground child. fork() resolves the script path
+  // via Node's normal module resolution, so cliPath does not need to be
+  // shell-quoted even when it contains spaces.
+  const forkArgs = ['daemon', 'start', '--foreground', '--quiet'];
+  // Validate with strict numeric pattern to prevent injection via crafted flags.
   const SPAWN_NUMERIC_RE = /^\d+(\.\d+)?$/;
   if (maxCpuLoad && SPAWN_NUMERIC_RE.test(maxCpuLoad)) {
-    spawnArgs.push('--max-cpu-load', maxCpuLoad);
+    forkArgs.push('--max-cpu-load', maxCpuLoad);
   }
   if (minFreeMemory && SPAWN_NUMERIC_RE.test(minFreeMemory)) {
-    spawnArgs.push('--min-free-memory', minFreeMemory);
+    forkArgs.push('--min-free-memory', minFreeMemory);
   }
-  const child = spawn(process.execPath, spawnArgs, spawnOpts);
+  const child = fork(cliPath, forkArgs, forkOpts);
 
   // Get PID from spawned process directly (no shell echo needed)
   const pid = child.pid;

@@ -10,7 +10,8 @@
  * @module v3/cli/mcp-tools/memory-tools
  */
 
-import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
+import { homedir } from 'os';
 import { join, resolve } from 'path';
 import type { MCPTool } from './types.js';
 import { validateIdentifier } from './validate-input.js';
@@ -667,7 +668,6 @@ export const memoryTools: MCPTool[] = [
     handler: async (input) => {
       await ensureInitialized();
       const { storeEntry } = await getMemoryFunctions();
-      const { homedir } = await import('os');
 
       const ns = (input.namespace as string) || 'claude-memories';
       if (input.namespace) { const vNs = validateIdentifier(ns, 'namespace'); if (!vNs.valid) return { success: false, imported: 0, error: vNs.error }; }
@@ -681,13 +681,11 @@ export const memoryTools: MCPTool[] = [
         // Scan all projects
         if (existsSync(claudeProjectsDir)) {
           try {
-            const projects = readFileSync; // just need fs methods already imported
-            const { readdirSync: readDir } = await import('fs');
-            for (const project of readDir(claudeProjectsDir, { withFileTypes: true })) {
+            for (const project of readdirSync(claudeProjectsDir, { withFileTypes: true })) {
               if (!project.isDirectory()) continue;
               const memDir = join(claudeProjectsDir, project.name, 'memory');
               if (!existsSync(memDir)) continue;
-              for (const file of readDir(memDir).filter((f: string) => f.endsWith('.md'))) {
+              for (const file of readdirSync(memDir).filter((f: string) => f.endsWith('.md'))) {
                 memoryFiles.push({ path: join(memDir, file), project: project.name, file });
               }
             }
@@ -700,8 +698,7 @@ export const memoryTools: MCPTool[] = [
         const memDir = join(claudeProjectsDir, projectHash, 'memory');
         if (existsSync(memDir)) {
           try {
-            const { readdirSync: readDir } = await import('fs');
-            for (const file of readDir(memDir).filter((f: string) => f.endsWith('.md'))) {
+            for (const file of readdirSync(memDir).filter((f: string) => f.endsWith('.md'))) {
               memoryFiles.push({ path: join(memDir, file), project: projectHash, file });
             }
           } catch { /* scan error */ }
@@ -771,7 +768,6 @@ export const memoryTools: MCPTool[] = [
     inputSchema: { type: 'object', properties: {} },
     handler: async () => {
       await ensureInitialized();
-      const { homedir } = await import('os');
 
       // Count Claude memory files
       const claudeProjectsDir = join(homedir(), '.claude', 'projects');
@@ -779,12 +775,11 @@ export const memoryTools: MCPTool[] = [
       let claudeProjects = 0;
       if (existsSync(claudeProjectsDir)) {
         try {
-          const { readdirSync: readDir } = await import('fs');
-          for (const project of readDir(claudeProjectsDir, { withFileTypes: true })) {
+          for (const project of readdirSync(claudeProjectsDir, { withFileTypes: true })) {
             if (!project.isDirectory()) continue;
             const memDir = join(claudeProjectsDir, project.name, 'memory');
             if (!existsSync(memDir)) continue;
-            const files = readDir(memDir).filter((f: string) => f.endsWith('.md'));
+            const files = readdirSync(memDir).filter((f: string) => f.endsWith('.md'));
             if (files.length > 0) { claudeProjects++; claudeFiles += files.length; }
           }
         } catch { /* ignore */ }

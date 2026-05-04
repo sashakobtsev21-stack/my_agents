@@ -122,13 +122,43 @@ export const agentdbPatternStore: MCPTool = {
       if (params.type) { const vType = validateIdentifier(params.type, 'type'); if (!vType.valid) return { success: false, error: vType.error }; }
       const pattern = validateString(params.pattern, 'pattern');
       if (!pattern) return { success: false, error: 'pattern is required (non-empty string, max 100KB)' };
+      const type = validateString(params.type, 'type', 200) ?? 'general';
+      const confidence = validateScore(params.confidence, 0.8);
+
       const bridge = await getBridge();
-      const result = await bridge.bridgeStorePattern({
-        pattern,
-        type: validateString(params.type, 'type', 200) ?? 'general',
-        confidence: validateScore(params.confidence, 0.8),
-      });
-      return result ?? { success: false, error: 'AgentDB bridge not available. Use memory_store/memory_search instead.' };
+      const result = await bridge.bridgeStorePattern({ pattern, type, confidence });
+      if (result) return result;
+
+      // ADR-093 F4: when the ReasoningBank controller registry returns
+      // null (the cause of audit-reported "AgentDB bridge not available"
+      // even though `agentdb_health.reasoningBank.enabled === true`), fall
+      // back to a direct memory_store write so the caller's pattern still
+      // persists. Surface the controller as `memory-store-fallback` so the
+      // path is observable instead of silently lost.
+      try {
+        const { storeEntry } = await import('../memory/memory-initializer.js');
+        const patternId = `pattern-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const value = JSON.stringify({ pattern, type, confidence, _fallback: 'reasoningBank-unavailable' });
+        await storeEntry({
+          key: patternId,
+          value,
+          namespace: 'pattern',
+          tags: [type, 'reasoning-pattern', 'fallback'],
+        });
+        return {
+          success: true,
+          patternId,
+          controller: 'memory-store-fallback',
+          note: 'ReasoningBank controller registry unavailable. Pattern persisted via memory_store. Run `agentdb_health` to inspect controller registration.',
+        };
+      } catch (fallbackErr) {
+        return {
+          success: false,
+          error: 'Pattern store failed: both ReasoningBank bridge and memory_store fallback unavailable',
+          fallbackError: sanitizeError(fallbackErr),
+          recommendation: 'Run agentdb_health to inspect controller registration and check that .swarm/memory.db is writable.',
+        };
+      }
     } catch (error) {
       return { success: false, error: sanitizeError(error) };
     }

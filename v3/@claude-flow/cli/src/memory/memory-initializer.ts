@@ -11,6 +11,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { readFileMaybeEncrypted, writeFileRestricted } from '../fs-secure.js';
 
 // ADR-053: Lazy import of AgentDB v3 bridge
 let _bridge: typeof import('./memory-bridge.js') | null | undefined;
@@ -439,7 +440,7 @@ export async function getHNSWIndex(options?: {
       try {
         const initSqlJs = (await import('sql.js')).default;
         const SQL = await initSqlJs();
-        const fileBuffer = fs.readFileSync(dbPath);
+        const fileBuffer = readFileMaybeEncrypted(dbPath, null);
         const sqlDb = new SQL.Database(fileBuffer);
 
         // Load all entries with embeddings
@@ -979,7 +980,7 @@ export async function ensureSchemaColumns(dbPath: string): Promise<{
     const initSqlJs = (await import('sql.js')).default;
     const SQL = await initSqlJs();
 
-    const fileBuffer = fs.readFileSync(dbPath);
+    const fileBuffer = readFileMaybeEncrypted(dbPath, null);
     const db = new SQL.Database(fileBuffer);
 
     // Get current columns in memory_entries
@@ -1021,7 +1022,7 @@ export async function ensureSchemaColumns(dbPath: string): Promise<{
     if (modified) {
       // Save updated database
       const data = db.export();
-      fs.writeFileSync(dbPath, Buffer.from(data));
+      writeFileRestricted(dbPath, Buffer.from(data), { encrypt: true });
     }
 
     db.close();
@@ -1237,7 +1238,7 @@ export async function initializeMemoryDatabase(options: {
       // Save to file
       const data = db.export();
       const buffer = Buffer.from(data);
-      fs.writeFileSync(dbPath, buffer);
+      writeFileRestricted(dbPath, buffer, { encrypt: true });
 
       // Close database
       db.close();
@@ -1308,7 +1309,7 @@ export async function initializeMemoryDatabase(options: {
       sqliteHeader[26] = 0x20; // min embedded payload
       sqliteHeader[27] = 0x20; // leaf payload
 
-      fs.writeFileSync(dbPath, sqliteHeader);
+      writeFileRestricted(dbPath, sqliteHeader, { encrypt: true });
 
       // ADR-053: Activate ControllerRegistry even on fallback path
       const controllerResult = await activateControllerRegistry(dbPath, verbose);
@@ -1535,17 +1536,37 @@ export async function loadEmbeddingModel(options?: {
   }
 
   try {
-    // Try to import @xenova/transformers for ONNX embeddings
-    const transformers = await import('@xenova/transformers').catch(() => null);
+    // ADR-094: prefer @huggingface/transformers (clears protobufjs <7.5.5
+    // critical RCE chain), fall back to legacy @xenova/transformers.
+    // Inlined here rather than depending on @claude-flow/embeddings to
+    // avoid a circular optional-dep at install time; the logic mirrors
+    // @claude-flow/embeddings/src/transformers-loader.ts.
+    let transformersSource: '@huggingface/transformers' | '@xenova/transformers' | null = null;
+    let pipelineFn: ((task: string, model?: string) => Promise<unknown>) | null = null;
 
-    if (transformers) {
-      if (verbose) {
-        console.log('Loading ONNX embedding model (all-MiniLM-L6-v2)...');
+    {
+      const tryLoad = async (specifier: string): Promise<Record<string, unknown> | null> => {
+        try { return (await import(specifier)) as Record<string, unknown>; }
+        catch { return null; }
+      };
+      const hf = await tryLoad('@huggingface/transformers');
+      if (hf && typeof hf.pipeline === 'function') {
+        pipelineFn = hf.pipeline as (t: string, m?: string) => Promise<unknown>;
+        transformersSource = '@huggingface/transformers';
+      } else {
+        const xen = await tryLoad('@xenova/transformers');
+        if (xen && typeof xen.pipeline === 'function') {
+          pipelineFn = xen.pipeline as (t: string, m?: string) => Promise<unknown>;
+          transformersSource = '@xenova/transformers';
+        }
       }
+    }
 
-      // Use small, fast model for local embeddings
-      const { pipeline } = transformers;
-      const embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+    if (pipelineFn && transformersSource) {
+      if (verbose) {
+        console.log(`Loading ONNX embedding model via ${transformersSource} (all-MiniLM-L6-v2)...`);
+      }
+      const embedder = await pipelineFn('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
 
       embeddingModelState = {
         loaded: true,
@@ -1847,7 +1868,7 @@ export async function verifyMemoryInit(dbPath: string, options?: {
     const fs = await import('fs');
 
     // Load database
-    const fileBuffer = fs.readFileSync(dbPath);
+    const fileBuffer = readFileMaybeEncrypted(dbPath, null);
     const db = new SQL.Database(fileBuffer);
 
     // Test 1: Schema verification
@@ -1992,7 +2013,7 @@ export async function verifyMemoryInit(dbPath: string, options?: {
 
     // Save changes
     const data = db.export();
-    fs.writeFileSync(dbPath, Buffer.from(data));
+    writeFileRestricted(dbPath, Buffer.from(data), { encrypt: true });
     db.close();
 
     const passed = tests.filter(t => t.passed).length;
@@ -2084,7 +2105,7 @@ export async function storeEntry(options: {
     const initSqlJs = (await import('sql.js')).default;
     const SQL = await initSqlJs();
 
-    const fileBuffer = fs.readFileSync(dbPath);
+    const fileBuffer = readFileMaybeEncrypted(dbPath, null);
     const db = new SQL.Database(fileBuffer);
 
     const id = `entry_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -2132,7 +2153,7 @@ export async function storeEntry(options: {
 
     // Save
     const data = db.export();
-    fs.writeFileSync(dbPath, Buffer.from(data));
+    writeFileRestricted(dbPath, Buffer.from(data), { encrypt: true });
     db.close();
 
     // Add to HNSW index for faster future searches
@@ -2223,7 +2244,7 @@ export async function searchEntries(options: {
         // Rerank candidates with exact cosine similarity from SQLite
         const initSqlJs = (await import('sql.js')).default;
         const SQL = await initSqlJs();
-        const fileBuffer = fs.readFileSync(dbPath);
+        const fileBuffer = readFileMaybeEncrypted(dbPath, null);
         const db = new SQL.Database(fileBuffer);
         const reranked: { id: string; key: string; content: string; score: number; namespace: string }[] = [];
 
@@ -2276,7 +2297,7 @@ export async function searchEntries(options: {
     const initSqlJs = (await import('sql.js')).default;
     const SQL = await initSqlJs();
 
-    const fileBuffer = fs.readFileSync(dbPath);
+    const fileBuffer = readFileMaybeEncrypted(dbPath, null);
     const db = new SQL.Database(fileBuffer);
 
     // Get entries with embeddings
@@ -2430,7 +2451,7 @@ export async function listEntries(options: {
     const initSqlJs = (await import('sql.js')).default;
     const SQL = await initSqlJs();
 
-    const fileBuffer = fs.readFileSync(dbPath);
+    const fileBuffer = readFileMaybeEncrypted(dbPath, null);
     const db = new SQL.Database(fileBuffer);
 
     // Get total count
@@ -2558,7 +2579,7 @@ export async function getEntry(options: {
     const initSqlJs = (await import('sql.js')).default;
     const SQL = await initSqlJs();
 
-    const fileBuffer = fs.readFileSync(dbPath);
+    const fileBuffer = readFileMaybeEncrypted(dbPath, null);
     const db = new SQL.Database(fileBuffer);
 
     // Find entry by key
@@ -2596,7 +2617,7 @@ export async function getEntry(options: {
 
     // Save updated database
     const data = db.export();
-    fs.writeFileSync(dbPath, Buffer.from(data));
+    writeFileRestricted(dbPath, Buffer.from(data), { encrypt: true });
 
     db.close();
 
@@ -2699,7 +2720,7 @@ export async function deleteEntry(options: {
     const initSqlJs = (await import('sql.js')).default;
     const SQL = await initSqlJs();
 
-    const fileBuffer = fs.readFileSync(dbPath);
+    const fileBuffer = readFileMaybeEncrypted(dbPath, null);
     const db = new SQL.Database(fileBuffer);
 
     // Check if entry exists first
@@ -2754,7 +2775,7 @@ export async function deleteEntry(options: {
 
     // Save updated database
     const data = db.export();
-    fs.writeFileSync(dbPath, Buffer.from(data));
+    writeFileRestricted(dbPath, Buffer.from(data), { encrypt: true });
 
     db.close();
 
