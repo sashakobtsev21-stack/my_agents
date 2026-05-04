@@ -4,9 +4,10 @@
  * Tool definitions for session management with file persistence.
  */
 
-import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, unlinkSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { type MCPTool, getProjectCwd } from './types.js';
+import { mkdirRestricted, writeFileRestricted } from '../fs-secure.js';
 import { validateIdentifier, validateText } from './validate-input.js';
 
 // Storage paths
@@ -44,7 +45,7 @@ function getSessionPath(sessionId: string): string {
 function ensureSessionDir(): void {
   const dir = getSessionDir();
   if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
+    mkdirRestricted(dir);
   }
 }
 
@@ -63,7 +64,9 @@ function loadSession(sessionId: string): SessionRecord | null {
 
 function saveSession(session: SessionRecord): void {
   ensureSessionDir();
-  writeFileSync(getSessionPath(session.sessionId), JSON.stringify(session, null, 2), 'utf-8');
+  // audit_1776853149979: session JSON contains memory snapshots and agent
+  // prompts — restrict to owner read/write.
+  writeFileRestricted(getSessionPath(session.sessionId), JSON.stringify(session, null, 2));
 }
 
 function listSessions(): SessionRecord[] {
@@ -229,11 +232,12 @@ export const sessionTools: MCPTool[] = [
       }
 
       if (session) {
-        // Restore data to respective stores (legacy JSON for backward compat)
+        // Restore data to respective stores (legacy JSON for backward compat).
+        // audit_1776853149979: tighten perms on the restored stores too.
         if (session.data?.memory) {
           const memoryDir = join(getProjectCwd(), STORAGE_DIR, 'memory');
-          if (!existsSync(memoryDir)) mkdirSync(memoryDir, { recursive: true });
-          writeFileSync(join(memoryDir, 'store.json'), JSON.stringify(session.data.memory, null, 2), 'utf-8');
+          if (!existsSync(memoryDir)) mkdirRestricted(memoryDir);
+          writeFileRestricted(join(memoryDir, 'store.json'), JSON.stringify(session.data.memory, null, 2));
 
           // Also populate active sql.js SQLite database so memory-tools can find entries
           try {
@@ -259,13 +263,13 @@ export const sessionTools: MCPTool[] = [
         }
         if (session.data?.tasks) {
           const taskDir = join(getProjectCwd(), STORAGE_DIR, 'tasks');
-          if (!existsSync(taskDir)) mkdirSync(taskDir, { recursive: true });
-          writeFileSync(join(taskDir, 'store.json'), JSON.stringify(session.data.tasks, null, 2), 'utf-8');
+          if (!existsSync(taskDir)) mkdirRestricted(taskDir);
+          writeFileRestricted(join(taskDir, 'store.json'), JSON.stringify(session.data.tasks, null, 2));
         }
         if (session.data?.agents) {
           const agentDir = join(getProjectCwd(), STORAGE_DIR, 'agents');
-          if (!existsSync(agentDir)) mkdirSync(agentDir, { recursive: true });
-          writeFileSync(join(agentDir, 'store.json'), JSON.stringify(session.data.agents, null, 2), 'utf-8');
+          if (!existsSync(agentDir)) mkdirRestricted(agentDir);
+          writeFileRestricted(join(agentDir, 'store.json'), JSON.stringify(session.data.agents, null, 2));
         }
 
         return {

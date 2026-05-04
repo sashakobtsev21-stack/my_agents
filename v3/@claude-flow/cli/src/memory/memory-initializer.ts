@@ -11,6 +11,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { writeFileRestricted } from '../fs-secure.js';
 
 // ADR-053: Lazy import of AgentDB v3 bridge
 let _bridge: typeof import('./memory-bridge.js') | null | undefined;
@@ -1021,7 +1022,7 @@ export async function ensureSchemaColumns(dbPath: string): Promise<{
     if (modified) {
       // Save updated database
       const data = db.export();
-      fs.writeFileSync(dbPath, Buffer.from(data));
+      writeFileRestricted(dbPath, Buffer.from(data));
     }
 
     db.close();
@@ -1237,7 +1238,7 @@ export async function initializeMemoryDatabase(options: {
       // Save to file
       const data = db.export();
       const buffer = Buffer.from(data);
-      fs.writeFileSync(dbPath, buffer);
+      writeFileRestricted(dbPath, buffer);
 
       // Close database
       db.close();
@@ -1308,7 +1309,7 @@ export async function initializeMemoryDatabase(options: {
       sqliteHeader[26] = 0x20; // min embedded payload
       sqliteHeader[27] = 0x20; // leaf payload
 
-      fs.writeFileSync(dbPath, sqliteHeader);
+      writeFileRestricted(dbPath, sqliteHeader);
 
       // ADR-053: Activate ControllerRegistry even on fallback path
       const controllerResult = await activateControllerRegistry(dbPath, verbose);
@@ -2012,7 +2013,7 @@ export async function verifyMemoryInit(dbPath: string, options?: {
 
     // Save changes
     const data = db.export();
-    fs.writeFileSync(dbPath, Buffer.from(data));
+    writeFileRestricted(dbPath, Buffer.from(data));
     db.close();
 
     const passed = tests.filter(t => t.passed).length;
@@ -2152,7 +2153,7 @@ export async function storeEntry(options: {
 
     // Save
     const data = db.export();
-    fs.writeFileSync(dbPath, Buffer.from(data));
+    writeFileRestricted(dbPath, Buffer.from(data));
     db.close();
 
     // Add to HNSW index for faster future searches
@@ -2616,7 +2617,7 @@ export async function getEntry(options: {
 
     // Save updated database
     const data = db.export();
-    fs.writeFileSync(dbPath, Buffer.from(data));
+    writeFileRestricted(dbPath, Buffer.from(data));
 
     db.close();
 
@@ -2774,7 +2775,7 @@ export async function deleteEntry(options: {
 
     // Save updated database
     const data = db.export();
-    fs.writeFileSync(dbPath, Buffer.from(data));
+    writeFileRestricted(dbPath, Buffer.from(data));
 
     db.close();
 
