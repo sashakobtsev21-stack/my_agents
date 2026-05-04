@@ -1,12 +1,12 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-05-04T01:44:08.951Z",
-    "gitCommit": "f8cd1c9fe24d0b86e51338f3a31d4ae49f5d1f38",
+    "issuedAt": "2026-05-04T02:34:04.875Z",
+    "gitCommit": "5addd83b43f15224b635f31a478bd3cb8d6caab5",
     "branch": "fix/issues-may-1-3",
     "releases": {
-      "ruflo": "3.6.25",
-      "@claude-flow/cli": "3.6.25"
+      "ruflo": "3.6.26",
+      "@claude-flow/cli": "3.6.26"
     },
     "summary": {
       "totalFixes": 55,
@@ -114,7 +114,7 @@
         "id": "#1697",
         "desc": "rvf-wasm overrides",
         "file": "package.json",
-        "sha256": "9dc654ca507fa93904e25d06c69aa0b95bcc77df5a54803222414aff33ac6611",
+        "sha256": "f9f109f8cf3181a3f7baf40ae0d541640d4206583af1e437f9b15a42bb63ecc5",
         "marker": "@ruvector/rvf-wasm",
         "markerVerified": true
       },
@@ -138,7 +138,7 @@
         "id": "#1721",
         "desc": "postinstall copies all dist/src/* siblings",
         "file": "v3/@claude-flow/cli/package.json",
-        "sha256": "d5d8455ea8c6d389a5baf08c4dc03b228559487c114201bffaa411513b75d203",
+        "sha256": "8e194a099c163fdb38acf8e9543a4d11ea9009d895ddefecbb36031f3149374f",
         "marker": "postinstall.cjs",
         "markerVerified": true
       },
@@ -458,10 +458,10 @@
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "eadefd53664bacbd770462576bfa7c8b8467c7651c139b5962923be07918b2d6",
+    "manifestHash": "922b9fb53d243f76c6c40705aff6e77cee9ca013978e42dd03602208ab0f92fb",
     "signatureAlgo": "ed25519",
-    "publicKey": "be2312d5493c3a66600a3267d2505ab4f55e3d914e5c06f7dfdd24fee12d9539",
-    "signature": "fd72ddd9a596978397c2e494cac6c304297d67e74b33e375b588b65b9e245e8af87665ed25c733c41027092a0040e34c62c085c4a9cd2b78c6fdb781e5d65e06",
+    "publicKey": "484271670c1c3db8201c9c6586a198b0dc8bba1f5c52e21b2181ed7424230a15",
+    "signature": "65de5874688a488457324b121d63a1ebd64fc2f0dd4ffdc93bade50956102bfe0000407edbef90cf045297b72291c7cbe0378a60531aac1a0f57c2d4808abd0c",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }
