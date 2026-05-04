@@ -353,9 +353,16 @@ The deterministic seed derivation means the signing key is reproducible from the
 
 ## Coverage so far
 
-The current witness covers **27 fixes** spanning ADR-093 F1–F12, four GitHub-issue fixes (#1697, #1698, #1691, #1721), one ADR (#094 transformers loader), and one ADR-095 gap closure (G6 auto-memory dedup).
+The current witness covers **27 fixes** spanning ADR-093 F1–F12, four GitHub-issue fixes (#1697, #1698, #1691, #1721), one ADR (#094 transformers loader), and the ADR-095 architectural gap closures (G1 agent_execute wire, G2 federation Ed25519, G3 workflow runtime, G4 WASM agent runtime, G6 auto-memory dedup, plus G7 controllers att/gnn/mut/rvf/gvb).
 
-The 6 remaining ADR-095 architectural gaps (G1, G2, G3, G4, G5/handed off to ADR-094, G7) are tracked in [`v3/docs/adr/ADR-095-architectural-gaps-from-april-audit.md`](v3/docs/adr/ADR-095-architectural-gaps-from-april-audit.md). When their per-gap ADRs land, they will be added to this manifest with their own fingerprints.
+Released as **ruflo@3.6.25 / @claude-flow/cli@3.6.25** on 2026-05-04. Regenerate manually with `node scripts/regenerate-witness.mjs` after a release bump.
+
+Remaining work tracked separately:
+- ADR-095 G7 graphAdapter — pending an external graph DB connection.
+- ADR-096 (encryption-at-rest) Phases 1–4 shipped in this release but are not yet enumerated as individual fix entries; they appear in the capability inventory section. Per-feature witnesses land in task #25.
+- ADR-097 (federation budget circuit breaker) Phase 1 shipped; Phases 2–4 deferred.
+
+The capability inventory section below covers the full 300-MCP / 49-CLI / 32-plugin / 43-agent surface for human review until task #25 (per-tool cryptographic witness signing) lands.
 
 ---
 
