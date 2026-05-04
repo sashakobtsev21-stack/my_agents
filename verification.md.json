@@ -1,12 +1,12 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-05-04T02:34:04.875Z",
-    "gitCommit": "5addd83b43f15224b635f31a478bd3cb8d6caab5",
+    "issuedAt": "2026-05-04T02:54:14.459Z",
+    "gitCommit": "9c1a71f009069d835cc1b02024c17f955ed692c9",
     "branch": "fix/issues-may-1-3",
     "releases": {
-      "ruflo": "3.6.26",
-      "@claude-flow/cli": "3.6.26"
+      "ruflo": "3.6.27",
+      "@claude-flow/cli": "3.6.27"
     },
     "summary": {
       "totalFixes": 55,
@@ -114,7 +114,7 @@
         "id": "#1697",
         "desc": "rvf-wasm overrides",
         "file": "package.json",
-        "sha256": "f9f109f8cf3181a3f7baf40ae0d541640d4206583af1e437f9b15a42bb63ecc5",
+        "sha256": "b546d37807325b7e0fd22af6443a67e498978b9b9f3b95861f0e2ed4d21222e1",
         "marker": "@ruvector/rvf-wasm",
         "markerVerified": true
       },
@@ -138,7 +138,7 @@
         "id": "#1721",
         "desc": "postinstall copies all dist/src/* siblings",
         "file": "v3/@claude-flow/cli/package.json",
-        "sha256": "8e194a099c163fdb38acf8e9543a4d11ea9009d895ddefecbb36031f3149374f",
+        "sha256": "498784c46429c1f1b00b84e8526a61adc3ce7404d9509e9ec1ef6bab7bd9482c",
         "marker": "postinstall.cjs",
         "markerVerified": true
       },
@@ -154,7 +154,7 @@
         "id": "G1",
         "desc": "agent_execute wires Anthropic Messages API",
         "file": "v3/@claude-flow/cli/dist/src/mcp-tools/agent-execute-core.js",
-        "sha256": "2990ff3e385b728df623d85d4e1954721fbe3bc07c206a288a2498b5c714bb9f",
+        "sha256": "3070ca38954ad68385faf54d4111e7395cf0667a3f4db6607fe1b9b3d84915fa",
         "marker": "callAnthropicMessages",
         "markerVerified": true
       },
@@ -458,10 +458,10 @@
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "922b9fb53d243f76c6c40705aff6e77cee9ca013978e42dd03602208ab0f92fb",
+    "manifestHash": "54d825e5875c1b6b52edf5d8efda0b4b91d4a01bda4aed7e311d097e8038f09b",
     "signatureAlgo": "ed25519",
-    "publicKey": "484271670c1c3db8201c9c6586a198b0dc8bba1f5c52e21b2181ed7424230a15",
-    "signature": "65de5874688a488457324b121d63a1ebd64fc2f0dd4ffdc93bade50956102bfe0000407edbef90cf045297b72291c7cbe0378a60531aac1a0f57c2d4808abd0c",
+    "publicKey": "1e0e229d7257657c8de49666d8f1a1afcbc48408990ddefeb12b0a07924daa75",
+    "signature": "57d6763567e6edf8f50f636a0ad4d46c1f6a135384abee5ab2b0e535ee3393b8655b537b8e706f39d90e69e8b2f438a4847070be814bab10d0c64cb1963b420e",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }
