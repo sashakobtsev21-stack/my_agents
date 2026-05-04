@@ -56,7 +56,9 @@ const DEFAULT_MANIFEST_URL = 'https://raw.githubusercontent.com/ruvnet/ruflo/{br
 
 async function fetchWitness(branch: string): Promise<Witness> {
   const url = DEFAULT_MANIFEST_URL.replace('{branch}', branch);
-  const res = await fetch(url);
+  // audit_1776853149979: bare fetch had no timeout — a hung GitHub CDN would
+  // pin the verify command indefinitely. 30s is generous for a sub-MB JSON.
+  const res = await fetch(url, { signal: AbortSignal.timeout(30000) });
   if (!res.ok) {
     throw new Error(`Failed to fetch manifest from ${url}: ${res.status} ${res.statusText}`);
   }
