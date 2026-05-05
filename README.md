@@ -20,12 +20,12 @@ Orchestrate 100+ specialized AI agents across machines, teams, and trust boundar
 
 ### Why Ruflo?
 
-> Claude Flow is now Ruflo — named by rUv, who loves Rust, flow states, and building things that feel inevitable. The "Ru" is the Ruv. The "flo" is the flow. Underneath, WASM kernels written in Rust power the policy engine, embeddings, and proof system. 
+> Claude Flow is now Ruflo — named by [`rUv`](https://ruv.io), who loves Rust, flow states, and building things that feel inevitable. The "Ru" is the Ruv. The "flo" is the flow. Underneath, powered by [`Congnitum.One`](https://cognitum.one/?RuFlo) Agentic Architecture, written in Rust super-charges the Ai engine, embeddings, and plugin system. 
 
 
 ### What Ruflo Does
 
-One `init` gives Claude Code a nervous system: agents self-organize into swarms, learn from every task, remember across sessions, and — with federation — securely talk to agents on other machines without leaking data. You keep writing code. Ruflo handles the coordination.
+One `npx ruvflo init` gives Claude Code a nervous system: agents self-organize into swarms, learn from every task, remember across sessions, and — with federation — securely talk to agents on other machines without leaking data. You keep writing code. Ruflo handles the coordination.
 
 ```
 Self-Learning / Self-Optimizing Agent Architecture
