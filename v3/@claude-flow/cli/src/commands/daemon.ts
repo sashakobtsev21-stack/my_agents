@@ -264,8 +264,14 @@ async function startBackgroundDaemon(projectRoot: string, quiet: boolean, maxCpu
   const isWin = process.platform === 'win32';
   const forkOpts: Record<string, unknown> = {
     cwd: resolvedRoot,
-    // detached is POSIX-only; on Windows we rely on windowsHide
-    detached: !isWin,
+    // detached: true on every platform (#1766). On Windows, leaving detached:false
+    // kept the child in the parent's process group AND the IPC pipe held the
+    // child to npx — when npx exited, the IPC pipe tore down and the daemon
+    // died within ~1s. detached:true + child.disconnect() (below) gives the
+    // child its own session/pgid and breaks the IPC pipe so the daemon
+    // genuinely survives parent exit. On POSIX, detached:true was already the
+    // path; this just makes Windows match.
+    detached: true,
     // Use 'ignore' for all stdio + 'ignore' for the IPC channel via silent:true off.
     // fork() defaults to creating an IPC channel; we don't need it here, so we
     // pass stdio explicitly. Passing fs.openSync() FDs causes the child to die
@@ -304,8 +310,15 @@ async function startBackgroundDaemon(projectRoot: string, quiet: boolean, maxCpu
   }
 
   // Unref BEFORE writing PID file — prevents race where parent exits
-  // but child hasn't fully detached yet (fixes macOS daemon death #1283)
+  // but child hasn't fully detached yet (fixes macOS daemon death #1283).
   child.unref();
+  // #1766: also break the IPC pipe explicitly. unref() releases the libuv
+  // handle but does NOT close the IPC channel; on Windows the open IPC
+  // pipe keeps the daemon tied to its parent npx, and when npx exits the
+  // pipe is torn down and the daemon exits with it. disconnect() severs
+  // the IPC pipe so the daemon truly stands on its own. Wrapped in try
+  // because disconnect() throws if the IPC channel is already gone.
+  try { child.disconnect(); } catch { /* IPC channel already closed */ }
 
   // Longer delay to let the child process start and write its own PID file.
   // 100ms was too short on Windows; the child's checkExistingDaemon() would
