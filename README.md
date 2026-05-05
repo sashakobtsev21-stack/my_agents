@@ -20,7 +20,7 @@ Orchestrate 100+ specialized AI agents across machines, teams, and trust boundar
 
 ### Why Ruflo?
 
-> Claude Flow is now Ruflo — named by [`rUv`](https://ruv.io), who loves Rust, flow states, and building things that feel inevitable. The "Ru" is the Ruv. The "flo" is the flow. Underneath, powered by [`Congnitum.One`](https://cognitum.one/?RuFlo) Agentic Architecture, written in Rust super-charges the Ai engine, embeddings, and plugin system. 
+> Claude Flow is now Ruflo — named by [`rUv`](https://ruv.io), who loves Rust, flow states, and building things that feel inevitable. The "Ru" is the rUv. The "flo" is working until 3am. Underneath, powered by [`Congnitum.One`](https://cognitum.one/?RuFlo) Agentic Architecture, written in Rust super-charges the Ai engine, embeddings, and plugin system. 
 
 
 ### What Ruflo Does
