@@ -22,18 +22,39 @@ claude --plugin-dir plugins/ruflo-cost-tracker
 
 | Skill | Usage | Description |
 |-------|-------|-------------|
-| `cost-report` | `/cost-report [--period today]` | Generate a cost report with token usage and USD costs by agent and model |
-| `cost-optimize` | `/cost-optimize` | Analyze usage patterns and recommend cost optimizations with estimated savings |
+| `cost-report` | `/cost-report [--period today]` | Generate a cost report with token usage and USD costs by tier, model, and agent |
+| `cost-optimize` | `/cost-optimize` | Analyze usage patterns, recommend cost optimizations, and emit `hooks_model-outcome` events |
+| `cost-booster-route` | `/cost-booster-route <task>` | Route tasks via `hooks_route` and report Agent Booster (Tier 1) bypass utilization |
+| `cost-booster-edit` | `/cost-booster-edit <intent> <file>` | **Apply** a Tier 1 transform via `agent-booster.apply()` (sub-millisecond, $0, deterministic) |
+| `cost-benchmark` | `/cost-benchmark [--llm] [--anthropic]` | Run the corpus benchmark and persist measured-vs-claimed table to `docs/benchmarks/runs/` |
+| `cost-compact-context` | `/cost-compact-context <query>` | Wrap `getTokenOptimizer().getCompactContext()` for retrieval-compacted analysis (graceful fallback when agentic-flow not installed) |
 
-## Commands (5 subcommands)
+## Commands (7 subcommands)
 
 ```bash
-cost report [--period today|week|month]  # Generate cost report for a period
-cost breakdown [--by agent|model|task]   # Detailed breakdown by dimension
-cost budget set <amount>                 # Set budget limit in USD
-cost optimize                            # Analyze usage and suggest savings
-cost history                             # Show cost tracking over time
+cost report [--period today|week|month]   # Cost report (with By-tier block, reads measured booster data)
+cost breakdown [--by agent|model|task]    # Detailed breakdown by dimension
+cost budget set <amount>                  # Set budget limit in USD
+cost optimize                             # Analyze usage and suggest savings (+ hooks_model-outcome feedback)
+cost benchmark [--llm] [--anthropic]      # Run measured benchmark — booster + optional Gemini/Sonnet/Opus baselines
+cost workers                              # Inspect optimize + benchmark loop-workers consumed
+cost history                              # Show cost tracking over time
 ```
+
+## Optimization integration (ADR-0002)
+
+Four upstream capabilities are now wired to the cost-tracker surface — every optimization recommendation maps to a real tool, not a heuristic:
+
+| Capability | Where | Surfaced by |
+|---|---|---|
+| **Agent Booster bypass** (Tier 1, $0, WASM) | `hooks_route` emits `[AGENT_BOOSTER_AVAILABLE]` (CLI: `npx @claude-flow/cli@latest hooks route --task ...`) | `cost-booster-route` skill |
+| **Token optimizer / compact context** | `getTokenOptimizer().getCompactContext()` from `@claude-flow/integration` (uses `agentic-flow` when present) | `cost-compact-context` skill |
+| **Model-outcome feedback loop** | `hooks_model-outcome` (typed equivalent of legacy `routing-outcomes`) | `cost-optimize` skill step 8 |
+| **Optimize + benchmark loop workers** | `hooks_worker-status --worker optimize / --worker benchmark` (declared by ruflo-loop-workers) | `cost workers` command + `cost-analyst` agent |
+
+CLAUDE.md root percentage claims (`-32%` retrieval, `-15%` booster edits, `352x` speedup, `95%` cache hit) are **claimed upstream, not yet verified** in this repo. The skills above tag every figure with that disclaimer; only the structural `$0` cost of Tier 1 bypasses is reported as a measured saving.
+
+See [ADR-0002](./docs/adrs/0002-agentic-flow-and-agent-booster-integration.md) for the full rationale, including the riskiest assumption (no MCP wrapper for `getTokenOptimizer` — `cost-compact-context` shells a Node one-liner).
 
 ## Model Pricing (per 1M tokens)
 
@@ -103,12 +124,13 @@ Reserved namespaces (`pattern`, `claude-memories`, `default`) MUST NOT be shadow
 
 ```bash
 bash plugins/ruflo-cost-tracker/scripts/smoke.sh
-# Expected: "10 passed, 0 failed"
+# Expected: "27 passed, 0 failed"
 ```
 
 ## Architecture Decisions
 
 - [`ADR-0001` — ruflo-cost-tracker plugin contract (namespace-routing fix, federation budget pairing, smoke as contract)](./docs/adrs/0001-cost-tracker-contract.md)
+- [`ADR-0002` — agentic-flow + Agent Booster integration, model-outcome feedback loop, optimize-worker consumption, tier-aware reporting](./docs/adrs/0002-agentic-flow-and-agent-booster-integration.md)
 
 ## Related Plugins
 

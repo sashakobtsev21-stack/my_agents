@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Structural smoke test for ruflo-cost-tracker v0.2.2 (ADR-0001).
+# Structural smoke test for ruflo-cost-tracker v0.3.0 (ADR-0001 + ADR-0002).
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PASS=0
@@ -8,21 +8,21 @@ step() { printf "→ %s ... " "$1"; }
 ok()   { printf "PASS\n"; PASS=$((PASS+1)); }
 bad()  { printf "FAIL: %s\n" "$1"; FAIL=$((FAIL+1)); }
 
-step "1. plugin.json declares 0.2.2 with new keywords"
+step "1. plugin.json declares 0.4.0 with new keywords"
 v=$(grep -E '"version"' "$ROOT/.claude-plugin/plugin.json" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-if [[ "$v" != "0.2.2" ]]; then
-  bad "expected 0.2.2, got '$v'"
+if [[ "$v" != "0.4.0" ]]; then
+  bad "expected 0.4.0, got '$v'"
 else
   miss=""
-  for k in namespace-routing mcp; do
+  for k in namespace-routing mcp agentic-flow agent-booster tier1-routing model-routing benchmarking verified; do
     grep -q "\"$k\"" "$ROOT/.claude-plugin/plugin.json" || miss="$miss $k"
   done
   [[ -z "$miss" ]] && ok || bad "missing keywords:$miss"
 fi
 
-step "2. both skills present with valid frontmatter"
+step "2. all six skills present with valid frontmatter"
 miss=""
-for s in cost-report cost-optimize; do
+for s in cost-report cost-optimize cost-booster-route cost-booster-edit cost-compact-context cost-benchmark; do
   f="$ROOT/skills/$s/SKILL.md"
   [[ -f "$f" ]] || { miss="$miss missing-$s"; continue; }
   for k in 'name:' 'description:' 'allowed-tools:'; do
@@ -80,6 +80,144 @@ for f in "$ROOT"/skills/*/SKILL.md; do
   grep -q '^allowed-tools:[[:space:]]*\*' "$f" && bad_skills="$bad_skills $(basename $(dirname "$f"))"
 done
 [[ -z "$bad_skills" ]] && ok || bad "wildcard:$bad_skills"
+
+# ─── ADR-0002 checks (11–16) ─────────────────────────────────────────────────
+
+step "11. cost-booster-route skill references hooks_route + AGENT_BOOSTER_AVAILABLE"
+F="$ROOT/skills/cost-booster-route/SKILL.md"
+miss=""
+grep -q "hooks_route" "$F" || miss="$miss hooks_route"
+grep -q "AGENT_BOOSTER_AVAILABLE" "$F" || miss="$miss booster-literal"
+grep -q '^allowed-tools:[[:space:]]*\*' "$F" && miss="$miss wildcard"
+[[ -z "$miss" ]] && ok || bad "$miss"
+
+step "12. cost-compact-context skill references getTokenOptimizer + tags upstream figures"
+F="$ROOT/skills/cost-compact-context/SKILL.md"
+miss=""
+grep -qE "getTokenOptimizer|@claude-flow/integration" "$F" || miss="$miss bridge-ref"
+grep -q "claimed upstream, not yet verified" "$F" || miss="$miss upstream-disclaimer"
+grep -qE "agentic-flow.*not (installed|available)|fallback|bridge[- ](unavailable|reported)" "$F" || miss="$miss fallback-doc"
+[[ -z "$miss" ]] && ok || bad "$miss"
+
+step "13. cost-optimize references hooks_model-outcome (step + allowed-tools)"
+F="$ROOT/skills/cost-optimize/SKILL.md"
+miss=""
+grep -q "hooks_model-outcome" "$F" || miss="$miss step-mention"
+grep -qE '^allowed-tools:.*hooks_model-outcome' "$F" || miss="$miss allowed-tools"
+[[ -z "$miss" ]] && ok || bad "$miss"
+
+step "14. cost-analyst agent documents optimize + benchmark workers"
+F="$ROOT/agents/cost-analyst.md"
+miss=""
+grep -q "Background workers" "$F" || miss="$miss section"
+grep -q "optimize" "$F" || miss="$miss optimize-worker"
+grep -q "benchmark" "$F" || miss="$miss benchmark-worker"
+grep -q "ruflo-loop-workers" "$F" || miss="$miss cross-link"
+[[ -z "$miss" ]] && ok || bad "$miss"
+
+step "15. ruflo-cost.md documents 'cost workers' subcommand with hooks_worker-status"
+F="$ROOT/commands/ruflo-cost.md"
+miss=""
+grep -q "cost workers" "$F" || miss="$miss subcommand"
+grep -q "hooks_worker-status" "$F" || miss="$miss tool-ref"
+grep -q "optimize" "$F" || miss="$miss optimize"
+grep -q "benchmark" "$F" || miss="$miss benchmark"
+[[ -z "$miss" ]] && ok || bad "$miss"
+
+step "16. cost-report tier aggregation + REFERENCE.md tier breakdown"
+F1="$ROOT/skills/cost-report/SKILL.md"
+F2="$ROOT/REFERENCE.md"
+miss=""
+grep -qiE "Aggregate by tier|tier breakdown|tier 1.+tier 2.+tier 3" "$F1" || miss="$miss skill-step"
+# REFERENCE has Tier 1/2/3 on separate lines — flatten with tr before matching
+tr '\n' ' ' < "$F2" | grep -qE "Tier 1.+Tier 2.+Tier 3" || miss="$miss reference-block"
+grep -q "Tier classification" "$F2" || miss="$miss classification-rules"
+[[ -z "$miss" ]] && ok || bad "$miss"
+
+# ─── Doc-invariant single-line greps (ADR-0002 §"Verification") ──────────────
+
+step "17. doc-invariant: agentic-flow in README"
+grep -q "agentic-flow" "$ROOT/README.md" && ok || bad "missing"
+
+step "18. doc-invariant: AGENT_BOOSTER_AVAILABLE in cost-booster-route"
+grep -q "AGENT_BOOSTER_AVAILABLE" "$ROOT/skills/cost-booster-route/SKILL.md" && ok || bad "missing"
+
+step "19. doc-invariant: Tier 1/2/3 enumerated in REFERENCE.md"
+tr '\n' ' ' < "$ROOT/REFERENCE.md" | grep -qE "Tier 1.+Tier 2.+Tier 3" && ok || bad "missing"
+
+step "20. cost-booster-edit references agent-booster.apply() with confidence threshold + measured benchmark"
+F="$ROOT/skills/cost-booster-edit/SKILL.md"
+miss=""
+[[ -f "$F" ]] || miss="$miss missing-file"
+grep -qE 'agent-booster|AgentBooster' "$F" || miss="$miss api-ref"
+grep -qE 'apply\(' "$F" || miss="$miss apply-call"
+grep -q "confidence" "$F" || miss="$miss confidence-check"
+grep -qE 'Measured benchmark|measured.*latency|0\.5' "$F" || miss="$miss benchmark-or-threshold"
+grep -q '^allowed-tools:[[:space:]]*\*' "$F" && miss="$miss wildcard"
+[[ -z "$miss" ]] && ok || bad "$miss"
+
+step "21. cost-analyst agent documents direct booster invocation"
+F="$ROOT/agents/cost-analyst.md"
+grep -qE 'cost-booster-edit|agent-booster.*apply|Direct.*booster|Agent Booster.*direct' "$F" \
+  && ok || bad "missing direct-invocation block"
+
+step "22. corpus + bench harness present and runnable"
+miss=""
+[[ -f "$ROOT/bench/booster-corpus.json" ]] || miss="$miss missing-corpus"
+[[ -x "$ROOT/scripts/bench.mjs" ]] || miss="$miss bench-not-executable"
+# Don't actually run the bench in smoke (needs cwd in v3/) — just check syntax + corpus shape
+node --check "$ROOT/scripts/bench.mjs" 2>/dev/null || miss="$miss bench-syntax"
+node -e "JSON.parse(require('fs').readFileSync('$ROOT/bench/booster-corpus.json'))" 2>/dev/null || miss="$miss corpus-not-json"
+case_count=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$ROOT/bench/booster-corpus.json')).cases.length)" 2>/dev/null)
+[[ "${case_count:-0}" -ge 10 ]] || miss="$miss corpus-too-small($case_count)"
+[[ -z "$miss" ]] && ok || bad "$miss"
+
+step "23. latest verified run shows Tier 1 winRate ≥ 0.80 (or skipped if not yet run)"
+LATEST="$ROOT/docs/benchmarks/runs/latest.json"
+if [[ ! -f "$LATEST" ]]; then
+  ok  # bench not run yet — non-blocking; fail only if the file exists and rate < 80%
+else
+  rate=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$LATEST')).summary.winRate)" 2>/dev/null)
+  pass=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$LATEST')).summary.winRate >= 0.8 ? 'yes':'no')" 2>/dev/null)
+  if [[ "$pass" == "yes" ]]; then ok; else bad "Tier 1 win rate $rate < 0.80"; fi
+fi
+
+step "24. corpus has both Tier 1 and adversarial cases"
+F="$ROOT/bench/booster-corpus.json"
+miss=""
+node -e "
+  const d = JSON.parse(require('fs').readFileSync('$F'));
+  const t1 = d.cases.filter(c => c.expectedTier1 !== false).length;
+  const adv = d.cases.filter(c => c.expectedTier1 === false).length;
+  if (t1 < 5) process.exit(1);
+  if (adv < 2) process.exit(2);
+" 2>/dev/null
+case $? in
+  0) ok ;;
+  1) bad "fewer than 5 Tier 1 cases" ;;
+  2) bad "fewer than 2 adversarial cases" ;;
+  *) bad "corpus check failed" ;;
+esac
+
+step "25. cost-benchmark skill exists and references corpus + bench harness"
+F="$ROOT/skills/cost-benchmark/SKILL.md"
+miss=""
+[[ -f "$F" ]] || miss="$miss missing-file"
+grep -q "bench.mjs" "$F" || miss="$miss bench-ref"
+grep -q "BENCH_ANTHROPIC" "$F" || miss="$miss anthropic-flag"
+grep -qE "winRate|win rate" "$F" || miss="$miss win-rate-mention"
+grep -q '^allowed-tools:[[:space:]]*\*' "$F" && miss="$miss wildcard"
+[[ -z "$miss" ]] && ok || bad "$miss"
+
+step "26. ruflo-cost.md documents 'cost benchmark' subcommand"
+F="$ROOT/commands/ruflo-cost.md"
+grep -q "cost benchmark" "$F" && grep -q -- "--anthropic" "$F" \
+  && ok || bad "missing subcommand or anthropic flag"
+
+step "27. cost-report reads benchmark runs/latest.json"
+F="$ROOT/skills/cost-report/SKILL.md"
+grep -qE 'runs/latest\.json|measured booster|measured.*Tier' "$F" \
+  && ok || bad "cost-report does not consume bench output"
 
 printf "\n%s passed, %s failed\n" "$PASS" "$FAIL"
 [[ $FAIL -eq 0 ]] || exit 1

@@ -23,6 +23,17 @@ Model pricing per 1M tokens (Haiku/Sonnet/Opus × Input/Output/Cache-Write/Cache
 - `mcp__claude-flow__agentdb_pattern-search` — search for cost reduction strategies.
 - `mcp__claude-flow__agentdb_semantic-route` — route cost queries to relevant data.
 
+## Agent Booster (direct invocation, $0/edit, ~1 ms measured)
+
+When a recommendation is to *apply* a Tier 1 transform (not just classify it), prefer the `cost-booster-edit` skill which wraps `agent-booster.apply()` from `npm agent-booster` (exposed via `agentic-flow/agent-booster`). Per the measured benchmark in `docs/benchmarks/0002-baseline.md`, mean latency was 1.2 ms and the strategy was `exact_replace` for the higher-confidence cases (`add-error-handling`, `async-await`) and `fuzzy_replace` for fuzzier edits (`var-to-const`, `add-types`, `remove-console`). All five measured cases produced `success: true`.
+
+Invocation contract (from `node_modules/agent-booster/dist/index.d.ts`):
+```ts
+booster.apply({ code, edit, language }) → { output, success, latency, confidence, strategy, tokens }
+```
+
+`cost-booster-route` decides whether to route to Tier 1; `cost-booster-edit` performs the transform when so directed. Always check `confidence >= 0.5` before writing; below that, escalate to Tier 2/3 and record via `hooks_model-outcome`.
+
 ## Memory
 
 Store cost patterns and optimization results for cross-session learning:
@@ -31,6 +42,15 @@ npx @claude-flow/cli@latest memory store --namespace cost-tracking --key "report
 npx @claude-flow/cli@latest memory store --namespace cost-patterns --key "optimization-OPT_NAME" --value "OPTIMIZATION_RESULT_JSON"
 npx @claude-flow/cli@latest memory search --query "cost savings from model downgrades" --namespace cost-patterns
 ```
+
+## Background workers
+
+This plugin is the declared consumer of two `ruflo-loop-workers` background workers (see [ruflo-loop-workers ADR-0001 §"12-worker trigger map"](../../ruflo-loop-workers/docs/adrs/0001-loop-workers-contract.md)):
+
+- **`optimize`** — periodically scans recent cost data and produces optimization recommendations. Consumed by the `cost-optimize` skill and surfaced via `cost workers` (see `commands/ruflo-cost.md`).
+- **`benchmark`** — runs cost-per-benchmark across spawned agents; results inform Tier 1/2/3 routing decisions reported in `cost-report`.
+
+Use `mcp__claude-flow__hooks_worker-status --worker optimize` and `--worker benchmark` to inspect last-run timestamps and outcomes. The worker scheduling itself is owned by `ruflo-loop-workers`; this plugin only consumes outputs.
 
 ## Neural learning
 
