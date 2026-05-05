@@ -69,7 +69,7 @@ There are **two different install paths** with very different surface areas. Pic
 This adds slash commands and agent definitions only. The Ruflo MCP server is NOT registered, so `memory_store`, `swarm_init`, `agent_spawn`, etc. won't be callable from Claude. For the full loop, use Path B below.
 
 <details>
-<summary><strong>All 32 plugins</strong></summary>
+<summary><strong>🔌 All 32 plugins</strong></summary>
 
 #### Core & Orchestration
 
