@@ -889,8 +889,10 @@ export function createEmbeddingService(config: EmbeddingConfig): IEmbeddingServi
     case 'rvf':
       return new RvfEmbeddingService(config as RvfEmbeddingConfig);
     default:
-      console.warn(`Unknown provider, using mock`);
-      return new MockEmbeddingService({ provider: 'mock', dimensions: 384 });
+      throw new Error(
+        `Unknown embedding provider: '${(config as EmbeddingConfig).provider}'. ` +
+        `Use 'agentic-flow' (recommended), 'transformers', 'openai', 'rvf', or 'mock' (tests only).`
+      );
   }
 }
 
@@ -990,12 +992,12 @@ export async function createEmbeddingServiceAsync(
       // Fall through to mock
     }
 
-    // Fallback to mock (always works)
-    console.warn('[embeddings] Using mock provider - install agentic-flow or @xenova/transformers for real embeddings');
-    return new MockEmbeddingService({
-      dimensions: rest.dimensions ?? 384,
-      cacheSize: rest.cacheSize,
-    });
+    // No real provider available — refuse to silently fall back to mock embeddings.
+    throw new Error(
+      "[embeddings] No real embedding provider available for 'auto'. " +
+      'Install agentic-flow OR @xenova/transformers, OR pass provider:"openai" with apiKey, ' +
+      'OR explicitly request provider:"mock" if mock embeddings are intentional (tests only).'
+    );
   }
 
   // Specific provider with optional fallback

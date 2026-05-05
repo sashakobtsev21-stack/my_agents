@@ -66,24 +66,11 @@ try {
     }
   }
 
-  // Tier 4: mock fallback (last resort — embeddings are not semantic)
-  if (!realEmbeddings) {
-    const embeddingsModule = await import('@claude-flow/embeddings').catch(() => null);
-    if (embeddingsModule?.createEmbeddingService) {
-      try {
-        const service = embeddingsModule.createEmbeddingService({ provider: 'mock' });
-        realEmbeddings = {
-          embed: async (text: string) => {
-            const result = await service.embed(text);
-            return Array.from(result.embedding);
-          },
-        };
-        embeddingServiceName = 'mock-fallback';
-      } catch {
-        // No embedding service available at all
-      }
-    }
-  }
+  // No Tier 4 mock fallback. If Tier 1 (agentic-flow) and Tier 3 (onnx)
+  // both failed to import, leave realEmbeddings null and let downstream
+  // code use the explicit hash-fallback path with a clear _embeddingNote
+  // in stats. Silently substituting mock embeddings would hide a missing
+  // production dependency from callers.
 } catch {
   // No embedding provider available, will use fallback
 }
