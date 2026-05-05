@@ -12,9 +12,16 @@
 
 import { spawnSync } from 'node:child_process';
 
+// ADR-100 / #1748 Issue 3 — CLI_CORE=1 routes to lite cli-core (~2s cold-cache).
+// verify only does list+retrieve across adr-patterns and adr-edges namespaces;
+// no semantic search needed. JSON backend is sufficient.
+const CLI_PKG = process.env.CLI_CORE === '1'
+  ? '@claude-flow/cli-core@alpha'
+  : '@claude-flow/cli@latest';
+
 function memoryListJson(namespace) {
   const r = spawnSync('npx', [
-    '@claude-flow/cli@latest', 'memory', 'list',
+    CLI_PKG, 'memory', 'list',
     '--namespace', namespace, '--format', 'json',
   ], { stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf-8' });
   if (r.status !== 0) return [];
@@ -24,7 +31,7 @@ function memoryListJson(namespace) {
 }
 function memoryRetrieve(namespace, key) {
   const r = spawnSync('npx', [
-    '@claude-flow/cli@latest', 'memory', 'retrieve',
+    CLI_PKG, 'memory', 'retrieve',
     '--namespace', namespace, '--key', key,
   ], { stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf-8' });
   if (r.status !== 0) return null;
