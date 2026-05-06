@@ -940,6 +940,11 @@ INSERT OR IGNORE INTO vector_indexes (id, name, dimensions) VALUES
  */
 export interface MemoryInitResult {
   success: boolean;
+  /**
+   * #1791.6 — set when an existing database was found and `force` was not
+   * passed. The call is treated as a successful no-op rather than an error.
+   */
+  alreadyExists?: boolean;
   backend: string;
   dbPath: string;
   schemaVersion: string;
@@ -1186,9 +1191,16 @@ export async function initializeMemoryDatabase(options: {
     }
 
     // Check existing database
+    // #1791.6 — Idempotent re-init: if the database already exists and the
+    // caller did not pass --force, treat it as a successful no-op instead of
+    // an error. Callers (CLI, MCP tools, embeddings) can branch on
+    // `alreadyExists` if they want a different message; previous behavior
+    // surfaced an `[ERROR]` and a "Initialization failed" spinner even when
+    // the existing DB was perfectly healthy.
     if (fs.existsSync(dbPath) && !force) {
       return {
-        success: false,
+        success: true,
+        alreadyExists: true,
         backend,
         dbPath,
         schemaVersion: '3.0.0',
@@ -1200,8 +1212,7 @@ export async function initializeMemoryDatabase(options: {
           temporalDecay: false,
           hnswIndexing: false,
           migrationTracking: false
-        },
-        error: 'Database already exists. Use --force to reinitialize.'
+        }
       };
     }
 

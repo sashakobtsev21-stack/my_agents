@@ -1401,6 +1401,13 @@ const initMemoryCommand: Command = {
         return { success: false, exitCode: 1 };
       }
 
+      // #1791.6 — DB already initialized and --force not passed: friendly no-op.
+      if (result.alreadyExists) {
+        spinner.succeed(`Memory database already initialized at ${result.dbPath}`);
+        output.printInfo('Use `--force` to reinitialize from scratch (destructive).');
+        return { success: true, exitCode: 0 };
+      }
+
       spinner.succeed('Schema initialized');
 
       // Lazy load or pre-load embedding model
