@@ -13,6 +13,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { join, resolve } from 'path';
+import { createHash } from 'crypto';
 import type { MCPTool } from './types.js';
 import { validateIdentifier } from './validate-input.js';
 
@@ -711,12 +712,31 @@ export const memoryTools: MCPTool[] = [
 
       let imported = 0;
       let skipped = 0;
+      // #1791.8 — Claude Code's `~/.claude/projects/` accumulates historical
+      // project_id directories (truncated forms, sandbox cwds, renamed
+      // workspaces) that all contain copies of the same memory files. The
+      // previous import indexed each copy under a different `project_id`
+      // prefix, producing 5–8x duplication on long-lived homes. Dedupe by
+      // file content hash so the same memory is imported once even if it
+      // appears under several project directories.
+      const seenContentHashes = new Set<string>();
+      let duplicatesSkipped = 0;
       const projects = new Set<string>();
 
       for (const memFile of memoryFiles) {
         projects.add(memFile.project);
         try {
           const content = readFileSync(memFile.path, 'utf-8');
+
+          // #1791.8 — Skip if we've already imported this exact content under
+          // a different project_id directory.
+          const contentHash = createHash('sha256').update(content).digest('hex').slice(0, 16);
+          if (seenContentHashes.has(contentHash)) {
+            duplicatesSkipped++;
+            continue;
+          }
+          seenContentHashes.add(contentHash);
+
           const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
           let name = memFile.file.replace('.md', '');
           let body = content;
@@ -753,6 +773,7 @@ export const memoryTools: MCPTool[] = [
         success: true,
         imported,
         skipped,
+        duplicatesSkipped,
         files: memoryFiles.length,
         projects: projects.size,
         namespace: ns,
