@@ -624,6 +624,100 @@ export const agentdbSemanticRoute: MCPTool = {
   },
 };
 
+// ===== #1784: Delete tools — symmetry for hierarchical-store + causal-edge =====
+
+export const agentdbHierarchicalDelete: MCPTool = {
+  name: 'agentdb_hierarchical-delete',
+  description: 'Delete a hierarchical-memory entry by key. Returns controller="native-unsupported" when the entry is in a backend without a public delete API.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      key: { type: 'string', description: 'Memory entry key to delete' },
+      tier: {
+        type: 'string',
+        description: 'Optional tier filter (working, episodic, semantic)',
+        enum: ['working', 'episodic', 'semantic'],
+      },
+    },
+    required: ['key'],
+  },
+  handler: async (params: Record<string, unknown>) => {
+    try {
+      const vKey = validateIdentifier(params.key, 'key');
+      if (!vKey.valid) return { success: false, deleted: false, error: vKey.error };
+      if (params.tier) { const vTier = validateIdentifier(params.tier, 'tier'); if (!vTier.valid) return { success: false, deleted: false, error: vTier.error }; }
+      const key = validateString(params.key, 'key', 1000);
+      if (!key) return { success: false, deleted: false, error: 'key is required (non-empty string, max 1KB)' };
+      const tier = validateString(params.tier, 'tier', 20);
+      if (tier && !['working', 'episodic', 'semantic'].includes(tier)) {
+        return { success: false, deleted: false, error: `Invalid tier: ${tier}. Must be working, episodic, or semantic` };
+      }
+      const bridge = await getBridge();
+      const result = await bridge.bridgeDeleteHierarchical({ key, tier: tier ?? undefined });
+      return result ?? { success: false, deleted: false, error: 'AgentDB bridge not available' };
+    } catch (error) {
+      return { success: false, deleted: false, error: sanitizeError(error) };
+    }
+  },
+};
+
+export const agentdbCausalEdgeDelete: MCPTool = {
+  name: 'agentdb_causal-edge-delete',
+  description: 'Delete a causal edge between two memory entries. Returns controller="native-unsupported" when the edge lives in graph-node native storage (no public delete API).',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      sourceId: { type: 'string', description: 'Source entry ID' },
+      targetId: { type: 'string', description: 'Target entry ID' },
+      relation: { type: 'string', description: 'Optional relationship type filter' },
+    },
+    required: ['sourceId', 'targetId'],
+  },
+  handler: async (params: Record<string, unknown>) => {
+    try {
+      const vSourceId = validateIdentifier(params.sourceId, 'sourceId');
+      if (!vSourceId.valid) return { success: false, deleted: false, error: vSourceId.error };
+      const vTargetId = validateIdentifier(params.targetId, 'targetId');
+      if (!vTargetId.valid) return { success: false, deleted: false, error: vTargetId.error };
+      const sourceId = validateString(params.sourceId, 'sourceId', 500);
+      const targetId = validateString(params.targetId, 'targetId', 500);
+      if (!sourceId) return { success: false, deleted: false, error: 'sourceId is required (non-empty string)' };
+      if (!targetId) return { success: false, deleted: false, error: 'targetId is required (non-empty string)' };
+      const relation = validateString(params.relation, 'relation', 200) ?? undefined;
+      const bridge = await getBridge();
+      const result = await bridge.bridgeDeleteCausalEdge({ sourceId, targetId, relation });
+      return result ?? { success: false, deleted: false, error: 'AgentDB bridge not available' };
+    } catch (error) {
+      return { success: false, deleted: false, error: sanitizeError(error) };
+    }
+  },
+};
+
+export const agentdbCausalNodeDelete: MCPTool = {
+  name: 'agentdb_causal-node-delete',
+  description: 'Cascade-delete a causal node and all its incident edges from the SQL fallback. Native graph-node entries are unaffected (no delete API in the binding).',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      nodeId: { type: 'string', description: 'Node ID to delete (cascades to all incident edges)' },
+    },
+    required: ['nodeId'],
+  },
+  handler: async (params: Record<string, unknown>) => {
+    try {
+      const vNodeId = validateIdentifier(params.nodeId, 'nodeId');
+      if (!vNodeId.valid) return { success: false, deletedNode: false, deletedEdges: 0, error: vNodeId.error };
+      const nodeId = validateString(params.nodeId, 'nodeId', 500);
+      if (!nodeId) return { success: false, deletedNode: false, deletedEdges: 0, error: 'nodeId is required (non-empty string)' };
+      const bridge = await getBridge();
+      const result = await bridge.bridgeDeleteCausalNode({ nodeId });
+      return result ?? { success: false, deletedNode: false, deletedEdges: 0, error: 'AgentDB bridge not available' };
+    } catch (error) {
+      return { success: false, deletedNode: false, deletedEdges: 0, error: sanitizeError(error) };
+    }
+  },
+};
+
 // ===== Export all tools =====
 
 export const agentdbTools: MCPTool[] = [
@@ -633,11 +727,14 @@ export const agentdbTools: MCPTool[] = [
   agentdbPatternSearch,
   agentdbFeedback,
   agentdbCausalEdge,
+  agentdbCausalEdgeDelete,
+  agentdbCausalNodeDelete,
   agentdbRoute,
   agentdbSessionStart,
   agentdbSessionEnd,
   agentdbHierarchicalStore,
   agentdbHierarchicalRecall,
+  agentdbHierarchicalDelete,
   agentdbConsolidate,
   agentdbBatch,
   agentdbContextSynthesize,
