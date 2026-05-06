@@ -131,8 +131,10 @@ export class CLI {
       // No command - show help or suggest correction
       if (commandPath.length === 0 || flags.help || flags.h) {
         if (commandPath.length > 0) {
-          // Show command-specific help
-          await this.showCommandHelp(commandPath[0]);
+          // #1791.4 — pass the FULL command path so subcommands like
+          // `hive-mind spawn --help` render spawn's own options/examples
+          // instead of falling back to the parent's SUBCOMMANDS list.
+          await this.showCommandHelp(commandPath);
         } else if (positional.length > 0 && !positional[0].startsWith('-')) {
           // First positional looks like an attempted command - suggest correction
           const attemptedCommand = positional[0];
@@ -257,8 +259,8 @@ export class CLI {
           process.exit(result.exitCode || 1);
         }
       } else {
-        // No action - show command help
-        this.showCommandHelp(commandName);
+        // No action - show command help (full path so nested subcommands work)
+        await this.showCommandHelp(commandPath);
       }
     } catch (error) {
       // Don't re-handle if this is a process.exit error (from mocked tests)
@@ -371,22 +373,45 @@ export class CLI {
   }
 
   /**
-   * Show command-specific help
+   * Show command-specific help.
+   *
+   * #1791.4 — accepts a FULL command path (e.g. ['hive-mind', 'spawn']) and
+   * walks subcommands so nested invocations show the leaf's own options /
+   * examples instead of always rendering the parent's SUBCOMMANDS list.
    */
-  private async showCommandHelp(commandName: string): Promise<void> {
-    // Try sync first, then lazy load
-    let command = getCommand(commandName);
-    if (!command && hasCommand(commandName)) {
-      command = await getCommandAsync(commandName);
-    }
-
-    if (!command) {
-      this.output.printError(`Unknown command: ${commandName}`);
+  private async showCommandHelp(commandPathOrName: string | string[]): Promise<void> {
+    const commandPath = Array.isArray(commandPathOrName) ? commandPathOrName : [commandPathOrName];
+    if (commandPath.length === 0) {
+      await this.showHelp();
       return;
     }
 
+    const rootName = commandPath[0];
+
+    // Try sync first, then lazy load
+    let command: Command | undefined = getCommand(rootName);
+    if (!command && hasCommand(rootName)) {
+      command = await getCommandAsync(rootName);
+    }
+
+    if (!command) {
+      this.output.printError(`Unknown command: ${rootName}`);
+      return;
+    }
+
+    // Walk into subcommands following the path so `hive-mind spawn --help`
+    // renders spawn's help, not hive-mind's parent help.
+    const titleParts: string[] = [command.name];
+    for (let i = 1; i < commandPath.length; i++) {
+      const subName = commandPath[i];
+      const sub = command.subcommands?.find(sc => sc.name === subName || sc.aliases?.includes(subName));
+      if (!sub) break; // unknown leaf — fall back to last known
+      command = sub;
+      titleParts.push(sub.name);
+    }
+
     this.output.writeln();
-    this.output.writeln(this.output.bold(`${this.name} ${command.name}`));
+    this.output.writeln(this.output.bold(`${this.name} ${titleParts.join(' ')}`));
     this.output.writeln(command.description);
     this.output.writeln();
 
