@@ -107,7 +107,7 @@ importers:
         specifier: ^3.0.0-alpha.8
         version: link:../mcp
       '@claude-flow/neural':
-        specifier: ^3.0.0-alpha.7
+        specifier: ^3.0.0-alpha.8
         version: link:../neural
       '@claude-flow/shared':
         specifier: ^3.0.0-alpha.7
@@ -877,7 +877,7 @@ packages:
       '@claude-flow/shared': ^3.0.0-alpha.1
     dependencies:
       '@claude-flow/memory': 3.0.0-alpha.14(@types/node@20.19.27)(zod@3.25.76)
-      '@claude-flow/neural': 3.0.0-alpha.7(@types/node@20.19.27)(zod@3.25.76)
+      '@claude-flow/neural': 3.0.0-alpha.8(@types/node@20.19.27)(zod@3.25.76)
       '@claude-flow/shared': 3.0.0-alpha.7
       zod: 3.25.76
     optionalDependencies:
@@ -926,12 +926,14 @@ packages:
     dev: false
     optional: true
 
-  /@claude-flow/neural@3.0.0-alpha.7(@types/node@20.19.27)(zod@3.25.76):
-    resolution: {integrity: sha512-OsL/IPMa62S3pwRo0EZ5tAbEdyhD6ALrUZdEj5o6MTPmFt5Xn6PD5uWcX2C5yEMCG/sAIM+Lpb3MDKqIi9avHA==}
+  /@claude-flow/neural@3.0.0-alpha.8(@types/node@20.19.27)(zod@3.25.76):
+    resolution: {integrity: sha512-+aPg0o6NfaGgw+toEVYdnxxbdtJTOBCtZcqC3BMHkor2AW3UigXoldhMc9T1w+Top11biZy3ZwrvwXHHcLjD4g==}
     requiresBuild: true
     dependencies:
       '@claude-flow/memory': 3.0.0-alpha.14(@types/node@20.19.27)(zod@3.25.76)
       '@ruvector/sona': 0.1.6
+    optionalDependencies:
+      agentdb: 3.0.0-alpha.11(@types/node@20.19.27)(zod@3.25.76)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - '@types/node'
