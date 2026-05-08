@@ -1142,13 +1142,32 @@ Analyze the above codebase context and provide your response following the forma
       // Resolve model: user env override > config override > default alias
       env.ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || MODEL_IDS[options.model];
 
-      // Spawn claude CLI process
-      const child = spawn('claude', ['--print', prompt], {
+      // Spawn claude CLI process. #1852: previously the prompt was passed
+      // as a positional CLI arg. On Windows `claude` resolves to
+      // `claude.cmd`, which Node refuses to exec directly (CVE-2024-27980
+      // mitigation) — it routes through `cmd.exe /d /s /c`, which then
+      // re-tokenizes the entire command line including the prompt.
+      // Source-code prompts contain `>` `<` `&` `|` (arrow functions,
+      // comparisons, redirections) — cmd.exe parses those as redirects
+      // and creates zero-byte files in cwd named after the next token
+      // (`controller.abort()`, `{const`, `0`, `HTTP`, etc.).
+      //
+      // Fix: pipe the prompt via stdin instead. `child.stdin.end(prompt)`
+      // writes the prompt and closes stdin atomically — the EOF still
+      // unblocks `claude --print` (the original concern in #1395) but no
+      // shell tokenization touches the prompt.
+      const child = spawn('claude', ['--print'], {
         cwd: this.projectRoot,
         env,
-        stdio: ['ignore', 'pipe', 'pipe'], // 'ignore' closes stdin at spawn — fixes #1395 where claude --print blocks on EOF
+        stdio: ['pipe', 'pipe', 'pipe'],
         windowsHide: true, // Prevent phantom console windows on Windows
       });
+      try {
+        child.stdin?.end(prompt);
+      } catch {
+        // stdin already closed (e.g. spawn failed) — `error` handler below
+        // will surface the real cause.
+      }
 
       // Setup timeout
       const timeoutHandle = setTimeout(() => {
