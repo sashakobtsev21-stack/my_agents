@@ -313,13 +313,21 @@ export const systemTools: MCPTool[] = [
       const checks: Array<{ name: string; status: string; latency?: number; message?: string }> = [];
       const projectCwd = getProjectCwd();
 
-      // Memory DB check — verify any supported store file exists
+      // Memory DB check — verify any supported store file exists.
+      // #1843: cover sql.js / HNSW / .swarm and root-level rvf/db paths,
+      // not just the legacy `.claude-flow/memory/*` triple.
       {
         const t0 = performance.now();
-        const legacyPath = join(projectCwd, '.claude-flow', 'memory', 'store.json');
-        const agentDbPath = join(projectCwd, '.claude-flow', 'memory', 'agentdb.sqlite');
-        const rvfPath = join(projectCwd, '.claude-flow', 'memory', 'store.rvf');
-        const memoryExists = existsSync(legacyPath) || existsSync(agentDbPath) || existsSync(rvfPath);
+        const memoryCandidates = [
+          join(projectCwd, '.claude-flow', 'memory', 'store.json'),       // legacy
+          join(projectCwd, '.claude-flow', 'memory', 'agentdb.sqlite'),
+          join(projectCwd, '.claude-flow', 'memory', 'store.rvf'),
+          join(projectCwd, '.claude-flow', 'memory', 'claude-flow.db'),   // sql.js
+          join(projectCwd, '.swarm', 'memory.db'),                        // swarm
+          join(projectCwd, 'ruvector.db'),                                // ruvector
+          join(projectCwd, 'agentdb.rvf'),                                // root rvf
+        ];
+        const memoryExists = memoryCandidates.some(existsSync);
         const elapsed = performance.now() - t0;
         checks.push({
           name: 'memory',
@@ -329,12 +337,21 @@ export const systemTools: MCPTool[] = [
         });
       }
 
-      // Config check — verify config file exists
+      // Config check — verify config file exists.
+      // #1843: also accept YAML config (.claude-flow/config.yaml) which
+      // the rest of v3 treats as canonical; previous code only counted
+      // .json variants and reported `degraded` when YAML was used.
       {
         const t0 = performance.now();
-        const configPath = join(projectCwd, '.claude-flow', 'config.json');
-        const altConfigPath = join(projectCwd, 'claude-flow.config.json');
-        const configExists = existsSync(configPath) || existsSync(altConfigPath);
+        const configCandidates = [
+          join(projectCwd, '.claude-flow', 'config.json'),
+          join(projectCwd, '.claude-flow', 'config.yaml'),
+          join(projectCwd, '.claude-flow', 'config.yml'),
+          join(projectCwd, 'claude-flow.config.json'),
+          join(projectCwd, 'claude-flow.config.yaml'),
+          join(projectCwd, 'claude-flow.config.yml'),
+        ];
+        const configExists = configCandidates.some(existsSync);
         const elapsed = performance.now() - t0;
         checks.push({
           name: 'config',
@@ -438,9 +455,16 @@ export const systemTools: MCPTool[] = [
         }
       }
 
+      // #1843: exclude `unknown` checks from the health score denominator.
+      // Previously a check reporting `unknown` (e.g. swarm/neural which
+      // can't be probed in-process) was counted as a non-healthy hit and
+      // dragged the score below 100 even when every actionable check was
+      // green. Treat `unknown` as advisory and surface it separately.
       const healthy = checks.filter(c => c.status === 'healthy').length;
+      const advisory = checks.filter(c => c.status === 'unknown').length;
       const total = checks.length;
-      const overallHealth = healthy / total;
+      const scoreDenominator = total - advisory;
+      const overallHealth = scoreDenominator > 0 ? healthy / scoreDenominator : 1;
 
       // Update metrics
       metrics.health = overallHealth;
@@ -451,9 +475,10 @@ export const systemTools: MCPTool[] = [
         score: Math.round(overallHealth * 100),
         checks,
         healthy,
+        advisory,
         total,
         timestamp: new Date().toISOString(),
-        issues: checks.filter(c => c.status !== 'healthy').map(c => ({
+        issues: checks.filter(c => c.status !== 'healthy' && c.status !== 'unknown').map(c => ({
           component: c.name,
           status: c.status,
           suggestion: `Check ${c.name} component configuration`,

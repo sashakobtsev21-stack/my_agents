@@ -796,26 +796,57 @@ function detectExistingRufloMCP(targetDir: string): string | null {
     candidates.add(path.join(home, '.claude', 'mcp.json'));
   }
   // Walk parents of targetDir up to root, checking for .mcp.json at each
-  let dir = path.resolve(targetDir);
+  const targetResolved = path.resolve(targetDir);
+  let dir = targetResolved;
+  const targetAncestors = new Set<string>();
   while (true) {
     candidates.add(path.join(dir, '.mcp.json'));
+    targetAncestors.add(normalizeProjectKey(dir));
     const parent = path.dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
   // Skip the targetDir itself — that's the one we're about to write
-  candidates.delete(path.join(path.resolve(targetDir), '.mcp.json'));
+  candidates.delete(path.join(targetResolved, '.mcp.json'));
 
   for (const candidate of candidates) {
     if (!fs.existsSync(candidate)) continue;
     try {
       const parsed = JSON.parse(fs.readFileSync(candidate, 'utf-8'));
-      if (parsed && typeof parsed === 'object' && parsed.mcpServers && typeof parsed.mcpServers === 'object') {
+      if (!parsed || typeof parsed !== 'object') continue;
+      // (a) Top-level mcpServers (legacy / global form)
+      if (parsed.mcpServers && typeof parsed.mcpServers === 'object') {
         if ('ruflo' in parsed.mcpServers) return candidate;
+      }
+      // (b) #1840: Claude Code project-scoped registrations under
+      //     parsed.projects[<projectPath>].mcpServers.ruflo. Match by
+      //     normalized path against targetDir or any of its ancestors so
+      //     a `claude mcp add ruflo` in this repo is detected even when
+      //     Claude stored the key with different casing/slash style.
+      if (parsed.projects && typeof parsed.projects === 'object') {
+        for (const [projectKey, projectVal] of Object.entries(parsed.projects)) {
+          if (!projectVal || typeof projectVal !== 'object') continue;
+          const projectMcp = (projectVal as { mcpServers?: unknown }).mcpServers;
+          if (!projectMcp || typeof projectMcp !== 'object') continue;
+          if (!('ruflo' in (projectMcp as Record<string, unknown>))) continue;
+          if (targetAncestors.has(normalizeProjectKey(projectKey))) {
+            return `${candidate} (projects[${projectKey}])`;
+          }
+        }
       }
     } catch { /* malformed JSON — ignore */ }
   }
   return null;
+}
+
+/**
+ * Normalize a project path key for cross-platform comparison.
+ * Claude Code stores Windows paths like "C:/Users/.../Project" while
+ * Node's `path.resolve()` may emit "C:\Users\...\Project". Lowercase +
+ * forward-slash gives a stable comparison key on both platforms.
+ */
+function normalizeProjectKey(p: string): string {
+  return path.resolve(p).replace(/\\/g, '/').toLowerCase();
 }
 
 /**

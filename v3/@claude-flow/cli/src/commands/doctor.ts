@@ -272,31 +272,74 @@ async function checkAIDefence(): Promise<HealthCheck> {
 
 // Check MCP servers
 async function checkMcpServers(): Promise<HealthCheck> {
+  const home = process.env.HOME || process.env.USERPROFILE || '';
+  // #1842: ~/.claude.json holds project-scoped registrations under
+  // parsed.projects[<projectPath>].mcpServers.ruflo, in addition to any
+  // top-level mcpServers. Check both shapes plus the legacy desktop and
+  // local .mcp.json paths.
   const mcpConfigPaths = [
-    join(process.env.HOME || '', '.claude/claude_desktop_config.json'),
-    join(process.env.HOME || '', '.config/claude/mcp.json'),
-    '.mcp.json'
+    join(home, '.claude.json'),
+    join(home, '.claude/claude_desktop_config.json'),
+    join(home, '.config/claude/mcp.json'),
+    '.mcp.json',
   ];
 
+  const isRufloKey = (k: string) =>
+    k === 'ruflo' || k === 'ruflo_alpha' || k === 'claude-flow' || k === 'claude-flow_alpha';
+
   for (const configPath of mcpConfigPaths) {
-    if (existsSync(configPath)) {
-      try {
-        const content = JSON.parse(readFileSync(configPath, 'utf8'));
-        const servers = content.mcpServers || content.servers || {};
-        const count = Object.keys(servers).length;
-        const hasClaudeFlow = 'claude-flow' in servers || 'claude-flow_alpha' in servers || 'ruflo' in servers || 'ruflo_alpha' in servers;
-        if (hasClaudeFlow) {
-          return { name: 'MCP Servers', status: 'pass', message: `${count} servers (ruflo configured)` };
-        } else {
-          return { name: 'MCP Servers', status: 'warn', message: `${count} servers (ruflo not found)`, fix: 'claude mcp add ruflo -- npx -y ruflo@latest mcp start' };
+    if (!existsSync(configPath)) continue;
+    try {
+      const content = JSON.parse(readFileSync(configPath, 'utf8'));
+      // Top-level mcpServers (legacy / desktop form)
+      const topServers = content.mcpServers || content.servers || {};
+      const topServerKeys = Object.keys(topServers);
+      const topHasRuflo = topServerKeys.some(isRufloKey);
+
+      // Project-scoped (Claude Code shape): projects[*].mcpServers.ruflo
+      let projectHits = 0;
+      let projectScannedServers = 0;
+      if (content.projects && typeof content.projects === 'object') {
+        for (const projectVal of Object.values(content.projects)) {
+          const pm = (projectVal as { mcpServers?: Record<string, unknown> })?.mcpServers;
+          if (pm && typeof pm === 'object') {
+            const keys = Object.keys(pm);
+            projectScannedServers += keys.length;
+            if (keys.some(isRufloKey)) projectHits += 1;
+          }
         }
-      } catch {
-        // continue to next path
       }
+
+      const totalServers = topServerKeys.length + projectScannedServers;
+      if (topHasRuflo || projectHits > 0) {
+        const where = topHasRuflo
+          ? 'top-level'
+          : `${projectHits} project-scoped`;
+        return {
+          name: 'MCP Servers',
+          status: 'pass',
+          message: `${totalServers} servers (ruflo configured: ${where})`,
+        };
+      }
+      if (totalServers > 0) {
+        return {
+          name: 'MCP Servers',
+          status: 'warn',
+          message: `${totalServers} servers (ruflo not found)`,
+          fix: 'claude mcp add ruflo -- npx -y ruflo@latest mcp start',
+        };
+      }
+    } catch {
+      // continue to next path
     }
   }
 
-  return { name: 'MCP Servers', status: 'warn', message: 'No MCP config found', fix: 'claude mcp add claude-flow npx @claude-flow/cli@v3alpha mcp start' };
+  return {
+    name: 'MCP Servers',
+    status: 'warn',
+    message: 'No MCP config found',
+    fix: 'claude mcp add ruflo -- npx -y ruflo@latest mcp start',
+  };
 }
 
 // Check disk space (async with proper env inheritance)

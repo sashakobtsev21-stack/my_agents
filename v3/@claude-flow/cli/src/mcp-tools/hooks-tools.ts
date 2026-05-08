@@ -1573,6 +1573,21 @@ export const hooksPretrain: MCPTool = {
       patternsStored = patterns.length;
     } catch { /* AgentDB not available */ }
 
+    // #1847: when the corpus contains files but no patterns were extracted
+    // (typical for Markdown vaults), make the source-code-only extraction
+    // contract explicit so users don't conclude the hook system is broken.
+    const SUPPORTED_EXTRACTION_EXTS = ['.ts', '.js', '.py', '.go', '.rs', '.java'];
+    let note: string | undefined;
+    if (filesAnalyzed > 0 && patterns.length === 0) {
+      const codeFileCount = SUPPORTED_EXTRACTION_EXTS.reduce(
+        (sum, ext) => sum + (extCounts[ext] ?? 0),
+        0,
+      );
+      note = codeFileCount === 0
+        ? `No source-code patterns found. hooks_pretrain extracts import/require lines from ${SUPPORTED_EXTRACTION_EXTS.join('/')} files only — Markdown/text/asset corpora produce zero patterns by design. This is not a hook-system failure; live trajectories and statusline are independent.`
+        : `Found ${codeFileCount} source-code file(s) but extracted zero import/require patterns. They may be empty, generated, or use non-standard module syntax.`;
+    }
+
     return {
       success: true,
       _real: true,
@@ -1585,7 +1600,14 @@ export const hooksPretrain: MCPTool = {
         patternsExtracted: patterns.length,
         patternsStored,
         fileTypes: Object.entries(extCounts).sort((a, b) => b[1] - a[1]).slice(0, 15).map(([ext, count]) => ({ ext, count })),
+        // #1847: explicit extraction contract so callers can tell pretrain
+        // patterns apart from live trajectories and hook statusline state.
+        sources: {
+          extractedFrom: SUPPORTED_EXTRACTION_EXTS,
+          scope: 'pretrain-only (live trajectories + statusline are tracked separately)',
+        },
       },
+      ...(note ? { note } : {}),
     };
   },
 };
@@ -3612,16 +3634,37 @@ export const hooksWorkerDispatch: MCPTool = {
     activeWorkers.set(workerId, worker);
 
     // Determine honest status
-    let reportedStatus: 'queued' | 'no-daemon' | 'synthetic-completed';
-    let note: string;
+    let reportedStatus: 'queued' | 'no-daemon' | 'synthetic-completed' | 'mcp-only';
+    let note = '';
     if (!daemonAlive) {
       reportedStatus = 'no-daemon';
       note = 'No worker daemon detected. Run `claude-flow daemon start` to enable real worker execution. The dispatch was recorded in-process but no actual work will run.';
     } else if (background) {
-      // Daemon is alive — record the queued worker. The daemon polls activeWorkers
-      // via its own state file, so this constitutes a real queue entry.
-      reportedStatus = 'queued';
-      note = `Worker queued for daemon (pid ${daemonPid}). Poll hooks_worker-status to track progression — do not assume completion until status === "completed".`;
+      // #1845: write a durable queue file the daemon polls every 5s. Until
+      // 3.7.0-alpha.11 the dispatch only updated a process-local Map that
+      // the daemon (separate process) could never see, so `queued` was a
+      // lie. The queue file makes it real and inspectable on disk.
+      const queueDir = join(cwd, '.claude-flow', 'daemon-queue');
+      const queuePath = join(queueDir, `${workerId}.json`);
+      let queueWritten = false;
+      try {
+        if (!existsSync(queueDir)) mkdirSync(queueDir, { recursive: true });
+        writeFileSync(
+          queuePath,
+          JSON.stringify({ workerId, trigger, context, priority, enqueuedAt: new Date().toISOString() }, null, 2),
+        );
+        queueWritten = true;
+      } catch (err) {
+        // Filesystem error — fall back to mcp-only status so we never
+        // claim queued without proof.
+        note = `Daemon detected (pid ${daemonPid}) but queue write to ${queuePath} failed: ${(err as Error).message}. Worker recorded in-process only; use \`ruflo daemon trigger -w ${trigger}\` to run synchronously.`;
+      }
+      if (queueWritten) {
+        reportedStatus = 'queued';
+        note = `Worker queued for daemon (pid ${daemonPid}) at ${queuePath}. Daemon polls every 5s; processed entries move to .claude-flow/daemon-queue/.processed/. Poll hooks_worker-status until status === "completed".`;
+      } else {
+        reportedStatus = 'mcp-only';
+      }
     } else {
       // Synchronous mode without a runner — be honest about it
       reportedStatus = 'synthetic-completed';

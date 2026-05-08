@@ -364,60 +364,84 @@ export const memoryTools: MCPTool[] = [
       const startTime = performance.now();
 
       try {
+        // #1846: feature-detect smartSearch on the resolved memory package.
+        // The export landed in @claude-flow/memory@>3.0.0-alpha.14 — older
+        // installs pin to a build that exposes search/store/retrieve but
+        // not smartSearch. Throwing `is not a function` is hostile; instead
+        // detect at runtime and gracefully fall through to plain semantic
+        // search with an explicit fallback note.
+        let smartFallbackReason: string | undefined;
         if (input.smart) {
-          // SmartRetrieval pipeline (ADR-090)
-          const { smartSearch } = await import('@claude-flow/memory');
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let memMod: any;
+          try {
+            memMod = await import('@claude-flow/memory');
+          } catch (err) {
+            smartFallbackReason = `@claude-flow/memory failed to load: ${(err as Error).message}`;
+          }
+          const smartSearch = memMod && typeof memMod.smartSearch === 'function'
+            ? memMod.smartSearch
+            : undefined;
 
-          // Adapt searchEntries to the SearchFn interface
-          const rawSearch = async (req: { query: string; namespace?: string; limit?: number; threshold?: number }) => {
-            const r = await searchEntries({
-              query: req.query,
-              namespace: req.namespace || namespace,
-              limit: req.limit || limit * 3,
-              threshold: req.threshold ?? threshold,
+          if (smartSearch) {
+            // SmartRetrieval pipeline (ADR-090)
+            const rawSearch = async (req: { query: string; namespace?: string; limit?: number; threshold?: number }) => {
+              const r = await searchEntries({
+                query: req.query,
+                namespace: req.namespace || namespace,
+                limit: req.limit || limit * 3,
+                threshold: req.threshold ?? threshold,
+              });
+              return {
+                results: r.results.map(e => ({
+                  id: e.id,
+                  key: e.key,
+                  content: e.content,
+                  score: e.score,
+                  namespace: e.namespace,
+                })),
+              };
+            };
+
+            const smartResult = await smartSearch(rawSearch, {
+              query,
+              namespace,
+              limit,
+              threshold,
             });
+
+            const duration = performance.now() - startTime;
+
+            const results = smartResult.results.map((r: { content: string; key: string; namespace: string; score: number }) => {
+              let value: unknown = r.content;
+              try { value = JSON.parse(r.content); } catch { /* keep as string */ }
+              return {
+                key: r.key,
+                namespace: r.namespace,
+                value,
+                similarity: r.score,
+              };
+            });
+
             return {
-              results: r.results.map(e => ({
-                id: e.id,
-                key: e.key,
-                content: e.content,
-                score: e.score,
-                namespace: e.namespace,
-              })),
+              query,
+              results,
+              total: results.length,
+              searchTime: `${duration.toFixed(2)}ms`,
+              backend: 'SmartRetrieval (RRF + MMR + Recency)',
+              stats: smartResult.stats,
             };
-          };
+          }
 
-          const smartResult = await smartSearch(rawSearch, {
-            query,
-            namespace,
-            limit,
-            threshold,
-          });
-
-          const duration = performance.now() - startTime;
-
-          const results = smartResult.results.map(r => {
-            let value: unknown = r.content;
-            try { value = JSON.parse(r.content); } catch { /* keep as string */ }
-            return {
-              key: r.key,
-              namespace: r.namespace,
-              value,
-              similarity: r.score,
-            };
-          });
-
-          return {
-            query,
-            results,
-            total: results.length,
-            searchTime: `${duration.toFixed(2)}ms`,
-            backend: 'SmartRetrieval (RRF + MMR + Recency)',
-            stats: smartResult.stats,
-          };
+          // smart=true but smartSearch unavailable on installed package.
+          // Fall through to plain search with an explicit warning.
+          smartFallbackReason = smartFallbackReason
+            ?? 'smartSearch is not exported by the installed @claude-flow/memory build (likely a release lag — see #1846). Falling back to standard semantic search.';
         }
 
-        // Original non-smart path (unchanged)
+        // Original non-smart path (unchanged) — also reached when smart was
+        // requested but unavailable. We attach `smartFallback` to the
+        // response so callers can see the degradation explicitly.
         const result = await searchEntries({
           query,
           namespace,
@@ -450,6 +474,7 @@ export const memoryTools: MCPTool[] = [
           total: results.length,
           searchTime: `${duration.toFixed(2)}ms`,
           backend: 'HNSW + sql.js',
+          ...(smartFallbackReason ? { smartFallback: smartFallbackReason } : {}),
         };
       } catch (error) {
         return {
