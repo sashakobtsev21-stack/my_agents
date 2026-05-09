@@ -262,11 +262,22 @@ describe('Tool Honesty (v3.5.56-57)', () => {
 
     it('should not generate fake speedup claims when no backend is available', () => {
       const source = readSource('hooks-tools.ts');
-      const attentionStart = source.indexOf("name: 'hooks_intelligence_attention'");
       const handlerSection = extractToolBlock(source, 'hooks_intelligence_attention');
 
-      // Speedup should be null when implementation is not real
-      expect(handlerSection).toMatch(/speedup:.*implementation\.startsWith\('real-'\)/);
+      // Honesty principle: don't fabricate a speedup claim. The handler can
+      // satisfy this two ways:
+      //   (a) Have no speedup field at all (current implementation — no
+      //       claim is made when there's no real backend).
+      //   (b) Have a speedup field gated by implementation.startsWith('real-')
+      //       so it only emits a value when real work happened.
+      // Both pass; only an UNCONDITIONAL speedup claim should fail.
+      const speedupRegex = /\bspeedup\s*:/m;
+      const hasSpeedupField = speedupRegex.test(handlerSection);
+      if (hasSpeedupField) {
+        expect(handlerSection).toMatch(/speedup\s*:[^,}]*implementation\.startsWith\('real-'\)/);
+      }
+      // Always verify no fabricated number literal is unconditionally returned.
+      expect(handlerSection).not.toMatch(/speedup\s*:\s*[\d.]+/m);
     });
   });
 

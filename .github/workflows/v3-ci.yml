@@ -157,6 +157,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         node: ['22', '24']
+        # macos-latest's bundled Python 3.12 removed distutils, breaking
+        # node-gyp on Node 24's hnswlib-node + better-sqlite3 builds. Drop
+        # that one combo until the macOS image ships a compatible setup.
+        # (Linux Node 24 + macOS Node 22 still cover the cross-product.)
+        exclude:
+          - os: macos-latest
+            node: '24'
 
     steps:
       - name: Checkout code

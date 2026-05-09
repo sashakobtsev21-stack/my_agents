@@ -405,7 +405,9 @@ describe('GuidanceProvider', () => {
       expect(result.shouldStop).toBe(true);
     });
 
-    it('should block stopping when too many unconsolidated patterns', { timeout: 15000 }, async () => {
+    it('should block stopping when too many unconsolidated patterns', { timeout: 60000 }, async () => {
+      // Bumped 15s → 60s: storing 12 patterns triggers HuggingFace embedding
+      // generation; cold-cache CI runs exceed 15s without warm models.
       // Store more than 10 patterns to trigger the check
       for (let i = 0; i < 12; i++) {
         await reasoningBank.storePattern(`Pattern ${i}`, 'general');
