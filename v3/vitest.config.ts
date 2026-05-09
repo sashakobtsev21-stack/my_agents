@@ -73,9 +73,14 @@ export default defineConfig({
     clearMocks: true,
     restoreMocks: true,
 
-    // Timeout for async operations
-    testTimeout: 10000,
-    hookTimeout: 10000,
+    // Timeout for async operations.
+    // Bumped from 10s → 30s because CI runners cold-load HuggingFace models
+    // and ONNX runtimes that take 5-20s on first call, causing timeout
+    // failures in guidance-provider and reasoningbank tests. Local runs
+    // with cached models still finish in <1s; the headroom only matters
+    // on cold environments.
+    testTimeout: 30000,
+    hookTimeout: 30000,
 
     // Reporter configuration
     reporters: ['default'],
