@@ -87,7 +87,18 @@ export default defineConfig({
         singleThread: false,
         isolate: true,
       },
+      forks: {
+        singleFork: false,
+        isolate: true,
+      },
     },
+    // Per-file pool override: tests that need process.chdir() must run in
+    // a forked subprocess (Node's worker threads forbid chdir). Add a glob
+    // here when a test legitimately needs cwd manipulation rather than
+    // refactoring it to take a path argument.
+    poolMatchGlobs: [
+      ['**/router-bandit.test.ts', 'forks'],
+    ],
 
     // Globals for easier testing
     globals: true,

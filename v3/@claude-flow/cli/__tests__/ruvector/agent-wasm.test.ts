@@ -130,7 +130,17 @@ import {
 
 // ── Tests ────────────────────────────────────────────────────
 
-describe('agent-wasm integration', () => {
+// Skip when @ruvector/rvagent-wasm isn't installed (typical CI without
+// native postinstall scripts). Mocks above target the loading path but
+// don't fully cover initialization — see ruvllm-wasm.test.ts for the
+// same pattern.
+import { createRequire as __createRequire } from 'node:module';
+const __WASM_PRESENT = (() => {
+  try { __createRequire(import.meta.url).resolve('@ruvector/rvagent-wasm'); return true; }
+  catch { return false; }
+})();
+
+describe.skipIf(!__WASM_PRESENT)('agent-wasm integration', () => {
   describe('detection and init', () => {
     it('detects module availability', async () => {
       expect(await isAgentWasmAvailable()).toBe(true);

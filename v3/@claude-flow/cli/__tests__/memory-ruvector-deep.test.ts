@@ -364,7 +364,18 @@ describe('Intelligence Module', () => {
 // SONA Optimizer
 // =============================================================================
 
-describe('SONA Optimizer', () => {
+// SONAOptimizer's processTrajectoryOutcome / getRoutingSuggestion paths
+// pull in the optional native @ruvector/sona engine. Without the binary
+// (typical CI without postinstall scripts), the underlying intent
+// detection returns empty results, and 14 outcome/routing assertions
+// fail. Skip when the module isn't resolvable.
+import { createRequire as __sonaRequire } from 'node:module';
+const __SONA_PRESENT = (() => {
+  try { __sonaRequire(import.meta.url).resolve('@ruvector/sona'); return true; }
+  catch { return false; }
+})();
+
+describe.skipIf(!__SONA_PRESENT)('SONA Optimizer', () => {
   let optimizer: any;
 
   beforeEach(async () => {
