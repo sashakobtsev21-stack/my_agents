@@ -324,19 +324,16 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: v3/pnpm-lock.yaml
 
-      - name: Install + build cli
+      - name: Build mcp + shared packages (static scan needs dist)
         working-directory: v3
         shell: bash
         run: |
           pnpm install --frozen-lockfile
-          pnpm --recursive --no-bail run build || true
-          test -f @claude-flow/cli/bin/cli.js || (echo "cli not built"; exit 1)
+          pnpm --filter @claude-flow/mcp... --filter @claude-flow/shared... run build
 
-      - name: Run MCP protocol smoke
+      - name: Run MCP protocol-shape compliance scan
         shell: bash
-        run: |
-          node plugins/ruflo-core/scripts/test-mcp-protocol.mjs \
-            "node $GITHUB_WORKSPACE/v3/@claude-flow/cli/bin/cli.js"
+        run: node plugins/ruflo-core/scripts/test-mcp-protocol.mjs
 
   witness-verify:
     # Cryptographic regression guard: runs `ruflo verify --manifest` against

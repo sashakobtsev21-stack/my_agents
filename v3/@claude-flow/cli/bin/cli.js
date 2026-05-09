@@ -39,9 +39,22 @@ console.log = (...args) => {
 // Conditions:
 //   1. stdin is being piped AND no CLI arguments provided (auto-detect)
 //   2. stdin is being piped AND args are "mcp start" (explicit, e.g. npx claude-flow@alpha mcp start)
+//   3. EXCEPT — if the user explicitly passed --transport <non-stdio>
+//      (e.g. -t http), defer to the parser. Without this, every smoke
+//      test or non-TTY caller of `mcp start -t http` got force-routed
+//      into stdio mode and never hit the HTTP server (#1874 follow-up).
 const cliArgs = process.argv.slice(2);
 const isExplicitMCP = cliArgs.length >= 1 && cliArgs[0] === 'mcp' && (cliArgs.length === 1 || cliArgs[1] === 'start');
-const isMCPMode = !process.stdin.isTTY && (process.argv.length === 2 || isExplicitMCP);
+const explicitNonStdioTransport = cliArgs.some((a, i) => {
+  // -t <value> | --transport <value>
+  if ((a === '-t' || a === '--transport') && cliArgs[i + 1] && cliArgs[i + 1] !== 'stdio') return true;
+  // --transport=<value>
+  if (/^--transport=/.test(a) && !/^--transport=stdio$/.test(a)) return true;
+  return false;
+});
+const isMCPMode = !process.stdin.isTTY
+  && !explicitNonStdioTransport
+  && (process.argv.length === 2 || isExplicitMCP);
 
 if (isMCPMode) {
   // Run MCP server mode
