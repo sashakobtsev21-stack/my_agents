@@ -85,25 +85,26 @@ export default defineConfig({
     // Reporter configuration
     reporters: ['default'],
 
-    // Parallel execution
-    pool: 'threads',
+    // Parallel execution.
+    // Switched from 'threads' → 'forks' because tests that load native
+    // bindings (onnxruntime-node, ruvector, agentic-flow) sometimes
+    // segfault during process cleanup. With 'forks' each test file
+    // runs in its own subprocess; a segfault in one doesn't kill the
+    // runner, and exit-time crashes happen after results are reported.
+    // Performance cost: ~10-20% slower than threads, acceptable for
+    // CI stability. Threads still available for tests that explicitly
+    // need them (none currently).
+    pool: 'forks',
     poolOptions: {
-      threads: {
-        singleThread: false,
-        isolate: true,
-      },
       forks: {
         singleFork: false,
         isolate: true,
       },
+      threads: {
+        singleThread: false,
+        isolate: true,
+      },
     },
-    // Per-file pool override: tests that need process.chdir() must run in
-    // a forked subprocess (Node's worker threads forbid chdir). Add a glob
-    // here when a test legitimately needs cwd manipulation rather than
-    // refactoring it to take a path argument.
-    poolMatchGlobs: [
-      ['**/router-bandit.test.ts', 'forks'],
-    ],
 
     // Globals for easier testing
     globals: true,

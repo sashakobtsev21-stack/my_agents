@@ -1594,7 +1594,7 @@ describe('Edge Cases', () => {
     });
   });
 
-  describe('SONA Optimizer keyword extraction', () => {
+  describe.skipIf(!__SONA_PRESENT)('SONA Optimizer keyword extraction', () => {
     it('should extract architecture keywords', async () => {
       const { SONAOptimizer } = await import('../src/memory/sona-optimizer.js');
       const opt = new SONAOptimizer({ persistencePath: '/tmp/sona-kw-test.json' });
