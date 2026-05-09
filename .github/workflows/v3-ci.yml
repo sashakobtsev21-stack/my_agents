@@ -267,6 +267,18 @@ jobs:
             console.log('witness verify ok:', s.pass, 'fixes pass,', s.drift, 'drifted');
           "
 
+      - name: History summary (ADR-103 — surface regression-introduction commits)
+        # Soft gate: prints transitions since the previous snapshot. The
+        # `summary` subcommand exits non-zero on any newly-regressed fix.
+        run: |
+          if [ -f verification-history.jsonl ]; then
+            node plugins/ruflo-core/scripts/witness/history.mjs \
+              --history verification-history.jsonl \
+              summary
+          else
+            echo "verification-history.jsonl not present — skipping temporal diff"
+          fi
+
   publish:
     name: Publish to npm (alpha)
     runs-on: ubuntu-latest
