@@ -293,6 +293,51 @@ jobs:
           node plugins/ruflo-core/scripts/test-hooks.mjs \
             "node $GITHUB_WORKSPACE/v3/@claude-flow/cli/bin/cli.js"
 
+  mcp-protocol-smoke:
+    # Regression guard for ruvnet/ruflo#1874 — boots the HTTP MCP server,
+    # sends a real `initialize` request, and validates the response wire
+    # format against the MCP spec (YYYY-MM-DD protocolVersion string,
+    # not a {major,minor,patch} object). This was the missing layer that
+    # let #1874 ship — the existing in-process unit tests asserted the
+    # wrong shape, so test+prod agreed on a non-spec format that broke
+    # Claude Code's Zod validator.
+    name: MCP protocol smoke / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: v3/pnpm-lock.yaml
+
+      - name: Install + build cli
+        working-directory: v3
+        shell: bash
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --recursive --no-bail run build || true
+          test -f @claude-flow/cli/bin/cli.js || (echo "cli not built"; exit 1)
+
+      - name: Run MCP protocol smoke
+        shell: bash
+        run: |
+          node plugins/ruflo-core/scripts/test-mcp-protocol.mjs \
+            "node $GITHUB_WORKSPACE/v3/@claude-flow/cli/bin/cli.js"
+
   witness-verify:
     # Cryptographic regression guard: runs `ruflo verify --manifest` against
     # the local build to confirm every documented fix in verification.md.json
@@ -319,7 +364,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke]
+    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, mcp-protocol-smoke]
 
     steps:
       - name: Checkout code

@@ -1,8 +1,8 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-05-09T14:43:27.568Z",
-    "gitCommit": "c5184159090d2c6b23f7e1bc0436af312fd3778e",
+    "issuedAt": "2026-05-09T17:17:12.118Z",
+    "gitCommit": "12f2546c0328347e53a8222019d7465233ef80d9",
     "branch": "main",
     "os": "macos",
     "releases": {
@@ -12,8 +12,8 @@
       "@claude-flow/memory": "3.0.0-alpha.15"
     },
     "summary": {
-      "totalFixes": 82,
-      "verified": 82,
+      "totalFixes": 84,
+      "verified": 84,
       "missing": 0
     },
     "fixes": [
@@ -672,15 +672,31 @@
         "sha256": "0da86e495a605f2d2942934059ec73b394195f584fcbd52720a5520a724e58b1",
         "marker": "'agent-handoff': ['federation:write', 'federation:spawn']",
         "markerVerified": true
+      },
+      {
+        "id": "#1874-mcp",
+        "desc": "MCP server returns spec-compliant YYYY-MM-DD string for protocolVersion (was {major,minor,patch} object — Claude Code Zod rejected it)",
+        "file": "v3/@claude-flow/mcp/dist/server.js",
+        "sha256": "a3d7975956309d5257cca3203e75f558eec2e8653067977c0ecbb32016d792ee",
+        "marker": "protocolVersion = '2025-11-25'",
+        "markerVerified": true
+      },
+      {
+        "id": "#1874-shared",
+        "desc": "Shared MCP server returns spec-compliant YYYY-MM-DD string for protocolVersion (companion to #1874-mcp)",
+        "file": "v3/@claude-flow/shared/dist/mcp/server.js",
+        "sha256": "eb93091a71f7459142eee3b9803e9e435110b5fdc5ac0c7d5ee05c79fc5928d7",
+        "marker": "protocolVersion = '2024-11-05'",
+        "markerVerified": true
       }
     ]
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "b28cb82aed7a574a62022681231129c89f4c401a34021e6e9d977de05bb4b00a",
+    "manifestHash": "7ada97559949bf547cd548923042c81896defee610249bbb005696027e1ce20b",
     "signatureAlgo": "ed25519",
-    "publicKey": "0dc7c0502740d9cae5dd7a07761d5f600a7934b19dc572245e0016e8ea5f1559",
-    "signature": "57a6e6a6e96e7e5d2c977df232bc841d16df729a39d6c4495a2b91609d231a2fda20de06c74a3dc045648921128500d895f2ecf05ddfa54879ba9002d45a2a08",
+    "publicKey": "5a8a5961088ed35c02bf481b22520301698061a1bcf9a54e579fbfcc6a332198",
+    "signature": "8245843ab41de389531d82cad973f132bbb10b78a0886b5b67fb70ae0242ef3a1c20659c058d24b8ce3fd05248425777b05813d8c3f6b357bdb32468631d5c0b",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }

@@ -24,6 +24,18 @@
       "desc": "Federation policy-engine wires claim-event + agent-handoff message types into CLAIMS_FOR_MESSAGE_TYPE (unblocked Build V3 after 3+ days of failures)",
       "file": "v3/@claude-flow/plugin-agent-federation/dist/application/policy-engine.js",
       "marker": "'agent-handoff': ['federation:write', 'federation:spawn']"
+    },
+    {
+      "id": "#1874-mcp",
+      "desc": "MCP server returns spec-compliant YYYY-MM-DD string for protocolVersion (was {major,minor,patch} object — Claude Code Zod rejected it)",
+      "file": "v3/@claude-flow/mcp/dist/server.js",
+      "marker": "protocolVersion = '2025-11-25'"
+    },
+    {
+      "id": "#1874-shared",
+      "desc": "Shared MCP server returns spec-compliant YYYY-MM-DD string for protocolVersion (companion to #1874-mcp)",
+      "file": "v3/@claude-flow/shared/dist/mcp/server.js",
+      "marker": "protocolVersion = '2024-11-05'"
     }
   ]
 }
