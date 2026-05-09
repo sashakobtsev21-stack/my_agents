@@ -1,8 +1,9 @@
 ---
 id: ADR-0001
 title: ruflo-iot-cognitum plugin contract — pinning, namespace coordination (compliant), 5-tier device trust + 6 background workers, smoke as contract
-status: Proposed
+status: Accepted
 date: 2026-05-04
+updated: 2026-05-09
 authors:
   - reviewer (Claude Code)
 tags: [plugin, iot, cognitum, telemetry, anomaly-detection, trust, witness-chain, namespace, smoke-test]
@@ -63,3 +64,7 @@ bash plugins/ruflo-iot-cognitum/scripts/smoke.sh
 - `plugins/ruflo-agentdb/docs/adrs/0001-agentdb-optimization.md` — namespace convention
 - `plugins/ruflo-federation/docs/adrs/0001-federation-contract.md` — 5-tier trust model parallel
 - `plugins/ruflo-intelligence/docs/adrs/0001-intelligence-surface-completeness.md` — SONA neural integration
+
+## Implementation status
+
+Plugin version v0.2.0 shipped and listed in marketplace.json. Source exists at `plugins/ruflo-iot-cognitum/`. Contract elements implemented: 5-tier device trust model; 6 background workers (HealthProbe, TelemetryIngest, AnomalyScan, MeshSync, FirmwareWatch, WitnessAudit); namespace coordination compliant; smoke-as-contract gate defined in `scripts/smoke.sh` (12 checks).

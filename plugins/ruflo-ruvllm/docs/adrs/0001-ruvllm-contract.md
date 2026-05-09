@@ -1,8 +1,9 @@
 ---
 id: ADR-0001
 title: ruflo-ruvllm plugin contract — pinning, namespace coordination, MicroLoRA + SONA cross-references, smoke as contract
-status: Proposed
+status: Accepted
 date: 2026-05-04
+updated: 2026-05-09
 authors:
   - reviewer (Claude Code)
 tags: [plugin, ruvllm, microlora, sona, llm, namespace, smoke-test]
@@ -42,3 +43,7 @@ bash plugins/ruflo-ruvllm/scripts/smoke.sh
 - `plugins/ruflo-agentdb/docs/adrs/0001-agentdb-optimization.md` — owns HNSW WASM router (`ruvllm_hnsw_*`) + namespace convention
 - `plugins/ruflo-ruvector/docs/adrs/0001-pin-ruvector-0.2.25.md` — sibling substrate plugin
 - `v3/@claude-flow/cli/src/mcp-tools/ruvllm-tools.ts` — 4 SONA + MicroLoRA tools at lines 142, 169, 192, 222
+
+## Implementation status
+
+Plugin version v0.2.0 shipped and listed in marketplace.json. Source exists at `plugins/ruflo-ruvllm/`. Contract elements implemented: LLM-config + chat-format slice owned; SONA/MicroLoRA ownership deferred to ruflo-intelligence; HNSW WASM router ownership deferred to ruflo-agentdb; namespace `ruvllm-configs` claimed; smoke-as-contract gate defined in `scripts/smoke.sh`.

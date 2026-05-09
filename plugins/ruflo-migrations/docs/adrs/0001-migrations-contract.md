@@ -1,8 +1,9 @@
 ---
 id: ADR-0001
 title: ruflo-migrations plugin contract — pinning, namespace-routing fix, namespace coordination, smoke as contract
-status: Proposed
+status: Accepted
 date: 2026-05-04
+updated: 2026-05-09
 authors:
   - reviewer (Claude Code)
 tags: [plugin, migrations, schema, namespace, smoke-test]
@@ -40,3 +41,7 @@ bash plugins/ruflo-migrations/scripts/smoke.sh
 - `plugins/ruflo-cost-tracker/docs/adrs/0001-cost-tracker-contract.md` — same bug class
 - `plugins/ruflo-market-data/docs/adrs/0001-market-data-contract.md` — same bug class
 - `plugins/ruflo-agentdb/docs/adrs/0001-agentdb-optimization.md` — namespace convention this fix observes
+
+## Implementation status
+
+Plugin version v0.2.0 shipped and listed in marketplace.json. Source exists at `plugins/ruflo-migrations/`. Contract elements implemented: namespace-routing bug fixed in both skills (switched `agentdb_hierarchical-*` + `agentdb_pattern-store` namespace args to `memory_*`); dual pattern-store path documented; smoke-as-contract gate defined in `scripts/smoke.sh`.

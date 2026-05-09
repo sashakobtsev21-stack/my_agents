@@ -1,8 +1,9 @@
 ---
 id: ADR-0001
 title: ruflo-plugin-creator plugin contract — pinning, scaffold-the-canonical-contract, MCP-drift warnings, smoke as contract
-status: Proposed
+status: Accepted
 date: 2026-05-04
+updated: 2026-05-09
 authors:
   - reviewer (Claude Code)
 tags: [plugin, plugin-creator, scaffolding, namespace, smoke-test]
@@ -81,3 +82,7 @@ bash plugins/ruflo-plugin-creator/scripts/smoke.sh
 - `plugins/ruflo-cost-tracker/docs/adrs/0001-cost-tracker-contract.md` — namespace-routing bug class
 - `plugins/ruflo-knowledge-graph/docs/adrs/0001-knowledge-graph-contract.md` — `embeddings_embed` rename
 - `plugins/ruflo-ruvector/docs/adrs/0001-pin-ruvector-0.2.25.md` — pinning + smoke-as-contract precedent
+
+## Implementation status
+
+Plugin version v0.2.0 shipped and listed in marketplace.json. Source exists at `plugins/ruflo-plugin-creator/`. Contract elements implemented: scaffolding templates updated to include contract ADR, smoke test, Compatibility section, and namespace coordination block by default; MCP-drift warnings added to scaffolded skill templates; smoke-as-contract gate defined in `scripts/smoke.sh`.

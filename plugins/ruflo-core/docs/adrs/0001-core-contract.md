@@ -1,8 +1,9 @@
 ---
 id: ADR-0001
 title: ruflo-core plugin contract — pinning, MCP server contract, plugin-catalog discovery, smoke as contract
-status: Proposed
+status: Accepted
 date: 2026-05-04
+updated: 2026-05-09
 authors:
   - reviewer (Claude Code)
 tags: [plugin, core, mcp, foundation, smoke-test]
@@ -95,3 +96,7 @@ bash plugins/ruflo-core/scripts/smoke.sh
 - `plugins/ruflo-aidefence/docs/adrs/0001-aidefence-contract.md` — 3-gate pattern
 - `plugins/ruflo-autopilot/docs/adrs/0001-autopilot-contract.md` — 270s cache-aware /loop
 - `v3/@claude-flow/cli/` — the MCP server source backing this plugin
+
+## Implementation status
+
+Plugin version v0.2.1 shipped and listed in marketplace.json. Source exists at `plugins/ruflo-core/`. Contract elements implemented: `.mcp.json` registers `ruflo` server via `npx -y @claude-flow/cli@latest`; plugin-catalog discovery skill present; 3 generalist agents shipped; smoke-as-contract gate defined in `scripts/smoke.sh`.
