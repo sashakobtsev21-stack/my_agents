@@ -18,6 +18,12 @@
       "desc": "ruflo-core PostToolUse hooks call documented CLI flags (-c/-s/-e, -f/-s) instead of bogus --format true",
       "file": "plugins/ruflo-core/hooks/hooks.json",
       "marker": "hooks post-edit -f \\\"$FILE\\\" -s true"
+    },
+    {
+      "id": "ADR-101-C",
+      "desc": "Federation policy-engine wires claim-event + agent-handoff message types into CLAIMS_FOR_MESSAGE_TYPE (unblocked Build V3 after 3+ days of failures)",
+      "file": "v3/@claude-flow/plugin-agent-federation/dist/application/policy-engine.js",
+      "marker": "'agent-handoff': ['federation:write', 'federation:spawn']"
     }
   ]
 }

@@ -1,8 +1,8 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-05-09T01:00:47.879Z",
-    "gitCommit": "54c706f561389888941f5b107bb7e2deea3b076d",
+    "issuedAt": "2026-05-09T01:38:39.382Z",
+    "gitCommit": "3ba0b6141186c57b114a1a8d0a1b8052f1695d77",
     "branch": "main",
     "releases": {
       "ruflo": "3.7.0-alpha.18",
@@ -11,8 +11,8 @@
       "@claude-flow/memory": "3.0.0-alpha.15"
     },
     "summary": {
-      "totalFixes": 81,
-      "verified": 81,
+      "totalFixes": 82,
+      "verified": 82,
       "missing": 0
     },
     "fixes": [
@@ -663,15 +663,23 @@
         "sha256": "09c10c262c0bb36301e713e8173090adcdfe345443bff9c4c4aa17fb1e900033",
         "marker": "hooks post-edit -f \\\"$FILE\\\" -s true",
         "markerVerified": true
+      },
+      {
+        "id": "ADR-101-C",
+        "desc": "Federation policy-engine wires claim-event + agent-handoff message types into CLAIMS_FOR_MESSAGE_TYPE (unblocked Build V3 after 3+ days of failures)",
+        "file": "v3/@claude-flow/plugin-agent-federation/dist/application/policy-engine.js",
+        "sha256": "0da86e495a605f2d2942934059ec73b394195f584fcbd52720a5520a724e58b1",
+        "marker": "'agent-handoff': ['federation:write', 'federation:spawn']",
+        "markerVerified": true
       }
     ]
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "0fb659a57aa21426ab98e8e70fd0ce46bf082afb9b4f5bb710a81d7a19997c24",
+    "manifestHash": "a6c6aceb8b998530e423d627294ba8cef4aec63e21c16ced30b126a8fe6f74f0",
     "signatureAlgo": "ed25519",
-    "publicKey": "0f38b06748adaca43f7a6c4e29ed98aec0c1dca1e537fd86d6e0307519dc85ef",
-    "signature": "df039e63e0426e0e46ad1a822065120606e7b9d4063268053e5ab529e2f84ecc90561c677f98bf391271abc98e45cc7adeae96f97978f88f119f0ad2aea65d09",
+    "publicKey": "99e44d37922c6bb31b61415425be389c1d1fd6d0ac0ef05da023d549b3b9c810",
+    "signature": "bd67d55f506230e15ff461a5b27cc91415ec5ce98657225b2829451c518757e21c32ee06190f83c2245c525f499eee4bd49e869ea1f80a2bd2c4628286eb880b",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }

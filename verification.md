@@ -71,8 +71,8 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-05-09T00:52:57.167Z",
-    "gitCommit": "d4795b75383d5a743de49fc1eb518f887eee606f",
+    "issuedAt": "2026-05-09T01:38:39.382Z",
+    "gitCommit": "3ba0b6141186c57b114a1a8d0a1b8052f1695d77",
     "branch": "main",
     "releases": {
       "ruflo": "3.7.0-alpha.18",
@@ -81,8 +81,8 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
       "@claude-flow/memory": "3.0.0-alpha.15"
     },
     "summary": {
-      "totalFixes": 81,
-      "verified": 81,
+      "totalFixes": 82,
+      "verified": 82,
       "missing": 0
     },
     "fixes": [
@@ -733,15 +733,23 @@ The `integrity.manifestHash` is a single fingerprint for the whole release's ver
         "sha256": "09c10c262c0bb36301e713e8173090adcdfe345443bff9c4c4aa17fb1e900033",
         "marker": "hooks post-edit -f \\"$FILE\\" -s true",
         "markerVerified": true
+      },
+      {
+        "id": "ADR-101-C",
+        "desc": "Federation policy-engine wires claim-event + agent-handoff message types into CLAIMS_FOR_MESSAGE_TYPE (unblocked Build V3 after 3+ days of failures)",
+        "file": "v3/@claude-flow/plugin-agent-federation/dist/application/policy-engine.js",
+        "sha256": "0da86e495a605f2d2942934059ec73b394195f584fcbd52720a5520a724e58b1",
+        "marker": "'agent-handoff': ['federation:write', 'federation:spawn']",
+        "markerVerified": true
       }
     ]
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "97b0a18427bea61b81bba3bfcb1dfb386af4d7432b84c91b8c003945db9c7e0c",
+    "manifestHash": "a6c6aceb8b998530e423d627294ba8cef4aec63e21c16ced30b126a8fe6f74f0",
     "signatureAlgo": "ed25519",
-    "publicKey": "c89e93db40e811846867fbc2b845c3cd61c7abd81faf32e0164abeab19db86d9",
-    "signature": "8ebf17a36f56d8bb203fa327533c7bd2d5633d6066fef5d5c75f85d6c4aed6e838c80a7ccc3adb3d70a914b7029bb649a1729695c35a563d5b7e2066f68ee906",
+    "publicKey": "99e44d37922c6bb31b61415425be389c1d1fd6d0ac0ef05da023d549b3b9c810",
+    "signature": "bd67d55f506230e15ff461a5b27cc91415ec5ce98657225b2829451c518757e21c32ee06190f83c2245c525f499eee4bd49e869ea1f80a2bd2c4628286eb880b",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }
@@ -784,7 +792,7 @@ The deterministic seed derivation means the signing key is reproducible from the
 
 ## Coverage so far
 
-The current witness covers **81 fixes** spanning ADR-093 F1–F12, ADR-095 G1–G7 architectural gap closures, multiple GitHub-issue fixes (#1697, #1698, #1691, #1721, #1744, #1749), one ADR (#094 transformers loader), the ADR-096 encryption-at-rest phase markers, the ADR-097 federation budget envelope, and 28 CAP-MCP capability inventory entries (300 tools across 28 source files).
+The current witness covers **82 fixes** spanning ADR-093 F1–F12, ADR-095 G1–G7 architectural gap closures, multiple GitHub-issue fixes (#1697, #1698, #1691, #1721, #1744, #1749), one ADR (#094 transformers loader), the ADR-096 encryption-at-rest phase markers, the ADR-097 federation budget envelope, and 28 CAP-MCP capability inventory entries (300 tools across 28 source files).
 
 Released as **ruflo@3.6.28 / @claude-flow/cli@3.6.28 / claude-flow@3.6.28** on 2026-05-05. The 3.6.28 release closes 3 of 5 papercuts in #1744 (the install-study issue): adds `--no-global` flag to opt out of the user-global ~/.claude/CLAUDE.md append (#1744 #2), gates the `--minimal` settings.json hooks block on `components.helpers` so minimal stays minimal AND functional (#1744 #3), and clarifies plugin install vs `npx ruflo init` labeling in the README (#1744 #1). Also bundles three runtime honesty fixes: drop the unverified Flash Attention speedup claim from `performance` recommendations, drop the silent Tier-4 mock-embedding fallback in `neural-tools`, and throw on missing real embedding provider in `embedding-service` (mock is tests-only).
 
