@@ -90,21 +90,29 @@ Negative assertions (`absent: 'Recording … : true'`) are critical. A naive `co
 
 ### 2. Wire it into `v3-ci.yml` as a blocking job
 
-`plugin-hooks-smoke` runs after `build` succeeds and before `publish`, on Node 20 + 22:
+`plugin-hooks-smoke` runs before `publish`, decoupled from the workspace `build` job (which is gated on unrelated test failures). The matrix is **cross-platform** to catch OS-specific shell behaviour:
 
 ```yaml
 plugin-hooks-smoke:
-  needs: [build]
   strategy:
     matrix:
-      node: ['20', '22']
+      os: [ubuntu-latest, macos-latest]   # bash needed; Windows out of scope
+      node: ['22']
   steps:
-    - install + build v3
+    - install + scoped build of @claude-flow/cli...
     - node plugins/ruflo-core/scripts/test-hooks.mjs \
         "node $GITHUB_WORKSPACE/v3/@claude-flow/cli/bin/cli.js"
 ```
 
-This *blocks* publishing on hook regression. A future PR that adds a non-existent flag to `hooks.json`, or re-introduces the `ctx.args[0] || ctx.flags.X` priority bug, fails this job before reaching users.
+Cross-platform reasoning per job (full matrix in §5):
+
+| Job | Linux | macOS | Windows | Why |
+|---|---|---|---|---|
+| `plugin-hooks-smoke` | ✓ | ✓ | — | Plugin's `hooks.json` uses `/bin/bash -c` and synthetic JSON-on-stdin assumes POSIX shell. Windows users run Claude Code via WSL/git-bash, which the test would also need to simulate; out of scope for this guard. |
+| `smoke-install-no-bsqlite` | ✓ | ✓ | — | Smoke script uses bash patterns; same reasoning. |
+| `witness-verify` | ✓ | ✓ | ✓ | Pure JS (only `@noble/ed25519`). Catches platform-specific JSON canonicalisation or path-resolution bugs (e.g. Windows CRLF normalisation breaking the manifest hash) before they reach users. |
+
+This *blocks* publishing on hook regression. A future PR that adds a non-existent flag to `hooks.json`, or re-introduces the `ctx.args[0] || ctx.flags.X` priority bug, fails this job before reaching users on whichever OS the bug surfaces.
 
 ### 3. Codify the CLI flag-priority convention
 
@@ -137,14 +145,30 @@ This is the second instance (after `smoke-install-no-bsqlite` from #1867) of the
 
 Future regression categories should follow the same shape rather than relying on in-process unit tests that miss subprocess/install/parser realities.
 
+### 5. Cross-platform matrix
+
+GitHub Actions provides `ubuntu-latest`, `macos-latest`, and `windows-latest` runners. The matrix per job reflects whether platform behaviour is load-bearing for *that specific guard*:
+
+| Job | ubuntu | macos | windows | Rationale |
+|---|---|---|---|---|
+| `smoke-install-no-bsqlite` | ✓ | ✓ | — | Tests `npm install --omit=optional` round-trip behaviour. The smoke script uses bash; Windows runners have git-bash but the regression class (native build failure on Node 26 without prebuilds) is OS-independent. Linux + macOS coverage is sufficient signal for the JS code path. |
+| `plugin-hooks-smoke` | ✓ | ✓ | — | The plugin's `hooks.json` uses `/bin/bash -c '...'`. Windows users run Claude Code via WSL/git-bash (where the test would behave the same as Linux/macOS); native cmd/PowerShell isn't the user environment for these hooks. |
+| `witness-verify` | ✓ | ✓ | ✓ | Pure JS — only `@noble/ed25519`. Catches platform-specific bugs that pure unit tests miss: e.g. Windows CRLF line-ending normalization breaking the canonical manifest hash, or Node `path` differences breaking the marker-cited file lookup. Always full coverage. |
+| `build` | ✓ | ✓ | ✓ | Pre-existing matrix; covers tsc behaviour across OSes. |
+
+Bash steps in cross-platform jobs use `shell: bash` to make Windows fall through to git-bash, and `$RUNNER_TEMP` instead of `/tmp` for OS-portable temp paths.
+
+The matrix expansion costs ~6 extra runner-minutes per CI invocation (3 OSes × ~2 min for witness-verify, 1 OS × ~2 min each for the two smoke jobs that gained macOS). Acceptable for catching OS drift before users do.
+
 ## Implementation
 
 | Artifact | Path | Purpose |
 |----------|------|---------|
 | Plugin hook fix | `plugins/ruflo-core/hooks/hooks.json` | Real flags, multi-line-safe wrappers |
 | Smoke harness | `plugins/ruflo-core/scripts/test-hooks.mjs` | 7 assertions; runs against any CLI invocation string |
-| CI job | `.github/workflows/v3-ci.yml` (`plugin-hooks-smoke`) | Node 20 + 22 matrix; blocks `publish` |
+| CI job | `.github/workflows/v3-ci.yml` (`plugin-hooks-smoke`) | ubuntu + macos × Node 22; blocks `publish` |
 | CLI parser fix | `v3/@claude-flow/cli/src/commands/hooks.ts` | 14-site flag/positional priority swap |
+| Witness verify cross-platform | `v3-ci.yml` (`witness-verify`) | ubuntu + macos + windows; pure-JS verifier dogfooding |
 
 The smoke harness accepts an arbitrary CLI invocation string, so it can also run against the *published* CLI (`npx --yes @claude-flow/cli@latest`) as a post-release sanity check — the same script doubles as a pre-merge guard and a release canary.
 

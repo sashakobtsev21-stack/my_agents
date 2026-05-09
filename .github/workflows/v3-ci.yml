@@ -146,11 +146,18 @@ jobs:
     #
     # Independent of the workspace `build` job because we only need to
     # build a single package (memory) — no workspace-wide dist required.
-    name: Smoke (no better-sqlite3) / Node ${{ matrix.node }}
-    runs-on: ubuntu-latest
+    #
+    # Cross-platform: ubuntu + macos (Windows excluded because the smoke
+    # script uses bash-specific patterns and runs in user environments
+    # that typically use WSL/git-bash anyway. The runtime fallback path
+    # the smoke verifies is platform-independent — a passing run on
+    # Linux+macOS proves the JS code path works everywhere.)
+    name: Smoke (no better-sqlite3) / ${{ matrix.os }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-latest]
         node: ['22', '24']
 
     steps:
@@ -177,22 +184,23 @@ jobs:
         id: pack
         working-directory: v3/@claude-flow/memory
         run: |
-          # pnpm pack rewrites workspace:* → resolved versions (npm pack doesn't)
-          TARBALL=$(pnpm pack --pack-destination /tmp 2>&1 | grep -E "\.tgz$" | head -1)
+          # pnpm pack rewrites workspace:* → resolved versions (npm pack doesn't).
+          # Pack to RUNNER_TEMP so the path works on both ubuntu and macos.
+          TARBALL=$(pnpm pack --pack-destination "$RUNNER_TEMP" 2>&1 | grep -E "\.tgz$" | head -1)
           [ -z "$TARBALL" ] && { echo "pnpm pack produced no tarball"; exit 1; }
           echo "tarball=$TARBALL" >> "$GITHUB_OUTPUT"
 
       - name: Install with --omit=optional (simulates Node 26 native build failure)
         run: |
-          mkdir -p /tmp/smoke
-          cd /tmp/smoke
+          mkdir -p "$RUNNER_TEMP/smoke"
+          cd "$RUNNER_TEMP/smoke"
           npm init -y >/dev/null
           npm pkg set type=module
           npm install "${{ steps.pack.outputs.tarball }}" --omit=optional --no-audit --no-fund
 
       - name: Assert better-sqlite3 was NOT installed
         run: |
-          if [ -d /tmp/smoke/node_modules/better-sqlite3 ]; then
+          if [ -d "$RUNNER_TEMP/smoke/node_modules/better-sqlite3" ]; then
             echo "FAIL: better-sqlite3 installed despite --omit=optional — smoke setup is wrong"
             exit 1
           fi
@@ -200,8 +208,8 @@ jobs:
 
       - name: Run smoke script
         run: |
-          cp v3/@claude-flow/memory/scripts/smoke-no-bsqlite.mjs /tmp/smoke/
-          cd /tmp/smoke
+          cp v3/@claude-flow/memory/scripts/smoke-no-bsqlite.mjs "$RUNNER_TEMP/smoke/"
+          cd "$RUNNER_TEMP/smoke"
           node smoke-no-bsqlite.mjs
 
   plugin-hooks-smoke:
@@ -213,11 +221,17 @@ jobs:
     #
     # Independent of the workspace `build` job — only the cli package needs
     # to be built. We use `pnpm --filter @claude-flow/cli...` to scope.
-    name: Plugin hooks smoke / Node ${{ matrix.node }}
-    runs-on: ubuntu-latest
+    name: Plugin hooks smoke / ${{ matrix.os }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        # Cross-platform: ubuntu + macos. Windows excluded because the
+        # plugin's hooks.json uses `/bin/bash -c '...'` and the synthetic
+        # JSON-on-stdin pipeline assumes POSIX shell. On Windows users
+        # run Claude Code via WSL or git-bash, which the test would also
+        # need to simulate; out of scope for this regression guard.
+        os: [ubuntu-latest, macos-latest]
         # Node 22 is the project's documented baseline (engines.node: '>=20')
         # but Node 20 had environment-specific issues with multi-line stdin
         # round-tripping that didn't reproduce on Node 22 or locally — same
@@ -273,8 +287,18 @@ jobs:
     # whose dist files are referenced by witness markers). Avoids depending
     # on the workspace `build` job so unrelated package failures don't
     # block this regression guard.
-    name: Witness verify (signed manifest)
-    runs-on: ubuntu-latest
+    #
+    # Cross-platform: ubuntu + macos + windows. The standalone verifier
+    # is pure JS (only @noble/ed25519) — no native deps, no shell calls.
+    # Catches platform-specific JSON canonicalization or path-resolution
+    # bugs (e.g. CRLF normalization on Windows breaking the manifest
+    # hash) before they reach users.
+    name: Witness verify (signed manifest) / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     needs: [smoke-install-no-bsqlite, plugin-hooks-smoke]
 
     steps:
@@ -295,6 +319,7 @@ jobs:
 
       - name: Install + build packages witness markers reference
         working-directory: v3
+        shell: bash
         run: |
           pnpm install --frozen-lockfile
           # --no-bail tolerates unrelated package failures. The standalone
@@ -303,6 +328,9 @@ jobs:
           pnpm --recursive --no-bail run build || true
 
       - name: Verify witness manifest (via standalone plugin script — no CLI dep)
+        # `shell: bash` makes Windows use git-bash so the same script
+        # works across all 3 OSes. RUNNER_TEMP is set on every runner.
+        shell: bash
         run: |
           # Use the project-agnostic verifier from ruflo-core plugin. This
           # is the same script external adopters use — dogfooding ensures
@@ -313,16 +341,16 @@ jobs:
           set +e
           node plugins/ruflo-core/scripts/witness/verify.mjs \
             --manifest verification.md.json \
-            --json > /tmp/witness-result.json 2> /tmp/witness-result.err
+            --json > "$RUNNER_TEMP/witness-result.json" 2> "$RUNNER_TEMP/witness-result.err"
           VERIFY_EXIT=$?
           set -e
           echo "--- verify.mjs exit code: $VERIFY_EXIT ---"
           echo "--- stderr ---"
-          cat /tmp/witness-result.err || true
+          cat "$RUNNER_TEMP/witness-result.err" || true
           echo "--- summary ---"
           node -e "
             const fs = require('fs');
-            const raw = fs.readFileSync('/tmp/witness-result.json', 'utf8');
+            const raw = fs.readFileSync(process.env.RUNNER_TEMP + '/witness-result.json', 'utf8');
             if (!raw.trim()) { console.error('verify.mjs produced no JSON output'); process.exit(1); }
             const r = JSON.parse(raw);
             console.log(JSON.stringify({signature: r.signature, summary: r.summary}, null, 2));
@@ -339,6 +367,7 @@ jobs:
       - name: History summary (ADR-103 — surface regression-introduction commits)
         # Soft gate: prints transitions since the previous snapshot. The
         # `summary` subcommand exits non-zero on any newly-regressed fix.
+        shell: bash
         run: |
           if [ -f verification-history.jsonl ]; then
             node plugins/ruflo-core/scripts/witness/history.mjs \
