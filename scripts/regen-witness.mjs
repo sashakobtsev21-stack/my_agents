@@ -12,15 +12,24 @@
  *   node scripts/regen-witness.mjs --dry-run  # preview without writing
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
-import { regenerate, appendHistory } from '../plugins/ruflo-core/scripts/witness/lib.mjs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { join, resolve, dirname } from 'node:path';
+import { regenerate, appendHistory, osDir } from '../plugins/ruflo-core/scripts/witness/lib.mjs';
 
 const REPO_ROOT = process.cwd();
-const MANIFEST_PATH = join(REPO_ROOT, 'verification.md.json');
-const HISTORY_PATH = join(REPO_ROOT, 'verification-history.jsonl');
-const FIXES_CONFIG = join(REPO_ROOT, 'witness-fixes.json');
+
+// Per-OS layout (see ADR-103 §6 — verification cognitive container).
+// Each OS subdir holds the manifest signed by that OS's runner; CI
+// regenerates its own per-OS bundle. Shared inputs live at verification/.
+const OS = osDir();
+const VERIFICATION_DIR = join(REPO_ROOT, 'verification');
+const MANIFEST_PATH = join(VERIFICATION_DIR, OS, 'manifest.md.json');
+const HISTORY_PATH = join(VERIFICATION_DIR, OS, 'history.jsonl');
+const FIXES_CONFIG = join(VERIFICATION_DIR, 'witness-fixes.json');
 const DRY_RUN = process.argv.includes('--dry-run');
+
+// Ensure the per-OS subdir exists (CI on a new OS bootstraps cleanly).
+mkdirSync(dirname(MANIFEST_PATH), { recursive: true });
 
 const newFixes = existsSync(FIXES_CONFIG)
   ? JSON.parse(readFileSync(FIXES_CONFIG, 'utf8')).fixes ?? []

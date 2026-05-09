@@ -14,6 +14,41 @@ import { join } from 'node:path';
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
+import { platform } from 'node:os';
+
+/**
+ * Map Node's `process.platform` value (linux/darwin/win32) to the
+ * directory name used under `verification/`. Lets the caller's path
+ * default to the right OS subfolder without hardcoding.
+ */
+export function osDir(p = platform()) {
+  if (p === 'darwin') return 'macos';
+  if (p === 'win32') return 'windows';
+  return 'linux'; // linux + anything unknown
+}
+
+/**
+ * Try to load the binary RVF backend (@ruvector/rvf-node) from the
+ * caller's node_modules. Returns the RvfDatabase class or null if the
+ * package isn't installed — callers fall back to JSONL.
+ */
+function loadRvfNode(probeRoots) {
+  const expanded = [
+    ...probeRoots,
+    ...probeRoots.flatMap(r => [
+      join(r, 'v3/@claude-flow/cli'),
+      join(r, 'v3/@claude-flow/memory'),
+    ]),
+  ];
+  for (const root of expanded) {
+    try {
+      const req = createRequire(join(root, 'noop.js'));
+      const mod = req('@ruvector/rvf-node');
+      if (mod && mod.RvfDatabase) return mod.RvfDatabase;
+    } catch { /* try next */ }
+  }
+  return null;
+}
 
 // ─── ed25519 lazy load ─────────────────────────────────────────────
 // Locate @noble/ed25519 from the caller's project (it lives in their
@@ -109,6 +144,7 @@ export function regenerate(opts) {
     issuedAt,
     gitCommit,
     branch,
+    os: osDir(),
     releases,
     summary: { totalFixes: merged.length, verified: verifiedCount, missing: missingCount },
     fixes: merged.map(f => { const { _missing, ...c } = f; return c; }),
@@ -148,10 +184,18 @@ export function regenerate(opts) {
 
 // ─── temporal history ─────────────────────────────────────────────
 /**
- * Append a compact snapshot of `manifest` to a JSONL history file.
- * One line per regen — git-diff-friendly, append-cheap.
+ * Append a compact snapshot of `manifest` to a JSONL history file
+ * (one entry per line — git-diff-friendly, append-cheap).
  *
- * @param {string} historyPath  Path to verification-history.jsonl.
+ * The history lives inside an RVF-style cognitive container layout
+ * (`verification/<os>/history.jsonl`). RVF's binary format optimises
+ * for vector similarity search; the witness use case is structured
+ * key-value retrieval (snapshot N's commit + fixes), so JSONL is the
+ * better format inside the container. The container concept — per-OS
+ * folder bundling manifest + history + metadata — is what we adopt
+ * from RVF, not the file format itself.
+ *
+ * @param {string} historyPath  Path to history.jsonl.
  * @param {object} manifest     The manifest object just signed.
  * @param {string} manifestHash The signed hash (for fast lookup).
  */
@@ -165,6 +209,7 @@ export function appendHistory(historyPath, manifest, manifestHash) {
     commit: manifest.gitCommit,
     issuedAt: manifest.issuedAt,
     branch: manifest.branch,
+    os: manifest.os,
     manifestHash,
     summary: manifest.summary,
     fixes: fixesIndex,
@@ -174,7 +219,7 @@ export function appendHistory(historyPath, manifest, manifestHash) {
 }
 
 /**
- * Load the JSONL history into memory (one entry per line).
+ * Load the JSONL history into memory (chronological order).
  */
 export function loadHistory(historyPath) {
   if (!existsSync(historyPath)) return [];

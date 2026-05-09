@@ -11,9 +11,7 @@ on:
       - 'plugins/ruflo-core/scripts/witness/**'
       - 'plugins/ruflo-core/scripts/test-hooks.mjs'
       - 'plugins/ruflo-core/hooks/hooks.json'
-      - 'verification.md.json'
-      - 'verification-history.jsonl'
-      - 'witness-fixes.json'
+      - 'verification/**'
   pull_request:
     branches: [main]
     paths:
@@ -338,9 +336,20 @@ jobs:
           # issues (e.g. missing @ruvector/sona, sharp native postinstall).
           # Capture both streams; analyze regardless of exit code so we
           # always see WHY a verification failed.
+          # OS-specific manifest path (verification/<os>/manifest.md.json).
+          # Each runner reads its own snapshot — Linux runner reads
+          # verification/linux/, macOS reads verification/macos/, etc.
+          case "$RUNNER_OS" in
+            Linux)   OS_DIR=linux ;;
+            macOS)   OS_DIR=macos ;;
+            Windows) OS_DIR=windows ;;
+            *)       OS_DIR=linux ;;
+          esac
+          MANIFEST="verification/$OS_DIR/manifest.md.json"
+          echo "verifying: $MANIFEST"
           set +e
           node plugins/ruflo-core/scripts/witness/verify.mjs \
-            --manifest verification.md.json \
+            --manifest "$MANIFEST" \
             --json > "$RUNNER_TEMP/witness-result.json" 2> "$RUNNER_TEMP/witness-result.err"
           VERIFY_EXIT=$?
           set -e
@@ -369,12 +378,19 @@ jobs:
         # `summary` subcommand exits non-zero on any newly-regressed fix.
         shell: bash
         run: |
-          if [ -f verification-history.jsonl ]; then
+          case "$RUNNER_OS" in
+            Linux)   OS_DIR=linux ;;
+            macOS)   OS_DIR=macos ;;
+            Windows) OS_DIR=windows ;;
+            *)       OS_DIR=linux ;;
+          esac
+          HISTORY="verification/$OS_DIR/history.jsonl"
+          if [ -f "$HISTORY" ]; then
             node plugins/ruflo-core/scripts/witness/history.mjs \
-              --history verification-history.jsonl \
+              --history "$HISTORY" \
               summary
           else
-            echo "verification-history.jsonl not present — skipping temporal diff"
+            echo "$HISTORY not present — skipping temporal diff"
           fi
 
   publish:
