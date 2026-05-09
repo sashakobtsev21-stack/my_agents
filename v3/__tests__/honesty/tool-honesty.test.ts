@@ -23,25 +23,33 @@ function readSource(relativePath: string): string {
 }
 
 // Helper: extract the body of a tool block starting at `name: '<toolName>'`.
-// Walks forward counting braces until the tool object closes, so the slice
-// is exactly the handler body regardless of how long it's grown. Returns
-// up to `maxChars` from the start to bound runaway scans.
-function extractToolBlock(source: string, toolName: string, maxChars = 50_000): string {
-  const start = source.indexOf(`name: '${toolName}'`);
-  if (start < 0) return '';
-  const window = source.slice(start, start + maxChars);
-  // Open brace right before "name: '...'" — find the previous `{` so we
-  // know the bracket count baseline (1).
-  let depth = 1;
-  let i = window.indexOf('{') + 1; // first { after name
-  while (i < window.length && depth > 0) {
-    const ch = window[i];
+// Walks backward to the outer `{` that opens the tool object, then forward
+// counting braces until that outer object closes. Returns the full tool
+// block regardless of how long the handler body has grown.
+function extractToolBlock(source: string, toolName: string, maxChars = 100_000): string {
+  const namePos = source.indexOf(`name: '${toolName}'`);
+  if (namePos < 0) return '';
+
+  // Walk backward to find the `{` that opens the tool object. Skip over
+  // earlier inner braces (e.g. block comments don't matter; inputSchema/
+  // handler bodies appear AFTER name, not before).
+  let openBrace = namePos;
+  while (openBrace > 0 && source[openBrace] !== '{') openBrace--;
+  if (source[openBrace] !== '{') return source.slice(namePos, namePos + maxChars);
+
+  // Walk forward from openBrace counting depth. Brace at openBrace = depth 1.
+  // Bound the scan by maxChars so a malformed file can't hang the test.
+  const end = Math.min(source.length, openBrace + maxChars);
+  let depth = 0;
+  for (let i = openBrace; i < end; i++) {
+    const ch = source[i];
     if (ch === '{') depth++;
-    else if (ch === '}') depth--;
-    if (depth === 0) return window.slice(0, i + 1);
-    i++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) return source.slice(openBrace, i + 1);
+    }
   }
-  return window;
+  return source.slice(openBrace, end);
 }
 
 // Helper: find all Math.random() usages and classify them
