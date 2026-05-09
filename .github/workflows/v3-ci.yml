@@ -380,6 +380,23 @@ jobs:
             console.log('witness verify ok:', r.summary.pass, 'pass,', r.summary.drift, 'drift');
           "
 
+      - name: Performance verification (lightweight capabilities only)
+        # Soft gate: appends to verification/<os>/performance.jsonl. Skips
+        # install_no_optional + memory_round_trip in CI to keep the matrix
+        # fast — those are slow + network/disk-bound and add minutes.
+        # Local devs run the full suite with `--capabilities all` (omitted).
+        shell: bash
+        run: |
+          case "$RUNNER_OS" in
+            Linux)   OS_DIR=linux ;;
+            macOS)   OS_DIR=macos ;;
+            Windows) OS_DIR=windows ;;
+          esac
+          node plugins/ruflo-core/scripts/witness/perf.mjs \
+            --output "verification/$OS_DIR/performance.jsonl" \
+            --capabilities install_pack,memory_load,witness_verify \
+            --baseline || echo "perf bench errored — non-blocking"
+
       - name: History summary (ADR-103 — surface regression-introduction commits)
         # Soft gate: prints transitions since the previous snapshot. The
         # `summary` subcommand exits non-zero on any newly-regressed fix.
