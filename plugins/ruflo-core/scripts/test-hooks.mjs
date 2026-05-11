@@ -9,7 +9,7 @@
  *   - Output records the *intended* value (the file path / command), not a
  *     stray boolean like "true" — the symptom that #1859 reported
  *
- * The script substitutes `npx claude-flow@alpha` → the local CLI binary, so
+ * The script substitutes `npx ruflo@alpha` → the local CLI binary, so
  * we exercise the same flag wiring users hit in production but pinned to
  * the build under test.
  *
@@ -47,7 +47,7 @@ const post = hooks.hooks?.PostToolUse ?? [];
 const findHook = (matcher) => {
   const hit = post.find(h => h.matcher === matcher);
   if (!hit) throw new Error(`No PostToolUse hook with matcher=${matcher}`);
-  return hit.hooks[0].command.replace(/npx claude-flow@alpha/g, cliInvoke);
+  return hit.hooks[0].command.replace(/npx ruflo@alpha/g, cliInvoke);
 };
 
 const cmdBash = findHook('Bash');
