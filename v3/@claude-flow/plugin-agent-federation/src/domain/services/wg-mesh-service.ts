@@ -64,6 +64,49 @@ export const WG_NETWORK_GATES: Record<TrustLevel, readonly WgPortRule[]> = {
  */
 export const WG_MIN_MESH_TRUST: TrustLevel = TrustLevel.VERIFIED;
 
+/**
+ * Security: validate every field we splice into a wg-quick config string
+ * or shell command. The ADR's threat model explicitly includes "compromised
+ * federation peer with valid WG key" — that peer signs their own manifest,
+ * so the Ed25519 signature only proves origin, not content safety. A
+ * compromised peer could publish e.g. wgEndpoint = "host:51820\n[Peer]\n..."
+ * to inject extra peers into the config the operator runs via wg-quick.
+ *
+ * These regexes are intentionally narrow:
+ *   - publicKey: base64 X25519, exactly 43 chars + '=' padding
+ *   - meshIP:    a.b.c.d/32, octets 0-255, no whitespace
+ *   - endpoint:  hostname-or-ipv4-or-bracketed-ipv6 + :port, no newlines/specials
+ */
+const WG_PUBKEY_REGEX = /^[A-Za-z0-9+/]{43}=$/;
+const WG_MESH_IP_REGEX = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\/32$/;
+const WG_ENDPOINT_REGEX = /^(\[[0-9a-fA-F:]+\]|[a-zA-Z0-9][a-zA-Z0-9.-]*):\d{1,5}$/;
+
+export interface WgPeerFields {
+  readonly wgPublicKey: string;
+  readonly wgMeshIP: string;
+  readonly wgEndpoint: string;
+}
+
+/**
+ * Return the validated peer wg fields, or null if any is malformed or
+ * out-of-range. Callers treat null as "peer not eligible for mesh" — the
+ * peer stays in the federation discovery registry but is excluded from
+ * the wg config and any wg commands.
+ */
+export function readSafePeerWgFields(peer: FederationNode): WgPeerFields | null {
+  const pk = peer.metadata.wgPublicKey;
+  const ip = peer.metadata.wgMeshIP;
+  const ep = peer.metadata.wgEndpoint;
+  if (typeof pk !== 'string' || !WG_PUBKEY_REGEX.test(pk)) return null;
+  if (typeof ip !== 'string' || !WG_MESH_IP_REGEX.test(ip)) return null;
+  const ipMatch = ip.match(WG_MESH_IP_REGEX);
+  if (!ipMatch || [ipMatch[1], ipMatch[2], ipMatch[3], ipMatch[4]].some(o => Number(o) > 255)) return null;
+  if (typeof ep !== 'string' || !WG_ENDPOINT_REGEX.test(ep)) return null;
+  const port = Number(ep.split(':').pop());
+  if (port < 1 || port > 65535) return null;
+  return { wgPublicKey: pk, wgMeshIP: ip, wgEndpoint: ep };
+}
+
 export interface WgMeshServiceConfig {
   /** Local interface name. Defaults to `ruflo-fed`. */
   readonly interfaceName?: string;
@@ -161,16 +204,20 @@ export class WgMeshService {
     lines.push('');
     for (const peer of peers) {
       if (peer.trustLevel < WG_MIN_MESH_TRUST) continue;
-      const meshIP = peer.metadata.wgMeshIP as string | undefined;
-      const wgPubkey = peer.metadata.wgPublicKey as string | undefined;
-      const endpoint = peer.metadata.wgEndpoint as string | undefined;
-      if (!meshIP || !wgPubkey || !endpoint) continue;
-      if (this.evicted.has(wgPubkey)) continue;
-      const allowed = this.suspended.has(wgPubkey) ? '' : this.computeAllowedIPs(peer, meshIP).join(', ');
-      lines.push(`# Peer ${peer.nodeId} — trust=${getTrustLevelLabel(peer.trustLevel)}${this.suspended.has(wgPubkey) ? ' (SUSPENDED)' : ''}`);
+      // Security: validate every spliced field. A compromised but-signed
+      // peer can otherwise inject extra [Peer] blocks via newline-laden
+      // wgEndpoint. readSafePeerWgFields enforces base64/CIDR/host:port
+      // regexes; mismatches skip the peer entirely (safer than partial-write).
+      const safe = readSafePeerWgFields(peer);
+      if (!safe) continue;
+      if (this.evicted.has(safe.wgPublicKey)) continue;
+      const allowed = this.suspended.has(safe.wgPublicKey)
+        ? ''
+        : this.computeAllowedIPs(peer, safe.wgMeshIP).join(', ');
+      lines.push(`# Peer ${peer.nodeId} — trust=${getTrustLevelLabel(peer.trustLevel)}${this.suspended.has(safe.wgPublicKey) ? ' (SUSPENDED)' : ''}`);
       lines.push('[Peer]');
-      lines.push(`PublicKey = ${wgPubkey}`);
-      lines.push(`Endpoint = ${endpoint}`);
+      lines.push(`PublicKey = ${safe.wgPublicKey}`);
+      lines.push(`Endpoint = ${safe.wgEndpoint}`);
       lines.push(`AllowedIPs = ${allowed}`);
       lines.push('');
     }
@@ -261,12 +308,16 @@ export class WgMeshService {
     return peers
       .filter(p => p.trustLevel >= WG_MIN_MESH_TRUST)
       .map(peer => {
-        const meshIP = (peer.metadata.wgMeshIP as string | undefined) ?? '';
-        const pubkey = (peer.metadata.wgPublicKey as string | undefined) ?? '';
-        const endpoint = (peer.metadata.wgEndpoint as string | undefined) ?? '';
+        // Security: same validation as buildInterfaceConfig. If a peer
+        // published unsafe wg fields they get reported with empty strings —
+        // visible in operator status without becoming an injection vector.
+        const safe = readSafePeerWgFields(peer);
+        const meshIP = safe?.wgMeshIP ?? '';
+        const pubkey = safe?.wgPublicKey ?? '';
+        const endpoint = safe?.wgEndpoint ?? '';
         let state: 'active' | 'suspended' | 'evicted' = 'active';
-        if (this.evicted.has(pubkey)) state = 'evicted';
-        else if (this.suspended.has(pubkey)) state = 'suspended';
+        if (pubkey && this.evicted.has(pubkey)) state = 'evicted';
+        else if (pubkey && this.suspended.has(pubkey)) state = 'suspended';
         return {
           nodeId: peer.nodeId,
           trustLevel: peer.trustLevel,
@@ -275,7 +326,7 @@ export class WgMeshService {
           endpoint,
           publicKey: pubkey,
           state,
-          allowedIPs: state === 'active' ? this.computeAllowedIPs(peer, meshIP) : [],
+          allowedIPs: safe && state === 'active' ? this.computeAllowedIPs(peer, safe.wgMeshIP) : [],
         };
       });
   }

@@ -168,6 +168,82 @@ describe('ADR-111 Phase 2 — WgMeshService breaker hooks', () => {
   });
 });
 
+describe('ADR-111 Phase 2 — readSafePeerWgFields (compromised-peer defense)', () => {
+  function evilPeer(overrides: { wgPublicKey?: string; wgMeshIP?: string; wgEndpoint?: string }) {
+    return FederationNode.create({
+      nodeId: 'evil',
+      publicKey: 'ed25519-evil',
+      endpoint: 'ws://evil:9100',
+      trustLevel: TrustLevel.ATTESTED,
+      capabilities: {
+        agentTypes: [],
+        maxConcurrentSessions: 1,
+        supportedProtocols: ['websocket'],
+        complianceModes: [],
+      },
+      metadata: {
+        wgPublicKey: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+        wgMeshIP: '10.50.1.2/32',
+        wgEndpoint: 'evil.example:51820',
+        ...overrides,
+      },
+    });
+  }
+
+  let svc: WgMeshService;
+  beforeEach(() => {
+    svc = new WgMeshService();
+    svc.setLocalIdentity(generateWgKeyPair(), '10.50.0.1/32');
+  });
+
+  it('rejects [Peer] injection via wgEndpoint newline', () => {
+    const evil = evilPeer({ wgEndpoint: 'host:51820\n[Peer]\nPublicKey = attacker' });
+    const cfg = svc.buildInterfaceConfig([evil]);
+    // The malicious endpoint must not appear, nor must the injected [Peer] block
+    expect(cfg).not.toContain('attacker');
+    expect(cfg).not.toContain('host:51820\n[Peer]');
+    // Peer should be skipped entirely — no nodeId comment for it either
+    expect(cfg).not.toContain('Peer evil');
+  });
+
+  it('rejects unsafe wgPublicKey (wrong length / non-base64)', () => {
+    const cfg1 = svc.buildInterfaceConfig([evilPeer({ wgPublicKey: 'short' })]);
+    const cfg2 = svc.buildInterfaceConfig([evilPeer({ wgPublicKey: '\\n; rm -rf /;\\n' })]);
+    expect(cfg1).not.toContain('Peer evil');
+    expect(cfg2).not.toContain('Peer evil');
+  });
+
+  it('rejects unsafe wgMeshIP (out-of-range octet)', () => {
+    const cfg = svc.buildInterfaceConfig([evilPeer({ wgMeshIP: '999.999.999.999/32' })]);
+    expect(cfg).not.toContain('Peer evil');
+  });
+
+  it('rejects unsafe wgMeshIP (missing /32 cidr)', () => {
+    const cfg = svc.buildInterfaceConfig([evilPeer({ wgMeshIP: '10.50.1.2' })]);
+    expect(cfg).not.toContain('Peer evil');
+  });
+
+  it('rejects port out of range in wgEndpoint', () => {
+    const cfg = svc.buildInterfaceConfig([evilPeer({ wgEndpoint: 'host:99999' })]);
+    expect(cfg).not.toContain('Peer evil');
+  });
+
+  it('accepts IPv6-bracketed endpoint', () => {
+    const cfg = svc.buildInterfaceConfig([evilPeer({ wgEndpoint: '[::1]:51820' })]);
+    expect(cfg).toContain('Peer evil');
+    expect(cfg).toContain('[::1]:51820');
+  });
+
+  it('summarize() also excludes unsafe peers (empty pubkey/IP/endpoint)', () => {
+    const evil = evilPeer({ wgEndpoint: 'host:51820\nmalicious' });
+    const summary = svc.summarize([evil]);
+    expect(summary).toHaveLength(1);
+    expect(summary[0].endpoint).toBe('');
+    expect(summary[0].publicKey).toBe('');
+    expect(summary[0].meshIP).toBe('');
+  });
+});
+
 describe('ADR-111 Phase 2 — WgMeshService defense-in-depth', () => {
   it('refuses cmd args with shell metacharacters', () => {
     const svc = new WgMeshService();
