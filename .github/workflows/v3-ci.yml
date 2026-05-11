@@ -423,6 +423,14 @@ jobs:
         shell: bash
         run: node plugins/ruflo-core/scripts/test-mcp-roundtrips.mjs
 
+      - name: Run #1863 cli-no-crash smoke
+        shell: bash
+        # Drives `task create` → `task status` + a few command formatters
+        # and asserts none crash with an unhandled exception. Catches the
+        # class where callMCPTool<{...}>() types a response field as
+        # non-optional but the server omits it → `.join()` on undefined.
+        run: node plugins/ruflo-core/scripts/test-cli-no-crash.mjs
+
   tool-descriptions-audit:
     # ADR-112 — gate: every MCP tool description must include "Use when …"
     # guidance so Claude knows when to pick Ruflo's tool over native
