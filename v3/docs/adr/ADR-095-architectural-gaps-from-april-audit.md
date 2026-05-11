@@ -179,12 +179,32 @@ The 100 MB `graph-state.json` artifact may still exist on machines with long-liv
 
 Both specific artifacts called out in the AlphaSignal article have been cleaned up. Downstream marketing materials (gists, social posts) are outside this ADR's scope.
 
+### G2 — in progress (consensus transport abstraction)
+
+The first piece landed: `v3/@claude-flow/swarm/src/consensus/transport.ts` introduces a `ConsensusTransport` interface that separates the **inter-node-message** dimension from the **observability-event** dimension. The consensus protocols (raft/byzantine/gossip) historically used a local `EventEmitter` for both — the inter-node side never crossed a process boundary (a node "sent" a message by `emit`ting it locally and synthesizing the peer's reply inline).
+
+**Landed (PR #1905, branch `feat/adr-095-g2-hive-mind-ws-transport`):**
+- `ConsensusTransport` interface — `send` (request-response), `broadcast`, `onMessage`, `peers`, `close`. Separates inter-node messaging from observability events.
+- `LocalTransport` — in-process registry; the default, matches current single-process behavior. Optional Ed25519 signing + per-sender monotonic-`seq` replay defense.
+- Real Ed25519 message signing via Node's built-in `crypto` (no new deps): `generateNodeKeyPair`, `signMessage`, `verifyMessage`, `canonicalizeForSigning` (deep-sorted-key JSON for cross-host determinism), `messageDigest`.
+- `FederationTransport` — `ConsensusTransport` over the federation plugin's ADR-104 WS wire (`agentic-flow/transport/loader`). Structural dep (swarm stays zero-dep — the wiring layer supplies the transport instance). Request-response layered on fire-and-forget WS via correlation ids; ADR-104 stream-mux; Ed25519 + replay defense; fail-closed.
+- **All three protocols wired** to accept an injected `transport`: `RaftConsensus` (real RequestVote/AppendEntries RPCs with proper receiver rules — term comparison, vote-once-per-term, log-up-to-date check, commitIndex advance), `ByzantineConsensus` (PBFT messages over the transport, sha256 digests replacing the 32-bit toy hash, inbound routing), `GossipConsensus` (gossip messages to neighbors over the transport, inbound merge with dedup-by-id). Legacy no-transport path preserved in all three.
+- **BFT fault-tolerance correctness**: `f` now derived from the actual cluster size (`floor((n-1)/3)`, clamped to ≥1) rather than hardcoded to 1; `config.maxFaultyNodes` (when set) acts as an upper cap. Quorum `2f+1` checks now use the cluster-derived `f`.
+- CI guard: `plugins/ruflo-core/scripts/test-consensus-transport.mjs` (in the `mcp-roundtrip-smoke` job) — asserts exports present (incl. `FederationTransport`), `LocalTransport` round-trips, Ed25519 verify is real (no `return true` stub regression).
+- Tests: 210/210 swarm suite (+28 new across transport/byzantine/raft/federation/gossip).
+
+Remaining for G2:
+- Failure-injection tests (f<n/3 for BFT, f<n/2 for Raft) — drive a multi-node `LocalTransport` cluster with simulated faulty/silent nodes; assert correct commits below threshold, no incorrect commits above.
+- Cross-host validation (mac ↔ ruvultra over tailscale, root) once `FederationTransport` is wired into a real hive-mind + federation setup.
+- Build + publish; merge PR #1905.
+
+Tracked in [#1872](https://github.com/ruvnet/ruflo/issues/1872) and PR #1905.
+
 ### Still open
 
-- **G2** — distributed consensus transport still single-process for hive-mind. Federation plugin's ws transport (alpha.13+) closes this for federation specifically; hive-mind has not adopted it.
 - **G5** — superseded by ADR-094; deps migration status tracked there.
 - **G7** — controller activation ADRs still per-controller work; 2 of 8 controllers active.
-- **#1748** — tool description audit. AlphaSignal article amplified this; no code change yet.
+- **#1748** — RESOLVED in alpha.22 (ADR-112): 0/285 tools lack "Use when" guidance; CI guard active.
 
 ### Tracking
 
