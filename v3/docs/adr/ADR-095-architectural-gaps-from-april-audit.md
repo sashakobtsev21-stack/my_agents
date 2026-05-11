@@ -143,3 +143,51 @@ This ADR closes when each row above has either landed in its own ADR (proposed/a
 
 - ADR-093 was never the right place to address these. It was a punch list of *honesty patches* — making the contract match the implementation. ADR-095 explicitly tracks gaps where the implementation needs to expand to match what the contract should be.
 - @roman-rr's audit was rigorous; the gaps named here are real. This ADR exists so future maintainers don't re-discover them every audit cycle.
+
+---
+
+## Status update — 2026-05-11 (post v3.7.0-alpha.21)
+
+Independent re-audit by AlphaSignal AI (May 7, targeting v3.6.30) re-surfaced these gaps publicly. Verification pass on current main + the work in v3.7.0-alpha series shows the following status changes:
+
+### G1 — agent_spawn → REMEDIATED via `agent_execute` wire
+
+The execution wire shipped as a sibling MCP tool, not by modifying `agent_spawn` (which intentionally remains a registry-only write for cost attribution + swarm coordination). File: `v3/@claude-flow/cli/src/mcp-tools/agent-execute-core.ts:117` — `fetch('https://api.anthropic.com/v1/messages', ...)`. Workflow steps go through this wire (see G3).
+
+### G3 — workflow_execute → REMEDIATED with real step executor
+
+`v3/@claude-flow/cli/src/mcp-tools/workflow-tools.ts:308+` contains the step-walking executor with variable interpolation, step-output binding, pause/cancel, and persistence-after-each-step. The `'Workflow not found'` error only fires when `store.workflows[workflowId]` is undefined (correct missing-ID handling, not a stub).
+
+### G4 — WASM agent prompt → REMEDIATED with echo-stub detection + Anthropic fallback
+
+`v3/@claude-flow/cli/src/ruvector/agent-wasm.ts:154` (`promptWasmAgent`) detects the bundled WASM agent's `echo: <input>` stub and routes through `callAnthropicMessages` when `ANTHROPIC_API_KEY` is set. When unset, surfaces the stub honestly with a `[NOTE: …set ANTHROPIC_API_KEY to enable real responses]` hint.
+
+### G6 — Auto-memory bloat → REFUTED on current main
+
+The 5,706-entries-per-message claim does not match current behavior:
+1. Global `~/.claude/settings.json` UserPromptSubmit hook is `[ -n "$PROMPT" ] && npx @claude-flow/cli@latest hooks route --task "$PROMPT" || true` — single routing call, no bulk injection.
+2. `plugins/ruflo-core/hooks/hooks.json` defines only `PreToolUse`, `PostToolUse`, `PreCompact`, `Stop` — no UserPromptSubmit / SessionStart context injection.
+3. No `trigram` / `jaccard` symbols in plugin/helper hooks (only one reference in `plugins/ruflo-rag-memory/README.md` documenting MMR diversity reranking — different code path).
+4. Live measurement: session-start reminder showed `[AutoMemory] ✓ Imported 0 entries (0 skipped) Backend entries: 8`.
+
+The 100 MB `graph-state.json` artifact may still exist on machines with long-lived `~/.claude/projects/` histories, but the runtime injection path no longer reads it. Recommend a separate one-shot cleanup script for users with bloated state files from earlier versions.
+
+### Benchmark integrity — REMEDIATED (simulate_benchmarks.py removed)
+
+- `find . -name 'simulate_benchmarks*'` returns zero results in current main.
+- `git grep "84.8.*SWE"` in tracked `.md` files returns zero hits.
+
+Both specific artifacts called out in the AlphaSignal article have been cleaned up. Downstream marketing materials (gists, social posts) are outside this ADR's scope.
+
+### Still open
+
+- **G2** — distributed consensus transport still single-process for hive-mind. Federation plugin's ws transport (alpha.13+) closes this for federation specifically; hive-mind has not adopted it.
+- **G5** — superseded by ADR-094; deps migration status tracked there.
+- **G7** — controller activation ADRs still per-controller work; 2 of 8 controllers active.
+- **#1748** — tool description audit. AlphaSignal article amplified this; no code change yet.
+
+### Tracking
+
+- [#1896](https://github.com/ruvnet/ruflo/issues/1896) — external audit response with the per-gap measurement evidence above.
+
+This update does NOT supersede the original ADR-095 problem statement; it records that 4 of the 7 originally-named gaps have been quietly fixed by the v3.7.0-alpha work that landed without ceremony.

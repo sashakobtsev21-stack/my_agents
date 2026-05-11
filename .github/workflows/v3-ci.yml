@@ -384,6 +384,69 @@ jobs:
         shell: bash
         run: node plugins/ruflo-core/scripts/test-memory-import.mjs
 
+  mcp-roundtrip-smoke:
+    # Regression guard for ruvnet/ruflo#1889 — paired MCP tool round-trip.
+    # When two MCP tools form a store/search pair, the contract is that
+    # data written by one MUST be retrievable by the other. The original
+    # bug: pattern-store wrote to memory-store-fallback while pattern-search
+    # only queried ReasoningBank (always empty), so writes were silently
+    # lost. Static dist-scan asserts both fallback paths are present;
+    # behavioural probe runs with an internal 30s timeout so CI never hangs
+    # on slow memory-backend init.
+    name: MCP paired-tool round-trip smoke (#1889)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: v3/pnpm-lock.yaml
+
+      - name: Build cli (smoke needs dist)
+        working-directory: v3
+        shell: bash
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --recursive --no-bail run build || true
+
+      - name: Run #1889 round-trip smoke
+        shell: bash
+        run: node plugins/ruflo-core/scripts/test-mcp-roundtrips.mjs
+
+  tool-descriptions-audit:
+    # ADR-112 — gate: every MCP tool description must include "Use when …"
+    # guidance so Claude knows when to pick Ruflo's tool over native
+    # (Bash, Read, Grep, Glob, Task, TodoWrite, WebFetch). Baseline lives
+    # in verification/mcp-tool-baseline.json and is monotone-decreasing —
+    # the script fails the build if the no-guidance count goes UP. Run
+    # `node scripts/audit-tool-descriptions.mjs --update-baseline` after
+    # landing a description-improvement PR to lock the new floor.
+    name: Tool description discoverability (ADR-112)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run tool-description audit
+        shell: bash
+        run: node scripts/audit-tool-descriptions.mjs
+
   witness-verify:
     # Cryptographic regression guard: runs `ruflo verify --manifest` against
     # the local build to confirm every documented fix in verification.md.json
@@ -410,7 +473,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, mcp-protocol-smoke, memory-import-smoke]
+    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke]
 
     steps:
       - name: Checkout code
