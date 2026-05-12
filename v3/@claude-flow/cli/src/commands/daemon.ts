@@ -24,6 +24,11 @@ const startCommand: Command = {
     { name: 'sandbox', type: 'string', description: 'Default sandbox mode for headless workers', choices: ['strict', 'permissive', 'disabled'] },
     { name: 'max-cpu-load', type: 'string', description: 'Override maxCpuLoad resource threshold (e.g. 4.0)' },
     { name: 'min-free-memory', type: 'string', description: 'Override minFreeMemoryPercent resource threshold (e.g. 15)' },
+    // #1914: workspace root for this daemon. Set automatically when the
+    // background launcher forks the foreground child so the daemon process
+    // carries its workspace path in argv — `killStaleDaemons` then only
+    // reaps daemons belonging to the current workspace (ADR-014 scope).
+    { name: 'workspace', type: 'string', description: 'Workspace root for this daemon (internal — set automatically when forking)' },
   ],
   examples: [
     { command: 'claude-flow daemon start', description: 'Start daemon in background (default)' },
@@ -34,7 +39,9 @@ const startCommand: Command = {
   action: async (ctx: CommandContext): Promise<CommandResult> => {
     const quiet = ctx.flags.quiet as boolean;
     const foreground = ctx.flags.foreground as boolean;
-    const projectRoot = process.cwd();
+    // #1914: a forked daemon child receives --workspace <root>; the launcher
+    // and interactive invocations have no flag and fall back to cwd.
+    const projectRoot = resolveWorkspaceFlag(ctx.flags.workspace) ?? process.cwd();
     const isDaemonProcess = process.env.CLAUDE_FLOW_DAEMON === '1';
 
     // Parse resource threshold overrides from CLI flags
@@ -222,6 +229,36 @@ function validatePath(path: string, label: string): void {
 }
 
 /**
+ * #1914: Resolve the `--workspace` flag to an absolute path, or return null
+ * if it is absent / not a usable string. Rejects values with null bytes or
+ * shell metacharacters (defence-in-depth — the value is later embedded in a
+ * forked child's argv and compared against `ps`/`tasklist` output).
+ */
+export function resolveWorkspaceFlag(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (trimmed.includes('\0') || /[;&|`$<>]/.test(trimmed)) return null;
+  return resolve(trimmed);
+}
+
+/**
+ * #1914: True when a process command line (from `ps -eo command` on POSIX or
+ * the tasklist Window Title column on Windows) belongs to a daemon started
+ * for `workspaceRoot`. The launcher (`startBackgroundDaemon`) always appends
+ * `--workspace <root>` as the FINAL argv entry, so an exact trailing match
+ * after stripping trailing whitespace/quotes is unambiguous — even for
+ * workspace paths containing spaces — and never a bare path-prefix match,
+ * so workspace `/a/proj` does not reap `/a/proj-other`'s daemon. A daemon
+ * whose argv puts `--workspace` mid-list (only possible via a hand-rolled
+ * invocation) simply won't be auto-reaped — `daemon stop` still handles it
+ * via the PID file.
+ */
+export function daemonCommandLineBelongsToWorkspace(commandLine: string, workspaceRoot: string): boolean {
+  return commandLine.replace(/[\s"']+$/u, '').endsWith(`--workspace ${workspaceRoot}`);
+}
+
+/**
  * Start daemon as a detached background process
  */
 async function startBackgroundDaemon(projectRoot: string, quiet: boolean, maxCpuLoad?: string, minFreeMemory?: string): Promise<CommandResult> {
@@ -299,6 +336,10 @@ async function startBackgroundDaemon(projectRoot: string, quiet: boolean, maxCpu
   if (minFreeMemory && SPAWN_NUMERIC_RE.test(minFreeMemory)) {
     forkArgs.push('--min-free-memory', minFreeMemory);
   }
+  // #1914: stamp the workspace into argv (kept LAST) so the foreground daemon
+  // process is self-identifying and `killStaleDaemons` only reaps daemons
+  // belonging to this workspace. resolvedRoot was validatePath()'d above.
+  forkArgs.push('--workspace', resolvedRoot);
   const child = fork(cliPath, forkArgs, forkOpts);
 
   // Get PID from spawned process directly (no shell echo needed)
@@ -459,11 +500,16 @@ async function killStaleDaemonsPosix(projectRoot: string, quiet: boolean): Promi
     const lines = psOutput.split('\n');
     const currentPid = process.pid;
     const trackedPid = getBackgroundDaemonPid(projectRoot);
+    // #1914: only ever reap daemons belonging to THIS workspace (ADR-014).
+    const resolvedRoot = resolve(projectRoot);
     let killed = 0;
 
     for (const line of lines) {
       if (!line.includes('daemon start --foreground')) continue;
       if (!line.includes('claude-flow') && !line.includes('@claude-flow/cli')) continue;
+      // #1914: skip daemons from other workspaces (or pre-#1914 versions that
+      // didn't stamp --workspace — let `daemon stop` handle those via PID file).
+      if (!daemonCommandLineBelongsToWorkspace(line, resolvedRoot)) continue;
       const pidStr = line.trim().split(/\s+/)[0];
       const pid = parseInt(pidStr, 10);
       if (isNaN(pid) || pid === currentPid || pid === trackedPid) continue;
@@ -501,6 +547,8 @@ async function killStaleDaemonsWindows(projectRoot: string, quiet: boolean): Pro
     const lines = out.split(/\r?\n/);
     const currentPid = process.pid;
     const trackedPid = getBackgroundDaemonPid(projectRoot);
+    // #1914: only ever reap daemons belonging to THIS workspace (ADR-014).
+    const resolvedRoot = resolve(projectRoot);
     let killed = 0;
 
     for (const line of lines) {
@@ -509,6 +557,8 @@ async function killStaleDaemonsWindows(projectRoot: string, quiet: boolean): Pro
       // typically holds the full invocation. Skip rows that aren't ours.
       if (!line.includes('daemon start --foreground')) continue;
       if (!line.includes('claude-flow') && !line.includes('@claude-flow/cli')) continue;
+      // #1914: skip daemons from other workspaces (or pre-#1914 versions).
+      if (!daemonCommandLineBelongsToWorkspace(line, resolvedRoot)) continue;
 
       // Parse CSV: tasklist quotes each field, so split on `","`
       const fields = line.split(/","/).map(f => f.replace(/^"|"$/g, ''));

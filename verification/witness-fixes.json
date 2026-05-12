@@ -156,6 +156,12 @@
       "desc": "agent_execute model aliases (haiku/sonnet/opus/inherit) map to current Claude 4.x ids (claude-haiku-4-5-20251001 / claude-sonnet-4-6 / claude-opus-4-7) \u2014 previously stuck on claude-3-*-latest which the Anthropic API 404s. DEFAULT_ANTHROPIC_MODEL = claude-sonnet-4-6. Unit test __tests__/agent-execute-models.test.ts asserts no alias resolves to a claude-3.x id.",
       "file": "v3/@claude-flow/cli/dist/src/mcp-tools/agent-execute-core.js",
       "marker": "claude-sonnet-4-6"
+    },
+    {
+      "id": "#1914",
+      "desc": "daemon start no longer SIGTERMs daemons belonging to OTHER workspaces (ADR-014 per-workspace scope). Forked daemon argv is stamped with `--workspace <root>` (kept last) and killStaleDaemons{Posix,Windows} filter on it via daemonCommandLineBelongsToWorkspace \u2014 exact trailing match, never a path-prefix match, so `/a/proj` start can't reap `/a/proj-other`'s daemon. Pre-#1914 daemons (no stamp) are left for `daemon stop` (PID file). Unit guard __tests__/daemon-workspace-scope.test.ts.",
+      "file": "v3/@claude-flow/cli/dist/src/commands/daemon.js",
+      "marker": "daemonCommandLineBelongsToWorkspace"
     }
   ]
 }
