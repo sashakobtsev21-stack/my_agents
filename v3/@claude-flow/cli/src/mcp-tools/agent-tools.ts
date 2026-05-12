@@ -15,6 +15,11 @@ import { executeAgentTask } from './agent-execute-core.js';
 const STORAGE_DIR = '.claude-flow';
 const AGENT_DIR = 'agents';
 const AGENT_FILE = 'store.json';
+// #1916: hive-mind_spawn writes its workers to `.claude-flow/agents.json`
+// (a *different* file from the canonical `.claude-flow/agents/store.json`
+// used here). agent_status / agent_list / agent_logs merge that store so a
+// hive-spawned worker is resolvable instead of returning `not_found`.
+const HIVE_AGENT_FILE = 'agents.json';
 
 // Model types matching Claude Agent SDK
 type ClaudeModel = 'haiku' | 'sonnet' | 'opus' | 'inherit';
@@ -69,6 +74,35 @@ function loadAgentStore(): AgentStore {
 function saveAgentStore(store: AgentStore): void {
   ensureAgentDir();
   writeFileSync(getAgentPath(), JSON.stringify(store, null, 2), 'utf-8');
+}
+
+// #1916: read hive-mind-spawned workers from `.claude-flow/agents.json`.
+function getHiveAgentPath(): string {
+  return join(getProjectCwd(), STORAGE_DIR, HIVE_AGENT_FILE);
+}
+
+function loadHiveAgents(): Record<string, AgentRecord> {
+  try {
+    const path = getHiveAgentPath();
+    if (existsSync(path)) {
+      const data = JSON.parse(readFileSync(path, 'utf-8'));
+      if (data && typeof data.agents === 'object' && data.agents) {
+        return data.agents as Record<string, AgentRecord>;
+      }
+    }
+  } catch {
+    // Ignore — hive store is optional/best-effort.
+  }
+  return {};
+}
+
+/**
+ * #1916: merged view of every tracked agent — the canonical agent store
+ * plus hive-mind-spawned workers. On an id collision the canonical record
+ * wins (it carries model-routing + lastResult that the hive store omits).
+ */
+function loadAllAgents(): Record<string, AgentRecord> {
+  return { ...loadHiveAgents(), ...loadAgentStore().agents };
 }
 
 // Default model mappings for agent types (can be overridden)
@@ -367,9 +401,8 @@ export const agentTools: MCPTool[] = [
       const v = validateIdentifier(input.agentId, 'agentId');
       if (!v.valid) return { agentId: input.agentId, status: 'not_found', error: `Input validation failed: ${v.error}` };
 
-      const store = loadAgentStore();
       const agentId = input.agentId as string;
-      const agent = store.agents[agentId];
+      const agent = loadAllAgents()[agentId]; // #1916: includes hive-mind-spawned workers
 
       if (agent) {
         return {
@@ -413,8 +446,7 @@ export const agentTools: MCPTool[] = [
         if (!v.valid) return { agents: [], total: 0, error: `Input validation failed: ${v.error}` };
       }
 
-      const store = loadAgentStore();
-      let agents = Object.values(store.agents);
+      let agents = Object.values(loadAllAgents()); // #1916: includes hive-mind-spawned workers
 
       // Filter by status
       if (input.status) {
@@ -700,6 +732,55 @@ export const agentTools: MCPTool[] = [
         success: false,
         agentId,
         error: 'Agent not found',
+      };
+    },
+  },
+  {
+    // #1916 — the `ruflo agent logs <id>` CLI subcommand and the guidance
+    // surface both reference an `agent_logs` MCP tool that was never
+    // registered, so it errored with `MCP tool not found: agent_logs`.
+    // This is the registered handler. Note: agents don't yet keep a
+    // structured per-agent activity log (that lands with hive worker
+    // execution wiring — see #1916), so for now we surface the agent's
+    // last task result as a single synthetic entry, or an explicit empty
+    // response. The shape matches what the CLI `logs` subcommand expects:
+    // `{ agentId, entries: [{timestamp,level,message,context?}], total }`.
+    name: 'agent_logs',
+    description: 'Return recorded activity-log entries for a tracked agent (idle/running history, last task result). Use when native Task tool is wrong because you need the agent\'s log across turns (what it did, last error/result, swarm context) rather than a one-shot Task transcript. For a Task you just ran, native Task output is fine. Pair with agent_list to find the agentId. (Hive-mind-spawned workers are resolved here too.) Today this returns the last task result as a synthetic entry — full per-agent activity logs land with hive worker execution wiring (ruvnet/ruflo#1916).',
+    category: 'agent',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        agentId: { type: 'string', description: 'ID of agent' },
+        tail: { type: 'number', description: 'Max recent entries to return (default 50)' },
+        level: { type: 'string', enum: ['debug', 'info', 'warn', 'error'], description: 'Minimum log level (currently advisory — entries are synthetic)' },
+        since: { type: 'string', description: 'Show logs since, e.g. "1h" / "30m" (currently advisory)' },
+      },
+      required: ['agentId'],
+    },
+    handler: async (input) => {
+      const v = validateIdentifier(input.agentId, 'agentId');
+      if (!v.valid) return { agentId: input.agentId, entries: [], total: 0, error: `Input validation failed: ${v.error}` };
+
+      const agentId = input.agentId as string;
+      const agent = loadAllAgents()[agentId]; // #1916: includes hive-mind-spawned workers
+      if (!agent) {
+        return { agentId, entries: [], total: 0, error: 'Agent not found' };
+      }
+
+      const entries: Array<{ timestamp: string; level: 'debug' | 'info' | 'warn' | 'error'; message: string; context?: Record<string, unknown> }> = [];
+      entries.push({ timestamp: agent.createdAt, level: 'info', message: `agent created (type=${agent.agentType}, status=${agent.status})` });
+      if (agent.lastResult) {
+        entries.push({ timestamp: agent.createdAt, level: 'info', message: 'last task result', context: agent.lastResult });
+      }
+
+      const tail = typeof input.tail === 'number' && input.tail > 0 ? Math.floor(input.tail) : 50;
+      const sliced = entries.slice(-tail);
+      return {
+        agentId: agent.agentId,
+        entries: sliced,
+        total: entries.length,
+        note: 'per-agent activity logging is not yet wired; entries are synthetic (ruvnet/ruflo#1916)',
       };
     },
   },

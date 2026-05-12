@@ -482,4 +482,53 @@ export const taskTools: MCPTool[] = [
       };
     },
   },
+  {
+    // #1916: the `ruflo task retry <id>` CLI subcommand referenced an
+    // unregistered `task_retry` tool. Re-queues a finished/cancelled task by
+    // cloning its spec into a fresh pending task (the original is left intact
+    // as history).
+    name: 'task_retry',
+    description: 'Re-queue a failed/cancelled/completed task by cloning its spec into a fresh pending task (the original record is kept as history). Use when native TodoWrite is wrong because you need the original task\'s persisted spec (type, priority, assignees, tags) and a stable taskId chain across runs rather than hand-retyping a checklist item. For ad-hoc re-runs, native TodoWrite is fine.',
+    category: 'task',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        taskId: { type: 'string', description: 'ID of the task to retry' },
+        resetState: { type: 'boolean', description: 'Reset progress/result on the new task (default true)' },
+      },
+      required: ['taskId'],
+    },
+    handler: async (input) => {
+      const v = validateIdentifier(input.taskId, 'taskId');
+      if (!v.valid) return { success: false, error: v.error };
+
+      const store = loadTaskStore();
+      const taskId = input.taskId as string;
+      const original = store.tasks[taskId];
+      if (!original) return { success: false, taskId, error: 'Task not found' };
+
+      const newTaskId = `task-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      store.tasks[newTaskId] = {
+        taskId: newTaskId,
+        type: original.type,
+        description: original.description,
+        priority: original.priority,
+        status: 'pending',
+        progress: 0,
+        assignedTo: [...original.assignedTo],
+        tags: [...original.tags, 'retry-of:' + taskId],
+        createdAt: new Date().toISOString(),
+        startedAt: null,
+        completedAt: null,
+      };
+      saveTaskStore(store);
+
+      return {
+        taskId,
+        newTaskId,
+        previousStatus: original.status,
+        status: 'pending',
+      };
+    },
+  },
 ];

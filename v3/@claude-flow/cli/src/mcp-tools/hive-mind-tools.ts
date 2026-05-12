@@ -1028,4 +1028,46 @@ export const hiveMindTools: MCPTool[] = [
       return { action, error: 'Unknown action' };
     },
   },
+  {
+    // #1916: `ruflo hive-mind optimize-memory` referenced an unregistered
+    // `hive-mind_optimize-memory` tool. Best-effort today: prunes obviously-
+    // empty shared-memory keys and reports the before/after counts; pattern
+    // quality consolidation is a follow-up (it belongs in the intelligence
+    // pipeline / agentdb curator, not here).
+    name: 'hive-mind_optimize-memory',
+    description: 'Compact the hive-mind shared-memory store (drops null/empty keys) and report before/after pattern counts. Use when native conversation memory is wrong because you need the queen-led collective\'s persisted shared state cleaned up between phases. For one-shot scratch state, no tool needed. (Pattern-quality consolidation is delegated to the intelligence pipeline — this only does the cheap structural pass for now.)',
+    category: 'hive-mind',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        qualityThreshold: { type: 'number', description: 'Quality threshold for pattern retention (advisory — not enforced yet)' },
+      },
+    },
+    handler: async () => {
+      const t0 = Date.now();
+      const state = loadHiveState();
+      if (!state.initialized) return { optimized: false, error: 'Hive-mind not initialized', before: { patterns: 0, memory: '0' }, after: { patterns: 0, memory: '0' }, removed: 0, consolidated: 0, timeMs: 0 };
+      const beforeKeys = Object.keys(state.sharedMemory);
+      const before = beforeKeys.length;
+      for (const k of beforeKeys) {
+        const v = state.sharedMemory[k];
+        if (v === null || v === undefined || (typeof v === 'object' && v !== null && Object.keys(v as object).length === 0)) {
+          delete state.sharedMemory[k];
+        }
+      }
+      const after = Object.keys(state.sharedMemory).length;
+      const removed = before - after;
+      if (removed > 0) saveHiveState(state);
+      const sizeStr = (n: number) => `${Buffer.byteLength(JSON.stringify(state.sharedMemory))}B (~${n} keys)`;
+      return {
+        optimized: removed > 0,
+        before: { patterns: before, memory: `~${before} keys` },
+        after: { patterns: after, memory: sizeStr(after) },
+        removed,
+        consolidated: 0,
+        timeMs: Date.now() - t0,
+        note: 'structural compaction only; pattern-quality consolidation is delegated to the intelligence pipeline (#1916 follow-up)',
+      };
+    },
+  },
 ];

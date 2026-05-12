@@ -463,6 +463,15 @@ jobs:
         shell: bash
         run: node scripts/audit-tool-descriptions.mjs
 
+      - name: Run CLI ↔ MCP tool coverage audit (#1916)
+        # Fails if a `ruflo <cmd>` subcommand callMCPTool()s a tool that isn't
+        # registered in src/mcp-tools/*.ts (it would die with `MCP tool not
+        # found`). Monotone-decreasing baseline at verification/cli-mcp-tool-
+        # baseline.json — new dangling references fail; fixing one and running
+        # `node scripts/audit-cli-mcp-tools.mjs --update-baseline` lowers the floor.
+        shell: bash
+        run: node scripts/audit-cli-mcp-tools.mjs
+
   witness-verify:
     # Cryptographic regression guard: runs `ruflo verify --manifest` against
     # the local build to confirm every documented fix in verification.md.json

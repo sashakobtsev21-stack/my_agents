@@ -162,6 +162,24 @@
       "desc": "daemon start no longer SIGTERMs daemons belonging to OTHER workspaces (ADR-014 per-workspace scope). Forked daemon argv is stamped with `--workspace <root>` (kept last) and killStaleDaemons{Posix,Windows} filter on it via daemonCommandLineBelongsToWorkspace \u2014 exact trailing match, never a path-prefix match, so `/a/proj` start can't reap `/a/proj-other`'s daemon. Pre-#1914 daemons (no stamp) are left for `daemon stop` (PID file). Unit guard __tests__/daemon-workspace-scope.test.ts.",
       "file": "v3/@claude-flow/cli/dist/src/commands/daemon.js",
       "marker": "daemonCommandLineBelongsToWorkspace"
+    },
+    {
+      "id": "#1916",
+      "desc": "agent_logs MCP tool registered (the `ruflo agent logs <id>` CLI subcommand called a tool that didn't exist \u2192 `MCP tool not found: agent_logs`). Also agent_status/agent_list/agent_logs now resolve hive-mind-spawned workers via loadAllAgents() \u2014 hive-mind_spawn writes to `.claude-flow/agents.json`, a different file from `.claude-flow/agents/store.json`, so `agent status <hive-worker-id>` returned `not_found`. (Task-execution dispatch for hive workers \u2014 #1916 items 3/4 \u2014 is a tracked follow-up.) Unit guard __tests__/agent-logs-hive-resolution.test.ts.",
+      "file": "v3/@claude-flow/cli/dist/src/mcp-tools/agent-tools.js",
+      "marker": "loadAllAgents"
+    },
+    {
+      "id": "#1916-guard",
+      "desc": "CLI\u2194MCP tool coverage CI guard (scripts/audit-cli-mcp-tools.mjs) \u2014 fails if any `ruflo <cmd>` subcommand callMCPTool()s a name not registered in src/mcp-tools/*.ts. Monotone-decreasing baseline at verification/cli-mcp-tool-baseline.json \u2014 now at 0 (was 20). Wired into v3-ci.yml `tool-descriptions-audit` job (already in witness-verify needs[]).",
+      "file": "scripts/audit-cli-mcp-tools.mjs",
+      "marker": "cli-mcp-tool-baseline.json"
+    },
+    {
+      "id": "#1916-cli-tools",
+      "desc": "Registered the 16 MCP tools that CLI subcommands referenced but that were never wired into the registry (the `MCP tool not found` class surfaced by #1916-guard): task_retry, workflow_stop, workflow_validate, session_current/export/import, memory_detailed-stats/cleanup/compress/export/import, hive-mind_optimize-memory, hooks_teammate-idle, hooks_task-completed, mcp_start, mcp_stop \u2014 plus renamed the coverage tools `hooks/coverage-*` \u2192 `hooks_coverage-*` (now match the CLI's underscore calls) and pointed `swarm stop` at `swarm_shutdown`. cli-mcp-tool-baseline.json is now 0.",
+      "file": "v3/@claude-flow/cli/dist/src/mcp-tools/workflow-tools.js",
+      "marker": "workflow_validate"
     }
   ]
 }

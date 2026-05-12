@@ -654,4 +654,52 @@ export const systemTools: MCPTool[] = [
       };
     },
   },
+  {
+    // #1916: `ruflo start` referenced an unregistered `mcp_start` tool. MCP
+    // tools run *in-process* via the CLI's TOOL_REGISTRY — there is no
+    // separate server process to spawn from inside an MCP call. If this tool
+    // responds, MCP is already up. (`ruflo mcp start` runs a standalone
+    // stdio/HTTP server; that's a process command, not an MCP tool.)
+    name: 'mcp_start',
+    description: 'Report that the in-process MCP toolset is available (no-op "start" — if this tool responds, MCP is up). Use when native `claude mcp list` is wrong because you want Ruflo-side confirmation that the in-process registry loaded. For a standalone stdio/HTTP MCP server, run `ruflo mcp start` (a process command, not this tool). Pair with mcp_status for detail.',
+    category: 'system',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        port: { type: 'number', description: 'Port (advisory — in-process MCP has no port)' },
+        transport: { type: 'string', description: 'Transport (advisory)' },
+        tools: { type: 'array', items: { type: 'string' }, description: 'Tool namespaces (advisory — all are loaded)' },
+      },
+    },
+    handler: async (input) => {
+      const isStdio = !process.stdin.isTTY;
+      return {
+        serverId: `in-process-${process.pid}`,
+        port: typeof input.port === 'number' ? input.port : (parseInt(process.env.CLAUDE_FLOW_MCP_PORT || '0', 10) || null),
+        transport: (input.transport as string) || process.env.CLAUDE_FLOW_MCP_TRANSPORT || (isStdio ? 'stdio' : 'in-process'),
+        startedAt: new Date().toISOString(),
+        note: 'MCP tools run in-process via the CLI; no separate server process was started. Use `ruflo mcp start` for a standalone server.',
+      };
+    },
+  },
+  {
+    // #1916: `ruflo stop` referenced an unregistered `mcp_stop` tool. Same
+    // story as mcp_start — nothing to stop for the in-process registry.
+    name: 'mcp_stop',
+    description: 'No-op "stop" for the in-process MCP toolset (there is no separate server process to stop from inside an MCP call). Use when native process-kill is wrong because you mistakenly think Ruflo runs a daemon — it does not, the tools live in the CLI process. To stop a standalone server run `ruflo mcp stop` or terminate that process. Pair with mcp_status.',
+    category: 'system',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        graceful: { type: 'boolean', description: 'Advisory (no-op)' },
+        timeout: { type: 'number', description: 'Advisory (no-op)' },
+      },
+    },
+    handler: async () => {
+      return {
+        stopped: false,
+        note: 'no separate MCP server process; nothing to stop. The in-process toolset goes away when the CLI process exits. Use `ruflo mcp stop` for a standalone server.',
+      };
+    },
+  },
 ];
