@@ -77,78 +77,78 @@ This adds slash commands and agent definitions only. The Ruflo MCP server is NOT
 
 | Plugin | What it does |
 |--------|-------------|
-| **ruflo-core** | Foundation — server, health checks, plugin discovery |
-| **ruflo-swarm** | Coordinate multiple agents as a team |
-| **ruflo-autopilot** | Let agents run autonomously in a loop |
-| **ruflo-loop-workers** | Schedule background tasks on a timer |
-| **ruflo-workflows** | Reusable multi-step task templates |
-| **ruflo-federation** | Agents on different machines collaborate securely |
+| [**ruflo-core**](plugins/ruflo-core/README.md) | Foundation — server, health checks, plugin discovery |
+| [**ruflo-swarm**](plugins/ruflo-swarm/README.md) | Coordinate multiple agents as a team |
+| [**ruflo-autopilot**](plugins/ruflo-autopilot/README.md) | Let agents run autonomously in a loop |
+| [**ruflo-loop-workers**](plugins/ruflo-loop-workers/README.md) | Schedule background tasks on a timer |
+| [**ruflo-workflows**](plugins/ruflo-workflows/README.md) | Reusable multi-step task templates |
+| [**ruflo-federation**](plugins/ruflo-federation/README.md) | Agents on different machines collaborate securely |
 
 #### Memory & Knowledge
 
 | Plugin | What it does |
 |--------|-------------|
-| **ruflo-agentdb** | Fast vector database for agent memory |
-| **ruflo-rag-memory** | Smart retrieval — hybrid search, graph hops, diversity ranking |
-| **ruflo-rvf** | Save and restore agent memory across sessions |
-| **ruflo-ruvector** | [`ruvector`](https://npmjs.com/package/ruvector) — GPU-accelerated search, Graph RAG, 103 tools |
-| **ruflo-knowledge-graph** | Build and traverse entity relationship maps |
+| [**ruflo-agentdb**](plugins/ruflo-agentdb/README.md) | Fast vector database for agent memory |
+| [**ruflo-rag-memory**](plugins/ruflo-rag-memory/README.md) | Smart retrieval — hybrid search, graph hops, diversity ranking |
+| [**ruflo-rvf**](plugins/ruflo-rvf/README.md) | Save and restore agent memory across sessions |
+| [**ruflo-ruvector**](plugins/ruflo-ruvector/README.md) | [`ruvector`](https://npmjs.com/package/ruvector) — GPU-accelerated search, Graph RAG, 103 tools |
+| [**ruflo-knowledge-graph**](plugins/ruflo-knowledge-graph/README.md) | Build and traverse entity relationship maps |
 
 #### Intelligence & Learning
 
 | Plugin | What it does |
 |--------|-------------|
-| **ruflo-intelligence** | Agents learn from past successes and get smarter |
-| **ruflo-daa** | Dynamic agent behavior and cognitive patterns |
-| **ruflo-ruvllm** | Run local LLMs (Ollama, etc.) with smart routing |
-| **ruflo-goals** | Break big goals into plans and track progress |
+| [**ruflo-intelligence**](plugins/ruflo-intelligence/README.md) | Agents learn from past successes and get smarter |
+| [**ruflo-daa**](plugins/ruflo-daa/README.md) | Dynamic agent behavior and cognitive patterns |
+| [**ruflo-ruvllm**](plugins/ruflo-ruvllm/README.md) | Run local LLMs (Ollama, etc.) with smart routing |
+| [**ruflo-goals**](plugins/ruflo-goals/README.md) | Break big goals into plans and track progress |
 
 #### Code Quality & Testing
 
 | Plugin | What it does |
 |--------|-------------|
-| **ruflo-testgen** | Find missing tests and generate them automatically |
-| **ruflo-browser** | Automate browser testing with Playwright |
-| **ruflo-jujutsu** | Analyze git diffs, score risk, suggest reviewers |
-| **ruflo-docs** | Generate and maintain documentation automatically |
+| [**ruflo-testgen**](plugins/ruflo-testgen/README.md) | Find missing tests and generate them automatically |
+| [**ruflo-browser**](plugins/ruflo-browser/README.md) | Automate browser testing with Playwright |
+| [**ruflo-jujutsu**](plugins/ruflo-jujutsu/README.md) | Analyze git diffs, score risk, suggest reviewers |
+| [**ruflo-docs**](plugins/ruflo-docs/README.md) | Generate and maintain documentation automatically |
 
 #### Security & Compliance
 
 | Plugin | What it does |
 |--------|-------------|
-| **ruflo-security-audit** | Scan for vulnerabilities and CVEs |
-| **ruflo-aidefence** | Block prompt injection, detect PII, safety scanning |
+| [**ruflo-security-audit**](plugins/ruflo-security-audit/README.md) | Scan for vulnerabilities and CVEs |
+| [**ruflo-aidefence**](plugins/ruflo-aidefence/README.md) | Block prompt injection, detect PII, safety scanning |
 
 #### Architecture & Methodology
 
 | Plugin | What it does |
 |--------|-------------|
-| **ruflo-adr** | Track architecture decisions with a living record |
-| **ruflo-ddd** | Scaffold domain-driven design — contexts, aggregates, events |
-| **ruflo-sparc** | Guided 5-phase development methodology with quality gates |
+| [**ruflo-adr**](plugins/ruflo-adr/README.md) | Track architecture decisions with a living record |
+| [**ruflo-ddd**](plugins/ruflo-ddd/README.md) | Scaffold domain-driven design — contexts, aggregates, events |
+| [**ruflo-sparc**](plugins/ruflo-sparc/README.md) | Guided 5-phase development methodology with quality gates |
 
 #### DevOps & Observability
 
 | Plugin | What it does |
 |--------|-------------|
-| **ruflo-migrations** | Manage database schema changes safely |
-| **ruflo-observability** | Structured logs, traces, and metrics in one place |
-| **ruflo-cost-tracker** | Track token usage, set budgets, get cost alerts |
+| [**ruflo-migrations**](plugins/ruflo-migrations/README.md) | Manage database schema changes safely |
+| [**ruflo-observability**](plugins/ruflo-observability/README.md) | Structured logs, traces, and metrics in one place |
+| [**ruflo-cost-tracker**](plugins/ruflo-cost-tracker/README.md) | Track token usage, set budgets, get cost alerts |
 
 #### Extensibility
 
 | Plugin | What it does |
 |--------|-------------|
-| **ruflo-agent** | Run sandboxed WebAssembly agents |
-| **ruflo-plugin-creator** | Scaffold, validate, and publish your own plugins |
+| [**ruflo-agent**](plugins/ruflo-agent/README.md) | Run agents — local WASM sandbox (rvagent) + Anthropic Claude Managed Agents (cloud) |
+| [**ruflo-plugin-creator**](plugins/ruflo-plugin-creator/README.md) | Scaffold, validate, and publish your own plugins |
 
 #### Domain-Specific
 
 | Plugin | What it does |
 |--------|-------------|
-| **ruflo-iot-cognitum** | IoT device management — trust scoring, anomaly detection, fleets |
-| **ruflo-neural-trader** | [`neural-trader`](https://npmjs.com/package/neural-trader) — AI trading with 4 agents, backtesting, 112+ tools |
-| **ruflo-market-data** | Ingest market data, vectorize OHLCV, detect patterns |
+| [**ruflo-iot-cognitum**](plugins/ruflo-iot-cognitum/README.md) | IoT device management — trust scoring, anomaly detection, fleets |
+| [**ruflo-neural-trader**](plugins/ruflo-neural-trader/README.md) | [`neural-trader`](https://npmjs.com/package/neural-trader) — AI trading with 4 agents, backtesting, 112+ tools |
+| [**ruflo-market-data**](plugins/ruflo-market-data/README.md) | Ingest market data, vectorize OHLCV, detect patterns |
 
 </details>
 
