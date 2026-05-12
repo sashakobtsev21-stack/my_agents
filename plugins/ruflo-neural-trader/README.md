@@ -4,7 +4,9 @@ Neural trading strategies powered by [`neural-trader`](https://www.npmjs.com/pac
 
 ## Overview
 
-Wraps the `neural-trader` npm package as a Ruflo plugin with 4 specialized agents, 6 skills, and comprehensive CLI commands. Adds AgentDB memory persistence, SONA trajectory learning, and swarm-coordinated execution on top of neural-trader's Rust/NAPI engine.
+Wraps the `neural-trader` npm package as a Ruflo plugin with 4 specialized agents, 7 skills, and comprehensive CLI commands. Adds AgentDB memory persistence, SONA trajectory learning, and swarm-coordinated execution on top of neural-trader's Rust/NAPI engine.
+
+Heavy jobs — multi-year walk-forward backtests, large Monte-Carlo runs, parameter sweeps, LSTM/Transformer/N-BEATS training — can be dispatched to an Anthropic Managed Agent **cloud container** instead of running locally: see the `trader-cloud-backtest` skill, the `/trader cloud <backtest|train|sweep>` command, and [ADR-117](../../v3/docs/adr/ADR-117-neural-trader-managed-agent-backtests.md) (built on the `managed_agent_*` runtime from the `ruflo-agent` plugin / [ADR-115](../../v3/docs/adr/ADR-115-managed-agents-rvagent-backend.md); needs `ANTHROPIC_API_KEY` + Managed Agents beta — degrades to the local `trader-backtest` skill without it).
 
 ## Prerequisites
 
@@ -45,6 +47,7 @@ claude mcp add neural-trader -- npx neural-trader mcp start
 | `trader-regime` | `/trader-regime [--symbol SPY]` | Market regime detection and classification |
 | `trader-train` | `/trader-train lstm --symbol TSLA` | Train neural prediction models |
 | `trader-risk` | `/trader-risk [--symbol AAPL]` | VaR, position sizing, circuit breaker status |
+| `trader-cloud-backtest` | `/trader cloud backtest <strategy> --symbol SPY` | Dispatch a heavy backtest / training / sweep to an Anthropic Managed Agent cloud container ([ADR-117](../../v3/docs/adr/ADR-117-neural-trader-managed-agent-backtests.md)) |
 
 ## Commands
 
@@ -182,9 +185,12 @@ bash plugins/ruflo-neural-trader/scripts/smoke.sh
 ## Architecture Decisions
 
 - [`ADR-0001` — ruflo-neural-trader plugin contract (already-compliant namespaces, 4-namespace claim, smoke as contract)](./docs/adrs/0001-neural-trader-contract.md)
+- [`ADR-117`](../../v3/docs/adr/ADR-117-neural-trader-managed-agent-backtests.md) — run heavy jobs (walk-forward / Monte-Carlo / sweep / training) on the Managed Agent cloud runtime (the `trader-cloud-backtest` skill + `/trader cloud` command), with cost-optimization rules
+- [`ADR-115`](../../v3/docs/adr/ADR-115-managed-agents-rvagent-backend.md) — the `managed_agent_*` cloud runtime that ADR-117 builds on (lives in the `ruflo-agent` plugin)
 
 ## Related Plugins
 
+- `ruflo-agent` — the `managed_agent_*` cloud agent runtime used by the `trader-cloud-backtest` skill (ADR-115 / ADR-117)
 - `ruflo-agentdb` — namespace convention owner; backing store
 - `ruflo-market-data` — OHLCV data ingestion and candlestick pattern detection (feeds `trading-strategies`)
 - `ruflo-ruvector` — HNSW indexing for strategy pattern similarity search

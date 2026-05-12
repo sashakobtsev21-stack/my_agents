@@ -17,15 +17,18 @@ if [[ "$v" != "0.2.0" ]]; then bad "expected 0.2.0, got '$v'"; else
   [[ -z "$miss" ]] && ok || bad "missing keywords:$miss"
 fi
 
-step "2. all 6 skills present with valid frontmatter"
+step "2. all 7 skills present with valid frontmatter (6 base + trader-cloud-backtest, ADR-117)"
 miss=""
-for s in trader-backtest trader-portfolio trader-regime trader-risk trader-signal trader-train; do
+for s in trader-backtest trader-portfolio trader-regime trader-risk trader-signal trader-train trader-cloud-backtest; do
   f="$ROOT/skills/$s/SKILL.md"
   [[ -f "$f" ]] || { miss="$miss missing-$s"; continue; }
   for k in 'name:' 'description:' 'allowed-tools:'; do
     grep -q "^$k" "$f" || miss="$miss $s-no-$k"
   done
 done
+# the cloud-backtest skill must reference the managed_agent_* tools + offer the local fallback
+grep -q 'managed_agent_create' "$ROOT/skills/trader-cloud-backtest/SKILL.md" 2>/dev/null || miss="$miss cloud-no-managed-tool-ref"
+grep -q 'trader-backtest' "$ROOT/skills/trader-cloud-backtest/SKILL.md" 2>/dev/null || miss="$miss cloud-no-local-fallback-ref"
 [[ -z "$miss" ]] && ok || bad "$miss"
 
 step "3. all 4 agents present"
@@ -67,10 +70,10 @@ grep -q "Monte Carlo\|monte-carlo" "$F" || miss="$miss monte-carlo"
 grep -q "Parameter optimization\|parameter optimization\|param-optimize" "$F" || miss="$miss param-opt"
 [[ -z "$miss" ]] && ok || bad "$miss"
 
-step "10. ADR-0001 exists with status Proposed"
+step "10. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-neural-trader-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "11. no wildcard tool grants in skills"
 bad_skills=""

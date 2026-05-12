@@ -152,4 +152,5 @@ Landed as a **separate `managed_agent_*` toolset** (rather than a `runtime:` fla
 - ADR-097 — federation peers (a Managed Agent session ≈ a federated executor)
 - ADR-026 — 3-tier model routing (Managed Agent `model` selection should route through this)
 - ADR-112 — MCP tool discoverability (every new `*_agent_*({runtime:"managed"})` tool description must comply; must state the cost/beta caveats)
+- ADR-117 — first consumer: `ruflo-neural-trader` dispatches heavy backtests / Monte-Carlo / sweeps / model training to the `managed_agent_*` runtime (the `trader-cloud-backtest` skill), with cost-optimization rules
 - #1916 — hive task-execution dispatch (Managed Agents as a third executor option)
