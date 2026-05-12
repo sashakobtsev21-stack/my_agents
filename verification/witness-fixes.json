@@ -204,6 +204,12 @@
       "desc": "scripts/ruflo-hook.sh \u2014 resilient invoker shipped in each plugin (.claude-plugin/, plugin/, plugins/ruflo-core/): prefers a local `ruflo`/`claude-flow` binary, else `npx --prefer-offline --yes ruflo@alpha`, always `exit 0`. stdin (hook event JSON) passes through unchanged. Companion to #1921.",
       "file": "plugins/ruflo-core/scripts/ruflo-hook.sh",
       "marker": "npx --prefer-offline --yes ruflo@alpha hooks"
+    },
+    {
+      "id": "#1927",
+      "desc": "ruflo-cost-tracker track.mjs encodeProjectPath now replaces Windows path separators (`\\`) and the drive colon (`:`), not just `/`, so `D:\\project\\Foo` encodes to `D--project-Foo` (matching Claude Code's ~/.claude/projects/<encoded-cwd>/ scheme) instead of being passed through unchanged on Windows. Behavioral CI guard: smoke.sh step 29b runs track.mjs with a Windows-style TRACK_CWD and asserts the 'looked under' path is encoded. (Also fixed smoke.sh step 8 \u2014 ADR-0001 is Accepted, not Proposed.)",
+      "file": "plugins/ruflo-cost-tracker/scripts/track.mjs",
+      "marker": "#1927: Claude Code encodes"
     }
   ]
 }

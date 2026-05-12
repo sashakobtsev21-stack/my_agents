@@ -66,9 +66,9 @@ grep -qE "maxHops|maxTokens|maxUsd" "$F" || miss="$miss budget-fields"
 grep -q "BUDGET_EXCEEDED" "$F" || miss="$miss enforcement-string"
 [[ -z "$miss" ]] && ok || bad "federation block missing:$miss"
 
-step "8. ADR-0001 exists with status Proposed; ADR-0002 + ADR-0003 Accepted"
+step "8. ADR-0001/0002/0003 exist with status Accepted"
 miss=""
-for n in 0001:Proposed 0002:Accepted 0003:Accepted; do
+for n in 0001:Accepted 0002:Accepted 0003:Accepted; do
   num=${n%:*}
   want=${n#*:}
   f=$(ls "$ROOT/docs/adrs/${num}"-*.md 2>/dev/null | head -1)
@@ -244,6 +244,19 @@ miss=""
 node --check "$F" 2>/dev/null || miss="$miss syntax-error"
 grep -q "spawnSync" "$F" || miss="$miss no-spawnSync"
 grep -q "PRICING" "$F" || miss="$miss no-pricing-table"
+[[ -z "$miss" ]] && ok || bad "$miss"
+
+step "29b. track.mjs encodeProjectPath handles Windows backslash + drive colon (#1927)"
+# A Windows-style cwd must encode to `D--project-Subcloudy`, not the corrupt
+# `D:\project\Subcloudy` the old `/`-only replace left untouched. Run track.mjs
+# with TRACK_CWD set and assert the (expected-to-fail) "looked under" line shows
+# the correctly-encoded folder. (The first line legitimately echoes the raw cwd
+# `cwd=D:\project\Subcloudy` — only the "looked under" line must be encoded.)
+TRACK_OUT_LINE="$(TRACK_CWD='D:\project\Subcloudy' node "$ROOT/scripts/track.mjs" 2>&1 || true)"
+LOOKED_LINE="$(printf '%s\n' "$TRACK_OUT_LINE" | grep 'looked under' || true)"
+miss=""
+printf '%s\n' "$LOOKED_LINE" | grep -q 'D--project-Subcloudy' || miss="$miss not-encoded"
+printf '%s\n' "$LOOKED_LINE" | grep -qF 'project\Subcloudy' && miss="$miss corrupt-encoded-path"
 [[ -z "$miss" ]] && ok || bad "$miss"
 
 step "30. ruflo-cost.md documents 'cost track' subcommand"

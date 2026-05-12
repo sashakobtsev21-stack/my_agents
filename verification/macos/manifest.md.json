@@ -1,9 +1,9 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-05-12T04:50:17.791Z",
-    "gitCommit": "7633c2952b9ebdd771c1c93ec16bc6dac90dc1a8",
-    "branch": "fix/1921-hook-cli-resilience",
+    "issuedAt": "2026-05-12T12:38:18.220Z",
+    "gitCommit": "19d2b2ed419f4747a22d1470d1d2b7ea4d3a76e3",
+    "branch": "fix/1927-cost-tracker-windows-path",
     "os": "macos",
     "releases": {
       "ruflo": "3.7.0-alpha.26",
@@ -12,8 +12,8 @@
       "@claude-flow/memory": "3.0.0-alpha.15"
     },
     "summary": {
-      "totalFixes": 112,
-      "verified": 112,
+      "totalFixes": 113,
+      "verified": 113,
       "missing": 0
     },
     "fixes": [
@@ -912,15 +912,23 @@
         "sha256": "3c99ed6c845a3ff44d4e012081307a4d2af3aaf8a1025dcdb125bff1eab2a661",
         "marker": "post-edit -f \\\"$FILE\\\" -s true",
         "markerVerified": true
+      },
+      {
+        "id": "#1927",
+        "desc": "ruflo-cost-tracker track.mjs encodeProjectPath now replaces Windows path separators (`\\`) and the drive colon (`:`), not just `/`, so `D:\\project\\Foo` encodes to `D--project-Foo` (matching Claude Code's ~/.claude/projects/<encoded-cwd>/ scheme) instead of being passed through unchanged on Windows. Behavioral CI guard: smoke.sh step 29b runs track.mjs with a Windows-style TRACK_CWD and asserts the 'looked under' path is encoded. (Also fixed smoke.sh step 8 — ADR-0001 is Accepted, not Proposed.)",
+        "file": "plugins/ruflo-cost-tracker/scripts/track.mjs",
+        "sha256": "acb8640bffaf15c5af37df30748f55af72c1acaaab084f68cafb3bf4da253be1",
+        "marker": "#1927: Claude Code encodes",
+        "markerVerified": true
       }
     ]
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "6350c72e79ca3eb38dac412fd254ba1e7230649f9031e899fd4c24310dbb69c8",
+    "manifestHash": "953ab29da177f43cf7faec02711d0a679664ab79b2e4a131a79c37c8ed9c65c9",
     "signatureAlgo": "ed25519",
-    "publicKey": "0a6f6225cf543ffefd2c273bb9a9689be54c4147c2d3ed5c8b2ebbabdfe4a1f2",
-    "signature": "bb0a47361f77e47a26cf7722c25098b793a39e017733eaa9d0ed2890cf7cdbde35495c7933cc49e21006e23998a70a915a712266da2ab32f9af9d954d4c30e0b",
+    "publicKey": "b748bd6b2491169c3a6b63bbc8483f978cceb3261b94b4fb53e842ad08721f8a",
+    "signature": "388b4a831d9a5df3dc09db994d7d4af857b8cea190782f0593644b1629e8964bdf3b1ad318a8c2433bacb0c964359c5b02ffb438465975b9a5ffd8bb32fa1609",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }

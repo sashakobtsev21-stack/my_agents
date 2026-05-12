@@ -25,6 +25,9 @@ on:
       - 'scripts/**'
       - '**/hooks/hooks.json'
       - '**/scripts/ruflo-hook.sh'
+      # witness manifests / fix list — so witness-verify runs on PRs that
+      # touch them (otherwise a stale per-OS manifest only fails post-merge).
+      - 'verification/**'
   workflow_dispatch:
 
 env:
