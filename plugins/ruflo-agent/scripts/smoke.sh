@@ -7,12 +7,17 @@ step() { printf "→ %s ... " "$1"; }
 ok()   { printf "PASS\n"; PASS=$((PASS+1)); }
 bad()  { printf "FAIL: %s\n" "$1"; FAIL=$((FAIL+1)); }
 
-step "1. plugin.json declares 0.2.0 with new keywords"
-v=$(grep -E '"version"' "$ROOT/.claude-plugin/plugin.json" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-if [[ "$v" != "0.2.0" ]]; then bad "expected 0.2.0, got '$v'"; else
+step "1. plugin.json is ruflo-agent 0.2.0 with both-runtime keywords"
+P="$ROOT/.claude-plugin/plugin.json"
+v=$(grep -E '"version"' "$P" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+n=$(grep -E '"name"' "$P" | grep -oE 'ruflo-agent' | head -1)
+if [[ "$v" != "0.2.0" ]]; then bad "expected version 0.2.0, got '$v'";
+elif [[ "$n" != "ruflo-agent" ]]; then bad "expected name ruflo-agent";
+else
   miss=""
-  for k in mcp rvagent-wasm ruvllm-wasm; do
-    grep -q "\"$k\"" "$ROOT/.claude-plugin/plugin.json" || miss="$miss $k"
+  # local WASM runtime (rvagent) + cloud runtime (managed-agents) keywords
+  for k in mcp rvagent-wasm ruvllm-wasm managed-agents anthropic; do
+    grep -q "\"$k\"" "$P" || miss="$miss $k"
   done
   [[ -z "$miss" ]] && ok || bad "missing keywords:$miss"
 fi
@@ -71,10 +76,10 @@ grep -q "ruflo-aidefence" "$F" \
   && grep -qE "3-gate|3 gates" "$F" \
   && ok || bad "AIDefence 3-gate cross-reference missing"
 
-step "10. ADR-0001 exists with status Proposed"
+step "10. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-wasm-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "11. no wildcard tool grants in skills"
 bad_skills=""
@@ -82,6 +87,18 @@ for f in "$ROOT"/skills/*/SKILL.md; do
   grep -q '^allowed-tools:[[:space:]]*\*' "$f" && bad_skills="$bad_skills $(basename $(dirname "$f"))"
 done
 [[ -z "$bad_skills" ]] && ok || bad "wildcard:$bad_skills"
+
+step "12. managed-agent (cloud runtime) skill + command + all 6 managed_agent_* tools referenced (ADR-115)"
+miss=""
+[[ -f "$ROOT/skills/managed-agent/SKILL.md" ]] || miss="$miss missing-skill"
+[[ -f "$ROOT/commands/managed-agent.md" ]] || miss="$miss missing-command"
+for t in managed_agent_create managed_agent_prompt managed_agent_status managed_agent_events managed_agent_list managed_agent_terminate; do
+  grep -rq "$t" "$ROOT/skills" "$ROOT/commands" || miss="$miss no-ref-$t"
+done
+# the cloud-runtime skill must keep an explicit allowed-tools list (no wildcard) and offer the wasm fallback
+grep -q '^allowed-tools:[[:space:]]*\*' "$ROOT/skills/managed-agent/SKILL.md" 2>/dev/null && miss="$miss wildcard"
+grep -q 'wasm_agent_create' "$ROOT/skills/managed-agent/SKILL.md" 2>/dev/null || miss="$miss no-wasm-fallback-ref"
+[[ -z "$miss" ]] && ok || bad "$miss"
 
 printf "\n%s passed, %s failed\n" "$PASS" "$FAIL"
 [[ $FAIL -eq 0 ]] || exit 1

@@ -60,7 +60,7 @@ claude $(ls -d plugins/ruflo-*/ | sed 's|^|--plugin-dir |' | tr '\n' ' ')
 | [ruflo-jujutsu](ruflo-jujutsu/) | Diff analysis, risk scoring, reviewer recommendations |
 | [ruflo-docs](ruflo-docs/) | Doc generation, drift detection, API docs |
 | [ruflo-ruvllm](ruflo-ruvllm/) | Local LLM inference, MicroLoRA, chat formatting |
-| [ruflo-wasm](ruflo-wasm/) | WASM agent sandboxing and gallery |
+| [ruflo-agent](ruflo-agent/) | WASM agent sandboxing and gallery |
 | [ruflo-plugin-creator](ruflo-plugin-creator/) | Scaffold and validate new plugins |
 | [ruflo-migrations](ruflo-migrations/) | Database schema migration management |
 | [ruflo-observability](ruflo-observability/) | Structured logging, tracing, metrics correlation |

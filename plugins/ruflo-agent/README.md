@@ -1,4 +1,4 @@
-# ruflo-wasm
+# ruflo-agent
 
 Sandboxed WASM agent creation, execution, and gallery sharing.
 
@@ -6,7 +6,7 @@ Sandboxed WASM agent creation, execution, and gallery sharing.
 
 ```
 /plugin marketplace add ruvnet/ruflo
-/plugin install ruflo-wasm@ruflo
+/plugin install ruflo-agent@ruflo
 ```
 
 ## Features
@@ -29,7 +29,7 @@ Sandboxed WASM agent creation, execution, and gallery sharing.
 
 - **CLI:** pinned to `@claude-flow/cli` v3.6 major+minor.
 - **WASM runtime:** built on `@ruvector/rvagent-wasm` + `@ruvector/ruvllm-wasm`. Both are declared in `@claude-flow/cli`'s `optionalDependencies` per [ADR-070 (Implemented)](../../v3/implementation/adrs/ADR-070-rvagent-wasm-completion.md). Without those packages, runtime falls through to the graceful-degradation path and the MCP tools no-op.
-- **Verification:** `bash plugins/ruflo-wasm/scripts/smoke.sh` is the contract.
+- **Verification:** `bash plugins/ruflo-agent/scripts/smoke.sh` is the contract.
 
 ## MCP surface (10 tools)
 
@@ -70,13 +70,13 @@ This plugin owns the `wasm-gallery` AgentDB namespace (kebab-case, follows the c
 ## Verification
 
 ```bash
-bash plugins/ruflo-wasm/scripts/smoke.sh
+bash plugins/ruflo-agent/scripts/smoke.sh
 # Expected: "11 passed, 0 failed"
 ```
 
 ## Architecture Decisions
 
-- [`ADR-0001` — ruflo-wasm plugin contract (10-tool MCP surface, ADR-070 integration cross-reference, sandbox isolation, smoke as contract)](./docs/adrs/0001-wasm-contract.md)
+- [`ADR-0001` — ruflo-agent plugin contract (10-tool MCP surface, ADR-070 integration cross-reference, sandbox isolation, smoke as contract)](./docs/adrs/0001-wasm-contract.md)
 
 ## Related Plugins
 

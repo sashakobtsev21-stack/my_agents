@@ -139,7 +139,7 @@ This adds slash commands and agent definitions only. The Ruflo MCP server is NOT
 
 | Plugin | What it does |
 |--------|-------------|
-| **ruflo-wasm** | Run sandboxed WebAssembly agents |
+| **ruflo-agent** | Run sandboxed WebAssembly agents |
 | **ruflo-plugin-creator** | Scaffold, validate, and publish your own plugins |
 
 #### Domain-Specific
