@@ -472,6 +472,54 @@ jobs:
         shell: bash
         run: node scripts/audit-cli-mcp-tools.mjs
 
+  plugin-package-audit:
+    # Regression guard for #1902/#1903/#1904 — plugin package.json install
+    # safety. Checks: (A) no unpublished @claude-flow/* hard dep / non-optional
+    # peer (#1903 ruvector-upstream class), (B) no bare-stable peer range that
+    # can't resolve a 3.x prerelease publish (#1902), (C) every main/module/
+    # exports path is covered by `files`, (D) after building each plugin,
+    # every main/module/exports path exists on disk (#1904 — exports.import →
+    # ./dist/index.mjs but the build only emits .js/.cjs). The build step is
+    # what makes check D live; without it the script does A/B/C only.
+    name: Plugin package install-safety (#1902/#1903/#1904)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: v3/pnpm-lock.yaml
+
+      - name: Install workspace + build plugins (so check D — exports-exist-after-build — is live)
+        working-directory: v3
+        shell: bash
+        run: |
+          pnpm install --frozen-lockfile
+          # Build each plugin that has a build script. --no-bail tolerates an
+          # unrelated build failure; check D simply won't run for a plugin
+          # whose dist/ is absent.
+          for d in plugins/*/; do
+            if [ -f "$d/package.json" ] && node -e "process.exit(require('./'+process.argv[1]+'package.json').scripts?.build?0:1)" "$d"; then
+              echo "::group::build $d"
+              ( cd "$d" && pnpm install --frozen-lockfile 2>/dev/null || pnpm install 2>/dev/null || true; pnpm run build || true )
+              echo "::endgroup::"
+            fi
+          done
+
+      - name: Run plugin package audit
+        shell: bash
+        run: node scripts/audit-plugin-packages.mjs
+
   witness-verify:
     # Cryptographic regression guard: runs `ruflo verify --manifest` against
     # the local build to confirm every documented fix in verification.md.json
@@ -498,7 +546,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke]
+    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke, plugin-package-audit]
 
     steps:
       - name: Checkout code

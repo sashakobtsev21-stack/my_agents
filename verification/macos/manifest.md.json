@@ -1,9 +1,9 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-05-12T04:39:59.412Z",
-    "gitCommit": "b680fca85aac08ec59880197f8f6af2042da8b6b",
-    "branch": "fix/1916-agent-logs-hive-resolution",
+    "issuedAt": "2026-05-12T04:44:05.086Z",
+    "gitCommit": "31f22ff9a92154952b8d9e417a25034bdf08de08",
+    "branch": "HEAD",
     "os": "macos",
     "releases": {
       "ruflo": "3.7.0-alpha.26",
@@ -12,8 +12,8 @@
       "@claude-flow/memory": "3.0.0-alpha.15"
     },
     "summary": {
-      "totalFixes": 108,
-      "verified": 108,
+      "totalFixes": 110,
+      "verified": 110,
       "missing": 0
     },
     "fixes": [
@@ -880,15 +880,31 @@
         "sha256": "442839dca2d6177f2567dccaf1f48306c304cbca0659c477501604289f7ad5a6",
         "marker": "workflow_validate",
         "markerVerified": true
+      },
+      {
+        "id": "#1902-#1903-guard",
+        "desc": "Plugin package.json install-safety CI guard (scripts/audit-plugin-packages.mjs) — fails CI on (A) an unpublished @claude-flow/* hard dep / non-optional peer (#1903 ruvector-upstream class), (B) a bare-stable peer range that can't resolve a 3.x prerelease publish (#1902), (C) a main/module/exports path not covered by `files`, (D) post-build, a main/module/exports path that doesn't exist on disk (#1904). Wired into v3-ci.yml as `plugin-package-audit` (builds plugins first so check D is live) and added to witness-verify needs[].",
+        "file": "scripts/audit-plugin-packages.mjs",
+        "sha256": "a4daac5d4732d9030890e937a78963346f30f3002303429a0d0aa95ac8d5f73a",
+        "marker": "KNOWN_PUBLISHED",
+        "markerVerified": true
+      },
+      {
+        "id": "#1904",
+        "desc": "plugin-gastown-bridge — package.json `exports` advertised ./dist/index.mjs (+ ./formula, ./convoy subpaths) that the build never emitted, so those import specifiers 404'd in the published tarball. Fix: tsup.config.ts builds the formula/convoy entries (previously commented out), and package.json exports/main/module point at the actually-emitted .js/.cjs filenames. Validated by the plugin-package-audit CI guard (check D).",
+        "file": "v3/plugins/gastown-bridge/tsup.config.ts",
+        "sha256": "e8bcf68635d45764e46be0c80647781134f8f437b395b949a95e56cce717a9e3",
+        "marker": "formula: 'src/formula/index.ts'",
+        "markerVerified": true
       }
     ]
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "867a536d3d605716484e79d49755eb9cd293694826d3b51e1190e90599107b61",
+    "manifestHash": "a081f02f53f33c5a008cd06177cb1f8a4de08ac7183312877d57c0ca95018192",
     "signatureAlgo": "ed25519",
-    "publicKey": "1518b52ec08a5034ffc55f506829ca8bc94972dee457749f365286d6b1e4ec1d",
-    "signature": "9b958742c22f51f70a76213971354476eedcf39ed4cbcb4fea4a9b3944bec47c20060f16282f11e706deeccbce91e8abd2163be43364e641d2e9af34b6953c0e",
+    "publicKey": "1d90203273675541aa963e769617d91c6188b5d0d062b8caa0f48f886ba84cf8",
+    "signature": "a470dd63ff659dcd2775a9bd932fecb67fb7c9b723d6ce2938b8c6f8e1eb37724f0bd073a0d14aa467e1dafc442ff9a179a3f8016df0aea11327b92a1ef01e05",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }
