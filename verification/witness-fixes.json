@@ -15,9 +15,9 @@
     },
     {
       "id": "#1862",
-      "desc": "ruflo-core PostToolUse hooks call documented CLI flags (-c/-s/-e, -f/-s) instead of bogus --format true",
+      "desc": "ruflo-core PostToolUse hooks call documented CLI flags (-c/-s/-e, -f/-s) instead of bogus --format true. (#1921 moved the invocation behind scripts/ruflo-hook.sh — the documented-flag form is preserved.)",
       "file": "plugins/ruflo-core/hooks/hooks.json",
-      "marker": "hooks post-edit -f \\\"$FILE\\\" -s true"
+      "marker": "post-edit -f \\\"$FILE\\\" -s true"
     },
     {
       "id": "ADR-101-C",
@@ -192,6 +192,18 @@
       "desc": "plugin-gastown-bridge \u2014 package.json `exports` advertised ./dist/index.mjs (+ ./formula, ./convoy subpaths) that the build never emitted, so those import specifiers 404'd in the published tarball. Fix: tsup.config.ts builds the formula/convoy entries (previously commented out), and package.json exports/main/module point at the actually-emitted .js/.cjs filenames. Validated by the plugin-package-audit CI guard (check D).",
       "file": "v3/plugins/gastown-bridge/tsup.config.ts",
       "marker": "formula: 'src/formula/index.ts'"
+    },
+    {
+      "id": "#1921",
+      "desc": "Plugin hooks no longer do a bare `npx <pkg>@alpha hooks \u2026` on every PreToolUse/PostToolUse/Stop fire \u2014 they invoke scripts/ruflo-hook.sh, which prefers a locally-installed `ruflo`/`claude-flow` binary, falls back to `npx --prefer-offline`, and ALWAYS exits 0 so a CLI/install crash (e.g. arborist `Invalid Version` on npm 10.8.x) never surfaces a hook error in Claude Code or wastes a cold-cache reinstall per turn. CI guard: scripts/audit-hook-commands.mjs (fails on bare-npx-without-prefer-offline / non-guarded CLI invocation) wired into v3-ci.yml `hook-command-audit` + added to witness-verify needs[].",
+      "file": "scripts/audit-hook-commands.mjs",
+      "marker": "NONFATAL_RE"
+    },
+    {
+      "id": "#1921-shim",
+      "desc": "scripts/ruflo-hook.sh \u2014 resilient invoker shipped in each plugin (.claude-plugin/, plugin/, plugins/ruflo-core/): prefers a local `ruflo`/`claude-flow` binary, else `npx --prefer-offline --yes ruflo@alpha`, always `exit 0`. stdin (hook event JSON) passes through unchanged. Companion to #1921.",
+      "file": "plugins/ruflo-core/scripts/ruflo-hook.sh",
+      "marker": "npx --prefer-offline --yes ruflo@alpha hooks"
     }
   ]
 }

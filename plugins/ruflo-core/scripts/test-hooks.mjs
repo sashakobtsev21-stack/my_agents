@@ -47,7 +47,16 @@ const post = hooks.hooks?.PostToolUse ?? [];
 const findHook = (matcher) => {
   const hit = post.find(h => h.matcher === matcher);
   if (!hit) throw new Error(`No PostToolUse hook with matcher=${matcher}`);
-  return hit.hooks[0].command.replace(/npx ruflo@alpha/g, cliInvoke);
+  return hit.hooks[0].command
+    // legacy form: `npx ruflo@alpha hooks …`
+    .replace(/npx ruflo@alpha/g, cliInvoke)
+    // #1921 form: hook subcommands go through scripts/ruflo-hook.sh (which
+    // prepends `hooks`). Bypass the shim here and call the built CLI directly
+    // so the test exercises the same flag wiring users hit, pinned to the
+    // build under test. Also drop the shim's `|| true` so exit codes are
+    // still asserted (the shim makes failures non-fatal in production).
+    .replace(/"\$\{CLAUDE_PLUGIN_ROOT\}\/scripts\/ruflo-hook\.sh"/g, `${cliInvoke} hooks`)
+    .replace(/\s*\|\|\s*true(\s*')/g, '$1');
 };
 
 const cmdBash = findHook('Bash');

@@ -1,9 +1,9 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-05-12T04:44:05.086Z",
-    "gitCommit": "31f22ff9a92154952b8d9e417a25034bdf08de08",
-    "branch": "HEAD",
+    "issuedAt": "2026-05-12T04:50:17.791Z",
+    "gitCommit": "7633c2952b9ebdd771c1c93ec16bc6dac90dc1a8",
+    "branch": "fix/1921-hook-cli-resilience",
     "os": "macos",
     "releases": {
       "ruflo": "3.7.0-alpha.26",
@@ -12,8 +12,8 @@
       "@claude-flow/memory": "3.0.0-alpha.15"
     },
     "summary": {
-      "totalFixes": 110,
-      "verified": 110,
+      "totalFixes": 112,
+      "verified": 112,
       "missing": 0
     },
     "fixes": [
@@ -658,14 +658,6 @@
         "markerVerified": true
       },
       {
-        "id": "#1862",
-        "desc": "ruflo-core PostToolUse hooks call documented CLI flags (-c/-s/-e, -f/-s) instead of bogus --format true",
-        "file": "plugins/ruflo-core/hooks/hooks.json",
-        "sha256": "c74a26044c1d283589696590f652ef21f4c65613f9ff5eb015127b1819d37fe7",
-        "marker": "hooks post-edit -f \\\"$FILE\\\" -s true",
-        "markerVerified": true
-      },
-      {
         "id": "ADR-101-C",
         "desc": "Federation policy-engine wires claim-event + agent-handoff message types into CLAIMS_FOR_MESSAGE_TYPE (unblocked Build V3 after 3+ days of failures)",
         "file": "v3/@claude-flow/plugin-agent-federation/dist/application/policy-engine.js",
@@ -896,15 +888,39 @@
         "sha256": "e8bcf68635d45764e46be0c80647781134f8f437b395b949a95e56cce717a9e3",
         "marker": "formula: 'src/formula/index.ts'",
         "markerVerified": true
+      },
+      {
+        "id": "#1921",
+        "desc": "Plugin hooks no longer do a bare `npx <pkg>@alpha hooks …` on every PreToolUse/PostToolUse/Stop fire — they invoke scripts/ruflo-hook.sh, which prefers a locally-installed `ruflo`/`claude-flow` binary, falls back to `npx --prefer-offline`, and ALWAYS exits 0 so a CLI/install crash (e.g. arborist `Invalid Version` on npm 10.8.x) never surfaces a hook error in Claude Code or wastes a cold-cache reinstall per turn. CI guard: scripts/audit-hook-commands.mjs (fails on bare-npx-without-prefer-offline / non-guarded CLI invocation) wired into v3-ci.yml `hook-command-audit` + added to witness-verify needs[].",
+        "file": "scripts/audit-hook-commands.mjs",
+        "sha256": "6f2702c59f1cb2438533ee4e7b2648dc2c2076334c60e5ca4dc30db5a0c99c5b",
+        "marker": "NONFATAL_RE",
+        "markerVerified": true
+      },
+      {
+        "id": "#1921-shim",
+        "desc": "scripts/ruflo-hook.sh — resilient invoker shipped in each plugin (.claude-plugin/, plugin/, plugins/ruflo-core/): prefers a local `ruflo`/`claude-flow` binary, else `npx --prefer-offline --yes ruflo@alpha`, always `exit 0`. stdin (hook event JSON) passes through unchanged. Companion to #1921.",
+        "file": "plugins/ruflo-core/scripts/ruflo-hook.sh",
+        "sha256": "08d576ea4938dbb7ac6c5072b2463ddf3299802801cf1d0110a1244ebe0868ea",
+        "marker": "npx --prefer-offline --yes ruflo@alpha hooks",
+        "markerVerified": true
+      },
+      {
+        "id": "#1862",
+        "desc": "ruflo-core PostToolUse hooks call documented CLI flags (-c/-s/-e, -f/-s) instead of bogus --format true. (#1921 moved the invocation behind scripts/ruflo-hook.sh — the documented-flag form is preserved.)",
+        "file": "plugins/ruflo-core/hooks/hooks.json",
+        "sha256": "3c99ed6c845a3ff44d4e012081307a4d2af3aaf8a1025dcdb125bff1eab2a661",
+        "marker": "post-edit -f \\\"$FILE\\\" -s true",
+        "markerVerified": true
       }
     ]
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "a081f02f53f33c5a008cd06177cb1f8a4de08ac7183312877d57c0ca95018192",
+    "manifestHash": "6350c72e79ca3eb38dac412fd254ba1e7230649f9031e899fd4c24310dbb69c8",
     "signatureAlgo": "ed25519",
-    "publicKey": "1d90203273675541aa963e769617d91c6188b5d0d062b8caa0f48f886ba84cf8",
-    "signature": "a470dd63ff659dcd2775a9bd932fecb67fb7c9b723d6ce2938b8c6f8e1eb37724f0bd073a0d14aa467e1dafc442ff9a179a3f8016df0aea11327b92a1ef01e05",
+    "publicKey": "0a6f6225cf543ffefd2c273bb9a9689be54c4147c2d3ed5c8b2ebbabdfe4a1f2",
+    "signature": "bb0a47361f77e47a26cf7722c25098b793a39e017733eaa9d0ed2890cf7cdbde35495c7933cc49e21006e23998a70a915a712266da2ab32f9af9d954d4c30e0b",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }
