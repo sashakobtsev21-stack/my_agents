@@ -1,6 +1,8 @@
 # 🇭🇺 ruFlo Summit — Budapest (June 2–3, 2026)
 
-![ruFlo Summit — Budapest, June 2–3, 2026](./ruFlo-Summit.jpg)
+[![ruFlo Summit — Budapest, June 2–3, 2026](./ruFlo-Summit.jpg)](https://ti.to/crafthub/craft-conference-2026/discount/AgenticsFoundation20)
+
+🎟️ **[Register here — discount applied](https://ti.to/crafthub/craft-conference-2026/discount/AgenticsFoundation20)**
 
 A **2-day, in-person ruFlo Summit** at Craft Conference in Budapest.
 Two working days, not presentations.
