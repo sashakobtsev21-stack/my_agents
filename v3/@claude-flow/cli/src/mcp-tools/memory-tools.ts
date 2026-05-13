@@ -911,14 +911,32 @@ export const memoryTools: MCPTool[] = [
       }
 
       // AgentDB status
+      // #1940: previously used `allEntries.entries.length` for the totals,
+      // but `listEntries({})` returns the first 20 entries with a separate
+      // `total` field for the full row count. So `memory_bridge_status`
+      // reported `totalEntries: 0`...20 even when the DB had hundreds of
+      // rows. Use `.total` for the count, and surface the namespaces with
+      // entries so the report matches what's actually in the store.
       let agentdbEntries = 0;
       let claudeMemoryEntries = 0;
+      const namespaceCounts: Record<string, number> = {};
       try {
         const { listEntries } = await getMemoryFunctions();
         const allEntries = await listEntries({});
-        agentdbEntries = allEntries?.entries?.length ?? 0;
+        agentdbEntries = (allEntries as { total?: number })?.total
+          ?? allEntries?.entries?.length ?? 0;
         const claudeEntries = await listEntries({ namespace: 'claude-memories' });
-        claudeMemoryEntries = claudeEntries?.entries?.length ?? 0;
+        claudeMemoryEntries = (claudeEntries as { total?: number })?.total
+          ?? claudeEntries?.entries?.length ?? 0;
+        // Per-namespace counts for the namespaces the reporter referenced
+        // (#1940). Best-effort — a namespace with 0 entries is omitted.
+        for (const ns of ['default', 'patterns', 'claude-memories', 'auto-memory', 'tasks', 'feedback', 'pretrain']) {
+          try {
+            const r = await listEntries({ namespace: ns });
+            const t = (r as { total?: number })?.total ?? r?.entries?.length ?? 0;
+            if (t > 0) namespaceCounts[ns] = t;
+          } catch { /* skip per-namespace failure */ }
+        }
       } catch { /* ignore */ }
 
       // Intelligence status
@@ -931,9 +949,12 @@ export const memoryTools: MCPTool[] = [
 
       return {
         claudeCode: { memoryFiles: claudeFiles, projects: claudeProjects },
-        agentdb: { totalEntries: agentdbEntries, claudeMemoryEntries, backend: 'sql.js + ONNX' },
+        agentdb: { totalEntries: agentdbEntries, claudeMemoryEntries, namespaces: namespaceCounts, backend: 'sql.js + ONNX' },
         intelligence,
-        bridge: { status: claudeMemoryEntries > 0 ? 'connected' : 'not-synced', embedding: 'all-MiniLM-L6-v2 (384-dim)' },
+        // #1940: report 'connected' whenever ANY namespace has imported
+        // content, not just `claude-memories` — the bridge can be in active
+        // use from other import paths (e.g. plugin namespaces, task memory).
+        bridge: { status: agentdbEntries > 0 ? 'connected' : 'not-synced', embedding: 'all-MiniLM-L6-v2 (384-dim)' },
       };
     },
   },
