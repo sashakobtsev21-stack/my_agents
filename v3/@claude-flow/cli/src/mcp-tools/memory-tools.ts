@@ -135,6 +135,16 @@ function resolveProjectMemoryDir(claudeProjectsDir: string, projectPathOverride?
 
     // Candidate 4: spaces replaced with dashes (Claude Code's space rule)
     candidates.add(source.replace(/\//g, '-').replace(/ /g, '-'));
+
+    // Candidate 5 (#1939): native Win32 path on a Win32 Claude Code install.
+    // `C:\Users\tobia\OneDrive\Desktop\Claude Stuff` →
+    // `C--Users-tobia-OneDrive-Desktop-Claude-Stuff`. Claude Code's on-disk
+    // slug replaces drive-colon AND backslashes AND whitespace with `-`.
+    // The earlier candidates only handled forward slashes, so a Win32+Win32
+    // setup never matched.
+    if (/^[A-Za-z]:[\\/]/.test(source)) {
+      candidates.add(source.replace(/[:\\/]/g, '-').replace(/\s+/g, '-'));
+    }
   }
 
   for (const projectHash of candidates) {
