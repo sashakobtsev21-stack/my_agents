@@ -19,6 +19,7 @@
 
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { createRequire } from 'node:module';
 
 // ===== Lazy singleton =====
 
@@ -28,18 +29,40 @@ let bridgeAvailable: boolean | null = null;
 
 /**
  * Resolve database path with path traversal protection.
- * Only allows paths within or below the project's .swarm directory,
+ * Only allows paths within or below the project's working directory,
  * or the special ':memory:' path.
+ *
+ * #1945: the previous hard-coded `<cwd>/.swarm/memory.db` default ignored
+ * `CLAUDE_FLOW_MEMORY_PATH` / `claude-flow.config.json#memory.persistPath`
+ * — so users with non-default memory paths had `memory init` write to e.g.
+ * `data/memory/memory.db` while `bridgeStoreEntry()` wrote to
+ * `.swarm/memory.db`. CLI store reported success against the wrong file and
+ * a fresh process reading the configured path saw nothing.
+ *
+ * Use `getMemoryRoot()` (from memory-initializer) so the bridge and the
+ * initializer agree on the same file. Imported via require() to avoid a
+ * circular ESM dep between memory-initializer.ts and memory-bridge.ts.
  */
 function getDbPath(customPath?: string): string {
-  const swarmDir = path.resolve(process.cwd(), '.swarm');
-  if (!customPath) return path.join(swarmDir, 'memory.db');
+  let defaultDir = path.resolve(process.cwd(), '.swarm');
+  try {
+    // `getMemoryRoot()` honors $CLAUDE_FLOW_MEMORY_PATH, then the
+    // claude-flow.config.json `memory.persistPath`, then defaults to `.swarm`.
+    const cjsRequire = createRequire(import.meta.url);
+    const mod = cjsRequire('./memory-initializer.js') as { getMemoryRoot?: () => string };
+    if (typeof mod.getMemoryRoot === 'function') {
+      defaultDir = mod.getMemoryRoot();
+    }
+  } catch {
+    /* memory-initializer not resolvable in this build — keep `.swarm/` default */
+  }
+  if (!customPath) return path.join(defaultDir, 'memory.db');
   if (customPath === ':memory:') return ':memory:';
   const resolved = path.resolve(customPath);
-  // Ensure the path doesn't escape the working directory
+  // Ensure the path doesn't escape the working directory.
   const cwd = process.cwd();
   if (!resolved.startsWith(cwd)) {
-    return path.join(swarmDir, 'memory.db'); // fallback to safe default
+    return path.join(defaultDir, 'memory.db'); // fallback to safe default
   }
   return resolved;
 }
