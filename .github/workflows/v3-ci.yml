@@ -558,6 +558,28 @@ jobs:
             PATH= "$BASH" "$sh" modify-bash </dev/null || { echo "::error::$sh did not exit 0 with no CLI on PATH"; exit 1; }
           done
 
+  vector-dim-audit:
+    # Regression guard for #1947 / #1942 / #1952 — `vector_indexes` rows for
+    # the `default` and `patterns` namespaces must use `dimensions = 384` to
+    # match the default ONNX embedding model (Xenova/all-MiniLM-L6-v2). A
+    # mismatched dim (the historical 768) is silent: HNSW rejects every
+    # `memory_store --vector` insert and `memory_search` always returns 0.
+    name: Vector-index dimension audit (#1947)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run vector-dim audit
+        shell: bash
+        run: node scripts/audit-vector-dim.mjs
+
   witness-verify:
     # Cryptographic regression guard: runs `ruflo verify --manifest` against
     # the local build to confirm every documented fix in verification.md.json
@@ -584,7 +606,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke, plugin-package-audit, hook-command-audit]
+    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke, plugin-package-audit, hook-command-audit, vector-dim-audit]
 
     steps:
       - name: Checkout code
