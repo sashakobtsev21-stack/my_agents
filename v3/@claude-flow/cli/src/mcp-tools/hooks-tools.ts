@@ -1517,14 +1517,43 @@ export const hooksPretrain: MCPTool = {
     // (readdirSync/statSync already imported statically at the top.)
     const extCounts: Record<string, number> = {};
     let filesAnalyzed = 0;
+    // #1953: separate budget for code files. The old code gated the
+    // import-pattern extraction on `filesAnalyzed <= 50`, which counts
+    // EVERY directory entry (including .md/.yaml/.db/.log). In any
+    // markdown/docs-heavy repo, the depth-first walker burned through the
+    // 50-file budget on non-code files before reaching any source — so
+    // `patternsExtracted: 0` even when hundreds of `.ts`/`.js` files existed.
+    let codeFilesScanned = 0;
     let totalLines = 0;
     const maxDepth = depth === 'shallow' ? 2 : depth === 'deep' ? 6 : 4;
     const patterns: string[] = [];
+
+    // #1953: recurse into directories that typically contain code first
+    // (`src/`, `apps/`, `packages/`, `lib/`, `crates/`, `workers/`, `server/`)
+    // before docs / specs / planning dirs, so the import-extraction budget
+    // is spent on the highest-signal directories even in mixed repos.
+    const CODE_DIR_PREFIXES = new Set([
+      'src', 'apps', 'packages', 'lib', 'crates', 'workers',
+      'server', 'backend', 'frontend', 'app', 'cli', 'core',
+    ]);
+    const scoreEntry = (name: string): number => {
+      if (CODE_DIR_PREFIXES.has(name)) return 0;
+      // Deprioritise common docs / output directories.
+      if (/^(docs?|specs?|_.*|examples?|samples?|out|build|target|coverage|tests?)$/.test(name)) return 2;
+      return 1;
+    };
 
     const scan = (dir: string, currentDepth: number) => {
       if (currentDepth > maxDepth) return;
       try {
         const entries = readdirSync(dir, { withFileTypes: true });
+        // Sort: code-likely dirs first, files mixed in by name, deprioritised
+        // dirs last. Stable for deterministic test behaviour.
+        entries.sort((a, b) => {
+          const sa = a.isDirectory() ? scoreEntry(a.name) : 1;
+          const sb = b.isDirectory() ? scoreEntry(b.name) : 1;
+          return sa - sb;
+        });
         for (const entry of entries) {
           if (entry.name.startsWith('.') || entry.name === 'node_modules' || entry.name === 'dist') continue;
           const full = join(dir, entry.name);
@@ -1535,15 +1564,18 @@ export const hooksPretrain: MCPTool = {
             if (ext) extCounts[ext] = (extCounts[ext] || 0) + 1;
             filesAnalyzed++;
             // For code files, count lines and extract imports
-            if (['.ts', '.js', '.py', '.go', '.rs', '.java'].includes(ext)) {
+            if (['.ts', '.js', '.tsx', '.jsx', '.mjs', '.cjs', '.py', '.go', '.rs', '.java'].includes(ext)) {
               try {
                 const content = readFileSync(full, 'utf-8');
                 const lines = content.split('\n');
                 totalLines += lines.length;
-                // Extract import patterns (first 50 files max for performance)
-                if (filesAnalyzed <= 50) {
-                  for (const line of lines.slice(0, 30)) {
-                    if (line.startsWith('import ') || line.startsWith('from ') || line.startsWith('const ') && line.includes('require(')) {
+                // #1953: gate on the code-file count, not every-file count.
+                // Also widened the per-file scan window from 30 → 80 lines:
+                // modern TS files often have license headers + JSDoc + type
+                // imports before the first `import` statement.
+                if (++codeFilesScanned <= 50) {
+                  for (const line of lines.slice(0, 80)) {
+                    if (line.startsWith('import ') || line.startsWith('from ') || (line.startsWith('const ') && line.includes('require('))) {
                       const trimmed = line.trim();
                       if (trimmed.length < 120 && !patterns.includes(trimmed)) patterns.push(trimmed);
                       if (patterns.length >= 100) break;
@@ -1576,7 +1608,7 @@ export const hooksPretrain: MCPTool = {
     // #1847: when the corpus contains files but no patterns were extracted
     // (typical for Markdown vaults), make the source-code-only extraction
     // contract explicit so users don't conclude the hook system is broken.
-    const SUPPORTED_EXTRACTION_EXTS = ['.ts', '.js', '.py', '.go', '.rs', '.java'];
+    const SUPPORTED_EXTRACTION_EXTS = ['.ts', '.js', '.tsx', '.jsx', '.mjs', '.cjs', '.py', '.go', '.rs', '.java'];
     let note: string | undefined;
     if (filesAnalyzed > 0 && patterns.length === 0) {
       const codeFileCount = SUPPORTED_EXTRACTION_EXTS.reduce(
