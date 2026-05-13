@@ -545,6 +545,10 @@ jobs:
         shell: bash
         run: node scripts/audit-hook-commands.mjs
 
+      - name: Run hook-handler prompt-resolution audit (#1944)
+        shell: bash
+        run: node scripts/audit-hook-handler-prompt.mjs
+
       - name: Lint the ruflo-hook shims
         shell: bash
         run: |
