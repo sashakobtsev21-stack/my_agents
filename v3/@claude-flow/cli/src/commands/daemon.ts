@@ -89,9 +89,19 @@ const startCommand: Command = {
       await killStaleDaemons(projectRoot, quiet);
     }
 
-    // Background mode (default): fork a detached process
+    // Background mode (default): fork a detached process.
+    // #1968: previously only forwarded resource thresholds — `--workers`,
+    // `--headless`, and `--sandbox` were dropped on the floor when the
+    // launcher forked the foreground child, so `daemon start --workers map`
+    // got the full default worker set instead.
     if (!foreground) {
-      return startBackgroundDaemon(projectRoot, quiet, rawMaxCpu, rawMinMem);
+      return startBackgroundDaemon(projectRoot, quiet, {
+        maxCpuLoad: rawMaxCpu,
+        minFreeMemory: rawMinMem,
+        workers: ctx.flags.workers as string | undefined,
+        headless: ctx.flags.headless as boolean | undefined,
+        sandbox: ctx.flags.sandbox as string | undefined,
+      });
     }
 
     // Foreground mode: run in current process (blocks terminal)
@@ -261,7 +271,16 @@ export function daemonCommandLineBelongsToWorkspace(commandLine: string, workspa
 /**
  * Start daemon as a detached background process
  */
-async function startBackgroundDaemon(projectRoot: string, quiet: boolean, maxCpuLoad?: string, minFreeMemory?: string): Promise<CommandResult> {
+interface ForwardedDaemonFlags {
+  maxCpuLoad?: string;
+  minFreeMemory?: string;
+  workers?: string;
+  headless?: boolean;
+  sandbox?: string;
+}
+
+async function startBackgroundDaemon(projectRoot: string, quiet: boolean, forwarded: ForwardedDaemonFlags = {}): Promise<CommandResult> {
+  const { maxCpuLoad, minFreeMemory, workers, headless, sandbox } = forwarded;
   // Validate and resolve project root
   const resolvedRoot = resolve(projectRoot);
   validatePath(resolvedRoot, 'Project root');
@@ -335,6 +354,22 @@ async function startBackgroundDaemon(projectRoot: string, quiet: boolean, maxCpu
   }
   if (minFreeMemory && SPAWN_NUMERIC_RE.test(minFreeMemory)) {
     forkArgs.push('--min-free-memory', minFreeMemory);
+  }
+  // #1968: forward worker-selection / sandbox flags. The previous launcher
+  // dropped these, so `daemon start --workers map` ran with the default
+  // five-worker set instead of just `map`. Validate each before passing
+  // through — argv goes straight to a forked process so reject anything
+  // that doesn't look like a comma-separated worker-name list or one of
+  // the allowed sandbox modes.
+  const WORKERS_RE = /^[a-z][a-z0-9_-]*(,[a-z][a-z0-9_-]*)*$/;
+  if (typeof workers === 'string' && workers.length > 0 && WORKERS_RE.test(workers)) {
+    forkArgs.push('--workers', workers);
+  }
+  if (headless === true) {
+    forkArgs.push('--headless');
+  }
+  if (typeof sandbox === 'string' && (sandbox === 'strict' || sandbox === 'permissive' || sandbox === 'disabled')) {
+    forkArgs.push('--sandbox', sandbox);
   }
   // #1914: stamp the workspace into argv (kept LAST) so the foreground daemon
   // process is self-identifying and `killStaleDaemons` only reaps daemons
