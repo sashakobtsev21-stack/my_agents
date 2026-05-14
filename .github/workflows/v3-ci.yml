@@ -549,6 +549,10 @@ jobs:
         shell: bash
         run: node scripts/audit-hook-handler-prompt.mjs
 
+      - name: Run fix-invariants audit (presence-check guard for #1939, #1941, #1943, #1945, #1946, #1951, #1953, #1968)
+        shell: bash
+        run: node scripts/audit-fix-invariants.mjs
+
       - name: Lint the ruflo-hook shims
         shell: bash
         run: |
