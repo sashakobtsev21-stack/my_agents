@@ -10,9 +10,34 @@ Heavy jobs — multi-year walk-forward backtests, large Monte-Carlo runs, parame
 
 ## Prerequisites
 
+> ⚠️ **Critical install advisory — #1974**
+>
+> `neural-trader@2.7.1` (and every earlier published version we audited) has a
+> dangerous `install` lifecycle script that **recursively invokes `npm install`
+> from inside the install hook**. On any non-`linux-x64` host (macOS Apple
+> Silicon, Windows, linux-arm64) the recursion is unbounded — one report saw
+> 3,049 stuck processes consuming ~120 GB of RAM in ~80 minutes before manual
+> intervention. The platform-binary subpackages it advertises in
+> `optionalDependencies` (`neural-trader-darwin-arm64`, etc.) are **not
+> published to npm**, which is what triggers the fallback path.
+>
+> Until upstream ships a fix, always install neural-trader with
+> `--ignore-scripts` to skip the malicious install hook. The `linux-x64`
+> binary is hardcoded inline in the tarball, so on `linux-x64` the package
+> still works after `--ignore-scripts`. On other platforms `--ignore-scripts`
+> at least won't fork-bomb your machine; whether the runtime works depends on
+> upstream publishing the platform binary.
+
 ```bash
-npm install neural-trader
+# SAFE — skips the upstream install script that fork-bombs on non-linux-x64
+npm install --ignore-scripts neural-trader
+
+# DO NOT run `npm install neural-trader` (no flags) on macOS / Windows /
+# linux-arm64 until #1974 is resolved upstream.
 ```
+
+Set the env var `npm_config_ignore_scripts=1` in your shell rc to make this
+the default for all subsequent `npx neural-trader` calls.
 
 ## Installation
 

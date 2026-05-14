@@ -553,6 +553,10 @@ jobs:
         shell: bash
         run: node scripts/audit-fix-invariants.mjs
 
+      - name: Run neural-trader install-safety audit (#1974)
+        shell: bash
+        run: node scripts/audit-neural-trader-safety.mjs
+
       - name: Lint the ruflo-hook shims
         shell: bash
         run: |
