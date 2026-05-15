@@ -100,8 +100,28 @@ async function verifySignature(witness, repoRoot) {
     catch (e) { probeErr = e; }
   }
   if (!ed) {
-    console.error(`verify.mjs: could not load @noble/ed25519 from any of:\n  ${probes.join('\n  ')}\n  last error: ${probeErr?.message ?? '?'}`);
-    return { manifestHashOk: false, publicKeyReproducible: false, signatureValid: false };
+    // ruflo#1880 — the scheduled 12h verification has bounced off this
+    // 6+ times. Spell out the fix in the error message instead of
+    // leaving the operator to chase it.
+    console.error(
+      `verify.mjs: could not load @noble/ed25519 from any of:\n` +
+      `  ${probes.join('\n  ')}\n` +
+      `  last error: ${probeErr?.message ?? '?'}\n` +
+      `\n` +
+      `Fix: from the repo root, run \`npm install\` (the dep is declared\n` +
+      `in the root package.json under @noble/ed25519). If your runner\n` +
+      `is a source-only checkout, your verification pipeline must run\n` +
+      `\`npm ci && npm run build\` before invoking this script. See #1880\n` +
+      `for the full diagnosis.`
+    );
+    return {
+      manifestHashOk: false,
+      publicKeyReproducible: false,
+      signatureValid: false,
+      // Machine-parseable hint for the scheduled runner so it can
+      // distinguish "missing dep" from a real signature failure.
+      reason: 'noble-ed25519-not-installed',
+    };
   }
 
   ed.etc.sha512Sync = (...m) => { const h = createHash('sha512'); for (const x of m) h.update(x); return h.digest(); };
