@@ -249,8 +249,26 @@ const INVARIANTS = [
   {
     issue: 'ADR-120',
     file: 'v3/crates/ruflo-federation-peer/Cargo.toml',
-    substring: 'midstreamer-quic = { version = "0.2.1"',
-    why: 'Step 3 crate pins midstreamer-quic@0.2.1 (the published upstream version with the strictly-better security posture — OS trust store via rustls-platform-verifier).',
+    substring: 'midstreamer-quic = { version = "0.3.0"',
+    why: 'Step 3 crate pins midstreamer-quic@0.3.0 (ruvnet/midstream PR #82 added the QuicTransport embedding trait this crate needs for its TransportProvider blanket impl).',
+  },
+  {
+    issue: 'ADR-120',
+    file: 'v3/crates/ruflo-federation-peer/Cargo.toml',
+    substring: 'aimds-core = { version = "0.2.0"',
+    why: 'Step 3 crate pins aimds-core@0.2.0 (ruvnet/midstream PR #82 added the SafetyGate composing trait this crate adapts in native_gate).',
+  },
+  {
+    issue: 'ADR-120',
+    file: 'v3/crates/ruflo-federation-peer/src/lib.rs',
+    substring: 'midstreamer_quic::{QuicConnection, QuicTransport}',
+    why: 'Step 3 native_transport must import the upstream QuicTransport trait (not just QuicConnection) so MidstreamerTransport is generic over any embedder-supplied transport.',
+  },
+  {
+    issue: 'ADR-120',
+    file: 'v3/crates/ruflo-federation-peer/src/lib.rs',
+    substring: 'aimds_core::{PromptInput, SafetyGate as AimdsSafetyGate, SafetyVerdict as AimdsVerdict}',
+    why: 'Step 3 native_gate must adapt aimds_core::SafetyGate to the peer-local SafetyGate trait — without this import the adapter degrades to a typed placeholder.',
   },
   {
     issue: 'ADR-120',

@@ -216,55 +216,240 @@ where
     }
 }
 
-/// Production transport wrapping `midstreamer-quic`. Only available
-/// under `--features native` because the upstream crate is otherwise
-/// optional.
+/// Production transport wrapping `midstreamer-quic@0.3.0`'s
+/// `QuicTransport` trait. Only available under `--features native`
+/// because the upstream crate is otherwise optional.
 #[cfg(feature = "native")]
 pub mod native_transport {
-    //! Real-QUIC wrapper. Implementation lands once the upstream
-    //! `midstreamer-quic` API stabilizes its `QuicTransport` trait.
-    //! Today this is a typed placeholder so `cargo check
-    //! --features native` succeeds.
+    //! Real-QUIC wrapper over the `midstreamer-quic@0.3.0`
+    //! `QuicTransport` trait surface (ruvnet/midstream PR #82).
+    //!
+    //! `MidstreamerTransport` owns a single established
+    //! [`midstreamer_quic::QuicConnection`] (typically a
+    //! ruflo↔hub-peer link). Outbound `send` opens a fresh
+    //! bidirectional stream and writes one NDJSON line per
+    //! [`FederationMessage`]; `recv` accepts an incoming
+    //! bidirectional stream and reads one NDJSON line. This matches
+    //! the framing used by the TS-side `midstream-aware-loader`.
+    //!
+    //! Full mesh (accept-from-many-peers) waits for an upstream
+    //! `Endpoint::accept_connection` API; today the peer establishes
+    //! exactly one connection at startup.
     use super::*;
+    use midstreamer_quic::{QuicConnection, QuicTransport};
 
-    /// Concrete [`TransportProvider`] backed by `midstreamer-quic`.
-    pub struct MidstreamerTransport;
+    /// Concrete [`TransportProvider`] backed by `midstreamer-quic`'s
+    /// `QuicTransport` trait. Generic over any embedder-supplied
+    /// transport so tests can substitute a fake.
+    pub struct MidstreamerTransport<T: QuicTransport = QuicConnection> {
+        connection: T,
+        remote_addr: String,
+    }
+
+    impl MidstreamerTransport<QuicConnection> {
+        /// Open a client connection to `addr` and wrap it. The
+        /// returned transport is ready to `send` / `recv`.
+        ///
+        /// `addr` must be a `host:port` string parseable by
+        /// `midstreamer-quic`'s connect path; the same string is
+        /// later echoed back from `recv` as the sender.
+        pub async fn connect(addr: &str) -> Result<Self, PeerError> {
+            let connection = QuicConnection::connect(addr)
+                .await
+                .map_err(|e| PeerError::Transport(format!("connect {addr}: {e}")))?;
+            Ok(Self {
+                connection,
+                remote_addr: addr.to_string(),
+            })
+        }
+    }
+
+    impl<T: QuicTransport> MidstreamerTransport<T> {
+        /// Wrap an already-established transport. Used when the peer
+        /// is the server side of a connection (accepted) or in tests.
+        pub fn from_connection(connection: T, remote_addr: String) -> Self {
+            Self {
+                connection,
+                remote_addr,
+            }
+        }
+    }
 
     #[async_trait]
-    impl TransportProvider for MidstreamerTransport {
-        async fn send(&self, _addr: &str, _msg: FederationMessage) -> Result<(), PeerError> {
-            Err(PeerError::Transport("not implemented — see ADR-120".into()))
+    impl<T: QuicTransport + 'static> TransportProvider for MidstreamerTransport<T> {
+        async fn send(&self, addr: &str, msg: FederationMessage) -> Result<(), PeerError> {
+            // Today the transport is single-connection; only sends
+            // to the established remote are valid. The TS-side
+            // loader holds the routing table, so an addr mismatch
+            // here is a programmer error rather than a runtime one.
+            if addr != self.remote_addr {
+                return Err(PeerError::Transport(format!(
+                    "addr {addr} does not match established remote {}",
+                    self.remote_addr
+                )));
+            }
+            let mut stream = self
+                .connection
+                .open_bi_stream()
+                .await
+                .map_err(|e| PeerError::Transport(format!("open_bi_stream: {e}")))?;
+            let mut line = serde_json::to_vec(&msg)?;
+            line.push(b'\n');
+            stream
+                .send(&line)
+                .await
+                .map_err(|e| PeerError::Transport(format!("write: {e}")))?;
+            stream
+                .finish()
+                .await
+                .map_err(|e| PeerError::Transport(format!("finish: {e}")))?;
+            Ok(())
         }
+
         async fn recv(&self) -> Result<(String, FederationMessage), PeerError> {
-            Err(PeerError::Transport("not implemented — see ADR-120".into()))
+            let mut stream = self
+                .connection
+                .accept_bi_stream()
+                .await
+                .map_err(|e| PeerError::Transport(format!("accept_bi_stream: {e}")))?;
+            // QUIC streams are reliable + framed-by-finish; read in
+            // chunks until the peer finishes the stream. Cap total
+            // at 16 MiB to bound memory; federation messages are
+            // small.
+            const MAX: usize = 16 * 1024 * 1024;
+            const CHUNK: usize = 8 * 1024;
+            let mut buf: Vec<u8> = Vec::with_capacity(4096);
+            let mut chunk = [0u8; CHUNK];
+            loop {
+                let n = stream
+                    .recv(&mut chunk)
+                    .await
+                    .map_err(|e| PeerError::Transport(format!("read: {e}")))?;
+                if n == 0 {
+                    break;
+                }
+                if buf.len() + n > MAX {
+                    return Err(PeerError::Transport(format!(
+                        "inbound message exceeded {MAX} bytes",
+                    )));
+                }
+                buf.extend_from_slice(&chunk[..n]);
+            }
+            // Strip trailing newline framing if present.
+            let trimmed: &[u8] = match buf.last() {
+                Some(&b'\n') => &buf[..buf.len() - 1],
+                _ => &buf,
+            };
+            let msg: FederationMessage = serde_json::from_slice(trimmed)?;
+            Ok((self.remote_addr.clone(), msg))
         }
+
         async fn close(&self) -> Result<(), PeerError> {
+            self.connection.close(0, b"peer shutdown");
             Ok(())
         }
     }
 }
 
-/// Production safety gate wrapping AIMDS detection + analysis +
-/// response layers. Only available under `--features native`.
+/// Production safety gate adapting any `aimds_core::SafetyGate`
+/// (e.g. AIMDS's `ComposedGate` running detection + analysis +
+/// response) to the peer's `FederationMessage` shape. Only
+/// available under `--features native`.
 #[cfg(feature = "native")]
 pub mod native_gate {
-    //! AIMDS 3-gate wrapper. Composes the four `aimds-*` crates.
-    //! Today this is a typed placeholder; the real implementation
-    //! lands in a follow-up once the upstream crates expose the
-    //! handle the ruflo MCP tools already use.
+    //! Adapter that lets the peer compose any `aimds_core::SafetyGate`
+    //! implementation. Converts `FederationMessage` → `PromptInput`
+    //! by serializing the payload to a string + carrying the
+    //! metadata as context; converts the verdict back into the
+    //! peer-local enum.
+    //!
+    //! Embedders construct one of these with their preferred gate
+    //! pipeline. AIMDS's canonical `ComposedGate` (detection +
+    //! analysis + response, short-circuit on Block) is the expected
+    //! default, but any `aimds_core::SafetyGate` works.
     use super::*;
+    use aimds_core::{PromptInput, SafetyGate as AimdsSafetyGate, SafetyVerdict as AimdsVerdict};
+    use std::sync::Arc;
 
-    /// Concrete [`SafetyGate`] backed by the AIMDS pipeline.
-    pub struct AimdsGate;
+    /// Concrete [`SafetyGate`] that delegates to a user-provided
+    /// `aimds_core::SafetyGate`. Cheap to clone (Arc-wrapped).
+    pub struct AimdsGate {
+        inner: Arc<dyn AimdsSafetyGate>,
+    }
+
+    impl AimdsGate {
+        /// Construct from any `aimds_core::SafetyGate` implementor.
+        /// Pass `AIMDS`'s canonical `ComposedGate` here, or a custom
+        /// 3-gate composition.
+        pub fn new<G: AimdsSafetyGate + 'static>(gate: G) -> Self {
+            Self {
+                inner: Arc::new(gate),
+            }
+        }
+    }
+
+    impl Clone for AimdsGate {
+        fn clone(&self) -> Self {
+            Self {
+                inner: Arc::clone(&self.inner),
+            }
+        }
+    }
+
+    /// Adapt a `FederationMessage` to `aimds-core`'s `PromptInput`.
+    /// The gate inspects message content as a stringified JSON
+    /// payload; metadata + stream-id ride along in `context` so the
+    /// gate can correlate per-session.
+    fn to_prompt_input(msg: &FederationMessage) -> PromptInput {
+        let content = serde_json::to_string(&msg.payload)
+            .unwrap_or_else(|_| msg.payload.to_string());
+        let context = serde_json::json!({
+            "federation_id": msg.id,
+            "kind": msg.kind,
+            "metadata": msg.metadata,
+            "streamId": msg.stream_id,
+        });
+        PromptInput {
+            id: uuid::Uuid::new_v4(),
+            timestamp: chrono::Utc::now(),
+            content,
+            context,
+            session_id: msg.stream_id.clone(),
+            user_id: None,
+        }
+    }
 
     #[async_trait]
     impl SafetyGate for AimdsGate {
-        async fn inspect(&self, _msg: &FederationMessage) -> Result<SafetyVerdict, PeerError> {
-            // The wired implementation walks `aimds-detection` →
-            // `aimds-analysis` → `aimds-response`. Until the upstream
-            // crates publish their public-API trait for embedding,
-            // this default safely passes everything through.
-            Ok(SafetyVerdict::Pass)
+        async fn inspect(&self, msg: &FederationMessage) -> Result<SafetyVerdict, PeerError> {
+            let input = to_prompt_input(msg);
+            let verdict = self
+                .inner
+                .inspect(&input)
+                .await
+                .map_err(|e| PeerError::Gate(format!("aimds: {e}")))?;
+            Ok(match verdict {
+                AimdsVerdict::Pass => SafetyVerdict::Pass,
+                AimdsVerdict::Block(reason) => SafetyVerdict::Block(reason),
+                AimdsVerdict::Redact(sanitized) => {
+                    // The peer's verdict carries a full
+                    // `FederationMessage`; rewrap the sanitized
+                    // content as the message payload + preserve the
+                    // routing metadata.
+                    let redacted = FederationMessage {
+                        id: msg.id.clone(),
+                        kind: msg.kind.clone(),
+                        payload: serde_json::json!({
+                            "sanitized": sanitized.sanitized_content,
+                            "modifications": sanitized.modifications,
+                            "is_safe": sanitized.is_safe,
+                        }),
+                        metadata: msg.metadata.clone(),
+                        stream_id: msg.stream_id.clone(),
+                    };
+                    SafetyVerdict::Redact(redacted)
+                }
+            })
         }
     }
 }
@@ -377,6 +562,62 @@ mod tests {
         match err {
             PeerError::Gate(reason) => assert_eq!(reason, "test rule"),
             other => panic!("expected Gate error, got {other:?}"),
+        }
+    }
+
+    /// Round-trips a `FederationMessage` through the real
+    /// `AimdsGate` adapter wired to an in-test `aimds_core::SafetyGate`
+    /// implementor. Exercises the actual upstream trait surface
+    /// (`midstreamer-quic@0.3.0` and `aimds-core@0.2.0`).
+    #[cfg(feature = "native")]
+    #[tokio::test]
+    async fn aimds_gate_adapter_forwards_pass_and_block_verdicts() {
+        use crate::native_gate::AimdsGate;
+        use aimds_core::{
+            AimdsError, PromptInput, SafetyGate as AimdsSafetyGate,
+            SafetyVerdict as AimdsVerdict,
+        };
+
+        // Test gate: block messages whose payload contains "secret".
+        struct PatternGate;
+        #[async_trait]
+        impl AimdsSafetyGate for PatternGate {
+            async fn inspect(
+                &self,
+                input: &PromptInput,
+            ) -> Result<AimdsVerdict, AimdsError> {
+                if input.content.contains("secret") {
+                    Ok(AimdsVerdict::Block("pattern: 'secret'".into()))
+                } else {
+                    Ok(AimdsVerdict::Pass)
+                }
+            }
+        }
+
+        let adapter = AimdsGate::new(PatternGate);
+
+        let safe = FederationMessage {
+            id: "1".into(),
+            kind: "task".into(),
+            payload: serde_json::json!({"text": "hello world"}),
+            metadata: Default::default(),
+            stream_id: None,
+        };
+        match adapter.inspect(&safe).await.unwrap() {
+            SafetyVerdict::Pass => {}
+            other => panic!("expected Pass, got {other:?}"),
+        }
+
+        let unsafe_msg = FederationMessage {
+            id: "2".into(),
+            kind: "task".into(),
+            payload: serde_json::json!({"text": "the secret is out"}),
+            metadata: Default::default(),
+            stream_id: None,
+        };
+        match adapter.inspect(&unsafe_msg).await.unwrap() {
+            SafetyVerdict::Block(reason) => assert!(reason.contains("secret")),
+            other => panic!("expected Block, got {other:?}"),
         }
     }
 }
