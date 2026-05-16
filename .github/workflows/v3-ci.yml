@@ -524,6 +524,61 @@ jobs:
         shell: bash
         run: node scripts/audit-plugin-packages.mjs
 
+      - name: Run package dep-overlap audit (#1147 / #2018)
+        # Static guard for the "Invalid Version: " npm 11.x crash. Any package
+        # declaring the same dep name in both optionalDependencies AND
+        # peerDependencies trips arborist's dedupe pass when a transitive
+        # carries a "-dev." prerelease tag. Fail CI on the overlap.
+        shell: bash
+        run: node scripts/audit-package-dep-overlap.mjs
+
+  cli-npx-install-smoke:
+    # Regression guard for ruvnet/ruflo#1147 and #2018 — both report:
+    #   $ npx @claude-flow/cli@latest …
+    #   npm error Invalid Version:
+    # Caused by an optionalDependencies/peerDependencies overlap deep in the
+    # dep tree (see scripts/audit-package-dep-overlap.mjs for the static
+    # guard). This is the BEHAVIOURAL guard: pack the locally-built CLI,
+    # install the tarball into a scratch project, fail if `npm install`
+    # prints "Invalid Version" or exits non-zero. Runs on Node 22 + 24 so
+    # the newer npm shipped with Node 24 (where the bug surfaces) is
+    # actually exercised.
+    name: CLI npx-install smoke (#1147 / #2018) / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'pnpm'
+          cache-dependency-path: v3/pnpm-lock.yaml
+
+      - name: Build cli (smoke packs from its dist/)
+        working-directory: v3
+        shell: bash
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --recursive --no-bail run build || true
+          test -f @claude-flow/cli/bin/cli.js \
+            || (echo "cli build did not produce bin/cli.js"; exit 1)
+
+      - name: Pack, install, and run cli (asserts no 'Invalid Version' crash)
+        shell: bash
+        run: node scripts/smoke-cli-npx-install.mjs
+
   hook-command-audit:
     # Regression guard for #1921 (and #1147) — plugin hooks.json must not
     # invoke a bare `npx <pkg>@alpha hooks …` per fire. The fix is
@@ -618,7 +673,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke, plugin-package-audit, hook-command-audit, vector-dim-audit]
+    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke, plugin-package-audit, cli-npx-install-smoke, hook-command-audit, vector-dim-audit]
 
     steps:
       - name: Checkout code
