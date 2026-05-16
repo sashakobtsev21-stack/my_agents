@@ -17,6 +17,15 @@ A self-contained learning module that records agent execution trajectories, dist
 npm install @claude-flow/neural
 ```
 
+> **Known issue (2026-05-16):** `@claude-flow/neural@3.0.0-alpha.8`
+> transitively depends on `@ruvector/sona`, and the latest published
+> `@ruvector/sona@0.1.6` is an empty release (README + `package.json`
+> only — no `index.js`, no native bins). Until a content-bearing
+> sona is republished or this package pins `@ruvector/sona@^0.1.5`,
+> fresh `npm install`s of `@claude-flow/neural` will fail at import
+> time with `Cannot find package '…/node_modules/@ruvector/sona/index.js'`.
+> See ruvnet/ruflo for a tracking issue.
+
 ## Quick start (recommended)
 
 `NeuralLearningSystem` is the high-level entry point — it wires `SONAManager`, `ReasoningBank`, and `PatternLearner` together so callers don't have to:
