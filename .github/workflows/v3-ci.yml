@@ -346,6 +346,36 @@ jobs:
       - name: Static scan of every rvf create call site
         run: node scripts/smoke-browser-rvf-create-flags.mjs
 
+  witness-marker-drift-smoke:
+    # Regression guard for ruvnet/ruflo#2021 — the slow witness-verify
+    # job below catches marker drift but only as a post-build check on
+    # cross-platform matrix. Direct pushes to main (e.g. the alpha.43
+    # release chain) bypass PR-time gating and a bad marker can sneak
+    # through, leaving the scheduled 12h cron to file a HIGH issue.
+    #
+    # This smoke runs verify.mjs's marker-presence layer (no signature
+    # check, no build, no native deps) on every push and pull-request.
+    # If a cited file exists on disk and the marker string is missing,
+    # fail immediately and name the specific fix id that drifted.
+    #
+    # The full witness-verify job stays — it adds the signature layer
+    # and the cross-platform dist build. This smoke is the fast gate
+    # that fails before that.
+    name: witness marker drift smoke (#2021)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Scan every witness marker for drift
+        run: node scripts/smoke-witness-marker-drift.mjs
+
   witness-verify-precondition-smoke:
     # Regression guard for ruvnet/ruflo#1880 — the 12h scheduled witness
     # verification runs in a source-only checkout (no `npm ci`, no
@@ -791,7 +821,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, pre-bash-hook-smoke, witness-verify-precondition-smoke, browser-rvf-create-flags-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke, plugin-package-audit, cli-npx-install-smoke, hook-command-audit, vector-dim-audit]
+    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, pre-bash-hook-smoke, witness-verify-precondition-smoke, witness-marker-drift-smoke, browser-rvf-create-flags-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke, plugin-package-audit, cli-npx-install-smoke, hook-command-audit, vector-dim-audit]
 
     steps:
       - name: Checkout code
