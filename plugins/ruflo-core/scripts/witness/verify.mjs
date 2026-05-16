@@ -9,8 +9,13 @@
  *
  * Exit codes:
  *   0  — signature valid + all fixes pass or drift (marker present)
- *   1  — signature invalid OR any fix regressed/missing
- *   2  — bad arguments / file not found
+ *   1  — signature invalid OR any fix regressed/missing (real failure)
+ *   2  — bad arguments / file not found OR precondition not met
+ *        (e.g. @noble/ed25519 not installed, or dist files not built —
+ *         source-only checkout without `npm ci && npm run build`).
+ *        Issue #1880: scheduled runners use this to distinguish a
+ *        "needs install+build" environment from a real verification
+ *        failure, so we stop filing recurring issues on every cron run.
  */
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -33,6 +38,20 @@ const witness = JSON.parse(readFileSync(manifestPath, 'utf8'));
 // ─── signature ────────────────────────────────────────────────────
 const sig = await verifySignature(witness, repoRoot);
 
+// Issue #1880 — if @noble/ed25519 isn't installed, this is a
+// precondition failure, not a verification failure. Exit 2 so the
+// scheduled runner can distinguish "install needed" from a real
+// regression and stop filing duplicate issues every 12 hours.
+if (sig.reason === 'noble-ed25519-not-installed') {
+  if (asJson) {
+    console.log(JSON.stringify(
+      { ok: false, precondition: 'noble-ed25519-not-installed', signature: sig },
+      null, 2
+    ));
+  }
+  process.exit(2);
+}
+
 // ─── per-fix marker check ─────────────────────────────────────────
 const fileResults = witness.manifest.fixes.map((fix) => {
   const installed = join(repoRoot, fix.file);
@@ -53,6 +72,35 @@ const summary = {
   regressed: fileResults.filter(r => r.status === 'regressed').length,
   missing: fileResults.filter(r => r.status === 'missing').length,
 };
+
+// Issue #1880 — heuristic: if *every* manifest entry is missing AND at
+// least one references a `/dist/` path, the checkout was source-only
+// (no `npm run build`). That's a precondition failure, not a regression.
+// Anything more nuanced (partial dist build, real regressions, etc.)
+// still lands in the normal exit-1 path.
+const allMissing = fileResults.length > 0
+                && summary.missing === fileResults.length;
+const referencesDist = fileResults.some(r => r.file && r.file.includes(`${sep}dist${sep}`)
+                                          || (r.file && r.file.includes('/dist/')));
+if (allMissing && referencesDist) {
+  if (asJson) {
+    console.log(JSON.stringify(
+      { ok: false, precondition: 'dist-not-built', signature: sig, summary },
+      null, 2
+    ));
+  } else {
+    console.error(
+      `verify.mjs: every manifest entry is missing and the manifest references\n` +
+      `dist/ artifacts. The checkout appears to be source-only (no build run).\n` +
+      `\n` +
+      `Fix: from the repo root, run \`npm ci && npm run build\` (or the\n` +
+      `equivalent for the workspaces witness markers reference) before\n` +
+      `invoking this script. See #1880 for the full diagnosis.`
+    );
+  }
+  process.exit(2);
+}
+
 const ok = sig.signatureValid && sig.manifestHashOk && sig.publicKeyReproducible
         && summary.regressed === 0 && summary.missing === 0;
 

@@ -43,7 +43,8 @@ site_record_replay() {
   local rvf="$RESULTS_DIR/$sid.rvf"
 
   # 1. Record a minimal baseline interaction
-  if ! npx -y ruvector@0.2.25 rvf create "$rvf" --kind browser-session >/dev/null 2>&1; then
+  # #2015: ruvector@0.2.25 requires --dimension on `rvf create`.
+  if ! npx -y ruvector@0.2.25 rvf create "$rvf" --kind browser-session --dimension 384 >/dev/null 2>&1; then
     echo "SKIP:$label rvf-create-failed" ; return 2
   fi
   if ! npx -y ruvector@0.2.25 hooks trajectory-begin --session-id "$sid" --task "spike-$label" >/dev/null 2>&1; then

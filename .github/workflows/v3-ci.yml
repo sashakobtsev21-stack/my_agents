@@ -18,6 +18,10 @@ on:
       - '**/scripts/ruflo-hook.sh'
       # pre-bash hook safety (#2017) — both handler copies trigger the smoke
       - '**/.claude/helpers/hook-handler.cjs'
+      # ruflo-browser rvf create flag (#2015) — TS source, plugin shell
+      # scripts, agent-facing recipes all guarded by the same smoke.
+      - 'v3/@claude-flow/cli/src/mcp-tools/browser-session-tools.ts'
+      - 'plugins/ruflo-browser/**'
   pull_request:
     branches: [main]
     paths:
@@ -28,6 +32,9 @@ on:
       - '**/hooks/hooks.json'
       - '**/scripts/ruflo-hook.sh'
       - '**/.claude/helpers/hook-handler.cjs'
+      # ruflo-browser rvf create flag (#2015)
+      - 'v3/@claude-flow/cli/src/mcp-tools/browser-session-tools.ts'
+      - 'plugins/ruflo-browser/**'
       # witness manifests / fix list — so witness-verify runs on PRs that
       # touch them (otherwise a stale per-OS manifest only fails post-merge).
       - 'verification/**'
@@ -304,6 +311,79 @@ jobs:
         run: |
           node plugins/ruflo-core/scripts/test-hooks.mjs \
             "node $GITHUB_WORKSPACE/v3/@claude-flow/cli/bin/cli.js"
+
+  browser-rvf-create-flags-smoke:
+    # Regression guard for ruvnet/ruflo#2015 — the ruflo-browser
+    # `browser_session_record` MCP tool wraps `ruvector rvf create`.
+    # ruvector@0.2.25 makes `-d, --dimension <n>` required, so before
+    # this fix every session-record call failed with
+    # `error: required option '-d, --dimension <n>' not specified`
+    # and the wrapper returned `{ success: false, error: "rvf create
+    # failed" }`.
+    #
+    # This smoke scans every place we shell out to `rvf create
+    # --kind browser-session` across the repo (TS source, compiled
+    # dist, shell scripts, agent-facing markdown recipes) and fails
+    # if any call is missing the dimension flag.
+    name: browser rvf create flag smoke (#2015)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build CLI (so the compiled dist is scanned alongside src)
+        run: |
+          cd v3/@claude-flow/cli
+          npm install --no-audit --no-fund --legacy-peer-deps
+          npm run build
+
+      - name: Static scan of every rvf create call site
+        run: node scripts/smoke-browser-rvf-create-flags.mjs
+
+  witness-verify-precondition-smoke:
+    # Regression guard for ruvnet/ruflo#1880 — the 12h scheduled witness
+    # verification runs in a source-only checkout (no `npm ci`, no
+    # `npm run build`). Before this fix, that environment exited 1
+    # (real verification failure) because `@noble/ed25519` wasn't
+    # installed and 87+ dist files referenced by the manifest didn't
+    # exist on disk — so the scheduled runner filed a "verification
+    # broken" issue every 12 hours even though nothing was actually
+    # wrong with the signed manifest.
+    #
+    # verify.mjs now reserves exit 2 for precondition failures
+    # (missing dep, source-only checkout) and exit 1 strictly for real
+    # failures (signature invalid, dist file regressed). This smoke
+    # drives both shapes through and asserts the contract holds:
+    #   - missing @noble/ed25519     → exit 2 + named in the error
+    #   - all-manifest-files missing → exit 2 + precondition tag
+    #   - built tree                 → exit is NEVER 2
+    #
+    # Independent job so a precondition contract break is named clearly
+    # in the CI summary. Wired into witness-verify's `needs:` below.
+    name: witness verify precondition smoke (#1880)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install root dependencies (provides @noble/ed25519 for Case 3)
+        run: npm ci --legacy-peer-deps
+
+      - name: Drive precondition + built-tree shapes through verify.mjs
+        shell: bash
+        run: node scripts/smoke-witness-verify-precondition.mjs
 
   pre-bash-hook-smoke:
     # Regression guard for ruvnet/ruflo#2017 — the `pre-bash` PreToolUse hook
@@ -711,7 +791,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, pre-bash-hook-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke, plugin-package-audit, cli-npx-install-smoke, hook-command-audit, vector-dim-audit]
+    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, pre-bash-hook-smoke, witness-verify-precondition-smoke, browser-rvf-create-flags-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke, plugin-package-audit, cli-npx-install-smoke, hook-command-audit, vector-dim-audit]
 
     steps:
       - name: Checkout code

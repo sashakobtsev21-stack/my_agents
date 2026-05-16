@@ -112,8 +112,17 @@ export const browserSessionTools: MCPTool[] = [
       const dir = (input.rvf_dir as string | undefined) ?? (await ensureSessionsDir());
       const rvfPath = path.join(dir, `${sessionId}.rvf`);
 
-      // 1. RVF allocate
-      const rvf = await shell('npx', ['-y', RUVECTOR_PIN, 'rvf', 'create', rvfPath, '--kind', 'browser-session'], { timeout: 60000 });
+      // 1. RVF allocate.
+      // Issue #2015: ruvector@0.2.25 requires `-d, --dimension <n>` for
+      // `rvf create`. Without it the command exits non-zero and the
+      // tool returned `{ success: false, error: "rvf create failed" }`
+      // for every invocation. 384 matches the MiniLM-L6 default used by
+      // the rest of the toolchain (ONNX embedder + AgentDB indexes).
+      const rvf = await shell(
+        'npx',
+        ['-y', RUVECTOR_PIN, 'rvf', 'create', rvfPath, '--kind', 'browser-session', '--dimension', '384'],
+        { timeout: 60000 },
+      );
       if (!rvf.success) return fail('rvf create failed', { detail: rvf.error, stderr: rvf.stderr, sessionId, rvfPath });
 
       // 2. trajectory-begin
