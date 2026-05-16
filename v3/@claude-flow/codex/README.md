@@ -7,6 +7,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@claude-flow/codex"><img src="https://img.shields.io/npm/v/@claude-flow/codex?label=npm&color=blue" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@claude-flow/codex"><img src="https://img.shields.io/npm/dm/@claude-flow/codex?label=downloads&color=cb3837" alt="npm downloads"></a>
   <a href="https://github.com/ruvnet/ruflo"><img src="https://img.shields.io/badge/license-MIT-green" alt="license"></a>
   <a href="https://agentics.org"><img src="https://img.shields.io/badge/standard-Agentics-purple" alt="Agentics Standard"></a>
 </p>
