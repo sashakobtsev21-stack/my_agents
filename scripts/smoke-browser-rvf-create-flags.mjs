@@ -2,88 +2,87 @@
 /**
  * Regression guard for ruvnet/ruflo#2015.
  *
- * ruvector@0.2.25's `rvf create` requires a `-d, --dimension <n>`
- * flag. ruflo-browser 0.2.0's `browser_session_record` MCP tool
- * invoked the command WITHOUT it, so every call failed with:
+ * `ruvector@0.2.25 rvf create` accepts only:
+ *   -d, --dimension <n>    (required)
+ *   -m, --metric <metric>  (optional, default cosine)
  *
- *   error: required option '-d, --dimension <n>' not specified
+ * It does NOT accept `--kind <value>` — commander's required-option
+ * check fires before its unknown-option check, so the original bug
+ * report only showed the dimension error. Stripping the bogus
+ * `--kind browser-session` was round 2 of the fix; this guard now
+ * polices BOTH invariants on every call site:
  *
- * The fix passes `--dimension 384` (matches the MiniLM-L6 default
- * used by AgentDB indexes and the ONNX embedder). This script
- * statically scans every place we shell out to `ruvector rvf create`
- * across the repo and fails if any of them is missing the flag.
+ *   - `--dimension` / `-d` is present
+ *   - `--kind` is absent
  *
- * Covers:
- *   - TS source + compiled dist of the MCP tool
- *   - Shell scripts in plugins/ruflo-browser/scripts/
- *   - Doc snippets in plugins/ruflo-browser/{agents,skills}/*.md
- *     (these are agent-facing recipes that get pasted into bashes —
- *      if the doc is wrong, agents reproduce the broken call)
+ * Scans TS, compiled dist, shell scripts, and the markdown recipes
+ * agents copy-paste into bashes.
  */
 
 import { readFileSync, existsSync } from 'node:fs';
-import { resolve, relative } from 'node:path';
-import { execSync } from 'node:child_process';
+import { resolve } from 'node:path';
 
 const REPO_ROOT = resolve(process.cwd());
 
-// Find every file that mentions `rvf create` with the browser-session
-// kind. ripgrep is faster than glob+read; fall back to find+grep if rg
-// isn't on the runner.
-let hits;
-try {
-  hits = execSync(
-    `rg -l --no-messages "rvf.{0,8}create" -g '!node_modules' -g '!**/dist/**/*.map' -g '!.git'`,
-    { cwd: REPO_ROOT, encoding: 'utf8' },
-  )
-    .split('\n')
-    .filter(Boolean);
-} catch {
-  hits = execSync(
-    `grep -rl --exclude-dir=node_modules --exclude-dir=.git "rvf create" .`,
-    { cwd: REPO_ROOT, encoding: 'utf8' },
-  )
-    .split('\n')
-    .filter(Boolean);
-}
-
-// We only police call sites that pair `rvf create` with `--kind browser-session`.
-// Other `rvf create` uses (e.g. inside ruvector's own dist or unrelated kinds)
-// aren't in scope of #2015.
+// We police every `rvf create` call we control across the repo —
+// the original anchor (`--kind browser-session`) is gone post-fix, so
+// we have to identify call sites by path, not by content.
+const PATHS_IN_SCOPE = [
+  'v3/@claude-flow/cli/src/mcp-tools/browser-session-tools.ts',
+  'v3/@claude-flow/cli/dist/src/mcp-tools/browser-session-tools.js',
+  'plugins/ruflo-browser/scripts/replay-spike.sh',
+  'plugins/ruflo-browser/agents/browser-agent.md',
+  'plugins/ruflo-browser/skills/browser-record/SKILL.md',
+  'plugins/ruflo-browser/docs/adrs/0001-browser-skills-architecture.md',
+];
 const failures = [];
 const checked = [];
 
-for (const rel of hits) {
+for (const rel of PATHS_IN_SCOPE) {
   const path = resolve(REPO_ROOT, rel);
-  if (!existsSync(path)) continue;
-  // Skip worktree clones — they're not on the publish path and they
-  // duplicate every finding.
-  if (rel.includes('.claude/worktrees/')) continue;
-  // Skip node_modules just in case the rg ignore didn't match.
-  if (rel.includes('node_modules/')) continue;
-  // Skip stale untracked dist/ at the repo root (the real published
-  // dist lives under v3/@claude-flow/cli/dist/, which IS scanned).
-  if (rel.startsWith('dist/') || rel.startsWith('./dist/')) continue;
-  // Skip this script itself — its grep patterns aren't real calls.
-  if (rel.endsWith('smoke-browser-rvf-create-flags.mjs')) continue;
+  if (!existsSync(path)) {
+    failures.push(`${rel}  expected call-site file missing from checkout`);
+    continue;
+  }
 
   const content = readFileSync(path, 'utf8');
-
-  // Find every line that has both `rvf create` and `browser-session`.
-  // Multi-line shell quoting is fine — the args we care about land
-  // on the same line in every call site we control.
   const lines = content.split('\n');
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (!/rvf['"\s,]*create/.test(line)) continue;
-    if (!/browser-session/.test(line)) continue;
+
+    // Two invocation shapes we police:
+    //   - TS/JS array form:   'rvf', 'create' (comma-separated tokens)
+    //   - Shell / markdown:   rvf create (whitespace-separated, not
+    //                          enclosed in a single quoted string)
+    const isArrayCall = /['"]rvf['"]\s*,\s*['"]create['"]/.test(line);
+    const isShellCall = /(^|[^'"`])\brvf\s+create\b(?!\s*(failed|succeeded))/.test(line);
+    if (!isArrayCall && !isShellCall) continue;
+
+    // Skip lines whose `rvf create` only appears inside a quoted
+    // string literal (e.g. an error message like `'rvf create failed'`).
+    // The /failed|succeeded/ negative-lookahead above usually catches it,
+    // but belt-and-suspenders for other literal strings.
+    if (/['"`][^'"`]*rvf\s+create[^'"`]*['"`]/.test(line) && !isArrayCall) {
+      continue;
+    }
+
+    // Skip comments.
+    const trimmed = line.trim();
+    if (/^(#|\/\/|\*)/.test(trimmed)) continue;
 
     checked.push(`${rel}:${i + 1}`);
 
-    // Accept either flag form: `--dimension <n>` or `-d <n>`.
-    const hasFlag = /--dimension\b|(^|[^a-zA-Z0-9_])-d\b/.test(line);
-    if (!hasFlag) {
+    // Required: --dimension or -d
+    const hasDim = /--dimension\b|(^|[^a-zA-Z0-9_])-d\b/.test(line);
+    if (!hasDim) {
       failures.push(`${rel}:${i + 1}  missing --dimension on rvf create`);
+    }
+
+    // Forbidden: --kind (ruvector@0.2.25 rejects it as unknown option)
+    const hasKind = /--kind\b/.test(line);
+    if (hasKind) {
+      failures.push(`${rel}:${i + 1}  carries bogus --kind flag (unknown option in ruvector@0.2.25)`);
     }
   }
 }

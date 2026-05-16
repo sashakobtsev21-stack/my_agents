@@ -47,7 +47,7 @@ We propose to refactor `ruflo-browser` around a **session-as-skill** architectur
 
 ### 1. Session model — RVF as the session container
 
-Every browser session opened by ruflo-browser is allocated an RVF container at session start (`rvf create --kind browser-session --dimension 384 --id <session-name>`) and committed at session end (`rvf compact && rvf export`). The container holds:
+Every browser session opened by ruflo-browser is allocated an RVF container at session start (`rvf create --dimension 384 <session-name>.rvf`) and committed at session end (`rvf compact && rvf export`). The container holds:
 
 | Slot | Producer | Notes |
 |------|----------|-------|
