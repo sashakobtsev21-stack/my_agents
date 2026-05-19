@@ -37,8 +37,14 @@ on:
       # silently revert the bug-fix shape.
       - 'plugins/ruflo-knowledge-graph/**'
       - 'scripts/smoke-kg-extract-type-imports.mjs'
+      # Plugin-registry CWE-347 regression smoke (#1922) — `discovery.ts`
+      # signature verifier + the smoke fixture must stay in lockstep.
+      - 'v3/@claude-flow/cli/src/plugins/store/discovery.ts'
+      - 'v3/@claude-flow/cli/src/transfer/ipfs/client.ts'
+      - 'v3/@claude-flow/cli/scripts/publish-registry.ts'
+      - 'scripts/smoke-plugin-registry-signature.mjs'
   pull_request:
-    branches: [main]
+    branches: [main, develop]
     paths:
       - 'v3/**'
       - 'plugins/ruflo-core/scripts/witness/**'
@@ -62,6 +68,11 @@ on:
       # Knowledge-graph plugin (#2049)
       - 'plugins/ruflo-knowledge-graph/**'
       - 'scripts/smoke-kg-extract-type-imports.mjs'
+      # Plugin-registry CWE-347 regression (#1922)
+      - 'v3/@claude-flow/cli/src/plugins/store/discovery.ts'
+      - 'v3/@claude-flow/cli/src/transfer/ipfs/client.ts'
+      - 'v3/@claude-flow/cli/scripts/publish-registry.ts'
+      - 'scripts/smoke-plugin-registry-signature.mjs'
       # witness manifests / fix list — so witness-verify runs on PRs that
       # touch them (otherwise a stale per-OS manifest only fails post-merge).
       - 'verification/**'
@@ -611,6 +622,50 @@ jobs:
 
       - name: Run kg-extract type-import smoke
         run: node scripts/smoke-kg-extract-type-imports.mjs
+
+  plugin-registry-signature-smoke:
+    # Regression guard for ruvnet/ruflo#1922 (CWE-347 — improper verification
+    # of cryptographic signature). The plugin-registry signature verifier in
+    # v3/@claude-flow/cli/src/plugins/store/discovery.ts used to be a stub
+    # that returned `true` whenever the served `registryPublicKey` field
+    # started with `"ed25519"`. The call site only `console.warn`ed on
+    # failure and continued. With `requireVerification: true` (the default),
+    # a network adversary on the path to an IPFS gateway could swap the
+    # served registry and have a user install attacker-controlled plugin
+    # tarballs with filesystem+network+hooks permissions.
+    #
+    # This smoke runs three layers:
+    #   1. Static contract check on discovery.ts — must import
+    #      `verifyEd25519Signature`, must strip both signature fields before
+    #      stringifying, must pin to caller-supplied `expectedPublicKey`
+    #      (not the served `registryPublicKey`), call site must `await` +
+    #      fail-closed.
+    #   2. Crypto round-trip with real Ed25519, matching the signRegistry()
+    #      scheme in scripts/publish-registry.ts — valid signature passes,
+    #      tampered body fails, empty fields fail, swapped served key
+    #      doesn't defeat the trusted pin.
+    #   3. Call-site byte check — the `requireVerification` block must
+    #      `await` the verifier AND `return` on failure (not just warn).
+    #
+    # If a future PR reverts to prefix-matching, drops the await, or
+    # silently warns, this smoke catches it before merge.
+    name: plugin-registry signature verification smoke (#1922, CWE-347)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install root deps (for @noble/ed25519)
+        run: npm install --legacy-peer-deps --no-audit --no-fund --ignore-scripts
+
+      - name: Run plugin-registry signature smoke
+        run: node scripts/smoke-plugin-registry-signature.mjs
 
   pre-bash-hook-smoke:
     # Regression guard for ruvnet/ruflo#2017 — the `pre-bash` PreToolUse hook
