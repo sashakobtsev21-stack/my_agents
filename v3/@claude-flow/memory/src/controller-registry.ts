@@ -146,6 +146,14 @@ export interface RuntimeConfig {
    * on this injection point.
    */
   agentdb?: unknown;
+
+  /**
+   * `MemoryService` (or compatible) used to back the `nightlyLearner`
+   * controller. When provided, ADR-125 Phase 4 wraps it with
+   * `MemoryConsolidator.runAll()` instead of delegating directly to AgentDB's
+   * `NightlyLearner`. Accepts `any` to avoid a circular import.
+   */
+  memoryService?: any;
 }
 
 /**
@@ -573,7 +581,6 @@ export class ControllerRegistry extends EventEmitter {
       case 'causalRecall':
       case 'learningSystem':
       case 'explainableRecall':
-      case 'nightlyLearner':
       case 'graphTransformer':
       case 'graphAdapter':
       case 'gnnService':
@@ -583,6 +590,12 @@ export class ControllerRegistry extends EventEmitter {
       case 'rvfOptimizer':
       case 'mmrDiversityRanker':
         return this.agentdb !== null;
+
+      // ADR-125 Phase 4 — nightlyLearner is enabled when EITHER an AgentDB
+      // is present (legacy path) OR a MemoryService is registered (new path
+      // backed by MemoryConsolidator.runAll).
+      case 'nightlyLearner':
+        return this.agentdb !== null || !!this.config.memoryService;
 
       // SemanticRouter — auto-enable if agentdb available (exported since alpha.10)
       case 'semanticRouter':
@@ -821,6 +834,25 @@ export class ControllerRegistry extends EventEmitter {
       }
 
       case 'nightlyLearner': {
+        // ADR-125 Phase 4 — prefer the MemoryConsolidator when a
+        // MemoryService is registered. The consolidator's `runAll()` is the
+        // documented entry point for sweep + dedup + compact and replaces the
+        // thin delegate to AgentDB's NightlyLearner.
+        const memSvc = this.config.memoryService;
+        if (memSvc && typeof memSvc.getConsolidator === 'function') {
+          try {
+            const consolidator = await memSvc.getConsolidator();
+            return {
+              run: () => consolidator.runAll(),
+              runAll: () => consolidator.runAll(),
+              sweepExpired: () => consolidator.sweepExpired(),
+              dedup: (s?: any) => consolidator.dedup(s),
+              compactHnsw: () => consolidator.compactHnsw(),
+              source: 'memory-consolidator' as const,
+            };
+          } catch { /* fall through to AgentDB */ }
+        }
+
         if (!this.agentdb) return null;
         try {
           const agentdbModule: any = await import('agentdb');
