@@ -10,6 +10,8 @@
 [![npm downloads (ruflo)](https://img.shields.io/npm/dm/ruflo?label=ruflo%20downloads&style=for-the-badge&logo=npm&color=cb3837)](https://www.npmjs.com/package/ruflo)
 [![npm version (claude-flow)](https://img.shields.io/npm/v/claude-flow?label=claude-flow&style=for-the-badge&logo=npm&color=blue)](https://www.npmjs.com/package/claude-flow)
 [![npm downloads (claude-flow)](https://img.shields.io/npm/dm/claude-flow?label=claude-flow%20downloads&style=for-the-badge&logo=npm&color=blue)](https://www.npmjs.com/package/claude-flow)
+[![Ecosystem downloads](https://img.shields.io/badge/ecosystem%20downloads-22.2M%2B-blue?style=for-the-badge&logo=npm)](https://github.com/ruvnet/ruflo/blob/main/data/clone-data.proof.json)
+[![Git clones (14d)](https://img.shields.io/badge/git%20clones%2014d-115k-blueviolet?style=for-the-badge&logo=github)](https://github.com/ruvnet/ruflo/blob/main/data/clone-data.ledger.json)
 
 [![Star on GitHub](https://img.shields.io/github/stars/ruvnet/claude-flow?style=for-the-badge&logo=github&color=gold)](https://github.com/ruvnet/claude-flow)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
