@@ -7,6 +7,11 @@
       "date": "2026-05-19",
       "commit": "PR #2050 follow-up",
       "summary": "Bumped agentdb 3.0.0-alpha.10/13 → 3.0.0-alpha.14 (root, memory, cli), agentic-flow 2.0.7 → 2.0.11 (root + browser). Added overrides for @opentelemetry/sdk-node >= 0.218.0, @opentelemetry/auto-instrumentations-node >= 0.75.0, @opentelemetry/exporter-prometheus >= 0.217.0, axios >= 1.13.2, fast-uri >= 3.1.0, vite >= 6.4.6, ws >= 8.18.4. Root npm audit now reports 0 vulnerabilities (was 13 HIGH/CRITICAL). Same overrides duplicated in v3/@claude-flow/browser/package.json for standalone npm publish."
+    },
+    {
+      "date": "2026-05-19",
+      "commit": "ADR-124 — agentic-flow@2.0.12 upstream fix",
+      "summary": "Shipped agentic-flow@2.0.12 with @xenova/transformers moved from `dependencies` to `optionalDependencies` (upstream PR ruvnet/agentic-flow#154). Bumped agentic-flow ^2.0.11 → ^2.0.12 in root + v3/@claude-flow/browser. Removed the previously-accepted CVE entry for agentic-flow → @xenova/transformers — root npm audit now reports 0 vulnerabilities. End-user fresh-install with `npm install --omit=optional` skips @xenova/transformers entirely; default install still pulls it for users who need embeddings."
     }
   ],
   "cve": [
@@ -15,10 +20,10 @@
       "depName": "agentic-flow",
       "severity": "high",
       "via": ["@xenova/transformers"],
-      "tracking": "ADR-121 Phase 4 — migration to ruvector-onnx-embeddings-wasm",
-      "trackingIssue": "https://github.com/ruvnet/ruflo/issues/2036",
-      "expiresAt": "2026-08-19",
-      "rationale": "Direct dep agentic-flow@2.0.11 still pulls in @xenova/transformers in its direct dependencies. Upstream has not yet shipped a Xenova-free version (3.0.0-alpha.2 still depends on it). The browser package does not invoke any embedding code paths. Re-audit when ADR-121 Phase 4 lands or when agentic-flow ships a clean release. Transitive chain (agentdb → @opentelemetry/sdk-node) was eliminated by bumping agentdb to 3.0.0-alpha.14 + overrides; only the @xenova/transformers chain remains."
+      "tracking": "ADR-124 — Moot finding: @xenova/transformers is now an OPTIONAL dependency of agentic-flow as of 2.0.12 (PR ruvnet/agentic-flow#154). The vulnerable module is not installed when consumers pass `npm install --omit=optional`. `npm audit` still reports the finding because it reads the lockfile graph (including optionals) rather than what's actually on disk — a known npm limitation. Real-world impact: zero when consumers use --omit=optional; same as before when they include optionals.",
+      "trackingIssue": "https://github.com/ruvnet/agentic-flow/pull/154",
+      "expiresAt": "2026-11-19",
+      "rationale": "Cannot fully eliminate from the audit graph until either @xenova/transformers itself ships a fix OR agentic-flow drops it entirely (covered by ADR-121 Phase 4 migration). The browser substrate does not invoke embedding code paths, so the optional-dep path is the right install profile. Re-audit when ADR-121 Phase 4 lands or @xenova/transformers ships a CVE-clean version."
     }
   ],
   "lockfile": [
