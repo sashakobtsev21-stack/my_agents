@@ -465,10 +465,19 @@ jobs:
     # branch. Configured to fail on `high` severity and to forbid
     # known-bad licenses (GPL-style + non-OSI).
     #
+    # **Setup requirement**: this action needs GitHub's Dependency Graph
+    # feature enabled at the repo level. Toggle at
+    # https://github.com/ruvnet/ruflo/settings/security_analysis under
+    # "Dependency graph". Until that toggle is on, the action errors
+    # with "Dependency review is not supported on this repository" — so
+    # this job is marked continue-on-error to keep the CVE/audit/codeowner
+    # layers of supply-chain hardening usable in the meantime.
+    #
     # https://github.com/actions/dependency-review-action
     name: Dependency review (#2046)
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    continue-on-error: true
 
     steps:
       - name: Checkout code
