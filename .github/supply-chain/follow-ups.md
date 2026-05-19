@@ -20,29 +20,37 @@ Open issues that the supply-chain audit + recent CI hardening surfaced but requi
 
 ## #2048 — `agentic-flow/reasoningbank` ESM import fails on Windows (onnxruntime native binding)
 
-**Status**: HIGH-UX-impact, open. Tracked at https://github.com/ruvnet/ruflo/issues/2048.
+**Status**: FIXED upstream + downstream integrated. Tracked at https://github.com/ruvnet/ruflo/issues/2048.
 
-**Root cause**: `import('agentic-flow/reasoningbank')` triggers an eager load of `onnxruntime-node`'s native binding (`onnxruntime_binding.node`), which fails on Windows with "OS cannot run %1" even when the user has VCRedist + a working CJS `require('onnxruntime-node')` from the same directory. The static import in some part of the reasoningbank module graph forces the binding load before any user code runs.
+**Root cause**: `import('agentic-flow/reasoningbank')` triggered an eager load of `onnxruntime-node`'s native binding (`onnxruntime_binding.node`), which fails on Windows with "OS cannot run %1" even when the user has VCRedist installed. The chain was `reasoningbank/index.ts → core/distill.ts → router/router.ts → onnx-local.ts (top-level await)`. The top-level `await import('onnxruntime-node')` in `onnx-local.ts` forced the binding load at module-evaluation time, before any user code ran.
 
-**Pattern is identical to ADR-124** — which moved `@xenova/transformers` from agentic-flow's `dependencies` to `optionalDependencies` and converted the one eager static import to dynamic. The same shape of fix is needed for `onnxruntime-node` in `agentic-flow/src/reasoningbank/**`.
+**Upstream fix** (PR ruvnet/agentic-flow#155, shipped as agentic-flow@2.0.13):
 
-**Right fix** (upstream patch in `ruvnet/agentic-flow`):
+1. ✅ `src/router/providers/onnx-local.ts` — moved the top-level `await import('onnxruntime-node')` into a lazy `loadOrt()` helper called from `initializeSession()`. The binding now loads only when an explicit inference call happens, never at module import time.
+2. ✅ `src/router/providers/onnx-local-optimized.ts` — removed the eager top-level try/catch around `await import('onnxruntime-node')`. It was dead code (the class extends ONNXLocalProvider and never used `ort` directly), but it was still triggering the binding at import time.
+3. ✅ `onnxruntime-node` was already in `optionalDependencies` per 2.0.12 — no `package.json` change needed for this fix.
 
-1. Audit `agentic-flow/src/reasoningbank/**` for any static `import { ... } from 'onnxruntime-node'`. The 6 known callers in `src/embeddings/**`, `src/core/**`, `src/services/**`, `src/router/providers/onnx.ts`, and `src/utils/model-cache.ts` mostly use dynamic import already (ADR-124 left the pattern in place). The reasoningbank-specific surface needs the same audit.
-2. Move `onnxruntime-node` from `dependencies` to `optionalDependencies` in `agentic-flow/package.json` (it's already in `optionalDependencies` per 2.0.12 — confirm reasoningbank doesn't transitively force-load it).
-3. Wrap each remaining static binding in try/catch with a clear `npm install onnxruntime-node` warning + a hash-based fallback (the same fallback path the `embeddings.ts` patch in ADR-124 ships).
-4. Cut `agentic-flow@2.0.13` (patch) and bump `v3/@claude-flow/browser` + root.
+**Downstream integration** (this PR):
 
-**Interim workaround for users**:
+- Bumped `agentic-flow` ^2.0.12 → ^2.0.13 in root `package.json` and `v3/@claude-flow/browser/package.json`.
+- Regenerated root `package-lock.json`, `v3/@claude-flow/browser/package-lock.json` (npm `--no-workspaces`), and `v3/pnpm-lock.yaml`.
+
+**Acceptance test** (verified locally on 2.0.13):
 ```bash
-npm install ruflo --omit=optional       # Windows: skip the native binding entirely
-# or
-npm install ruflo && set ONNXRUNTIME_DISABLE=1   # disable at runtime
+# Full install — binding present, but never loaded at module import
+npm install agentic-flow@2.0.13
+node -e "import('agentic-flow/reasoningbank').then(()=>console.log('OK'))"  # → OK
+node -e "import('agentic-flow/router').then(()=>console.log('OK'))"  # → OK
+
+# Simulated Windows: --omit=optional skips the binding entirely
+npm install agentic-flow@2.0.13 --omit=optional
+node -e "import('agentic-flow/router').then(()=>console.log('OK'))"  # → OK (was: FAIL)
 ```
 
-**CI guard** to add after the upstream patch lands:
-- Windows runner smoke job that does `node -e "import('agentic-flow/reasoningbank').then(() => console.log('OK'))"` under `--omit=optional` and asserts it loads without the binding present.
-- That smoke goes in the supply-chain audit suite alongside the other 5 layers.
+**Follow-up CI guard** (now possible):
+- Add a Windows-runner smoke job that does `node -e "import('agentic-flow/reasoningbank').then(()=>console.log('OK'))"` under `--omit=optional` to lock the lazy-load contract in place. Add to `v3-ci.yml` alongside the existing supply-chain audit jobs.
+
+**Related**: `--omit=optional` surfaced a separate import (agentdb static import via reasoningbank graph). That's NOT #2048 (which was specifically the Windows native binding crash with the binding present). Tracking separately if it becomes user-facing.
 
 ## #2049 — `kg-extract` over-counts type imports + `kg-traverse` mis-wired
 

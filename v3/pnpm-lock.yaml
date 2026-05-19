@@ -57,8 +57,8 @@ importers:
         specifier: ^0.27.0
         version: 0.27.0
       agentic-flow:
-        specifier: ^2.0.12
-        version: 2.0.12(@types/node@20.19.27)
+        specifier: ^2.0.13
+        version: 2.0.13(@types/node@20.19.27)
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -6753,63 +6753,6 @@ packages:
       - utf-8-validate
     dev: false
 
-  /agentic-flow@2.0.12(@types/node@20.19.27):
-    resolution: {integrity: sha512-F0b9TyT77hbec2A86+AiWa+4qctof5t5qqfbwbunqi7TWLwXOtE8lzI1TdpPBkzLKrLcGQXyeuwAwe18Hs+dYA==}
-    engines: {node: '>=18.0.0'}
-    hasBin: true
-    requiresBuild: true
-    dependencies:
-      '@anthropic-ai/claude-agent-sdk': 0.1.76(zod@3.25.76)
-      '@anthropic-ai/sdk': 0.65.0(zod@3.25.76)
-      '@google/genai': 1.44.0(@modelcontextprotocol/sdk@1.27.1)
-      '@ruvector/core': 0.1.30
-      '@ruvector/edge-full': 0.1.0
-      '@ruvector/router': 0.1.30
-      '@ruvector/ruvllm': 0.2.4
-      '@ruvector/tiny-dancer': 0.1.18
-      '@supabase/supabase-js': 2.89.0
-      axios: 1.13.2
-      dotenv: 16.6.1
-      express: 5.2.1
-      fastmcp: 3.26.7
-      glob: 13.0.0
-      gun: 0.2020.1241
-      http-proxy-middleware: 3.0.5
-      ruvector: 0.1.100(zod@3.25.76)
-      ruvector-onnx-embeddings-wasm: 0.1.2
-      tiktoken: 1.0.22
-      ulid: 3.0.2
-      ws: 8.20.0
-      yaml: 2.8.2
-      zod: 3.25.76
-    optionalDependencies:
-      '@rollup/rollup-darwin-arm64': 4.60.3
-      '@ruvector/attention': 0.1.32
-      '@ruvector/sona': 0.1.6
-      '@xenova/transformers': 2.17.2
-      agentdb: 3.0.0-alpha.14(@types/node@20.19.27)(zod@3.25.76)
-      better-sqlite3: 11.10.0
-      onnxruntime-node: 1.24.3
-      sharp: 0.32.6
-      sql.js: 1.14.1
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - '@modelcontextprotocol/sdk'
-      - '@types/node'
-      - '@valibot/to-json-schema'
-      - arktype
-      - bare-abort-controller
-      - bare-buffer
-      - bufferutil
-      - debug
-      - effect
-      - jose
-      - react-native-b4a
-      - supports-color
-      - sury
-      - utf-8-validate
-    dev: false
-
   /agentic-flow@2.0.12-fix.8(@types/node@20.19.27):
     resolution: {integrity: sha512-pp36lAT7lXF9cyXA7KqUBe8pg7nUrGrhb3hplzTJ1V2B6y7n+jBG8/wH1gTNWk+i1+Zzzgl2zfngmY9u2qEOFg==}
     engines: {node: '>=18.0.0'}
@@ -6865,6 +6808,63 @@ packages:
       - supports-color
       - sury
       - utf-8-validate
+
+  /agentic-flow@2.0.13(@types/node@20.19.27):
+    resolution: {integrity: sha512-VN3OVYUweVtCE4ARzxwf0Qf22Z3+6dgYWukKvnE5qlBIa5FEPjD5rRN4Fz5mecQ+88+0fnFgJ/00lb6MVhWsNQ==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+    requiresBuild: true
+    dependencies:
+      '@anthropic-ai/claude-agent-sdk': 0.1.76(zod@3.25.76)
+      '@anthropic-ai/sdk': 0.65.0(zod@3.25.76)
+      '@google/genai': 1.44.0(@modelcontextprotocol/sdk@1.27.1)
+      '@ruvector/core': 0.1.30
+      '@ruvector/edge-full': 0.1.0
+      '@ruvector/router': 0.1.30
+      '@ruvector/ruvllm': 0.2.4
+      '@ruvector/tiny-dancer': 0.1.18
+      '@supabase/supabase-js': 2.89.0
+      axios: 1.13.2
+      dotenv: 16.6.1
+      express: 5.2.1
+      fastmcp: 3.26.7
+      glob: 13.0.0
+      gun: 0.2020.1241
+      http-proxy-middleware: 3.0.5
+      ruvector: 0.1.100(zod@3.25.76)
+      ruvector-onnx-embeddings-wasm: 0.1.2
+      tiktoken: 1.0.22
+      ulid: 3.0.2
+      ws: 8.20.0
+      yaml: 2.8.2
+      zod: 3.25.76
+    optionalDependencies:
+      '@rollup/rollup-darwin-arm64': 4.60.3
+      '@ruvector/attention': 0.1.32
+      '@ruvector/sona': 0.1.6
+      '@xenova/transformers': 2.17.2
+      agentdb: 3.0.0-alpha.14(@types/node@20.19.27)(zod@3.25.76)
+      better-sqlite3: 11.10.0
+      onnxruntime-node: 1.24.3
+      sharp: 0.32.6
+      sql.js: 1.14.1
+    transitivePeerDependencies:
+      - '@cfworker/json-schema'
+      - '@modelcontextprotocol/sdk'
+      - '@types/node'
+      - '@valibot/to-json-schema'
+      - arktype
+      - bare-abort-controller
+      - bare-buffer
+      - bufferutil
+      - debug
+      - effect
+      - jose
+      - react-native-b4a
+      - supports-color
+      - sury
+      - utf-8-validate
+    dev: false
 
   /agentic-flow@2.0.3(@types/node@20.19.27)(marked@11.2.0):
     resolution: {integrity: sha512-yqrcwWG+RztVKx4w9bvIiAymXEZn93GiTsF6qhYv2gOTQyhIl+VKwY9MLuQKz+Nr5wibTJ4EPm1Cib43usvNNA==}

@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "agent-browser": "^0.27.0",
-    "agentic-flow": "^2.0.12",
+    "agentic-flow": "^2.0.13",
     "zod": "^3.22.4"
   },
   "overrides": {

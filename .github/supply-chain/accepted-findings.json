@@ -12,6 +12,11 @@
       "date": "2026-05-19",
       "commit": "ADR-124 — agentic-flow@2.0.12 upstream fix",
       "summary": "Shipped agentic-flow@2.0.12 with @xenova/transformers moved from `dependencies` to `optionalDependencies` (upstream PR ruvnet/agentic-flow#154). Bumped agentic-flow ^2.0.11 → ^2.0.12 in root + v3/@claude-flow/browser. Removed the previously-accepted CVE entry for agentic-flow → @xenova/transformers — root npm audit now reports 0 vulnerabilities. End-user fresh-install with `npm install --omit=optional` skips @xenova/transformers entirely; default install still pulls it for users who need embeddings."
+    },
+    {
+      "date": "2026-05-19",
+      "commit": "ruflo#2048 — agentic-flow@2.0.13 lazy onnxruntime-node load",
+      "summary": "Shipped agentic-flow@2.0.13 to fix ruflo#2048 — `import('agentic-flow/reasoningbank')` on Windows crashed because router/providers/onnx-local.ts used a top-level `await import('onnxruntime-node')` which forced the native binding (`onnxruntime_binding.node`) to load at module import time. On Windows this throws \"OS cannot run %1\" even when VCRedist is installed. Upstream PR ruvnet/agentic-flow#155 moves the import into a lazy `loadOrt()` helper called from `initializeSession()`, so `reasoningbank` consumers never trigger the binding unless they actually run local ONNX inference. Bumped agentic-flow ^2.0.12 → ^2.0.13 in root + v3/@claude-flow/browser. Acceptance test: `node -e \"import('agentic-flow/reasoningbank').then(()=>console.log('OK'))\"` now succeeds under both default install and `--omit=optional` (binding absent)."
     }
   ],
   "cve": [
