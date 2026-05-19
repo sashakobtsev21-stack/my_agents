@@ -22,6 +22,9 @@ on:
       # scripts, agent-facing recipes all guarded by the same smoke.
       - 'v3/@claude-flow/cli/src/mcp-tools/browser-session-tools.ts'
       - 'plugins/ruflo-browser/**'
+      # ruflo-graph-intelligence (#2044, ADR-123) — outside v3 workspace,
+      # has its own lockfile + tests; needs to be CI-guarded on every change.
+      - 'plugins/ruflo-graph-intelligence/**'
   pull_request:
     branches: [main]
     paths:
@@ -35,6 +38,8 @@ on:
       # ruflo-browser rvf create flag (#2015)
       - 'v3/@claude-flow/cli/src/mcp-tools/browser-session-tools.ts'
       - 'plugins/ruflo-browser/**'
+      # ruflo-graph-intelligence (#2044, ADR-123)
+      - 'plugins/ruflo-graph-intelligence/**'
       # witness manifests / fix list — so witness-verify runs on PRs that
       # touch them (otherwise a stale per-OS manifest only fails post-merge).
       - 'verification/**'
@@ -358,6 +363,41 @@ jobs:
 
       - name: Static scan of every rvf create call site
         run: node scripts/smoke-browser-rvf-create-flags.mjs
+
+  graph-intelligence-build-smoke:
+    # Regression guard for #2044 / ADR-123 — the ruflo-graph-intelligence
+    # plugin lives outside the v3 pnpm workspace (it has its own
+    # package-lock.json) so it does not pick up the workspace's
+    # frozen-lockfile / -r build path. This job installs + builds + tests
+    # the plugin in isolation so the eleven sublinear wedges are verified
+    # on every push and PR.
+    name: ruflo-graph-intelligence build + test smoke (#2044, ADR-123)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install plugin dependencies (npm — plugin is outside v3 workspace)
+        working-directory: plugins/ruflo-graph-intelligence
+        run: npm ci --no-audit --no-fund --legacy-peer-deps
+
+      - name: Type-check
+        working-directory: plugins/ruflo-graph-intelligence
+        run: npx tsc --noEmit
+
+      - name: Build
+        working-directory: plugins/ruflo-graph-intelligence
+        run: npx tsc
+
+      - name: Run vitest
+        working-directory: plugins/ruflo-graph-intelligence
+        run: npx vitest run
 
   witness-marker-drift-smoke:
     # Regression guard for ruvnet/ruflo#2021 — the slow witness-verify
