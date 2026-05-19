@@ -481,16 +481,10 @@ jobs:
           comment-summary-in-pr: on-failure
           # Block licenses we cannot ship:
           deny-licenses: AGPL-3.0, GPL-3.0, SSPL-1.0
-          # Block known-bad scope: dependency-confusion targets, supply-
-          # chain-attack squatters, etc. Update via PR review.
-          deny-packages: |
-            event-stream
-            flatmap-stream
-            ua-parser-js@0.7.29
-            ua-parser-js@0.8.0
-            ua-parser-js@1.0.0
-            colors@1.4.1
-            faker@6.6.6
+          # Block known-compromised package versions via pURL (package-url)
+          # format — this is the action's required input shape per its docs.
+          # https://github.com/actions/dependency-review-action#configuration-options
+          deny-packages: pkg:npm/event-stream@3.3.6, pkg:npm/flatmap-stream, pkg:npm/ua-parser-js@0.7.29, pkg:npm/ua-parser-js@0.8.0, pkg:npm/ua-parser-js@1.0.0, pkg:npm/colors@1.4.1, pkg:npm/faker@6.6.6
 
   witness-marker-drift-smoke:
     # Regression guard for ruvnet/ruflo#2021 — the slow witness-verify
