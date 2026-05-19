@@ -337,11 +337,20 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Build CLI (so the compiled dist is scanned alongside src)
+        # The CLI uses `workspace:*` deps which only pnpm understands — npm
+        # install errors with EUNSUPPORTEDPROTOCOL. Install via pnpm in the
+        # workspace root, then run the CLI's own build script.
         run: |
-          cd v3/@claude-flow/cli
-          npm install --no-audit --no-fund --legacy-peer-deps
-          npm run build
+          cd v3
+          pnpm install --frozen-lockfile --filter @claude-flow/cli...
+          cd @claude-flow/cli
+          pnpm run build
 
       - name: Static scan of every rvf create call site
         run: node scripts/smoke-browser-rvf-create-flags.mjs
