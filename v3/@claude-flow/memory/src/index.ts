@@ -193,10 +193,11 @@ export type {
   SemanticQuery,
   HybridQuery,
 } from './hybrid-backend.js';
-export { RvfBackend } from './rvf-backend.js';
-export type { RvfBackendConfig } from './rvf-backend.js';
-export { HnswLite, cosineSimilarity } from './hnsw-lite.js';
-export type { HnswSearchResult } from './hnsw-lite.js';
+// `RvfBackend` and `HnswLite` are intentionally NOT re-exported from the top level
+// per ADR-125 Phase 1. They remain internal — RvfBackend is reachable via
+// `createDatabase({ provider: 'rvf' })`, and HnswLite is used inside RvfBackend.
+// Importers that need them directly should import the explicit module path.
+export { cosineSimilarity } from './hnsw-lite.js';
 export { HNSWIndex } from './hnsw-index.js';
 export { CacheManager, TieredCacheManager } from './cache-manager.js';
 export { QueryBuilder, query, QueryTemplates } from './query-builder.js';
@@ -252,15 +253,22 @@ export interface UnifiedMemoryServiceConfig extends Partial<AgentDBAdapterConfig
 }
 
 /**
- * Unified Memory Service
+ * Memory Service implementation (legacy class name).
  *
- * High-level interface for the V3 memory system that provides:
+ * @deprecated Use {@link MemoryService} — the canonical name introduced by
+ *   ADR-125 Phase 1. `UnifiedMemoryService` is preserved as an alias and will
+ *   continue to work through `@claude-flow/memory@3.0.0-rc`. Both names refer
+ *   to the same class.
+ *
+ * High-level interface that provides:
  * - Simple API for common operations
  * - Automatic embedding generation
  * - Cross-agent memory sharing
  * - SONA integration for learning
  * - Event-driven notifications
  * - Performance monitoring
+ *
+ * @see {@link MemoryService} for the canonical alias.
  */
 export class UnifiedMemoryService extends EventEmitter implements IMemoryBackend {
   private adapter: AgentDBAdapter;
@@ -530,6 +538,40 @@ export class UnifiedMemoryService extends EventEmitter implements IMemoryBackend
     return this.initialized;
   }
 }
+
+// ===== Canonical Alias (ADR-125 Phase 1) =====
+
+/**
+ * Canonical memory service entry point (ADR-125).
+ *
+ * `MemoryService` is the preferred name as of `@claude-flow/memory@3.0.0-alpha.18`.
+ * It is an alias of {@link UnifiedMemoryService}; both names refer to the same
+ * class so existing callers continue working unchanged.
+ *
+ * @example
+ * ```typescript
+ * import { MemoryService } from '@claude-flow/memory';
+ *
+ * const memory = new MemoryService({ dimensions: 1536 });
+ * await memory.initialize();
+ * ```
+ */
+export const MemoryService = UnifiedMemoryService;
+
+/**
+ * @public
+ * @typedef MemoryService
+ *
+ * Type alias matching the canonical {@link MemoryService} runtime export so that
+ * `import type { MemoryService } from '@claude-flow/memory'` works alongside the
+ * value import.
+ */
+export type MemoryService = UnifiedMemoryService;
+
+/**
+ * Config type alias for {@link MemoryService}.
+ */
+export type MemoryServiceConfig = UnifiedMemoryServiceConfig;
 
 // ===== Factory Functions =====
 
