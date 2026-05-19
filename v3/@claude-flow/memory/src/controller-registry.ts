@@ -601,8 +601,13 @@ export class ControllerRegistry extends EventEmitter {
       case 'semanticRouter':
         return this.agentdb !== null;
 
-      // Optional controllers
+      // ADR-125 Phase 5 — hybridSearch auto-enables when a MemoryService is
+      // registered. Replaces the prior "placeholder, require explicit enable"
+      // posture.
       case 'hybridSearch':
+        return !!this.config.memoryService;
+
+      // Optional controllers
       case 'agentMemoryScope':
       case 'sonaTrajectory':
       case 'federatedSession':
@@ -705,9 +710,76 @@ export class ControllerRegistry extends EventEmitter {
         return cache;
       }
 
-      case 'hybridSearch':
-        // BM25 hybrid search — placeholder for future implementation
-        return null;
+      case 'hybridSearch': {
+        // ADR-125 Phase 5 — real RRF + MMR hybrid search.
+        // Calls semanticSearch() (which degrades gracefully when embedder is
+        // unavailable) AND searchKeyword() independently, fuses via RRF, then
+        // diversifies via MMR (lambda=0.7).
+        const memSvc = this.config.memoryService;
+        if (!memSvc) return null;
+        const adapter = typeof memSvc.getAdapter === 'function' ? memSvc.getAdapter() : null;
+        if (!adapter) return null;
+
+        const { applyRRF, applyMMR } = await import('./smart-retrieval.js');
+
+        return {
+          /**
+           * Run a fused hybrid search.
+           * @param query        Free-form query string.
+           * @param opts.limit   Final result count (default 10).
+           * @param opts.fanOutK Per-arm fanout before fusion (default = limit * 3).
+           * @param opts.mmrLambda MMR relevance/diversity balance (default 0.7).
+           */
+          search: async (
+            query: string,
+            opts: { limit?: number; fanOutK?: number; mmrLambda?: number } = {}
+          ) => {
+            const limit = opts.limit ?? 10;
+            const fanOutK = opts.fanOutK ?? Math.max(limit * 3, 20);
+            const mmrLambda = opts.mmrLambda ?? 0.7;
+
+            // Dense arm — may internally fall back to keyword if embedder is
+            // missing, but that's still a valid signal to fuse.
+            let dense: any[] = [];
+            try {
+              dense = await adapter.semanticSearch(query, fanOutK);
+            } catch {
+              dense = [];
+            }
+
+            // Sparse arm — FTS5 / keyword search.
+            let sparse: any[] = [];
+            try {
+              sparse = await adapter.searchKeyword(query, { k: fanOutK });
+            } catch {
+              sparse = [];
+            }
+
+            // Adapt SearchResult[] → SearchCandidate[] expected by RRF
+            const toCands = (results: any[]) =>
+              results.map((r: any) => ({
+                id: r.entry.id,
+                key: r.entry.key,
+                content: r.entry.content,
+                namespace: r.entry.namespace,
+                metadata: r.entry.metadata,
+                createdAt: r.entry.createdAt,
+                updatedAt: r.entry.updatedAt,
+                score: r.score,
+                _entry: r.entry,
+              }));
+
+            const fused = applyRRF([toCands(dense), toCands(sparse)], 60);
+            const diverse = applyMMR(fused, mmrLambda, limit);
+
+            return diverse.map((s: any) => ({
+              entry: s.candidate._entry,
+              score: s.score,
+            }));
+          },
+          source: 'hybrid-rrf-mmr' as const,
+        };
+      }
 
       case 'agentMemoryScope':
         // Agent memory scope — placeholder, activated when explicitly enabled
