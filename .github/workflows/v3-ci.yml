@@ -477,13 +477,19 @@ jobs:
     name: Dependency review (#2046)
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    continue-on-error: true
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # `continue-on-error` is at the STEP (not job) level so the action's
+      # "Dependency review is not supported on this repository" error from
+      # the off-by-default Dependency Graph feature doesn't show as a PR
+      # check failure. Once the repo owner toggles Dependency Graph on at
+      # Settings → Security and analysis, remove this line to make the
+      # action gating again.
       - name: Dependency Review
+        continue-on-error: true
         uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
