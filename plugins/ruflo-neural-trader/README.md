@@ -192,18 +192,29 @@ neural-trader uses Rust/NAPI bindings for zero-overhead performance:
 
 ## Namespace coordination
 
-This plugin owns four AgentDB namespaces (kebab-case, follows the convention from [ruflo-agentdb ADR-0001 §"Namespace convention"](../ruflo-agentdb/docs/adrs/0001-agentdb-optimization.md)):
+This plugin owns five AgentDB namespaces (kebab-case, follows the convention from [ruflo-agentdb ADR-0001 §"Namespace convention"](../ruflo-agentdb/docs/adrs/0001-agentdb-optimization.md)). The canonical five-namespace set is defined by [ADR-126](../../v3/docs/adr/ADR-126-neural-trader-substrate-integration.md) Phase 1:
 
 | Namespace | Purpose |
 |-----------|---------|
-| `trading-strategies` | Strategy definitions (loaded by `trader-backtest`, `trader-signal`) |
-| `trading-backtests` | Backtest results indexed by strategy + timestamp |
-| `trading-risk` | Risk metrics per portfolio |
-| `trading-analysis` | Regime detection + market analysis history |
+| `trading-strategies` | Strategy definitions, parameters, regime-condition mappings (loaded by `trader-backtest`, `trader-signal`) |
+| `trading-backtests` | Historical backtest results indexed by strategy + timestamp (long-lived; signed in ADR-126 Phase 4) |
+| `trading-risk` | Risk model state, VaR/CVaR snapshots, circuit-breaker triggers |
+| `trading-analysis` | Market-analyst output — regime classifications, technical-indicator summaries, model-training results |
+| `trading-signals` | Short-lived signal events (intraday; TTL applied in ADR-126 Phase 2) |
 
 Note: the namespace prefix is `trading-` (the actual intent) rather than `neural-trader-` (the plugin stem). This is a deliberate ergonomic choice — `trading` is the load-bearing concern downstream consumers reason about. Reserved namespaces (`pattern`, `claude-memories`, `default`) MUST NOT be shadowed.
 
 All access via `memory_*` (namespace-routed). No `agentdb_hierarchical-*` or `agentdb_pattern-store` with namespace arguments — the plugin uses the correct routing throughout.
+
+### Memory lifecycle (ADR-125 integration)
+
+This plugin relies on `@claude-flow/memory@3.0.0-alpha.18` for the lifecycle guarantees defined in [ADR-125](../../v3/docs/adr/ADR-125-memory-consolidation.md) and wired by [ADR-126 Phase 2](../../v3/docs/adr/ADR-126-neural-trader-substrate-integration.md):
+
+- **Warm HNSW restart** — `@claude-flow/memory@3.0.0-alpha.18` (ADR-125 Phase 3) snapshots the HNSW index to a `.hnsw` sidecar file, so neural-trader process restarts no longer rebuild the strategy / regime similarity index from scratch. No plugin-side change is required to benefit; routing is automatic through `MemoryService.search()`.
+- **Hybrid retrieval (RRF + MMR)** — `market-analyst` regime-similarity queries automatically become hybrid (dense ANN + sparse FTS5 keyword, reciprocal-rank-fused and MMR-diversified) via the same `MemoryService.search()` path (ADR-125 Phase 5). When the embedding generator is unavailable, retrieval gracefully degrades to keyword-only rather than throwing.
+- **Signal TTL (24h)** — `trader-signal` writes to `trading-signals` with `expiresAt: now + 24h`. The `MemoryConsolidator.sweepExpired()` pass (ADR-125 Phase 4) removes them from all indexes — including HNSW — when they expire. Long-running ruflo sessions no longer accumulate stale intraday signals.
+- **Backtest dedup** — `trader-backtest` proactively deletes prior entries for the same `(strategyId, paramsHash)` before storing a fresh one. The same outcome is also produced asynchronously by the `MemoryConsolidator.dedup('keep-newest')` background pass that runs every 6 hours.
+- **Consolidator schedule** — the consolidator runs every 6 hours by default (`sweepExpired` + `dedup` + `compactHnsw`), and also on `MemoryService.close()`. No plugin-side wiring is required.
 
 ## Verification
 
