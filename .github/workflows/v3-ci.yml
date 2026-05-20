@@ -52,6 +52,15 @@ on:
       - 'plugins/ruflo-neural-trader/skills/trader-backtest/**'
       - 'plugins/ruflo-neural-trader/skills/trader-cloud-backtest/**'
       - 'scripts/smoke-neural-trader-backtest-signing.mjs'
+      # Neural-trader SendMessage risk-gate pipeline (#2068, ADR-126 Phase 5) —
+      # structural gate: trading-strategist refuses --broker without an
+      # explicit risk-analyst RiskDecision approval.
+      - 'plugins/ruflo-neural-trader/src/pipeline-messages.ts'
+      - 'plugins/ruflo-neural-trader/agents/market-analyst.md'
+      - 'plugins/ruflo-neural-trader/agents/trading-strategist.md'
+      - 'plugins/ruflo-neural-trader/agents/risk-analyst.md'
+      - 'plugins/ruflo-neural-trader/agents/backtest-engineer.md'
+      - 'scripts/smoke-neural-trader-pipeline.mjs'
       # Plugin-registry CWE-347 regression smoke (#1922) — `discovery.ts`
       # signature verifier + the smoke fixture must stay in lockstep.
       - 'v3/@claude-flow/cli/src/plugins/store/discovery.ts'
@@ -94,6 +103,13 @@ on:
       - 'plugins/ruflo-neural-trader/skills/trader-backtest/**'
       - 'plugins/ruflo-neural-trader/skills/trader-cloud-backtest/**'
       - 'scripts/smoke-neural-trader-backtest-signing.mjs'
+      # Neural-trader SendMessage risk-gate pipeline (#2068, ADR-126 Phase 5)
+      - 'plugins/ruflo-neural-trader/src/pipeline-messages.ts'
+      - 'plugins/ruflo-neural-trader/agents/market-analyst.md'
+      - 'plugins/ruflo-neural-trader/agents/trading-strategist.md'
+      - 'plugins/ruflo-neural-trader/agents/risk-analyst.md'
+      - 'plugins/ruflo-neural-trader/agents/backtest-engineer.md'
+      - 'scripts/smoke-neural-trader-pipeline.mjs'
       # Plugin-registry CWE-347 regression (#1922)
       - 'v3/@claude-flow/cli/src/plugins/store/discovery.ts'
       - 'v3/@claude-flow/cli/src/transfer/ipfs/client.ts'
@@ -741,6 +757,60 @@ jobs:
 
       - name: Run backtest signing smoke
         run: node scripts/smoke-neural-trader-backtest-signing.mjs
+
+  neural-trader-pipeline-smoke:
+    # Regression guard for ruvnet/ruflo#2068 — ADR-126 Phase 5.
+    #
+    # Phase 5 refactors the four neural-trader agents (market-analyst,
+    # trading-strategist, risk-analyst, backtest-engineer) into a typed
+    # SendMessage pipeline with risk-analyst as a structural BLOCKING
+    # GATE. The live broker call (`npx neural-trader --broker <name>`)
+    # cannot fire without an explicit RiskDecision approval event from
+    # risk-analyst for the proposal's signalId.
+    #
+    # Six load-bearing artifacts must stay in lockstep:
+    #   1. `src/pipeline-messages.ts` — the three TypeScript message
+    #      schemas (RegimeVerdict, SignalProposal, RiskDecision) +
+    #      PipelineMessage discriminated union.
+    #   2-5. `agents/{market-analyst,trading-strategist,risk-analyst,backtest-engineer}.md`
+    #      — frontmatter `name:` fields + Comms protocol sections with
+    #      the correct upstream/downstream wiring.
+    #   6. `trading-strategist.md` — the structural risk-gate guard at
+    #      step 5 of the Strategy Development Workflow that refuses
+    #      `--broker` calls without a risk-analyst approval.
+    #
+    # The smoke runs four layers:
+    #   [1/4] AGENT FRONTMATTER — each .md declares `name: <agent>` so
+    #         the agent is SendMessage-addressable.
+    #   [2/4] COMMS PROTOCOL — each .md has a "Comms protocol" section
+    #         with the correct upstream/downstream references; backtest-
+    #         engineer documents its orthogonal-lane status.
+    #   [3/4] STRUCTURAL RISK-GATE — trading-strategist.md contains
+    #         explicit refusal logic: mentions `--broker`, requires
+    #         RiskDecision approval, declares REFUSAL, emits [ERROR],
+    #         marks the gate as NON-NEGOTIABLE/structural.
+    #   [4/4] BEHAVIORAL MOCK — drives a mock pipeline through a guard
+    #         function that mirrors the trading-strategist guard. Happy
+    #         path approves and executes; missing approval / rejected
+    #         decision / mismatched signalId are ALL refused.
+    #
+    # If a future PR drops the guard, removes a `name` field, breaks
+    # the pipeline-messages schema, or rewrites a comms section without
+    # the upstream/downstream wiring, this smoke catches it before merge.
+    name: neural-trader pipeline risk-gate smoke (#2068, ADR-126 Phase 5)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run pipeline risk-gate smoke
+        run: node scripts/smoke-neural-trader-pipeline.mjs
 
   plugin-registry-signature-smoke:
     # Regression guard for ruvnet/ruflo#1922 (CWE-347 — improper verification
