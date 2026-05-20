@@ -70,14 +70,14 @@ There are **two different install paths** with very different surface areas. Pic
 # Install core + any plugins you need
 /plugin install ruflo-core@ruflo
 /plugin install ruflo-swarm@ruflo
-/plugin install ruflo-autopilot@ruflo
-/plugin install ruflo-federation@ruflo
+/plugin install ruflo-rag-memory@ruflo
+/plugin install ruflo-neural-trader@ruflo
 ```
 
 This adds slash commands and agent definitions only. The Ruflo MCP server is NOT registered, so `memory_store`, `swarm_init`, `agent_spawn`, etc. won't be callable from Claude. For the full loop, use Path B below.
 
 <details>
-<summary><strong>🔌 All 32 plugins</strong></summary>
+<summary><strong>🔌 All 33 plugins</strong></summary>
 
 #### Core & Orchestration
 
@@ -105,6 +105,7 @@ This adds slash commands and agent definitions only. The Ruflo MCP server is NOT
 | Plugin | What it does |
 |--------|-------------|
 | [**ruflo-intelligence**](plugins/ruflo-intelligence/README.md) | Agents learn from past successes and get smarter |
+| [**ruflo-graph-intelligence**](plugins/ruflo-graph-intelligence/) | Sublinear graph reasoning — PageRank, delta updates, complexity-aware execution (ADR-123) |
 | [**ruflo-daa**](plugins/ruflo-daa/README.md) | Dynamic agent behavior and cognitive patterns |
 | [**ruflo-ruvllm**](plugins/ruflo-ruvllm/README.md) | Run local LLMs (Ollama, etc.) with smart routing |
 | [**ruflo-goals**](plugins/ruflo-goals/README.md) | Break big goals into plans and track progress |
