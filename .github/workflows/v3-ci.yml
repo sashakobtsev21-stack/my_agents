@@ -44,6 +44,14 @@ on:
       - 'plugins/ruflo-neural-trader/src/sublinear-adapter.mjs'
       - 'plugins/ruflo-neural-trader/skills/trader-portfolio-cg/**'
       - 'scripts/smoke-neural-trader-portfolio-cg.mjs'
+      # Neural-trader backtest signing (#2068, ADR-126 Phase 4) — Ed25519
+      # tamper-evidence for paper→live promotion; verifier MUST pin to a
+      # trusted key (CWE-347 / #1922 pattern).
+      - 'plugins/ruflo-neural-trader/src/signed-artifact.ts'
+      - 'plugins/ruflo-neural-trader/src/signed-artifact.mjs'
+      - 'plugins/ruflo-neural-trader/skills/trader-backtest/**'
+      - 'plugins/ruflo-neural-trader/skills/trader-cloud-backtest/**'
+      - 'scripts/smoke-neural-trader-backtest-signing.mjs'
       # Plugin-registry CWE-347 regression smoke (#1922) — `discovery.ts`
       # signature verifier + the smoke fixture must stay in lockstep.
       - 'v3/@claude-flow/cli/src/plugins/store/discovery.ts'
@@ -80,6 +88,12 @@ on:
       - 'plugins/ruflo-neural-trader/src/sublinear-adapter.mjs'
       - 'plugins/ruflo-neural-trader/skills/trader-portfolio-cg/**'
       - 'scripts/smoke-neural-trader-portfolio-cg.mjs'
+      # Neural-trader backtest signing (#2068, ADR-126 Phase 4)
+      - 'plugins/ruflo-neural-trader/src/signed-artifact.ts'
+      - 'plugins/ruflo-neural-trader/src/signed-artifact.mjs'
+      - 'plugins/ruflo-neural-trader/skills/trader-backtest/**'
+      - 'plugins/ruflo-neural-trader/skills/trader-cloud-backtest/**'
+      - 'scripts/smoke-neural-trader-backtest-signing.mjs'
       # Plugin-registry CWE-347 regression (#1922)
       - 'v3/@claude-flow/cli/src/plugins/store/discovery.ts'
       - 'v3/@claude-flow/cli/src/transfer/ipfs/client.ts'
@@ -677,6 +691,56 @@ jobs:
 
       - name: Run portfolio CG smoke
         run: node scripts/smoke-neural-trader-portfolio-cg.mjs
+
+  neural-trader-backtest-signing-smoke:
+    # Regression guard for ruvnet/ruflo#2068 — ADR-126 Phase 4.
+    #
+    # Phase 4 wires Ed25519-signed backtest artifacts so the paper→live
+    # promotion gate has cryptographic tamper evidence. The signing scheme
+    # mirrors the CWE-347 plugin-registry pattern (#1922): canonical body
+    # = JSON.stringify without signature fields; verifier pins to a
+    # caller-supplied `trustedPublicKey`, NOT to the served self-asserted
+    # `witnessPublicKey` field (which an attacker can swap freely).
+    #
+    # Three load-bearing artifacts must stay in lockstep:
+    #   1. `src/signed-artifact.ts` — the typed signer/verifier contract.
+    #   2. `src/signed-artifact.mjs` — the runtime mirror imported by the
+    #      smoke + (future) skill harnesses (the plugin has no build step).
+    #   3. `skills/trader-backtest/SKILL.md` + `skills/trader-cloud-backtest/SKILL.md`
+    #      — the call sites that sign before store + verify before promote.
+    #
+    # The smoke runs three layers:
+    #   [1/3] STATIC CONTRACT — verifier pins to trustedPublicKey (NOT to
+    #         artifact.witnessPublicKey), canonical body strips BOTH
+    #         signature fields, .ts and .mjs runtime mirrors agree.
+    #   [2/3] CRYPTO ROUND-TRIP with real Ed25519 — happy path, tampered
+    #         body fails, empty sig/pubkey fails, swapped served pubkey
+    #         still verifies (pin is real), wrong trusted pubkey fails.
+    #   [3/3] CALL-SITE BYTE check — trader-cloud-backtest/SKILL.md calls
+    #         verifyBacktestArtifact AND documents the fail-closed branch;
+    #         trader-backtest/SKILL.md references the signer + degraded
+    #         warning + RUFLO_WITNESS_KEY_PATH env var.
+    #
+    # If a future PR drops the verify call, reverts to pinning the served
+    # field, or removes the fail-closed branch, this smoke catches it
+    # before merge.
+    name: neural-trader backtest signing smoke (#2068, ADR-126 Phase 4)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install root deps (for @noble/ed25519)
+        run: npm install --legacy-peer-deps --no-audit --no-fund --ignore-scripts
+
+      - name: Run backtest signing smoke
+        run: node scripts/smoke-neural-trader-backtest-signing.mjs
 
   plugin-registry-signature-smoke:
     # Regression guard for ruvnet/ruflo#1922 (CWE-347 — improper verification
