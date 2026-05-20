@@ -37,6 +37,13 @@ on:
       # silently revert the bug-fix shape.
       - 'plugins/ruflo-knowledge-graph/**'
       - 'scripts/smoke-kg-extract-type-imports.mjs'
+      # Neural-trader portfolio CG (#2068, ADR-126 Phase 3) — drift fast
+      # when the adapter, skill, or runtime mirror diverge from the
+      # ADR-123 Wedge 8 contract.
+      - 'plugins/ruflo-neural-trader/src/sublinear-adapter.ts'
+      - 'plugins/ruflo-neural-trader/src/sublinear-adapter.mjs'
+      - 'plugins/ruflo-neural-trader/skills/trader-portfolio-cg/**'
+      - 'scripts/smoke-neural-trader-portfolio-cg.mjs'
       # Plugin-registry CWE-347 regression smoke (#1922) — `discovery.ts`
       # signature verifier + the smoke fixture must stay in lockstep.
       - 'v3/@claude-flow/cli/src/plugins/store/discovery.ts'
@@ -68,6 +75,11 @@ on:
       # Knowledge-graph plugin (#2049)
       - 'plugins/ruflo-knowledge-graph/**'
       - 'scripts/smoke-kg-extract-type-imports.mjs'
+      # Neural-trader portfolio CG (#2068, ADR-126 Phase 3)
+      - 'plugins/ruflo-neural-trader/src/sublinear-adapter.ts'
+      - 'plugins/ruflo-neural-trader/src/sublinear-adapter.mjs'
+      - 'plugins/ruflo-neural-trader/skills/trader-portfolio-cg/**'
+      - 'scripts/smoke-neural-trader-portfolio-cg.mjs'
       # Plugin-registry CWE-347 regression (#1922)
       - 'v3/@claude-flow/cli/src/plugins/store/discovery.ts'
       - 'v3/@claude-flow/cli/src/transfer/ipfs/client.ts'
@@ -622,6 +634,49 @@ jobs:
 
       - name: Run kg-extract type-import smoke
         run: node scripts/smoke-kg-extract-type-imports.mjs
+
+  neural-trader-portfolio-cg-smoke:
+    # Regression guard for ruvnet/ruflo#2068 — ADR-126 Phase 3.
+    #
+    # Phase 3 wires the Conjugate-Gradient portfolio path that ADR-123
+    # Wedge 8 promises a 40-60× speedup over the legacy Neumann series.
+    # The contract is load-bearing on three artifacts that must stay
+    # in lockstep:
+    #   1. `src/sublinear-adapter.ts` — the typed adapter shape
+    #      (SublinearAdapter, solveCG, isMcpAvailable, SolveResult)
+    #      that conforms to ADR-123 §262-289.
+    #   2. `src/sublinear-adapter.mjs` — the runtime mirror that the
+    #      smoke + bench import directly (the plugin has no build step).
+    #   3. `skills/trader-portfolio-cg/SKILL.md` — frontmatter must
+    #      declare `mcp__ruflo-sublinear__solve` in allowed-tools and
+    #      write to the canonical `trading-risk` namespace.
+    #
+    # The smoke runs three layers:
+    #   [1/3] STATIC ADAPTER CONTRACT — class shape, method signatures,
+    #         SolveResult fields, MCP tool name, symmetric-input validation.
+    #   [2/3] STATIC SKILL CONTRACT — frontmatter, allowed-tools, namespace,
+    #         disable-flag documentation, Neumann fallback path.
+    #   [3/3] RUNTIME CORRECTNESS — solves the textbook 2×2 SPD case
+    #         A=[[4,1],[1,3]], b=[1,2] → x=[1/11, 7/11] within 1e-6, and
+    #         exercises the degraded paths (non-square, non-symmetric).
+    #
+    # If a future PR drops solveCG, removes the MCP tool from allowed-tools,
+    # changes the namespace, or breaks the local CG kernel, this smoke
+    # catches it before merge.
+    name: neural-trader portfolio CG smoke (#2068, ADR-126 Phase 3)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run portfolio CG smoke
+        run: node scripts/smoke-neural-trader-portfolio-cg.mjs
 
   plugin-registry-signature-smoke:
     # Regression guard for ruvnet/ruflo#1922 (CWE-347 — improper verification
