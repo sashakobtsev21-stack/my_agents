@@ -80,6 +80,18 @@ on:
       - 'v3/@claude-flow/cli/src/mcp-tools/ruvllm-tools.ts'
       - 'v3/@claude-flow/cli/src/ruvector/ruvllm-wasm.ts'
       - 'scripts/smoke-ruvllm-wasm-auto-init.mjs'
+      # GitHub skills/agents/helpers surface (#2089, ADR-127) — injection
+      # smoke + actions pin smoke gate every change to the .github surface.
+      - '.claude/agents/github/**'
+      - '.claude/skills/github-*/**'
+      - 'v3/@claude-flow/cli/.claude/commands/github/**'
+      - '.claude/helpers/github-safe.js'
+      - 'v3/@claude-flow/cli/.claude/helpers/github-safe.js'
+      - 'scripts/smoke-github-safe-injection.mjs'
+      - 'scripts/smoke-github-actions-pins.mjs'
+      - 'scripts/smoke-deprecated-actions.mjs'
+      - 'scripts/smoke-attribution-opt-in.mjs'
+      - '.github/supply-chain/allowed-deps.json'
   pull_request:
     branches: [main, develop]
     paths:
@@ -137,6 +149,17 @@ on:
       - 'v3/@claude-flow/cli/src/mcp-tools/ruvllm-tools.ts'
       - 'v3/@claude-flow/cli/src/ruvector/ruvllm-wasm.ts'
       - 'scripts/smoke-ruvllm-wasm-auto-init.mjs'
+      # GitHub skills/agents/helpers surface (#2089, ADR-127)
+      - '.claude/agents/github/**'
+      - '.claude/skills/github-*/**'
+      - 'v3/@claude-flow/cli/.claude/commands/github/**'
+      - '.claude/helpers/github-safe.js'
+      - 'v3/@claude-flow/cli/.claude/helpers/github-safe.js'
+      - 'scripts/smoke-github-safe-injection.mjs'
+      - 'scripts/smoke-github-actions-pins.mjs'
+      - 'scripts/smoke-deprecated-actions.mjs'
+      - 'scripts/smoke-attribution-opt-in.mjs'
+      - '.github/supply-chain/allowed-deps.json'
       # witness manifests / fix list — so witness-verify runs on PRs that
       # touch them (otherwise a stale per-OS manifest only fails post-merge).
       - 'verification/**'
@@ -972,6 +995,122 @@ jobs:
 
       - name: Run ruvllm WASM auto-init smoke
         run: node scripts/smoke-ruvllm-wasm-auto-init.mjs
+
+  github-safe-injection-smoke:
+    # Regression guard for ruvnet/ruflo#2089 — ADR-127 Phase 1.
+    #
+    # Drives adversarial PR/issue bodies (backticks, $(), semicolons,
+    # >256KB, empty) through github-safe.js and asserts the body lands in a
+    # temp file verbatim rather than being passed inline to `gh`.  Inline
+    # interpolation of untrusted body content into shell arguments is the
+    # prompt-injection vector closed by the swarm-pr.md / swarm-issue.md
+    # fix in Phase 2.  This smoke ensures github-safe.js itself always writes
+    # the temp file and passes --body-file rather than --body.
+    #
+    # Runs against both copies:
+    #   - .claude/helpers/github-safe.js           (dogfood)
+    #   - v3/@claude-flow/cli/.claude/helpers/      (init-template)
+    name: github-safe injection smoke (#2089, ADR-127 Phase 1)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run github-safe injection smoke
+        run: node scripts/smoke-github-safe-injection.mjs
+
+  github-actions-pins-smoke:
+    # Static contract guard for ruvnet/ruflo#2089 — ADR-127 Phase 1.
+    #
+    # Scans every `uses:` line in:
+    #   .claude/agents/github/*.md
+    #   .claude/skills/github-[name]/SKILL.md
+    #   v3/@claude-flow/cli/.claude/commands/github/[name].md
+    #
+    # Asserts each ref is either SHA-pinned (40-hex) or present in
+    # .github/supply-chain/allowed-deps.json actions.allowed[].
+    #
+    # This smoke catches any future commit that copies @v3 snippets from
+    # blog posts into the skill files — the most common doc-drift pattern.
+    # Phase 3 upgrades all @v3 refs to @v4; this smoke is the regression
+    # gate that prevents them from drifting back.
+    name: github actions pin smoke (#2089, ADR-127 Phase 1)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run github actions pin smoke
+        run: node scripts/smoke-github-actions-pins.mjs
+
+  github-deprecated-actions-smoke:
+    # Regression guard for ruvnet/ruflo#2089 — ADR-127 Phase 3.
+    #
+    # Scans every `uses:` line in the same scope as the pins smoke and
+    # fails if any deprecated action ref is still present:
+    #   - actions/checkout@v3           (v4 available since Nov 2023)
+    #   - actions/setup-node@v3         (v4 available since Nov 2023)
+    #   - actions/create-release@*      (deprecated; replaced by gh CLI)
+    #   - actions/upload-release-asset@* (deprecated; replaced by gh CLI)
+    #   - softprops/action-gh-release@v1 (v1 has known CVEs; use @v2)
+    #
+    # Phase 3 bumps all @v3 refs to @v4.  This smoke is the regression gate
+    # that prevents them from drifting back via copy-paste from blog posts
+    # or AI-generated snippets that still reference the old versions.
+    name: github deprecated actions smoke (#2089, ADR-127 Phase 3)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run deprecated-actions smoke
+        run: node scripts/smoke-deprecated-actions.mjs
+
+  github-attribution-opt-in-smoke:
+    # Regression guard for ruvnet/ruflo#2089 — ADR-127 Phase 4.
+    #
+    # Phase 4 removes hardcoded "Generated with Claude Code" attribution
+    # strings from the static github command templates. Attribution is now
+    # opt-in via --attribution / options.attribution=true (#1670 / #2089).
+    # Hard-wired footers silently added a third-party Co-Authored-By line
+    # to every user's commits and were impossible to undo without rewriting
+    # git history.
+    #
+    # This smoke scans the same three trees as the pins smoke and fails if
+    # the "Generated with" emoji pattern reappears — preventing copy-paste
+    # regression from blog posts or AI-generated snippets.
+    name: github attribution opt-in smoke (#2089, ADR-127 Phase 4)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run attribution opt-in smoke
+        run: node scripts/smoke-attribution-opt-in.mjs
 
   pre-bash-hook-smoke:
     # Regression guard for ruvnet/ruflo#2017 — the `pre-bash` PreToolUse hook
