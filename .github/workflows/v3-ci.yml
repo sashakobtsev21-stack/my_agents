@@ -89,6 +89,7 @@ on:
       - 'v3/@claude-flow/cli/.claude/helpers/github-safe.js'
       - 'scripts/smoke-github-safe-injection.mjs'
       - 'scripts/smoke-github-actions-pins.mjs'
+      - 'scripts/smoke-deprecated-actions.mjs'
       - '.github/supply-chain/allowed-deps.json'
   pull_request:
     branches: [main, develop]
@@ -155,6 +156,7 @@ on:
       - 'v3/@claude-flow/cli/.claude/helpers/github-safe.js'
       - 'scripts/smoke-github-safe-injection.mjs'
       - 'scripts/smoke-github-actions-pins.mjs'
+      - 'scripts/smoke-deprecated-actions.mjs'
       - '.github/supply-chain/allowed-deps.json'
       # witness manifests / fix list — so witness-verify runs on PRs that
       # touch them (otherwise a stale per-OS manifest only fails post-merge).
@@ -1050,6 +1052,35 @@ jobs:
 
       - name: Run github actions pin smoke
         run: node scripts/smoke-github-actions-pins.mjs
+
+  github-deprecated-actions-smoke:
+    # Regression guard for ruvnet/ruflo#2089 — ADR-127 Phase 3.
+    #
+    # Scans every `uses:` line in the same scope as the pins smoke and
+    # fails if any deprecated action ref is still present:
+    #   - actions/checkout@v3           (v4 available since Nov 2023)
+    #   - actions/setup-node@v3         (v4 available since Nov 2023)
+    #   - actions/create-release@*      (deprecated; replaced by gh CLI)
+    #   - actions/upload-release-asset@* (deprecated; replaced by gh CLI)
+    #   - softprops/action-gh-release@v1 (v1 has known CVEs; use @v2)
+    #
+    # Phase 3 bumps all @v3 refs to @v4.  This smoke is the regression gate
+    # that prevents them from drifting back via copy-paste from blog posts
+    # or AI-generated snippets that still reference the old versions.
+    name: github deprecated actions smoke (#2089, ADR-127 Phase 3)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run deprecated-actions smoke
+        run: node scripts/smoke-deprecated-actions.mjs
 
   pre-bash-hook-smoke:
     # Regression guard for ruvnet/ruflo#2017 — the `pre-bash` PreToolUse hook
