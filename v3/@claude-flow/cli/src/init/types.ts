@@ -88,6 +88,7 @@ export interface SkillsConfig {
 
 /**
  * Commands configuration
+ * ADR-128 Phase 4: new keys for promoted substrate dirs and opt-in categories.
  */
 export interface CommandsConfig {
   /** Include core commands */
@@ -106,6 +107,30 @@ export interface CommandsConfig {
   optimization: boolean;
   /** Include SPARC commands */
   sparc: boolean;
+  // ADR-128 Phase 4 — substrate promotions (default true)
+  /** Include agents commands */
+  agents?: boolean;
+  /** Include coordination commands */
+  coordination?: boolean;
+  /** Include hive-mind commands */
+  hiveMind?: boolean;
+  /** Include memory commands */
+  memory?: boolean;
+  /** Include swarm commands */
+  swarm?: boolean;
+  /** Include workflows commands */
+  workflows?: boolean;
+  // ADR-128 Phase 4 — opt-in categories (default false)
+  /** Include pair programming commands (opt-in) */
+  pair?: boolean;
+  /** Include training commands (opt-in) */
+  training?: boolean;
+  /** Include stream-chain commands (opt-in) */
+  streamChain?: boolean;
+  /** Include truth commands (opt-in) */
+  truth?: boolean;
+  /** Include verify commands (opt-in) */
+  verify?: boolean;
   /** Include all commands */
   all: boolean;
 }
@@ -375,6 +400,19 @@ export const DEFAULT_INIT_OPTIONS: InitOptions = {
     monitoring: true,
     optimization: true,
     sparc: true,
+    // ADR-128 Phase 4 substrate promotions (default true — core swarm substrate)
+    agents: true,
+    coordination: true,
+    hiveMind: true,
+    memory: true,
+    swarm: true,
+    workflows: true,
+    // ADR-128 Phase 4 opt-in (default false — not universal)
+    pair: false,
+    training: false,
+    streamChain: false,
+    truth: false,
+    verify: false,
     all: false,
   },
   agents: {
