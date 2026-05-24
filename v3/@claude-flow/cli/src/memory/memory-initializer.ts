@@ -73,6 +73,12 @@ export function _resetMemoryRootCache(): void {
 // ADR-053: Lazy import of AgentDB v3 bridge
 let _bridge: typeof import('./memory-bridge.js') | null | undefined;
 async function getBridge(): Promise<typeof import('./memory-bridge.js') | null> {
+  // #2120 — Allow callers to force the raw sql.js fallback path. The
+  // ensureSchemaColumns backfill (NULL → 'active') lives in that
+  // fallback, so smokes that verify legacy-DB migration semantics need a
+  // way to bypass the bridge. Also useful when the bridge would hang on
+  // network-bound init (Xenova model fetch) in offline CI.
+  if (process.env.CLAUDE_FLOW_DISABLE_BRIDGE === '1') return null;
   if (_bridge === null) return null;
   if (_bridge) return _bridge;
   try {

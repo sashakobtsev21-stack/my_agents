@@ -112,6 +112,13 @@ on:
       - 'plugins/*/skills/**'
       - 'plugins/*/commands/**'
       - 'scripts/smoke-init-bundle-invariants.mjs'
+      # ADR-129 — rvagent full integration (P1-P4)
+      - 'v3/@claude-flow/cli/src/ruvector/agent-wasm.ts'
+      - 'v3/@claude-flow/cli/src/mcp-tools/wasm-agent-tools.ts'
+      - 'scripts/smoke-wasm-provider-bridge.mjs'
+      - 'scripts/smoke-wasm-rvf-compose.mjs'
+      - 'scripts/smoke-wasm-gallery-crud.mjs'
+      - 'scripts/smoke-wasm-plugin-bridge.mjs'
   pull_request:
     branches: [main, develop]
     paths:
@@ -195,6 +202,13 @@ on:
       - 'plugins/*/skills/**'
       - 'plugins/*/commands/**'
       - 'scripts/smoke-init-bundle-invariants.mjs'
+      # ADR-129 — rvagent full integration (P1-P4)
+      - 'v3/@claude-flow/cli/src/ruvector/agent-wasm.ts'
+      - 'v3/@claude-flow/cli/src/mcp-tools/wasm-agent-tools.ts'
+      - 'scripts/smoke-wasm-provider-bridge.mjs'
+      - 'scripts/smoke-wasm-rvf-compose.mjs'
+      - 'scripts/smoke-wasm-gallery-crud.mjs'
+      - 'scripts/smoke-wasm-plugin-bridge.mjs'
       # witness manifests / fix list — so witness-verify runs on PRs that
       # touch them (otherwise a stale per-OS manifest only fails post-merge).
       - 'verification/**'
@@ -1081,11 +1095,33 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install root deps (for sql.js + cli imports)
+      - name: Setup pnpm (workspace-aware install)
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install root deps (sql.js for the smoke fixture)
+        # The smoke creates a `.swarm/memory.db` fixture using `sql.js`
+        # imported from the repo root. Root has no `workspace:*` deps,
+        # so plain npm works here.
         run: npm install --legacy-peer-deps --no-audit --no-fund --ignore-scripts
 
-      - name: Build CLI dist
-        run: cd v3/@claude-flow/cli && npm install --legacy-peer-deps --no-audit --no-fund --ignore-scripts && npm run build
+      - name: Install workspace deps + build CLI (pnpm — `workspace:*` protocol)
+        # `cd v3/@claude-flow/cli && npm install` errors with
+        # `EUNSUPPORTEDPROTOCOL: Unsupported URL Type "workspace:"` because
+        # npm doesn't understand workspace:*. The pnpm workspace root is
+        # `v3/pnpm-workspace.yaml`. The CLI's tsc references project-refs to
+        # @claude-flow/swarm (and others), so those must be built first —
+        # `pnpm --filter @claude-flow/cli build` alone fails with TS6305.
+        # `--recursive --no-bail` builds the whole graph in topological order
+        # past unrelated package failures; we then assert the specific dist
+        # file the smoke imports.
+        working-directory: v3
+        run: |
+          pnpm install --frozen-lockfile=false --ignore-scripts
+          pnpm --recursive --no-bail run build || true
+          test -f @claude-flow/cli/dist/src/memory/memory-initializer.js \
+            || (echo "CLI build did not produce memory-initializer.js"; exit 1)
 
       - name: Run memory stats legacy-DB smoke
         run: node scripts/smoke-memory-stats-legacy-db.mjs
@@ -1793,3 +1829,80 @@ jobs:
 
       - name: Run init-bundle invariants smoke
         run: node scripts/smoke-init-bundle-invariants.mjs
+
+  wasm-provider-bridge-smoke:
+    # ADR-129 Phase 1 — JsModelProvider routes WasmAgent through the v3
+    # provider system.  Pre-P1: set_model_provider() was never called and
+    # the echo-stub bypass competed with the WASM runtime.  P1 fix:
+    # attachJsModelProvider() is called at agent-creation time.
+    # Static-only smoke: no build, no API keys required.
+    name: wasm provider bridge smoke (ADR-129 P1)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run wasm provider bridge smoke
+        run: node scripts/smoke-wasm-provider-bridge.mjs
+
+  wasm-compose-smoke:
+    # ADR-129 Phase 2 — wasm_agent_compose MCP tool + addMcpTools bridge.
+    # Fixes the silent drop of template.mcp_tools in buildRvfFromTemplate.
+    # Static-only smoke: no build, no API keys required.
+    name: wasm compose smoke (ADR-129 P2)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run wasm compose smoke
+        run: node scripts/smoke-wasm-rvf-compose.mjs
+
+  wasm-gallery-crud-smoke:
+    # ADR-129 Phase 3 — 16 new MCP tools (10 gallery CRUD + 6 agent
+    # introspection), with AIDefence gate on wasm_gallery_import.
+    # Static-only smoke: no build, no API keys required.
+    name: wasm gallery CRUD smoke (ADR-129 P3)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run wasm gallery CRUD smoke
+        run: node scripts/smoke-wasm-gallery-crud.mjs
+
+  wasm-plugin-bridge-smoke:
+    # ADR-129 Phase 4 — plugin manifest "rvagent" field + includePlugins
+    # in wasm_agent_compose.  Static + behavioral fixture smoke.
+    name: wasm plugin bridge smoke (ADR-129 P4)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run wasm plugin bridge smoke
+        run: node scripts/smoke-wasm-plugin-bridge.mjs
