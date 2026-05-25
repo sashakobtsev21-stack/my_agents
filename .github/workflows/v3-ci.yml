@@ -1520,6 +1520,16 @@ jobs:
         shell: bash
         run: node scripts/audit-package-dep-overlap.mjs
 
+      - name: Run wrapper dep-range audit (#2127)
+        # Catches stale alpha-tagged dep ranges in the ruflo wrapper and the
+        # claude-flow umbrella that point at sibling packages we publish.
+        # #2127 shipped with `ruflo → @claude-flow/cli@^3.7.0-alpha.11` even
+        # after cli moved to stable 3.10.0 — a pre-release range against a
+        # stable dep widens arborist's dedupe walk and can surface as the
+        # "Invalid Version: (empty)" crash on some npm/Node combos.
+        shell: bash
+        run: node scripts/audit-wrapper-dep-ranges.mjs
+
   cli-npx-install-smoke:
     # Regression guard for ruvnet/ruflo#1147 and #2018 — both report:
     #   $ npx @claude-flow/cli@latest …
