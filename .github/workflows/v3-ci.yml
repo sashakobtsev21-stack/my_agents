@@ -2055,6 +2055,7 @@ jobs:
     name: graph benchmark (ADR-130 P6)
     runs-on: ubuntu-latest
     needs: [graph-query-smoke, graph-trajectory-smoke, graph-plugin-adapter-smoke]
+    timeout-minutes: 40
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
