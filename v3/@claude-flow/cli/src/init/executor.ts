@@ -26,6 +26,7 @@ import {
   generateHookHandler,
   generateIntelligenceStub,
   generateAutoMemoryHook,
+  generateRufloHookCjs,
 } from './helpers-generator.js';
 import { generateClaudeMd } from './claudemd-generator.js';
 
@@ -1147,6 +1148,12 @@ async function writeHelpers(
   // Find source helpers directory (works for npm package and local dev)
   const sourceHelpersDir = findSourceHelpersDir(options.sourceBaseDir);
 
+  // On Windows: emit a notice before writing helpers — the settings.json
+  // hooks will use node-based commands instead of bash shims (#2132).
+  if (process.platform === 'win32') {
+    console.log('Detected Windows — adding cross-platform hook overrides to .claude/settings.json (#2132)');
+  }
+
   // Try to copy existing helpers from source first
   if (sourceHelpersDir && fs.existsSync(sourceHelpersDir)) {
     const helperFiles = fs.readdirSync(sourceHelpersDir);
@@ -1174,6 +1181,18 @@ async function writeHelpers(
       }
     }
 
+    // #2132: Always generate ruflo-hook.cjs regardless of source copy path.
+    // The source helpers dir may not contain this file (it lives in
+    // plugins/ruflo-core/scripts/, not .claude/helpers/), but it must
+    // always be present so Windows users can use the node-based shim.
+    const rufloHookDest = path.join(helpersDir, 'ruflo-hook.cjs');
+    if (!fs.existsSync(rufloHookDest) || options.force) {
+      fs.writeFileSync(rufloHookDest, generateRufloHookCjs(), 'utf-8');
+      result.created.files.push('.claude/helpers/ruflo-hook.cjs');
+    } else {
+      result.skipped.push('.claude/helpers/ruflo-hook.cjs');
+    }
+
     if (copiedCount > 0) {
       return; // Skip generating if we copied from source
     }
@@ -1189,6 +1208,10 @@ async function writeHelpers(
     'hook-handler.cjs': generateHookHandler(),
     'intelligence.cjs': generateIntelligenceStub(),
     'auto-memory-hook.mjs': generateAutoMemoryHook(),
+    // #2132: cross-platform Node.js port of ruflo-hook.sh — always deployed so
+    // Windows users have a working shim even if the plugin's hooks.json bash
+    // commands are overridden via settings.json.
+    'ruflo-hook.cjs': generateRufloHookCjs(),
   };
 
   for (const [name, content] of Object.entries(helpers)) {

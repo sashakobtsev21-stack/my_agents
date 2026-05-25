@@ -1495,6 +1495,13 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: v3/pnpm-lock.yaml
 
+      - name: Install root deps (semver for audit-wrapper-dep-ranges)
+        # The audit-wrapper-dep-ranges.mjs script imports `semver` from the
+        # repo root node_modules. Run a root npm install BEFORE the audit
+        # job's main install/build step.
+        shell: bash
+        run: npm install --legacy-peer-deps --no-audit --no-fund --ignore-scripts
+
       - name: Install workspace + build plugins (so check D — exports-exist-after-build — is live)
         working-directory: v3
         shell: bash
@@ -1534,14 +1541,11 @@ jobs:
         # Catches /bin/bash literals, POSIX-only pipelines (jq, xargs, tr),
         # and .sh script invocations in plugin hooks.json files — patterns
         # that fail on native Windows (exit 126).
-        #
-        # KNOWN ISSUE: current main has unfixed violations from #2132 itself
-        # (the underlying bug). Running with `continue-on-error: true` so the
-        # audit reports but doesn't block PRs while the .sh→.cjs migration
-        # lands. Flip to strict (remove continue-on-error) once #2132 is
-        # closed — see commit log for the migration PR.
+        # Files with "_platform": "posix" are exempt (Mac/Linux-only, verified
+        # to have a companion ruflo-hook.cjs Windows shim). New hooks.json
+        # files without the marker are scanned strictly.
+        # Strict (no continue-on-error) — fixed in PR fix/2132-windows-hooks.
         shell: bash
-        continue-on-error: true
         run: node scripts/audit-plugin-hooks-cross-platform.mjs
 
   cli-npx-install-smoke:
@@ -1590,6 +1594,117 @@ jobs:
       - name: Pack, install, and run cli (asserts no 'Invalid Version' crash)
         shell: bash
         run: node scripts/smoke-cli-npx-install.mjs
+
+  windows-hook-shim-smoke:
+    # Smoke test for ruvnet/ruflo#2132 — ruflo-hook.cjs cross-platform shim.
+    # Proves that plugins/ruflo-core/scripts/ruflo-hook.cjs can be invoked
+    # via `node ruflo-hook.cjs <subcommand>`, always exits 0, and accepts
+    # stdin JSON input without crashing.
+    # Runs on all 3 OS to prove cross-platform behaviour.
+    name: Windows hook shim smoke (#2132) / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run ruflo-hook.cjs smoke
+        shell: bash
+        run: node scripts/smoke-ruflo-hook-cjs.mjs
+
+  windows-init-hooks-smoke:
+    # Smoke test for ruvnet/ruflo#2132 — init-time platform detection.
+    # Proves ruflo init generates correct hook commands per platform:
+    #   - windows-latest: node-based (no /bin/bash, no | jq)
+    #   - ubuntu/macos: POSIX-compatible (sh-based, no cmd.exe patterns)
+    # Also verifies ruflo-hook.cjs is always deployed to .claude/helpers/.
+    name: Windows init hooks smoke (#2132) / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: v3/pnpm-lock.yaml
+
+      - name: Build CLI
+        working-directory: v3
+        shell: bash
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --recursive --no-bail run build || true
+          # --no-bail lets unrelated workspace failures pass; assert the
+          # one dist file the smoke needs is actually produced.
+          test -f @claude-flow/cli/bin/cli.js \
+            || (echo "::error::cli build did not produce bin/cli.js"; exit 1)
+
+      - name: Run init hooks smoke
+        shell: bash
+        run: node scripts/smoke-windows-init-hooks.mjs
+
+  windows-hook-execution-smoke:
+    # End-to-end validation for ruvnet/ruflo#2132 — simulates a Claude Code
+    # PostToolUse hook firing. Asserts exit code != 126 ("cannot execute
+    # binary file") and no POSIX-only pipeline patterns in the generated
+    # settings.json hook commands.
+    # Primary target: windows-latest (the OS that originally broke).
+    # Also runs on ubuntu/macos to catch POSIX regression.
+    name: Windows hook execution smoke (#2132) / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: v3/pnpm-lock.yaml
+
+      - name: Build CLI
+        working-directory: v3
+        shell: bash
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --recursive --no-bail run build || true
+
+      - name: Run Windows hook execution smoke
+        shell: bash
+        run: node scripts/smoke-windows-hook-execution.mjs
 
   hook-command-audit:
     # Regression guard for #1921 (and #1147) — plugin hooks.json must not
@@ -1685,7 +1800,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, pre-bash-hook-smoke, witness-verify-precondition-smoke, witness-marker-drift-smoke, browser-rvf-create-flags-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke, plugin-package-audit, cli-npx-install-smoke, hook-command-audit, vector-dim-audit]
+    needs: [smoke-install-no-bsqlite, plugin-hooks-smoke, pre-bash-hook-smoke, witness-verify-precondition-smoke, witness-marker-drift-smoke, browser-rvf-create-flags-smoke, mcp-protocol-smoke, memory-import-smoke, tool-descriptions-audit, mcp-roundtrip-smoke, plugin-package-audit, cli-npx-install-smoke, hook-command-audit, vector-dim-audit, windows-hook-shim-smoke, windows-init-hooks-smoke, windows-hook-execution-smoke]
 
     steps:
       - name: Checkout code

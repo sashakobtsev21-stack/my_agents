@@ -17,6 +17,24 @@
  *
  *   "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/helpers/hook-handler.cjs\" post-edit"
  *
+ * ## POSIX-only exemption (added in #2132 fix PR)
+ *
+ * A hooks.json file may declare `"_platform": "posix"` at the top level to
+ * mark it as intentionally Mac/Linux-only. Such files are EXEMPT from the
+ * cross-platform patterns audit. The exemption exists because the 3 plugin
+ * hooks.json files in this repo use POSIX bash pipelines that are
+ * battle-tested on Mac/Linux; the Windows path is provided via init-time
+ * settings.json override (see v3/@claude-flow/cli/src/init/settings-generator.ts).
+ *
+ * Audit logic:
+ *  1. Files with "_platform": "posix" - skip pattern scan, check Windows path exists
+ *  2. All other files - strict cross-platform scan (original behaviour)
+ *
+ * Windows path check: for every POSIX-exempt file in a plugins/<name>/hooks/ dir,
+ * verify that plugins/<name>/scripts/ruflo-hook.cjs exists (the Node shim that
+ * init copies to `.claude/helpers/` on Windows). This proves the Windows path
+ * is covered without requiring platform detection at audit time.
+ *
  * This audit walks every plugin `hooks.json` in the tree (skipping
  * node_modules and worktrees) and fails if it finds any of the broken
  * patterns. Wired into v3-ci.yml as `plugin-hooks-cross-platform-audit`.
@@ -26,9 +44,9 @@
  * field are ignored.
  */
 
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, relative, resolve, basename } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..');
@@ -71,6 +89,8 @@ const BAD_PATTERNS = [
 
 let violations = [];
 const scanned = [];
+const posixExempt = [];
+let posixWindowsPathMissing = false;
 
 for (const file of walkForHooksJson(REPO_ROOT)) {
   const text = readFileSync(file, 'utf8');
@@ -80,6 +100,31 @@ for (const file of walkForHooksJson(REPO_ROOT)) {
     continue;
   }
 
+  // --- POSIX-only exemption check (#2132) ---
+  if (json._platform === 'posix') {
+    const relFile = relative(REPO_ROOT, file);
+    posixExempt.push(relFile);
+
+    // Verify the Windows path (Node shim) exists alongside this hooks.json.
+    // Convention: hooks.json lives in <plugin>/hooks/hooks.json
+    //             shim lives in <plugin>/scripts/ruflo-hook.cjs
+    const pluginDir = resolve(join(file, '..', '..'));
+    const shimPath = join(pluginDir, 'scripts', 'ruflo-hook.cjs');
+    if (!existsSync(shimPath)) {
+      violations.push({
+        file: relFile,
+        line: 0,
+        label: 'POSIX-exempt but Windows shim missing',
+        cmd: `Expected ${relative(REPO_ROOT, shimPath)}`,
+        hint: 'Create plugins/<name>/scripts/ruflo-hook.cjs (cross-platform Node port of ruflo-hook.sh). See #2132.',
+      });
+      posixWindowsPathMissing = true;
+    }
+    // Skip further pattern scanning for POSIX-exempt files
+    continue;
+  }
+
+  // --- Strict cross-platform scan for non-exempt files ---
   const events = Array.isArray(json?.hooks) ? json.hooks : Object.values(json?.hooks ?? {}).flat();
   const flat = [];
   // hooks can be either:
@@ -120,17 +165,24 @@ for (const file of walkForHooksJson(REPO_ROOT)) {
 console.log(`plugin-hooks cross-platform audit — scanned ${scanned.length} file(s), ${scanned.reduce((a, b) => a + b.entries, 0)} hook command(s)`);
 for (const s of scanned) console.log(`  ${s.file}: ${s.entries} command(s)`);
 
+if (posixExempt.length > 0) {
+  console.log(`\nPOSIX-exempt files (${posixExempt.length}) — skipped cross-platform scan, Windows shim checked:`);
+  for (const f of posixExempt) console.log(`  ${f}`);
+}
+
 if (violations.length === 0) {
-  console.log('  ok: all plugin hook commands are cross-platform (no /bin/bash, no POSIX pipelines, no .sh scripts)');
+  console.log('\n  ok: all plugin hook commands are cross-platform (no /bin/bash, no POSIX pipelines, no .sh scripts)');
+  console.log('  ok: all POSIX-exempt files have a corresponding Windows Node shim');
   process.exit(0);
 }
 
 console.error(`\n${violations.length} violation(s):`);
 for (const v of violations) {
-  console.error(`  ✗ ${v.file}:${v.line}  [${v.matcher}]  ${v.label}`);
+  console.error(`  x ${v.file}:${v.line}  [${v.matcher ?? ''}]  ${v.label}`);
   console.error(`     cmd: ${v.cmd}`);
   console.error(`     fix: ${v.hint}`);
 }
 console.error('\nReference: ruvnet/ruflo#2132 (plugin hooks broken on Windows).');
-console.error('Pattern that works cross-platform: .claude/settings.json + .claude/helpers/hook-handler.cjs (node, no bash).');
+console.error('Cross-platform pattern: .claude/settings.json + .claude/helpers/hook-handler.cjs (node, no bash).');
+console.error('POSIX-exempt pattern: add "_platform": "posix" to hooks.json + create scripts/ruflo-hook.cjs sibling.');
 process.exit(1);
