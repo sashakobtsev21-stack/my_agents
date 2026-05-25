@@ -1530,6 +1530,20 @@ jobs:
         shell: bash
         run: node scripts/audit-wrapper-dep-ranges.mjs
 
+      - name: Run plugin-hooks cross-platform audit (#2132)
+        # Catches /bin/bash literals, POSIX-only pipelines (jq, xargs, tr),
+        # and .sh script invocations in plugin hooks.json files — patterns
+        # that fail on native Windows (exit 126).
+        #
+        # KNOWN ISSUE: current main has unfixed violations from #2132 itself
+        # (the underlying bug). Running with `continue-on-error: true` so the
+        # audit reports but doesn't block PRs while the .sh→.cjs migration
+        # lands. Flip to strict (remove continue-on-error) once #2132 is
+        # closed — see commit log for the migration PR.
+        shell: bash
+        continue-on-error: true
+        run: node scripts/audit-plugin-hooks-cross-platform.mjs
+
   cli-npx-install-smoke:
     # Regression guard for ruvnet/ruflo#1147 and #2018 — both report:
     #   $ npx @claude-flow/cli@latest …
