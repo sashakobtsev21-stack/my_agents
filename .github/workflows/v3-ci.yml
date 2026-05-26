@@ -1604,6 +1604,18 @@ jobs:
         shell: bash
         run: node scripts/audit-plugin-hooks-cross-platform.mjs
 
+      - name: Run env-var-precedence audit (ADR-125 / ADR-130)
+        # Guards the "CLI flag > ENV var > default" precedence rule added in
+        # ADR-125 (rvagent integration) and ADR-130 (graph intelligence).
+        # Scans v3/cli/src and plugins/ for any CLAUDE_FLOW_* / RUFLO_* env
+        # var read that lacks a documented CLI-flag override path or is not
+        # registered as an intentional escape hatch (CI/credential/process
+        # signal). Fails closed (exit 1) — prevents future contributors from
+        # silently ignoring explicit CLI flags when an env var is set.
+        # Strict (no continue-on-error).
+        shell: bash
+        run: node scripts/audit-env-var-precedence.mjs
+
   cli-npx-install-smoke:
     # Regression guard for ruvnet/ruflo#1147 and #2018 — both report:
     #   $ npx @claude-flow/cli@latest …

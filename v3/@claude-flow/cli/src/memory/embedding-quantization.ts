@@ -92,8 +92,15 @@ export function decodeEmbedding(embeddingRef: string): Float32Array | null {
     const raw = Buffer.from(b64, 'base64');
     const view = new DataView(raw.buffer, raw.byteOffset, raw.byteLength);
 
+    if (raw.byteLength < 16) return null;           // too short for the header
     if (view.getUint32(0, true) !== PQ_MAGIC) return null;
     const dims = view.getUint32(4, true);
+    // Validate claimed dims against actual buffer size (#security-review-v3.10):
+    //   (a) dims=0 or buffer too short -> malformed blob, reject.
+    //   (b) dims > 8192 -> oversized allocation guard (DoS via crafted blob).
+    //       Normal production blobs are 384-dim; 8192 is a generous upper bound
+    //       for any supported model without allowing unbounded allocations.
+    if (dims === 0 || dims > 8192 || raw.byteLength < 16 + dims) return null;
     const gMin = view.getFloat32(8, true);
     const gMax = view.getFloat32(12, true);
     const range = gMax - gMin;
