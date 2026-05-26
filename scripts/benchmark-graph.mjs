@@ -259,3 +259,8 @@ if (jsonMode) {
   checks.forEach(([label, ok]) => console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${label}`));
   console.log(`\nTargets: ${pass}/${total} met`);
 }
+
+// The sql.js/agentdb bridge keeps a native handle alive after the script
+// finishes its work, which would otherwise stall the Node event loop until
+// the CI 40-min timeout. Hard-exit once results have been emitted.
+process.exit(0);
