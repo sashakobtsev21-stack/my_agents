@@ -1593,6 +1593,15 @@ jobs:
         shell: bash
         run: node scripts/audit-wrapper-dep-ranges.mjs
 
+      - name: Run umbrella version-lockstep audit (#2151)
+        # Asserts @claude-flow/cli, claude-flow, and ruflo all share the
+        # same version. #2151 reported ruflo@3.10.2 + cli@3.10.1 drift —
+        # `npx ruflo --version` printed the bundled CLI's 3.10.1, not the
+        # wrapper's 3.10.2. CLAUDE.md publish rules already require lockstep;
+        # this audit enforces it so drift can't reach a release.
+        shell: bash
+        run: node scripts/audit-umbrella-version-lockstep.mjs
+
       - name: Run plugin-hooks cross-platform audit (#2132)
         # Catches /bin/bash literals, POSIX-only pipelines (jq, xargs, tr),
         # and .sh script invocations in plugin hooks.json files — patterns
