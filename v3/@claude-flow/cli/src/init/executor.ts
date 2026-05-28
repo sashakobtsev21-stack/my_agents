@@ -832,21 +832,28 @@ function detectExistingRufloMCP(targetDir: string): string | null {
     try {
       const parsed = JSON.parse(fs.readFileSync(candidate, 'utf-8'));
       if (!parsed || typeof parsed !== 'object') continue;
-      // (a) Top-level mcpServers (legacy / global form)
+      // (a) Top-level mcpServers (legacy / global form).
+      // #2207: accept BOTH the old 'ruflo' key AND the new 'claude-flow' key so that
+      // a prior install with either key is correctly detected as already-initialized.
+      // This also avoids the reverse problem: after #2206 fixed the generator to write
+      // 'claude-flow', a second `ruflo init` must still recognise the existing install.
       if (parsed.mcpServers && typeof parsed.mcpServers === 'object') {
-        if ('ruflo' in parsed.mcpServers) return candidate;
+        const servers = parsed.mcpServers as Record<string, unknown>;
+        if ('claude-flow' in servers || 'ruflo' in servers) return candidate;
       }
       // (b) #1840: Claude Code project-scoped registrations under
-      //     parsed.projects[<projectPath>].mcpServers.ruflo. Match by
+      //     parsed.projects[<projectPath>].mcpServers. Match by
       //     normalized path against targetDir or any of its ancestors so
-      //     a `claude mcp add ruflo` in this repo is detected even when
-      //     Claude stored the key with different casing/slash style.
+      //     a `claude mcp add claude-flow` (or legacy `ruflo`) in this repo is
+      //     detected even when Claude stored the key with different casing/slash style.
+      // #2207: accept both keys here too.
       if (parsed.projects && typeof parsed.projects === 'object') {
         for (const [projectKey, projectVal] of Object.entries(parsed.projects)) {
           if (!projectVal || typeof projectVal !== 'object') continue;
           const projectMcp = (projectVal as { mcpServers?: unknown }).mcpServers;
           if (!projectMcp || typeof projectMcp !== 'object') continue;
-          if (!('ruflo' in (projectMcp as Record<string, unknown>))) continue;
+          const mcp = projectMcp as Record<string, unknown>;
+          if (!('claude-flow' in mcp) && !('ruflo' in mcp)) continue;
           if (targetAncestors.has(normalizeProjectKey(projectKey))) {
             return `${candidate} (projects[${projectKey}])`;
           }
@@ -1960,6 +1967,18 @@ async function writeClaudeMd(
   if (fs.existsSync(claudeMdPath) && !options.force) {
     result.skipped.push('CLAUDE.md');
   } else {
+    // #2208: if overwriting an existing CLAUDE.md (force mode), back it up first so
+    // users don't silently lose curated project context.
+    if (fs.existsSync(claudeMdPath)) {
+      const backupBase = `${claudeMdPath}.pre-ruflo`;
+      // Don't clobber an existing backup — append a timestamp if one already exists.
+      const backupPath = fs.existsSync(backupBase)
+        ? `${backupBase}.${Date.now()}`
+        : backupBase;
+      fs.copyFileSync(claudeMdPath, backupPath);
+      result.created.files.push(path.basename(backupPath));
+      console.warn(`[ruflo init] Existing CLAUDE.md backed up to ${path.basename(backupPath)} before overwrite`);
+    }
     // Determine template: explicit option > infer from components > 'standard'
     const inferredTemplate = (!options.components.commands && !options.components.agents) ? 'minimal' : undefined;
     const content = generateClaudeMd(options, inferredTemplate);

@@ -143,6 +143,10 @@ on:
       - 'v3/@claude-flow/cli/src/init/statusline-generator.ts'
       - '.claude/helpers/statusline.cjs'
       - 'scripts/smoke-statusline-generator-delegation.mjs'
+      # wizard init regression guard (#2206 #2207 #2208)
+      - 'v3/@claude-flow/cli/src/init/mcp-generator.ts'
+      - 'v3/@claude-flow/cli/src/init/executor.ts'
+      - 'scripts/smoke-wizard-init-regression.mjs'
   pull_request:
     branches: [main, develop]
     paths:
@@ -245,6 +249,10 @@ on:
       - 'v3/@claude-flow/cli/src/init/statusline-generator.ts'
       - '.claude/helpers/statusline.cjs'
       - 'scripts/smoke-statusline-generator-delegation.mjs'
+      # wizard init regression guard (#2206 #2207 #2208)
+      - 'v3/@claude-flow/cli/src/init/mcp-generator.ts'
+      - 'v3/@claude-flow/cli/src/init/executor.ts'
+      - 'scripts/smoke-wizard-init-regression.mjs'
   workflow_dispatch:
 
 env:
@@ -2413,3 +2421,161 @@ jobs:
       - name: Guard 2 — smoke: generate .cjs and validate output ranges
         shell: bash
         run: node scripts/smoke-statusline-generator-delegation.mjs
+
+  wizard-init-regression-guard:
+    # Regression guard for ruvnet/ruflo#2206 #2207 #2208 — three init-wizard
+    # bugs that collectively broke every new user install:
+    #
+    # #2206: mcp-generator registered the server under key 'ruflo', causing all
+    #        33 ruflo plugins to fail with "Unknown tool mcp__claude-flow__*".
+    #        The key must be 'claude-flow'; the command args (ruflo@latest) are
+    #        correct and must NOT change.
+    #
+    # #2207: detectExistingRufloMCP only checked for 'ruflo' in mcpServers.
+    #        After #2206, the key becomes 'claude-flow', so the detector would
+    #        NEVER recognise a prior install. Both keys must be accepted. Also
+    #        guarded: bare .claude/settings.json must NOT be a false positive.
+    #
+    # #2208: init --force silently destroyed existing CLAUDE.md without backup,
+    #        causing data loss. A .pre-ruflo backup must be created before
+    #        any overwrite; timestamped fallback when a backup already exists.
+    #
+    # Three guards (static + runtime each):
+    #   [1/3] STATIC #2206 — mcp-generator source must write 'claude-flow' key
+    #   [2/3] RUNTIME #2206 + #2208 — build CLI, run init in tmp dir, assert
+    #         .mcp.json has 'claude-flow' key and CLAUDE.md.pre-ruflo was created
+    #   [3/3] RUNTIME #2207 — bare .claude/settings.json must NOT trigger
+    #         the duplicate-detection guard (false-positive check)
+    name: wizard init regression guard (#2206 #2207 #2208)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Guard 1 — static #2206 server key contract
+        shell: bash
+        run: |
+          echo "=== Guard 1: mcp-generator must write the claude-flow key ==="
+
+          echo "Checking mcp-generator uses 'claude-flow' as the server key..."
+          grep -qE "mcpServers\['claude-flow'\]|mcpServers\[\"claude-flow\"\]" \
+            v3/@claude-flow/cli/src/init/mcp-generator.ts \
+            || { echo "::error::mcp-generator no longer writes 'claude-flow' server key — #2206 regression"; exit 1; }
+          echo "ok: 'claude-flow' key found"
+
+          echo "Checking mcp-generator does NOT use bare 'ruflo' as the server key..."
+          ! grep -qE "mcpServers\['ruflo'\]|mcpServers\[\"ruflo\"\]" \
+            v3/@claude-flow/cli/src/init/mcp-generator.ts \
+            || { echo "::error::mcp-generator writes 'ruflo' server key — breaks mcp__claude-flow__* tool naming (#2206)"; exit 1; }
+          echo "ok: bare 'ruflo' server key absent"
+
+          echo "Checking command args still invoke ruflo@latest (must NOT change)..."
+          grep -q "ruflo@latest" v3/@claude-flow/cli/src/init/mcp-generator.ts \
+            || { echo "::error::mcp-generator no longer invokes ruflo@latest — command args must be preserved (#2206)"; exit 1; }
+          echo "ok: ruflo@latest invocation present"
+
+          echo "Guard 1 passed."
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install and build CLI
+        working-directory: v3
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --recursive --no-bail run build || true
+          test -f @claude-flow/cli/dist/src/init/executor.js \
+            || { echo "::error::executor.js not built — CLI build failed"; exit 1; }
+          test -f @claude-flow/cli/dist/src/init/mcp-generator.js \
+            || { echo "::error::mcp-generator.js not built"; exit 1; }
+
+      - name: Guard 2 — runtime #2206 server key + #2208 CLAUDE.md backup
+        shell: bash
+        run: |
+          echo "=== Guard 2: generated .mcp.json key and CLAUDE.md backup ==="
+
+          TMP=$(mktemp -d)
+          cd "$TMP"
+
+          # Seed CLAUDE.md with sentinel content so #2208 backup is observable
+          printf '# Sentinel Project Content — do not lose\n' > CLAUDE.md
+
+          # Run init --force (non-interactive); ignore non-zero exit from
+          # optional components that need extra deps (skills, helpers, etc.)
+          HOME="$TMP" node "$GITHUB_WORKSPACE/v3/@claude-flow/cli/dist/cli.js" \
+            init --force 2>&1 || true
+
+          echo "--- .mcp.json contents ---"
+          cat .mcp.json 2>/dev/null || echo "(not found)"
+
+          # #2206: 'claude-flow' key must exist
+          node -e "
+            const cfg = JSON.parse(require('fs').readFileSync('.mcp.json','utf-8'));
+            if (!cfg.mcpServers || !('claude-flow' in cfg.mcpServers)) {
+              console.error('FAIL: .mcp.json missing claude-flow server key (#2206)');
+              process.exit(1);
+            }
+            console.log('ok: claude-flow key present in .mcp.json');
+          " || { echo "::error::generated .mcp.json missing 'claude-flow' server key (#2206)"; exit 1; }
+
+          # #2206: stray 'ruflo' key must NOT exist
+          node -e "
+            const cfg = JSON.parse(require('fs').readFileSync('.mcp.json','utf-8'));
+            if (cfg.mcpServers && 'ruflo' in cfg.mcpServers) {
+              console.error('FAIL: .mcp.json has stray ruflo server key (#2206)');
+              process.exit(1);
+            }
+            console.log('ok: stray ruflo key absent');
+          " || { echo "::error::generated .mcp.json has stray 'ruflo' server key (#2206)"; exit 1; }
+
+          # #2208: CLAUDE.md.pre-ruflo backup must exist with sentinel content
+          BACKUP=$(ls CLAUDE.md.pre-ruflo* 2>/dev/null | head -1)
+          if [ -z "$BACKUP" ]; then
+            echo "::error::init --force did not create CLAUDE.md.pre-ruflo backup (#2208)"
+            exit 1
+          fi
+          echo "ok: backup file created: $BACKUP"
+          grep -q "Sentinel Project Content" "$BACKUP" \
+            || { echo "::error::CLAUDE.md backup missing original sentinel content (#2208)"; exit 1; }
+          echo "ok: backup contains original content"
+
+          echo "Guard 2 passed."
+
+      - name: Guard 3 — runtime #2207 false-positive check
+        shell: bash
+        run: |
+          echo "=== Guard 3: bare .claude/settings.json must NOT trigger duplicate detection ==="
+
+          TMP=$(mktemp -d)
+          cd "$TMP"
+
+          # Simulate Claude Code's own project settings.json with NO ruflo registration
+          mkdir -p .claude
+          echo '{"env": {}, "hooks": {}}' > .claude/settings.json
+
+          # Run init WITHOUT --force; use a custom HOME with no ~/.claude.json
+          # so the real user's global config doesn't interfere
+          FAKE_HOME=$(mktemp -d)
+          OUT=$(HOME="$FAKE_HOME" node "$GITHUB_WORKSPACE/v3/@claude-flow/cli/dist/cli.js" \
+            init 2>&1 || true)
+
+          echo "--- init output ---"
+          echo "$OUT"
+
+          # The init must NOT claim "already initialized" due to the bare settings.json
+          if echo "$OUT" | grep -qi "existing 'ruflo' MCP registration\|existing 'claude-flow' MCP registration"; then
+            echo "::error::init false-positives on bare .claude/settings.json (#2207)"
+            exit 1
+          fi
+          echo "ok: no false-positive on bare .claude/settings.json"
+
+          rm -rf "$FAKE_HOME"
+          echo "Guard 3 passed."

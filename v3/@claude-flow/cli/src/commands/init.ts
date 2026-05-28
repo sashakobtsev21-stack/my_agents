@@ -170,13 +170,52 @@ async function initCodexAction(
   }
 }
 
-// Check if project is already initialized
+// Check if project is already initialized with ruflo.
+// #2207: .claude/settings.json alone is NOT a ruflo marker — it's created by
+// Claude Code itself and exists in every Claude Code project. We require a
+// ruflo-specific signal: either a claudeFlow section in settings.json, OR a
+// .mcp.json with a 'claude-flow' or 'ruflo' server key, OR the ruflo-only
+// .claude-flow/config.yaml. Using the bare file-existence check was causing
+// false-positives for new users whose only existing file was Claude Code's own
+// settings.json.
 function isInitialized(cwd: string): { claude: boolean; claudeFlow: boolean } {
-  const claudePath = path.join(cwd, '.claude', 'settings.json');
   const claudeFlowPath = path.join(cwd, '.claude-flow', 'config.yaml');
+  const mcpJsonPath = path.join(cwd, '.mcp.json');
+  const settingsPath = path.join(cwd, '.claude', 'settings.json');
+
+  // Check .claude-flow/config.yaml — ruflo-specific, always reliable
+  const hasClaudeFlow = fs.existsSync(claudeFlowPath);
+
+  // Check .claude/settings.json for ruflo-specific content (claudeFlow section)
+  let hasRufloSettings = false;
+  if (fs.existsSync(settingsPath)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+      hasRufloSettings =
+        parsed != null &&
+        typeof parsed === 'object' &&
+        'claudeFlow' in parsed;
+    } catch { /* malformed — ignore */ }
+  }
+
+  // Check .mcp.json for ruflo/claude-flow server key
+  let hasRufloMcp = false;
+  if (fs.existsSync(mcpJsonPath)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(mcpJsonPath, 'utf-8'));
+      hasRufloMcp =
+        parsed != null &&
+        typeof parsed === 'object' &&
+        parsed.mcpServers != null &&
+        typeof parsed.mcpServers === 'object' &&
+        ('claude-flow' in (parsed.mcpServers as Record<string, unknown>) ||
+         'ruflo' in (parsed.mcpServers as Record<string, unknown>));
+    } catch { /* malformed — ignore */ }
+  }
+
   return {
-    claude: fs.existsSync(claudePath),
-    claudeFlow: fs.existsSync(claudeFlowPath),
+    claude: hasRufloSettings || hasRufloMcp,
+    claudeFlow: hasClaudeFlow,
   };
 }
 
