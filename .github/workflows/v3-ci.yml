@@ -139,6 +139,10 @@ on:
       - 'scripts/smoke-graph-plugin-adapter.mjs'
       - 'scripts/smoke-graph-pathfinder.mjs'
       - 'scripts/benchmark-graph.mjs'
+      # statusline generator delegation regression guard (#2195)
+      - 'v3/@claude-flow/cli/src/init/statusline-generator.ts'
+      - '.claude/helpers/statusline.cjs'
+      - 'scripts/smoke-statusline-generator-delegation.mjs'
   pull_request:
     branches: [main, develop]
     paths:
@@ -237,6 +241,10 @@ on:
       # witness manifests / fix list — so witness-verify runs on PRs that
       # touch them (otherwise a stale per-OS manifest only fails post-merge).
       - 'verification/**'
+      # statusline generator delegation regression guard (#2195)
+      - 'v3/@claude-flow/cli/src/init/statusline-generator.ts'
+      - '.claude/helpers/statusline.cjs'
+      - 'scripts/smoke-statusline-generator-delegation.mjs'
   workflow_dispatch:
 
 env:
@@ -2336,3 +2344,72 @@ jobs:
           pnpm -r build
       - name: Run graph benchmark
         run: node scripts/benchmark-graph.mjs
+
+  statusline-generator-delegation-smoke:
+    # Regression guard for ruvnet/ruflo#2195 — the statusline generator
+    # previously re-implemented all data readers locally with fragile file
+    # probes that returned wrong values (DDD 0/5, intelligence 1%, ADR 87/87).
+    #
+    # The fix delegates to 'npx @claude-flow/cli@latest hooks statusline --json'
+    # as the single source of truth and counts ADRs in BOTH directories
+    # (v3/implementation/adrs/ + v3/docs/adr/).
+    #
+    # Two guards:
+    #   [1/2] STATIC — assert generator still delegates to the CLI command
+    #         and does NOT contain the old fragile heuristics.
+    #   [2/2] SMOKE — build the CLI, run the generated .cjs with --json,
+    #         assert all numeric fields are within valid ranges and that
+    #         the known-bad fallback values (domainsCompleted=0 when patterns>0,
+    #         intelligencePct=1 when system is healthy) are not present.
+    name: statusline generator delegation smoke (#2195)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Guard 1 — static delegation contract
+        shell: bash
+        run: |
+          echo "Checking that statusline-generator.ts delegates to 'hooks statusline --json'..."
+          grep -q "hooks statusline --json" v3/@claude-flow/cli/src/init/statusline-generator.ts \
+            || { echo "::error::statusline-generator.ts no longer delegates to 'hooks statusline --json' — regression of #2195"; exit 1; }
+          echo "ok: delegation pattern found"
+
+          echo "Checking that the old fragile heuristics are NOT present..."
+          # The buggy fallback computed domains from file-based pattern counts —
+          # this produced domainsCompleted=0 when AgentDB had 26k+ patterns.
+          ! grep -q "getLearningStats\b" v3/@claude-flow/cli/src/init/statusline-generator.ts \
+            || { echo "::error::statusline-generator.ts still has getLearningStats (old local reader) — regression of #2195"; exit 1; }
+          ! grep -q "getV3Progress\b" v3/@claude-flow/cli/src/init/statusline-generator.ts \
+            || { echo "::error::statusline-generator.ts still has getV3Progress (old local reader) — regression of #2195"; exit 1; }
+          echo "ok: old local-reader heuristics removed"
+
+          echo "Checking that both ADR directories are counted..."
+          grep -q "v3/docs/adr" v3/@claude-flow/cli/src/init/statusline-generator.ts \
+            || { echo "::error::statusline-generator.ts missing v3/docs/adr ADR directory — regression of #2195 ADR-count bug"; exit 1; }
+          grep -q "v3/implementation/adrs" v3/@claude-flow/cli/src/init/statusline-generator.ts \
+            || { echo "::error::statusline-generator.ts missing v3/implementation/adrs ADR directory"; exit 1; }
+          echo "ok: both ADR directories present"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install and build CLI
+        working-directory: v3
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --recursive --no-bail run build || true
+          test -f @claude-flow/cli/dist/src/init/statusline-generator.js \
+            || { echo "::error::statusline-generator.js not built"; exit 1; }
+
+      - name: Guard 2 — smoke: generate .cjs and validate output ranges
+        shell: bash
+        run: node scripts/smoke-statusline-generator-delegation.mjs
