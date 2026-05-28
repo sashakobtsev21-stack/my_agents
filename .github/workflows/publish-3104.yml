@@ -1,0 +1,106 @@
+name: Publish 3.10.4 (one-shot)
+# One-shot workflow to publish 3.10.4 patch release (fixes #2195 statusline generator)
+# This workflow will be deleted after successful publish.
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish @claude-flow/cli@3.10.4, claude-flow@3.10.4, ruflo@3.10.4
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: '8'
+
+      - name: Setup Node.js with npm auth
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+          cache-dependency-path: v3/pnpm-lock.yaml
+
+      - name: Install v3 dependencies
+        working-directory: v3
+        run: pnpm install --frozen-lockfile
+
+      - name: Build @claude-flow/cli
+        working-directory: v3/@claude-flow/cli
+        run: pnpm run build
+
+      - name: Verify fix is in dist
+        working-directory: v3/@claude-flow/cli
+        run: |
+          grep -q "hooks statusline --json" dist/src/init/statusline-generator.js || { echo "REGRESSION: delegation not in dist"; exit 1; }
+          echo "Fix verified in dist"
+
+      - name: Verify versions are 3.10.4
+        run: |
+          CLI_VER=$(node -p "require('./v3/@claude-flow/cli/package.json').version")
+          ROOT_VER=$(node -p "require('./package.json').version")
+          RUFLO_VER=$(node -p "require('./ruflo/package.json').version")
+          echo "CLI: $CLI_VER, root: $ROOT_VER, ruflo: $RUFLO_VER"
+          [ "$CLI_VER" = "3.10.4" ] || { echo "CLI version mismatch"; exit 1; }
+          [ "$ROOT_VER" = "3.10.4" ] || { echo "root version mismatch"; exit 1; }
+          [ "$RUFLO_VER" = "3.10.4" ] || { echo "ruflo version mismatch"; exit 1; }
+
+      - name: Publish @claude-flow/cli@3.10.4
+        working-directory: v3/@claude-flow/cli
+        run: npm publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Add dist-tags for @claude-flow/cli
+        run: |
+          npm dist-tag add @claude-flow/cli@3.10.4 alpha
+          npm dist-tag add @claude-flow/cli@3.10.4 v3alpha
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish claude-flow@3.10.4 (umbrella)
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Add dist-tags for claude-flow
+        run: |
+          npm dist-tag add claude-flow@3.10.4 alpha
+          npm dist-tag add claude-flow@3.10.4 v3alpha
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish ruflo@3.10.4 (wrapper)
+        working-directory: ruflo
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Add dist-tags for ruflo
+        run: |
+          npm dist-tag add ruflo@3.10.4 alpha
+          npm dist-tag add ruflo@3.10.4 v3alpha
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify all 9 dist-tags
+        run: |
+          for pkg in "@claude-flow/cli" "claude-flow" "ruflo"; do
+            echo "=== $pkg ==="
+            latest=$(npm view "$pkg@latest" version)
+            alpha=$(npm view "$pkg@alpha" version)
+            v3alpha=$(npm view "$pkg@v3alpha" version)
+            echo "latest:  $latest"
+            echo "alpha:   $alpha"
+            echo "v3alpha: $v3alpha"
+            [ "$latest"  = "3.10.4" ] || { echo "FAIL: $pkg latest != 3.10.4"; exit 1; }
+            [ "$alpha"   = "3.10.4" ] || { echo "FAIL: $pkg alpha != 3.10.4"; exit 1; }
+            [ "$v3alpha" = "3.10.4" ] || { echo "FAIL: $pkg v3alpha != 3.10.4"; exit 1; }
+          done
+          echo "All 9 dist-tags verified as 3.10.4"
