@@ -16,7 +16,7 @@ const STORAGE_DIR = '.claude-flow';
 const AGENT_DIR = 'agents';
 const AGENT_FILE = 'store.json';
 
-type ClaudeModel = 'haiku' | 'sonnet' | 'opus' | 'inherit';
+type ClaudeModel = 'haiku' | 'sonnet' | 'opus' | 'opus-4.7' | 'inherit';
 
 export interface AgentRecord {
   agentId: string;
@@ -54,9 +54,9 @@ function saveAgentStore(store: AgentStore): void {
   writeFileSync(getAgentPath(), JSON.stringify(store, null, 2), 'utf-8');
 }
 
-// #1906 — these were stuck on Claude-3.x ids that the Anthropic API now
-// 404s. Current model ids (Claude 4.x family):
-//   Opus 4.7    → claude-opus-4-7
+// #1906/#2232 — Current model ids (Claude 4.x family):
+//   Opus 4.8    → claude-opus-4-8   (current, the `opus` alias)
+//   Opus 4.7    → claude-opus-4-7   (prior pin, reachable via `opus-4.7`)
 //   Sonnet 4.6  → claude-sonnet-4-6
 //   Haiku 4.5   → claude-haiku-4-5-20251001
 // `inherit` and the various defaults below all map to Sonnet 4.6.
@@ -64,7 +64,8 @@ export const DEFAULT_ANTHROPIC_MODEL = 'claude-sonnet-4-6';
 const MODEL_MAP: Record<string, string> = {
   haiku: 'claude-haiku-4-5-20251001',
   sonnet: 'claude-sonnet-4-6',
-  opus: 'claude-opus-4-7',
+  opus: 'claude-opus-4-8',
+  'opus-4.7': 'claude-opus-4-7',
   inherit: DEFAULT_ANTHROPIC_MODEL,
 };
 
@@ -436,7 +437,9 @@ export async function executeAgentTask(input: AgentExecuteInput): Promise<AgentE
   if (!agent) return { success: false, agentId: input.agentId, error: 'Agent not found' };
   if (agent.status === 'terminated') return { success: false, agentId: input.agentId, error: 'Agent has been terminated' };
 
-  const anthropicModel = MODEL_MAP[agent.model || 'sonnet'] || DEFAULT_ANTHROPIC_MODEL;
+  // #2232 — Single source of truth so literal claude-* ids pass through
+  // instead of silently collapsing to Sonnet via the old MODEL_MAP[]||DEFAULT fold.
+  const anthropicModel = resolveAnthropicModel(agent.model || 'sonnet');
   const systemPrompt = input.systemPrompt ||
     `You are a ${agent.agentType} agent operating as part of a Ruflo swarm. ` +
     `Agent ID: ${input.agentId}. Domain: ${agent.domain ?? 'general'}. ` +

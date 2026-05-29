@@ -85,7 +85,7 @@ export function generateSettings(options: InitOptions): object {
       shell: platform.shell,
     },
     modelPreferences: {
-      default: 'claude-opus-4-7',
+      default: 'claude-opus-4-8',
       routing: 'claude-haiku-4-5-20251001',
     },
     agentTeams: {

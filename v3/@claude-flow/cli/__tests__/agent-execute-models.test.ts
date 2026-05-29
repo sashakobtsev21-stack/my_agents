@@ -13,8 +13,11 @@ describe('#1906 — agent_execute model aliases resolve to current Claude 4.x id
   it('sonnet → claude-sonnet-4-6', () => {
     expect(resolveAnthropicModel('sonnet')).toBe('claude-sonnet-4-6');
   });
-  it('opus → claude-opus-4-7', () => {
-    expect(resolveAnthropicModel('opus')).toBe('claude-opus-4-7');
+  it('opus → claude-opus-4-8 (#2232 alias bump)', () => {
+    expect(resolveAnthropicModel('opus')).toBe('claude-opus-4-8');
+  });
+  it('opus-4.7 reaches the prior pin', () => {
+    expect(resolveAnthropicModel('opus-4.7')).toBe('claude-opus-4-7');
   });
   it('inherit → the default (sonnet 4.6)', () => {
     expect(resolveAnthropicModel('inherit')).toBe('claude-sonnet-4-6');

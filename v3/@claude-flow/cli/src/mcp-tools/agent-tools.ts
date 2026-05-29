@@ -22,7 +22,7 @@ const AGENT_FILE = 'store.json';
 const HIVE_AGENT_FILE = 'agents.json';
 
 // Model types matching Claude Agent SDK
-type ClaudeModel = 'haiku' | 'sonnet' | 'opus' | 'inherit';
+type ClaudeModel = 'haiku' | 'sonnet' | 'opus' | 'opus-4.7' | 'inherit';
 
 interface AgentRecord {
   agentId: string;
@@ -159,7 +159,7 @@ async function determineAgentModel(
   tier?: 1 | 2 | 3;
 }> {
   // 1. Explicit model in config
-  if (config.model && ['haiku', 'sonnet', 'opus', 'inherit'].includes(config.model as string)) {
+  if (config.model && ['haiku', 'sonnet', 'opus', 'opus-4.7', 'inherit'].includes(config.model as string)) {
     return { model: config.model as ClaudeModel, routedBy: 'explicit' };
   }
 
@@ -229,8 +229,8 @@ export const agentTools: MCPTool[] = [
         domain: { type: 'string', description: 'Agent domain' },
         model: {
           type: 'string',
-          enum: ['haiku', 'sonnet', 'opus', 'inherit'],
-          description: 'Claude model to use (haiku=fast/cheap, sonnet=balanced, opus=most capable)'
+          enum: ['haiku', 'sonnet', 'opus', 'opus-4.7', 'inherit'],
+          description: 'Claude model alias (haiku=fast/cheap, sonnet=balanced, opus=current Opus 4.8, opus-4.7=prior Opus pin)'
         },
         task: { type: 'string', description: 'Task description for intelligent model routing' },
       },

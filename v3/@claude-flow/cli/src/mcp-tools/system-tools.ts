@@ -112,7 +112,10 @@ export const systemTools: MCPTool[] = [
     },
     handler: async (input) => {
       const metrics = loadMetrics();
-      const uptime = Date.now() - new Date(metrics.startTime).getTime();
+      // #2235(B) — live process uptime, not the persisted metrics.startTime
+      // (which is the file's creation timestamp and survived across restarts,
+      // making system_status report stale ~8.8-day uptime on a fresh server).
+      const uptime = Math.floor(process.uptime() * 1000);
 
       const status = {
         status: metrics.health >= 0.8 ? 'healthy' : metrics.health >= 0.5 ? 'degraded' : 'unhealthy',
@@ -252,7 +255,7 @@ export const systemTools: MCPTool[] = [
           } catch { /* tracker not available — fall back to stored value */ }
           return store.requests;
         })(),
-        uptime: Date.now() - new Date(store.startTime).getTime(),
+        uptime: Math.floor(process.uptime() * 1000), // #2235(B) — live process uptime
         lastCheck: new Date().toISOString(),
       };
 
