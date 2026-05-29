@@ -28,6 +28,15 @@ const os = require('os');
 // Configuration
 const CONFIG = {
   maxAgents: 15,
+  // Session-cost display. Claude Code's cost.total_cost_usd is a client-side
+  // estimate that "may differ from your actual bill" and reads as misleading on
+  // subscription plans, where token usage is not billed per dollar. These let
+  // each user pick what the segment means to them without changing the default.
+  //   RUFLO_STATUSLINE_COST_SYMBOL  override the leading '$' (e.g. ⚡, €, 🌱);
+  //                                 set to an empty string for the number alone.
+  //   RUFLO_STATUSLINE_HIDE_COST    1/true/yes/on removes the segment entirely.
+  costSymbol: process.env.RUFLO_STATUSLINE_COST_SYMBOL ?? '$',
+  hideCost: /^(1|true|yes|on)$/i.test(process.env.RUFLO_STATUSLINE_HIDE_COST || ''),
 };
 
 const CWD = process.cwd();
@@ -420,8 +429,8 @@ function generateStatusline() {
     const ctxColor = ctxInfo.usedPct >= 90 ? c.brightRed : ctxInfo.usedPct >= 70 ? c.brightYellow : c.brightGreen;
     header += '  ' + c.dim + '│' + c.reset + '  ' + ctxColor + '● ' + ctxInfo.usedPct + '% ctx' + c.reset;
   }
-  if (costInfo && costInfo.costUsd > 0) {
-    header += '  ' + c.dim + '│' + c.reset + '  ' + c.brightYellow + '$' + costInfo.costUsd.toFixed(2) + c.reset;
+  if (!CONFIG.hideCost && costInfo && costInfo.costUsd > 0) {
+    header += '  ' + c.dim + '│' + c.reset + '  ' + c.brightYellow + CONFIG.costSymbol + costInfo.costUsd.toFixed(2) + c.reset;
   }
   lines.push(header);
 

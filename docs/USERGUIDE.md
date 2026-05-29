@@ -2586,6 +2586,30 @@ Claude Code pipes JSON session data via **stdin** to the statusline script after
 | `🧠 15%` | Intelligence score | Pattern count from AgentDB |
 | `📦 AgentDB ●1.2K` | AgentDB vector count | File size estimate (`size / 2KB`) |
 
+**Customizing the cost segment:**
+
+`cost.total_cost_usd` is a client-side estimate from Claude Code that *may differ from your actual bill* and, on subscription plans, does not reflect out-of-pocket spend. Two environment variables let you relabel or remove the segment (the default is unchanged):
+
+| Variable | Effect | Example |
+|----------|--------|---------|
+| `RUFLO_STATUSLINE_COST_SYMBOL` | Overrides the leading `$`. Set to an empty string to show the number alone. | `RUFLO_STATUSLINE_COST_SYMBOL=⚡` → `⚡1.30` |
+| `RUFLO_STATUSLINE_HIDE_COST` | `1`/`true`/`yes`/`on` removes the segment entirely. | `RUFLO_STATUSLINE_HIDE_COST=1` |
+
+Set them in the `env` block of `.claude/settings.json` — Claude Code applies it to every session and to the statusline subprocess, and unlike hand-editing the helper it survives `npx ruflo@latest init --update`:
+
+```json
+{
+  "statusLine": { "type": "command", "command": "node .claude/helpers/statusline.cjs" },
+  "env": { "RUFLO_STATUSLINE_COST_SYMBOL": "⚡" }
+}
+```
+
+Or export them in your shell profile before launching Claude Code:
+
+```bash
+export RUFLO_STATUSLINE_COST_SYMBOL=⚡   # or: export RUFLO_STATUSLINE_HIDE_COST=1
+```
+
 **Setup (Automatic):**
 
 Run `npx ruflo@latest init` — this generates `.claude/settings.json` with the correct statusline config and creates the helper script at `.claude/helpers/statusline.cjs`.
