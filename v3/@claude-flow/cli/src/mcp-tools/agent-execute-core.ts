@@ -28,7 +28,7 @@ export interface AgentRecord {
   createdAt: string;
   domain?: string;
   model?: ClaudeModel;
-  modelRoutedBy?: 'explicit' | 'router' | 'agent-booster' | 'default';
+  modelRoutedBy?: 'explicit' | 'router' | 'codemod' | 'default';
   lastResult?: Record<string, unknown>;
 }
 

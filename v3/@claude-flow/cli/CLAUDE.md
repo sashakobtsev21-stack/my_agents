@@ -17,13 +17,13 @@
 
 **CLI coordinates, Task tool agents do the actual work!**
 
-### 🤖 INTELLIGENT 3-TIER MODEL ROUTING (ADR-026)
+### 🤖 INTELLIGENT 3-TIER MODEL ROUTING (ADR-026, ADR-143)
 
 **The routing system has 3 tiers for optimal cost/performance:**
 
 | Tier | Handler | Latency | Cost | Use Cases |
 |------|---------|---------|------|-----------|
-| **1** | Agent Booster | <1ms | $0 | Simple transforms (var→const, add-types, remove-console) |
+| **1** | Deterministic codemod | ~1ms | $0 | Structural transforms, **no LLM**: var→const, remove-console, add-logging |
 | **2** | Haiku | ~500ms | $0.0002 | Simple tasks, bug fixes, low complexity |
 | **3** | Sonnet/Opus | 2-5s | $0.003-$0.015 | Architecture, security, complex reasoning |
 
@@ -34,8 +34,9 @@ npx @claude-flow/cli@latest hooks pre-task --description "[task description]"
 
 **When you see these recommendations:**
 
-1. `[AGENT_BOOSTER_AVAILABLE]` → Skip LLM entirely, use Edit tool directly
-   - Intent types: `var-to-const`, `add-types`, `add-error-handling`, `async-await`, `add-logging`, `remove-console`
+1. `[CODEMOD_AVAILABLE]` → call the `hooks_codemod` MCP tool (intent + file). It applies the transform deterministically via the TypeScript compiler at $0, no LLM.
+   - Deterministic intents (Tier 1): `var-to-const`, `remove-console`, `add-logging`
+   - `add-types`, `add-error-handling`, `async-await` need judgement → they route to a model (Tier 2/3), NOT a $0 codemod
 
 2. `[TASK_MODEL_RECOMMENDATION] Use model="X"` → Use that model in Task tool:
 ```javascript
@@ -46,7 +47,7 @@ Task({
 })
 ```
 
-**Benefits:** 75% cost reduction, 352x faster for Tier 1 tasks
+**Benefits:** Tier-1 codemods are $0 and ~1ms (no model call); routing keeps simple edits off Sonnet/Opus.
 
 ---
 
