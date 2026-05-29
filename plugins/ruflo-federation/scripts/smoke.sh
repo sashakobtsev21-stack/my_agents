@@ -70,10 +70,10 @@ grep -qE "3-gate|3 gates|three gates" "$F" || miss="$miss header"
 grep -q "ruflo-aidefence" "$F" || miss="$miss aidefence-ref"
 [[ -z "$miss" ]] && ok || bad "3-gate alignment block missing:$miss"
 
-step "9. ADR-0001 exists with status Proposed"
+step "9. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-federation-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "10. no wildcard tool grants in skills"
 bad_skills=""

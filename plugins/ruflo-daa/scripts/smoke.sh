@@ -61,10 +61,10 @@ step "8. daa-patterns namespace claimed"
 grep -q "daa-patterns" "$ROOT/README.md" \
   && ok || bad "daa-patterns namespace not claimed"
 
-step "9. ADR-0001 exists with status Proposed"
+step "9. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-daa-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "10. no wildcard tool grants in skills"
 bad_skills=""

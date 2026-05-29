@@ -67,10 +67,10 @@ for plugin in ruflo-adr ruflo-ddd ruflo-jujutsu ruflo-docs ruflo-goals; do
 done
 [[ -z "$miss" ]] && ok || bad "missing plugin cross-references:$miss"
 
-step "9. ADR-0001 exists with status Proposed"
+step "9. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-sparc-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "10. 5 phase gate criteria documented"
 F="$ROOT/README.md"

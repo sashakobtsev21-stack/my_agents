@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Structural smoke test for ruflo-core v0.2.0 (ADR-0001).
+# Structural smoke test for ruflo-core v0.2.2 (ADR-0001).
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PASS=0
@@ -8,10 +8,10 @@ step() { printf "→ %s ... " "$1"; }
 ok()   { printf "PASS\n"; PASS=$((PASS+1)); }
 bad()  { printf "FAIL: %s\n" "$1"; FAIL=$((FAIL+1)); }
 
-step "1. plugin.json declares 0.2.0 with new keywords"
+step "1. plugin.json declares 0.2.2 with new keywords"
 v=$(grep -E '"version"' "$ROOT/.claude-plugin/plugin.json" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-if [[ "$v" != "0.2.0" ]]; then
-  bad "expected 0.2.0, got '$v'"
+if [[ "$v" != "0.2.2" ]]; then
+  bad "expected 0.2.2, got '$v'"
 else
   miss=""
   for k in foundation mcp-server plugin-catalog discovery; do
@@ -71,10 +71,10 @@ grep -qE "3-gate|3 gates|three gates" "$F" || miss="$miss 3-gate"
 grep -qE "4-step|4 step" "$F" || miss="$miss 4-step"
 [[ -z "$miss" ]] && ok || bad "missing cross-references:$miss"
 
-step "8. ADR-0001 exists with status Proposed"
+step "8. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-core-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "9. /ruflo-status command invokes doctor + status"
 F="$ROOT/commands/ruflo-status.md"

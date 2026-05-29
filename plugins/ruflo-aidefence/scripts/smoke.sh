@@ -57,10 +57,10 @@ grep -qE "0600|0700" "$F" || miss="$miss file-mode"
 grep -q "Encryption at rest" "$F" || miss="$miss encryption"
 [[ -z "$miss" ]] && ok || bad "defence-in-depth block missing:$miss"
 
-step "8. ADR-0001 exists with status Proposed"
+step "8. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-aidefence-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "9. both skills have valid frontmatter"
 miss=""

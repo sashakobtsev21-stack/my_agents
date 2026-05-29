@@ -63,10 +63,10 @@ grep -q "AES-256-GCM" "$F" || miss="$miss cipher"
 grep -q "RFE1" "$F" || miss="$miss magic-byte"
 [[ -z "$miss" ]] && ok || bad "encryption block missing:$miss"
 
-step "9. ADR-0001 exists with status Proposed"
+step "9. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-rvf-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "10. no wildcard tool grants in skills"
 bad_skills=""

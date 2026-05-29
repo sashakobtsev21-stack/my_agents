@@ -71,10 +71,10 @@ grep -q "ruflo-agentdb" "$ROOT/README.md" \
   && grep -q "Namespace convention" "$ROOT/README.md" \
   && ok || bad "namespace coordination block incomplete"
 
-step "9. ADR-0001 exists with status Proposed"
+step "9. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-knowledge-graph-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "10. no wildcard tool grants in skills"
 bad_skills=""

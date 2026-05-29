@@ -58,10 +58,10 @@ grep -q "Document-worker contract" "$F" || miss="$miss header"
 grep -qE 'scope.+api|api.+scope' "$F" || miss="$miss api-scope"
 [[ -z "$miss" ]] && ok || bad "$miss"
 
-step "9. ADR-0001 exists with status Proposed"
+step "9. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-docs-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "10. agent uses Haiku model (cost-efficient)"
 grep -qE "^model:[[:space:]]*haiku" "$ROOT/agents/docs-writer.md" \

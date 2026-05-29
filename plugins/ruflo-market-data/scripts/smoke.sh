@@ -79,10 +79,10 @@ F="$ROOT/README.md"
 grep -q "market-data" "$F" && grep -q "market-patterns" "$F" \
   && ok || bad "namespace claims missing"
 
-step "11. ADR-0001 exists with status Proposed"
+step "11. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-market-data-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 printf "\n%s passed, %s failed\n" "$PASS" "$FAIL"
 [[ $FAIL -eq 0 ]] || exit 1

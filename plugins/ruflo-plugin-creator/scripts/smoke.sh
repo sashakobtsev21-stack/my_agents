@@ -64,10 +64,10 @@ step "7. README has Architecture Decisions section"
 grep -q "## Architecture Decisions" "$ROOT/README.md" \
   && ok || bad "Architecture Decisions section missing"
 
-step "8. ADR-0001 exists with status Proposed"
+step "8. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-plugin-creator-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "9. validate-plugin skill present"
 [[ -f "$ROOT/skills/validate-plugin/SKILL.md" ]] && ok || bad "validate-plugin skill missing"

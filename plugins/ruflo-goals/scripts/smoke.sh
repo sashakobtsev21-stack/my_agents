@@ -63,10 +63,10 @@ for token in 'horizons' 'goals-horizons' 'research' 'goals-research'; do
 done
 [[ -z "$miss" ]] && ok || bad "missing namespace map entries:$miss"
 
-step "8. ADR-0001 exists with status Proposed"
+step "8. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-goals-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "9. Dossier ADR-099 invariants documented (seed-driven, graph output, budget caps, provenance)"
 F="$ROOT/README.md"

@@ -79,10 +79,10 @@ grep -q "ruflo-docs" "$F" || miss="$miss docs-attribution"
 grep -q "ruflo-testgen" "$F" || miss="$miss testgen-attribution"
 [[ -z "$miss" ]] && ok || bad "$miss"
 
-step "11. ADR-0001 exists with status Proposed"
+step "11. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-loop-workers-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "12. no wildcard tool grants in skills"
 bad_skills=""

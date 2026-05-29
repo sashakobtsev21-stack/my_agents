@@ -63,10 +63,10 @@ grep -q "ADR-096" "$ROOT/README.md" \
   && grep -qE "CLAUDE_FLOW_ENCRYPT_AT_REST|encryption" "$ROOT/README.md" \
   && ok || bad "ADR-096 encryption cross-reference missing"
 
-step "9. ADR-0001 exists with status Proposed"
+step "9. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-security-audit-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "10. no wildcard tool grants in skills"
 bad_skills=""

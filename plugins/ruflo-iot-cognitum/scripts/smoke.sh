@@ -83,10 +83,10 @@ grep -q "ruflo-federation" "$F" \
   && grep -qE "trust|trust model" "$F" \
   && ok || bad "federation trust-model parallel cross-reference missing"
 
-step "11. ADR-0001 exists with status Proposed"
+step "11. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-iot-cognitum-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "12. REFERENCE.md exists and is non-empty"
 [[ -s "$ROOT/REFERENCE.md" ]] && ok || bad "REFERENCE.md missing or empty"

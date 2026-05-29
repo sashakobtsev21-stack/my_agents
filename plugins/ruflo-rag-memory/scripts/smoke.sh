@@ -60,10 +60,10 @@ grep -q "AES-256-GCM" "$F" || miss="$miss cipher"
 grep -q "RFE1" "$F" || miss="$miss magic-byte"
 [[ -z "$miss" ]] && ok || bad "encryption block missing:$miss"
 
-step "8. ADR-0001 exists with status Proposed"
+step "8. ADR-0001 exists with status Accepted"
 ADR="$ROOT/docs/adrs/0001-rag-memory-contract.md"
-[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Proposed" "$ADR" \
-  && ok || bad "ADR missing or status != Proposed"
+[[ -f "$ADR" ]] && grep -qE "^status:[[:space:]]*Accepted" "$ADR" \
+  && ok || bad "ADR missing or status != Accepted"
 
 step "9. README does not claim '19 AgentDB controllers' (regression)"
 F="$ROOT/README.md"
