@@ -6,9 +6,10 @@
 //   - latency (avg / p50 / p99 / max)
 //   - cost: $0 measured (no API call) + estimated savings vs an LLM edit
 //
-// Writes a run JSON in the cost-trend summary schema to
-//   <repo>/docs/benchmarks/runs/codemod-<timestamp>.json (+ codemod-latest.json)
-// so the cost-tracker's trend tooling can ingest it.
+// Writes a run JSON (tagged summary.benchmark="codemod-tier1") into the
+// cost-tracker plugin's runs dir, which is exactly what `cost-trend` reads:
+//   plugins/ruflo-cost-tracker/docs/benchmarks/runs/codemod-<timestamp>.json
+// View the series with: BENCH_NAME=codemod-tier1 node scripts/trend.mjs
 //
 // Usage:
 //   node scripts/benchmark-codemods.mjs            # build dist first (npm run build)
@@ -23,7 +24,8 @@ import { performance } from 'node:perf_hooks';
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const CLI_ROOT = resolve(SCRIPT_DIR, '..');
 const REPO_ROOT = resolve(SCRIPT_DIR, '../../../..');
-const RUNS_DIR = join(REPO_ROOT, 'docs', 'benchmarks', 'runs');
+// Write to the cost-tracker plugin's runs dir — the exact path `cost-trend` reads.
+const RUNS_DIR = join(REPO_ROOT, 'plugins', 'ruflo-cost-tracker', 'docs', 'benchmarks', 'runs');
 
 // Estimated per-edit LLM cost (USD). Documented estimates, NOT a live call —
 // used only to express the savings of a $0 deterministic codemod.

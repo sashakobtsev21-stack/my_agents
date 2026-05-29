@@ -112,9 +112,14 @@ LLM-produced edit snippets), but it is **out of the Tier-1 path**.
    codemod and only emits `[CODEMOD_AVAILABLE]` if it actually changes something;
    a verified no-op falls through to model routing. With no file, it recommends
    Tier-1 best-effort (the executor verifies before writing).
-4. **Measured benchmark + corpus guardrail** — `bench/codemod-corpus.json` (12
-   golden cases) + `scripts/benchmark-codemods.mjs` measure correctness/latency and
-   write a run JSON (cost-trend schema) to `docs/benchmarks/runs/codemod-*.json`.
+4. **Measured benchmark + corpus guardrail + cost-trend wiring** —
+   `bench/codemod-corpus.json` (12 golden cases) + `scripts/benchmark-codemods.mjs`
+   measure correctness/latency and write a run JSON (tagged
+   `summary.benchmark="codemod-tier1"`) into the cost-tracker plugin's runs dir,
+   the exact path `cost-trend` reads. `cost-trend` is now benchmark-aware:
+   `BENCH_NAME=codemod-tier1 node scripts/trend.mjs` shows the codemod series,
+   while the default trend keeps showing only legacy booster runs (untagged /
+   `benchmark==="booster"`) — no cross-benchmark conflation.
    `__tests__/codemod-corpus.test.ts` fails CI on any regression vs golden.
 
 ## Verification

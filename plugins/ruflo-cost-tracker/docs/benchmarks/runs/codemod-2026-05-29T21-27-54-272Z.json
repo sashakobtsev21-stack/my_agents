@@ -1,16 +1,16 @@
 {
   "summary": {
-    "runAt": "2026-05-29T19:31:22.484Z",
+    "runAt": "2026-05-29T21:27:54.272Z",
     "benchmark": "codemod-tier1",
     "corpusVersion": 1,
     "corpusSize": 12,
     "winRate": 1,
     "winRatePct": "100.0%",
     "successCount": 12,
-    "avgLatencyMs": 0.5533,
-    "p50LatencyMs": 0.296,
-    "p99LatencyMs": 3.1452,
-    "maxLatencyMs": 3.1452,
+    "avgLatencyMs": 0.549,
+    "p50LatencyMs": 0.306,
+    "p99LatencyMs": 2.9676,
+    "maxLatencyMs": 2.9676,
     "structuralCostUsd": 0,
     "llmBaseline": "estimated",
     "estimatedSavingsUsd": {
@@ -26,7 +26,7 @@
       "correct": true,
       "changed": true,
       "edits": 2,
-      "latencyMs": 3.1452
+      "latencyMs": 2.9676
     },
     {
       "id": "v2c-reassigned",
@@ -34,7 +34,7 @@
       "correct": true,
       "changed": true,
       "edits": 1,
-      "latencyMs": 0.4904
+      "latencyMs": 0.475
     },
     {
       "id": "v2c-for-loop",
@@ -42,7 +42,7 @@
       "correct": true,
       "changed": true,
       "edits": 1,
-      "latencyMs": 0.6178
+      "latencyMs": 0.5999
     },
     {
       "id": "v2c-destructure",
@@ -50,7 +50,7 @@
       "correct": true,
       "changed": true,
       "edits": 1,
-      "latencyMs": 0.296
+      "latencyMs": 0.306
     },
     {
       "id": "v2c-scope-aware",
@@ -58,7 +58,7 @@
       "correct": true,
       "changed": true,
       "edits": 2,
-      "latencyMs": 0.619
+      "latencyMs": 0.8177
     },
     {
       "id": "v2c-comments-preserved",
@@ -66,7 +66,7 @@
       "correct": true,
       "changed": true,
       "edits": 1,
-      "latencyMs": 0.2776
+      "latencyMs": 0.2913
     },
     {
       "id": "rmc-midblock",
@@ -74,7 +74,7 @@
       "correct": true,
       "changed": true,
       "edits": 1,
-      "latencyMs": 0.2854
+      "latencyMs": 0.282
     },
     {
       "id": "rmc-multiple",
@@ -82,7 +82,7 @@
       "correct": true,
       "changed": true,
       "edits": 2,
-      "latencyMs": 0.1528
+      "latencyMs": 0.1397
     },
     {
       "id": "rmc-indented",
@@ -90,7 +90,7 @@
       "correct": true,
       "changed": true,
       "edits": 1,
-      "latencyMs": 0.1218
+      "latencyMs": 0.1083
     },
     {
       "id": "rmc-keep-logger",
@@ -98,7 +98,7 @@
       "correct": true,
       "changed": false,
       "edits": 0,
-      "latencyMs": 0.0757
+      "latencyMs": 0.0618
     },
     {
       "id": "log-named-fn",
@@ -106,7 +106,7 @@
       "correct": true,
       "changed": true,
       "edits": 1,
-      "latencyMs": 0.1759
+      "latencyMs": 0.1789
     },
     {
       "id": "log-arrow-var",
@@ -114,7 +114,7 @@
       "correct": true,
       "changed": true,
       "edits": 1,
-      "latencyMs": 0.3822
+      "latencyMs": 0.3603
     }
   ]
 }
