@@ -1,7 +1,7 @@
 {
   "name": "ruflo-workflows",
-  "description": "Workflow automation with templates, orchestration, and lifecycle management — wraps 10 workflow_* MCP tools (create/run/execute/status/list/pause/resume/cancel/delete/template) with full state-machine lifecycle (created → running ↔ paused → completed/cancelled). Includes GAIA benchmark component for Princeton HAL leaderboard submissions.",
-  "version": "0.3.0",
+  "description": "Workflow automation across two surfaces: the 10 workflow_* MCP tools (create/run/execute/status/list/pause/resume/cancel/delete/template) with full state-machine lifecycle (created → running ↔ paused → completed/cancelled), and native Claude Code Workflow JS orchestration (.claude/workflows/*.js — agent/parallel/pipeline/phase fan-out). Includes GAIA benchmark component for Princeton HAL leaderboard submissions.",
+  "version": "0.4.0",
   "author": {
     "name": "ruvnet",
     "url": "https://github.com/ruvnet"
@@ -18,6 +18,10 @@
     "workflow-templates",
     "pause-resume",
     "lifecycle",
+    "native-workflow",
+    "agent-fanout",
+    "pipeline",
+    "parallel",
     "gaia",
     "benchmark",
     "hal-leaderboard",
@@ -53,6 +57,14 @@
         "gaia-patterns",
         "gaia-debug-patterns"
       ]
+    },
+    "native_workflows": {
+      "description": "Native Claude Code Workflow JS orchestration — deterministic subagent fan-out via agent/parallel/pipeline/phase, authored as .claude/workflows/*.js named workflows",
+      "location": ".claude/workflows/*.js",
+      "api": ["agent", "parallel", "pipeline", "phase", "log"],
+      "invocation": "Workflow tool — Workflow({ name }) | Workflow({ scriptPath }) | Workflow({ resumeFromRunId })",
+      "reference_workflow": ".claude/workflows/plugin-contract-audit.js",
+      "adrs": ["ADR-0002"]
     }
   }
 }

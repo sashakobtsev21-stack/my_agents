@@ -167,3 +167,49 @@ describe('#2226 — pattern store and search share a backend', () => {
     expect(hit).toBeDefined();
   }, 60_000);
 });
+
+/**
+ * 3.10.8 routing-learning fixes (follow-ups to the intelligence audit):
+ *   Bug B — Q-router cached a stale route decision and only invalidated the
+ *           whole cache every 50 updates, so a freshly-learned Q-update was
+ *           hidden in-process until 50 updates accumulated. Now the updated
+ *           state's cache entry is invalidated immediately.
+ *   Bug C — boolean flags ignored an explicit space-form value, so
+ *           `route task --explore false` still explored (could not disable a
+ *           default-true boolean). The parser now consumes `true`/`false`.
+ */
+describe('3.10.8 #bugB — Q-router reflects a learned update immediately (no 50-update cache lag)', () => {
+  it('changes the exploited route within a handful of updates', async () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'ruflo-qcache-'));
+    try {
+      const r = createQLearningRouter({ modelPath: path.join(dir, 'q.json') });
+      await r.initialize();
+      const task = 'deep research and investigation task';
+      r.route(task, false); // prime the cache with the cold (all-zero) decision
+      for (let i = 0; i < 5; i++) r.update(task, 'researcher', 1.0);
+      for (let i = 0; i < 5; i++) r.update(task, 'architect', -1.0);
+      // Only 10 updates — well under the old 50-update invalidation threshold.
+      expect(r.route(task, false).route).toBe('researcher');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('3.10.8 #bugC — boolean flags accept an explicit space-form value', () => {
+  const parse = (argv: string[]) =>
+    new CommandParser({ booleanFlags: ['explore'], allowUnknownFlags: true })
+      .parse(['route', 'task', 'x', ...argv]).flags.explore;
+
+  it('parses --explore false as false (was forced true)', () => {
+    expect(parse(['--explore', 'false'])).toBe(false);
+  });
+  it('parses --explore true as true', () => {
+    expect(parse(['--explore', 'true'])).toBe(true);
+  });
+  it('still honors --explore=false and bare --explore', () => {
+    expect(parse(['--explore=false'])).toBe(false);
+    expect(parse(['--explore'])).toBe(true);
+    expect(parse(['--no-explore'])).toBe(false);
+  });
+});

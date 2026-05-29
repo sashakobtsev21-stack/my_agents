@@ -87,3 +87,26 @@ What does **not** hold up is the **performance-multiplier marketing**: the HNSW 
 5. Wire or remove the inert pieces (#4–#7) so named capabilities are either real or not advertised.
 
 *Per-subsystem raw evidence is preserved in the audit run; load-bearing file:line references are inline above.*
+
+---
+
+## Remediation status (updated 2026-05-29)
+
+### Shipped in v3.10.7
+- ✅ **#1 negative-reward inversion** — fixed in `parser.ts` (negative numeric literals accepted as flag values). Verified in the published artifact.
+- ✅ **#2 Flash Attention fabrication** — randomized telemetry removed from both `attention-coordinator` copies (unmeasured sentinel + "unverified" labels).
+- ✅ **#3 embedding observability** — `generateEmbedding` returns `backend: onnx|mock`, surfaced in `memory_bridge_status`/`import`.
+- ✅ **#4/#5 MCP learning** — `trajectory-end` no longer feeds EWC a synthetic gradient; `hooks_intelligence_learn` runs a real cycle.
+- ✅ **HNSW optimization** — root-caused the silent brute-force fallback (no `storagePath` → native DB lock → silent `catch{}`); fixed with unique storagePath + `hnswConfig {m:32, efC:200}` + a visible fallback warning. Measured 0.92×→3.2–4.7× at N=5k, 0.95×→1.89× at N=20k.
+- ✅ Perf docs rewritten to measured values; `scripts/benchmark-intelligence.mjs` added.
+
+### Shipped in v3.10.8
+- ✅ **#10 Bug B (stale route cache)** — `update()` now invalidates the updated state's cache entry immediately (was: whole cache only every 50 updates, hiding learning in-process). Verified: learned route changes within 10 updates.
+- ✅ **#10 Bug C (`--explore false` ignored)** — the parser now consumes an explicit `true`/`false` value for boolean flags in the space form, so a default-true boolean can be disabled. Verified deterministic exploitation with `explore=false`.
+
+### Deferred — with honest rationale (NOT fixed)
+- **SONA "default-path adapt is a stub"** — re-examined: the default intelligence path's pattern-confidence learning runs through `LocalSonaCoordinator`, which IS real and was confirmed working end-to-end (confidence 0.906→1.0). The inert piece is the *supplementary* `@ruvector/ruvllm` `SonaCoordinator` forward, which is not load-bearing for the confirmed learning. The audit slightly overstated this as a default-path gap; wiring the WASM SONA into the default path is an *enhancement*, not a bug fix, and is left for a dedicated change.
+- **WASM MicroLoRA `apply()` inert** — lives in the `@ruvector/ruvllm`/`-wasm` **published dependency**, not ruflo source; cannot be fixed by editing a node_module. Requires an upstream fix or a deliberate route-around (use the real JS `LoraAdapter` path). Tracked, not shipped here.
+- **EWC++ "Fisher information" is a proxy** (`|w|`/`embedding²`, not gradient curvature) — functional regularizer; relabeling vs. real gradient-Fisher is a design decision, deferred.
+- **Bandit priors global-per-model, not per-task** — making them per-task changes the **persisted state schema** (`priors` → per-task-bucket map), so it needs an ADR + migration, not a patch. Deferred to a dedicated change.
+- **Embedding ONNX broken without native `sharp`** — now *observable* (3.10.7 `backend:mock`); a sharp-free transformers path / bundled binary is the real fix, deferred.

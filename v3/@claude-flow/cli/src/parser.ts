@@ -297,7 +297,16 @@ export class CommandParser {
         const normalizedKey = this.normalizeKey(key);
 
         if (booleanFlags.has(normalizedKey)) {
-          flags[normalizedKey] = true;
+          // #explore-flag: allow an explicit boolean value (`--explore false`,
+          // `--explore true`). Without this, a default-true boolean could never
+          // be disabled via the space form — the value was dropped and the flag
+          // forced to true. The `=` form already worked via parseValue.
+          if (nextIndex < args.length && this.isBooleanLiteral(args[nextIndex])) {
+            flags[normalizedKey] = args[nextIndex].toLowerCase() === 'true';
+            nextIndex++;
+          } else {
+            flags[normalizedKey] = true;
+          }
         } else if (nextIndex < args.length && this.isFlagValue(args[nextIndex])) {
           flags[normalizedKey] = this.parseValue(args[nextIndex]);
           nextIndex++;
@@ -315,7 +324,14 @@ export class CommandParser {
         const normalizedKey = this.normalizeKey(key);
 
         if (booleanFlags.has(normalizedKey)) {
-          flags[normalizedKey] = true;
+          // #explore-flag: short boolean flags also accept an explicit value
+          // (`-e false`) so a default-true boolean can be turned off.
+          if (nextIndex < args.length && this.isBooleanLiteral(args[nextIndex])) {
+            flags[normalizedKey] = args[nextIndex].toLowerCase() === 'true';
+            nextIndex++;
+          } else {
+            flags[normalizedKey] = true;
+          }
         } else if (nextIndex < args.length && this.isFlagValue(args[nextIndex])) {
           flags[normalizedKey] = this.parseValue(args[nextIndex]);
           nextIndex++;
@@ -353,6 +369,14 @@ export class CommandParser {
     if (!arg.startsWith('-')) return true;
     // Negative number: '-' followed by a parseable numeric literal.
     return /^-\d*\.?\d+(?:[eE][+-]?\d+)?$/.test(arg);
+  }
+
+  /** True for the literal tokens `true`/`false` (case-insensitive). Used so a
+   * boolean flag can take an explicit value in the space form, e.g.
+   * `--explore false` / `-e true`. */
+  private isBooleanLiteral(arg: string): boolean {
+    const a = arg.toLowerCase();
+    return a === 'true' || a === 'false';
   }
 
   private parseValue(value: string): string | number | boolean {

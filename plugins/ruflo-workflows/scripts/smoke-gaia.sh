@@ -11,9 +11,9 @@ bad()  { printf "FAIL: %s\n" "$1"; FAIL=$((FAIL+1)); }
 
 # ── plugin.json ──────────────────────────────────────────────────────────────
 
-step "1. plugin.json bumped to 0.3.0 with gaia keywords"
+step "1. plugin.json at 0.4.0 with gaia keywords"
 v=$(grep -E '"version"' "$ROOT/.claude-plugin/plugin.json" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-if [[ "$v" != "0.3.0" ]]; then bad "expected 0.3.0, got '$v'"; else
+if [[ "$v" != "0.4.0" ]]; then bad "expected 0.4.0, got '$v'"; else
   miss=""
   for k in gaia benchmark hal-leaderboard evaluation; do
     grep -q "\"$k\"" "$ROOT/.claude-plugin/plugin.json" || miss="$miss $k"
@@ -118,7 +118,7 @@ grep -qE 'SWE-bench|WebArena|HumanEval|extensib' "$ROOT/skills/gaia-submission/S
 
 # ── original smoke test still passes ─────────────────────────────────────────
 
-step "13. original plugin smoke (0.3.0 is not 0.2.0 but other checks still valid)"
+step "13. core plugin artifacts intact (skills + agent + command)"
 # Re-run a subset: skills + agent + command for pre-existing artifacts
 miss=""
 for s in workflow-create workflow-run; do
