@@ -1618,6 +1618,17 @@ jobs:
         shell: bash
         run: node scripts/audit-umbrella-version-lockstep.mjs
 
+      - name: Run better-sqlite3 override audit (#2219)
+        # agentdb pins better-sqlite3 as an OPTIONAL dep at ^11.8.1, which has
+        # no Node 24/25/26 prebuild → the optional native build fails silently
+        # on those runtimes and AgentDB drops to a non-persistent backend
+        # (silent write loss). Asserts both the root umbrella and the ruflo
+        # wrapper override better-sqlite3 to >=12.8.0 (which ships Node 20–26
+        # prebuilds). Root overrides do NOT reach the published wrapper (#2112),
+        # so both must carry it.
+        shell: bash
+        run: node scripts/audit-better-sqlite3-override.mjs
+
       - name: Run plugin-hooks cross-platform audit (#2132)
         # Catches /bin/bash literals, POSIX-only pipelines (jq, xargs, tr),
         # and .sh script invocations in plugin hooks.json files — patterns

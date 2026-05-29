@@ -205,7 +205,7 @@ export const agentdbPatternSearch: MCPTool = {
       //      against each entry's pattern text. Deterministic; survives
       //      embedding-index latency and threshold tuning.
       try {
-        const { searchEntries, listEntries } = await import('../memory/memory-initializer.js');
+        const { searchEntries, listEntries, getEntry } = await import('../memory/memory-initializer.js');
 
         const parseEntry = (e: Record<string, unknown>): Record<string, unknown> | null => {
           const raw = typeof e.content === 'string' ? e.content : (e as { value?: unknown }).value;
@@ -236,14 +236,29 @@ export const agentdbPatternSearch: MCPTool = {
             .filter((r): r is Record<string, unknown> => r !== null);
         } catch { /* fall through to tier 2 */ }
 
-        // Tier 2 — substring scan (catches just-written entries before HNSW indexes them)
+        // Tier 2 — substring scan (catches just-written entries before HNSW indexes them).
+        // #2226: listEntries returns metadata only (no content/value — see open #2014),
+        // so parseEntry would always null out here. Fetch each entry's content by key via
+        // getEntry (which DOES return content) before parsing/matching. This is the path
+        // that actually runs when the ReasoningBank controller is unavailable (the common
+        // real-world state), so a stored pattern is now findable by search.
         if (results.length === 0) {
           tier = 'substring';
           const all = await listEntries({ namespace: 'pattern', limit: 200 });
           const qLower = query.toLowerCase();
           const matched: Array<Record<string, unknown>> = [];
           for (const e of (all?.entries ?? [])) {
-            const parsed = parseEntry(e as Record<string, unknown>);
+            const meta = e as Record<string, unknown>;
+            let entry: Record<string, unknown> = meta;
+            // If the listing lacks content, hydrate it from the keyed store.
+            if (typeof meta.content !== 'string' && typeof (meta as { value?: unknown }).value !== 'string') {
+              const key = typeof meta.key === 'string' ? meta.key : (typeof meta.id === 'string' ? meta.id : null);
+              if (!key) continue;
+              const got = await getEntry({ key, namespace: 'pattern' });
+              if (!got?.found || !got.entry) continue;
+              entry = got.entry as unknown as Record<string, unknown>;
+            }
+            const parsed = parseEntry(entry);
             if (!parsed) continue;
             const text = typeof parsed.pattern === 'string' ? parsed.pattern.toLowerCase() : '';
             if (text.includes(qLower)) matched.push(parsed);

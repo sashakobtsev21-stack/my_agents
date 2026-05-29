@@ -497,6 +497,17 @@ export const systemTools: MCPTool[] = [
       },
     },
     handler: async () => {
+      // #2215: flashAttention must reflect the runtime probe, not a stale literal.
+      // Same source-of-truth as hooks_intelligence / neural_status so the tools
+      // can never report contradictory state for the same daemon.
+      let flashAttentionAvailable = false;
+      try {
+        const { getFlashAttention } = await import('@claude-flow/neural');
+        flashAttentionAvailable = getFlashAttention() !== null;
+      } catch {
+        flashAttentionAvailable = false;
+      }
+
       return {
         version: PKG_VERSION,
         nodeVersion: process.version,
@@ -511,7 +522,7 @@ export const systemTools: MCPTool[] = [
           neural: true,
           hnsw: true,
           quantization: true,
-          flashAttention: false,
+          flashAttention: flashAttentionAvailable,
         },
         limits: {
           maxAgents: 100,

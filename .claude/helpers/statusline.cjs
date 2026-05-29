@@ -345,6 +345,20 @@ function getPkgVersion() {
       path.join(CWD, 'node_modules', 'ruflo', 'package.json'),
       path.join(CWD, 'v3', '@claude-flow', 'cli', 'package.json'),
     ];
+    // #2221: global installs (npm i -g ruflo) live outside CWD/node_modules, so the
+    // probes above all miss and the version falls back to the hard-coded default.
+    // Derive the global node_modules dir from the running node binary (no npm spawn —
+    // statusline renders often). Covers nvm/mise (bin/../lib/node_modules) and Windows
+    // (bin/node_modules) layouts.
+    try {
+      const binDir = path.dirname(process.execPath);
+      for (const gm of [path.join(binDir, '..', 'lib', 'node_modules'), path.join(binDir, 'node_modules')]) {
+        pkgPaths.push(
+          path.join(gm, 'ruflo', 'package.json'),
+          path.join(gm, '@claude-flow', 'cli', 'package.json'),
+        );
+      }
+    } catch { /* ignore */ }
     for (const p of pkgPaths) {
       if (!fs.existsSync(p)) continue;
       try {
