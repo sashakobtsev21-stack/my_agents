@@ -7,6 +7,7 @@ import { mkdirSync, writeFileSync, existsSync, readFileSync, statSync, unlinkSyn
 import { dirname, join, resolve } from 'path';
 import { type MCPTool, getProjectCwd } from './types.js';
 import { validateIdentifier, validateText, validatePath } from './validate-input.js';
+import { checkCommandLoop, recordCommandOutcome } from './tool-loop-guardrail.js';
 
 // Real vector search functions - lazy loaded to avoid circular imports
 let searchEntriesFn: ((options: {
@@ -20,6 +21,26 @@ let searchEntriesFn: ((options: {
   searchTime: number;
   error?: string;
 }>) | null = null;
+
+/**
+ * Strip extended-thinking blocks from text before it enters a learning
+ * trajectory (hermes-agent think_scrubber pattern). Claude models with extended
+ * thinking emit <thinking>/<think>/<reasoning> blocks; if those land in a
+ * trajectory's action/result text, the DISTILL step embeds reasoning-token
+ * content that does not generalize, contaminating pattern confidence. Boundary-
+ * gated: only strips well-formed paired tags, leaving prose that merely mentions
+ * the tag names untouched.
+ */
+export function scrubReasoningBlocks(text: string): string {
+  if (typeof text !== 'string' || text.indexOf('<') === -1) return text;
+  return text
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/<thinking>[\s\S]*?<\/thinking>/gi, '')
+    .replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '')
+    .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+    .replace(/<REASONING_SCRATCHPAD>[\s\S]*?<\/REASONING_SCRATCHPAD>/gi, '')
+    .trim();
+}
 
 async function getRealSearchFunction() {
   if (!searchEntriesFn) {
@@ -812,6 +833,14 @@ export const hooksPreCommand: MCPTool = {
         : assessment.level >= 0.3 ? 'medium'
           : 'low';
 
+    // #6: tool-loop circuit breaker — warn/block when this exact command has
+    // failed repeatedly in a row (an agent stuck looping on a failing call).
+    const loop = checkCommandLoop(command);
+    const recommendations = assessment.warnings.length > 0
+      ? ['Review warnings before proceeding', 'Consider using safer alternative']
+      : ['Command appears safe to execute'];
+    if (loop.hint) recommendations.unshift(loop.hint);
+
     return {
       command,
       riskLevel,
@@ -820,11 +849,11 @@ export const hooksPreCommand: MCPTool = {
         severity: assessment.level >= 0.6 ? 'high' : 'medium',
         description: warning,
       })),
-      recommendations: assessment.warnings.length > 0
-        ? ['Review warnings before proceeding', 'Consider using safer alternative']
-        : ['Command appears safe to execute'],
+      recommendations,
+      loopGuard: { verdict: loop.verdict, consecutiveFailures: loop.consecutiveFailures },
       safeAlternatives: [],
-      shouldProceed: assessment.level < 0.7,
+      // Don't proceed on a high-risk command OR a hard loop-block.
+      shouldProceed: assessment.level < 0.7 && loop.verdict !== 'block',
     };
   },
 };
@@ -846,6 +875,10 @@ export const hooksPostCommand: MCPTool = {
     const success = exitCode === 0;
 
     { const v = validateText(command, 'command'); if (!v.valid) return { success: false, error: v.error }; }
+
+    // #6: feed the tool-loop circuit breaker so pre-command can warn/block on
+    // repeated consecutive failures of the same command.
+    recordCommandOutcome(command, success);
 
     // Persist command outcome via AgentDB
     let _storedIn: 'agentdb' | 'json-store' | 'none' = 'none';
@@ -2443,8 +2476,10 @@ export const hooksTrajectoryStep: MCPTool = {
   },
   handler: async (params: Record<string, unknown>) => {
     const trajectoryId = params.trajectoryId as string;
-    const action = params.action as string;
-    const result = (params.result as string) || 'success';
+    // #14: scrub extended-thinking blocks so reasoning tokens don't contaminate
+    // the learning signal (DISTILL embeds this text).
+    const action = scrubReasoningBlocks(params.action as string);
+    const result = scrubReasoningBlocks((params.result as string) || 'success');
     const quality = (params.quality as number) || 0.85;
     const timestamp = new Date().toISOString();
     const stepId = `step-${Date.now()}`;

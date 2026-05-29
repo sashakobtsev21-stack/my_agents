@@ -150,7 +150,13 @@ export async function callAnthropicMessages(input: AnthropicCallInput): Promise<
         model,
         max_tokens: input.maxTokens || 1024,
         temperature: typeof input.temperature === 'number' ? input.temperature : 0.7,
-        ...(input.systemPrompt ? { system: input.systemPrompt } : {}),
+        // #8 prompt caching (hermes-agent pattern): mark the (often large,
+        // stable) system prompt as an ephemeral cache breakpoint so repeated
+        // agent_execute calls with the same system prompt hit Anthropic's
+        // prompt cache (~90% discount on cached input tokens, 5-min TTL).
+        ...(input.systemPrompt
+          ? { system: [{ type: 'text', text: input.systemPrompt, cache_control: { type: 'ephemeral' } }] }
+          : {}),
         messages: [{ role: 'user', content: input.prompt }],
       }),
       signal: controller.signal,
