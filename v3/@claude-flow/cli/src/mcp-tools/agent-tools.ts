@@ -34,7 +34,7 @@ interface AgentRecord {
   createdAt: string;
   domain?: string;
   model?: ClaudeModel;  // Model assigned to this agent
-  modelRoutedBy?: 'explicit' | 'router' | 'agent-booster' | 'default';  // How model was determined (ADR-026)
+  modelRoutedBy?: 'explicit' | 'router' | 'codemod' | 'default';  // How model was determined (ADR-026, ADR-143)
   lastResult?: Record<string, unknown>;  // Output from last completed task
 }
 
@@ -143,7 +143,7 @@ async function getModelRouter() {
 /**
  * Determine model for agent based on (ADR-026 3-tier routing):
  * 1. Explicit model in config
- * 2. Enhanced task-based routing with Agent Booster AST (if task provided)
+ * 2. Enhanced task-based routing with deterministic Tier-1 codemods (if task provided)
  * 3. Agent type defaults
  * 4. Fallback to sonnet
  */
@@ -153,9 +153,9 @@ async function determineAgentModel(
   task?: string
 ): Promise<{
   model: ClaudeModel;
-  routedBy: 'explicit' | 'router' | 'agent-booster' | 'default';
+  routedBy: 'explicit' | 'router' | 'codemod' | 'default';
   canSkipLLM?: boolean;
-  agentBoosterIntent?: string;
+  codemodIntent?: string;
   tier?: 1 | 2 | 3;
 }> {
   // 1. Explicit model in config
@@ -163,21 +163,21 @@ async function determineAgentModel(
     return { model: config.model as ClaudeModel, routedBy: 'explicit' };
   }
 
-  // 2. Enhanced task-based routing with Agent Booster AST
+  // 2. Enhanced task-based routing with deterministic Tier-1 codemods
   if (task) {
     try {
-      // Try enhanced router first (includes Agent Booster detection)
+      // Try enhanced router first (includes codemod-intent detection)
       const { getEnhancedModelRouter } = await import('../ruvector/enhanced-model-router.js');
       const enhancedRouter = getEnhancedModelRouter();
       const routeResult = await enhancedRouter.route(task, { filePath: config.filePath as string });
 
       if (routeResult.tier === 1 && routeResult.canSkipLLM) {
-        // Agent Booster can handle this task
+        // Deterministic codemod can apply this edit ($0, no LLM)
         return {
-          model: 'haiku', // Use haiku as fallback if AB fails
-          routedBy: 'agent-booster',
+          model: 'haiku', // fallback model if the codemod can't apply
+          routedBy: 'codemod',
           canSkipLLM: true,
-          agentBoosterIntent: routeResult.agentBoosterIntent?.type,
+          codemodIntent: (routeResult.codemodIntent ?? routeResult.agentBoosterIntent)?.type,
           tier: 1,
         };
       }
@@ -314,7 +314,7 @@ export const agentTools: MCPTool[] = [
         await addNode({ id: agentId, type: 'agent', name: agentType });
       } catch { /* graph-node not available */ }
 
-      // Include Agent Booster routing info if applicable
+      // Include deterministic codemod routing info if applicable
       const response: Record<string, unknown> = {
         success: true,
         agentId,
@@ -329,12 +329,12 @@ export const agentTools: MCPTool[] = [
           '(3) claude -p — headless background instance.',
       };
 
-      // Add Agent Booster info if task can skip LLM
+      // Add codemod info if task can skip LLM (deterministic Tier-1, ADR-143)
       if (routingResult.canSkipLLM) {
         response.canSkipLLM = true;
-        response.agentBoosterIntent = routingResult.agentBoosterIntent;
+        response.codemodIntent = routingResult.codemodIntent;
         response.tier = routingResult.tier;
-        response.note = `Agent Booster can handle "${routingResult.agentBoosterIntent}" - use agent_booster_edit_file MCP tool`;
+        response.note = `Deterministic codemod can apply "${routingResult.codemodIntent}" — call the hooks_codemod MCP tool (intent="${routingResult.codemodIntent}"), $0, no LLM`;
       } else if (routingResult.tier) {
         response.tier = routingResult.tier;
       }

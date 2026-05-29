@@ -1831,24 +1831,25 @@ const preTaskCommand: Command = {
         output.printList(result.recommendations);
       }
 
-      // Enhanced model routing with Agent Booster AST (ADR-026)
+      // Enhanced model routing with deterministic codemod Tier-1 (ADR-026, ADR-143)
       try {
         const { getEnhancedModelRouter } = await import('../ruvector/enhanced-model-router.js');
         const router = getEnhancedModelRouter();
         const routeResult = await router.route(description, { filePath: ctx.flags.file as string });
+        const intent = routeResult.codemodIntent ?? routeResult.agentBoosterIntent;
 
         output.writeln();
         output.writeln(output.bold('Intelligent Model Routing'));
 
         if (routeResult.tier === 1) {
-          // Agent Booster can handle this task - skip LLM entirely
-          output.writeln(output.success(`  Tier 1: Agent Booster (WASM)`));
-          output.writeln(output.dim(`  Intent: ${routeResult.agentBoosterIntent?.type}`));
-          output.writeln(output.dim(`  Latency: <1ms | Cost: $0`));
+          // Deterministic codemod can apply this edit - skip LLM entirely ($0)
+          output.writeln(output.success(`  Tier 1: Deterministic codemod`));
+          output.writeln(output.dim(`  Intent: ${intent?.type}`));
+          output.writeln(output.dim(`  Latency: ~1ms | Cost: $0 | No LLM`));
           output.writeln();
           output.writeln(output.dim('─'.repeat(60)));
-          output.writeln(output.bold(output.success(`[AGENT_BOOSTER_AVAILABLE] Skip LLM - use Agent Booster for "${routeResult.agentBoosterIntent?.type}"`)));
-          output.writeln(output.dim(`Confidence: ${(routeResult.confidence * 100).toFixed(0)}% | Intent: ${routeResult.agentBoosterIntent?.description}`));
+          output.writeln(output.bold(output.success(`[CODEMOD_AVAILABLE] Skip LLM — call hooks_codemod with intent="${intent?.type}" (deterministic, $0)`)));
+          output.writeln(output.dim(`Confidence: ${(routeResult.confidence * 100).toFixed(0)}% | Intent: ${intent?.description}`));
           output.writeln(output.dim('─'.repeat(60)));
         } else {
           // LLM required - show tier and model recommendation
@@ -1875,7 +1876,8 @@ const preTaskCommand: Command = {
           complexity: routeResult.complexity,
           reasoning: routeResult.reasoning,
           canSkipLLM: routeResult.canSkipLLM,
-          agentBoosterIntent: routeResult.agentBoosterIntent
+          deterministic: routeResult.deterministic,
+          codemodIntent: routeResult.codemodIntent ?? routeResult.agentBoosterIntent,
         };
       } catch {
         // Enhanced router not available, skip recommendation
