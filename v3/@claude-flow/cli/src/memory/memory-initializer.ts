@@ -1837,17 +1837,34 @@ export async function loadEmbeddingModel(options?: {
 /**
  * Generate real embedding for text
  * Uses ONNX model if available, falls back to deterministic hash
+ *
+ * AUDIT #3: the `backend` field is the authoritative signal for whether the
+ * returned vector carries real ONNX semantics ('onnx') or the deterministic
+ * hash fallback ('mock'). The hash fallback produces inverted/meaningless
+ * semantics, so operators MUST be able to tell the two apart even when the
+ * `model` string reports a real model name (e.g. the AgentDB bridge always
+ * labels its output 'Xenova/all-MiniLM-L6-v2' regardless of whether AgentDB's
+ * own embedder is real or stubbed). Set `backend` truthfully by the path that
+ * actually produced the vector. Do NOT change the embedding math.
  */
 export async function generateEmbedding(text: string): Promise<{
   embedding: number[];
   dimensions: number;
   model: string;
+  backend: 'onnx' | 'mock';
 }> {
   // ADR-053: Try AgentDB v3 bridge first
   const bridge = await getBridge();
   if (bridge) {
     const bridgeResult = await bridge.bridgeGenerateEmbedding(text);
-    if (bridgeResult) return bridgeResult;
+    if (bridgeResult) {
+      // The bridge labels its output with a real model name unconditionally;
+      // honor the backend it reports if present, otherwise treat a real model
+      // name as ONNX (the bridge only returns when AgentDB's embedder exists).
+      const backend: 'onnx' | 'mock' =
+        (bridgeResult as { backend?: 'onnx' | 'mock' }).backend ?? 'onnx';
+      return { ...bridgeResult, backend };
+    }
   }
 
   // Ensure model is loaded
@@ -1869,7 +1886,8 @@ export async function generateEmbedding(text: string): Promise<{
         return {
           embedding,
           dimensions: embedding.length,
-          model: 'onnx'
+          model: 'onnx',
+          backend: 'onnx'
         };
       }
     } catch {
@@ -1877,12 +1895,14 @@ export async function generateEmbedding(text: string): Promise<{
     }
   }
 
-  // Deterministic hash-based fallback (for testing/demo without ONNX)
+  // Deterministic hash-based fallback (for testing/demo without ONNX).
+  // AUDIT #3: backend='mock' — these vectors do NOT carry real semantics.
   const embedding = generateHashEmbedding(text, state.dimensions);
   return {
     embedding,
     dimensions: state.dimensions,
-    model: 'hash-fallback'
+    model: 'hash-fallback',
+    backend: 'mock'
   };
 }
 

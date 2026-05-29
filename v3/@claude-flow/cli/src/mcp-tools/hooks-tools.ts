@@ -2597,17 +2597,35 @@ export const hooksTrajectoryEnd: MCPTool = {
         const ewc = await getEWCConsolidator();
         if (ewc) {
           try {
-            // Record gradient sample for Fisher matrix update
-            // Create a simple gradient from trajectory steps
-            const gradients = new Array(384).fill(0).map((_, i) =>
-              Math.sin(i * 0.01) * (trajectory.steps.length / 10)
-            );
-            ewc.recordGradient(`trajectory-${trajectoryId}`, gradients, success);
-            const stats = ewc.getConsolidationStats();
-            ewcResult = {
-              consolidated: true,
-              penalty: stats.avgPenalty,
-            };
+            // AUDIT FIX #4: derive a REAL gradient from the trajectory's
+            // embedding (mirrors the DISTILL path, where step content is
+            // embedded via generateEmbedding) instead of a synthetic sine
+            // wave. The EWC library treats the embedding as the gradient
+            // proxy (see recordPatternOutcome in ewc-consolidation.ts).
+            let gradients: number[] | null = null;
+            try {
+              const { generateEmbedding } = await import('../memory/memory-initializer.js');
+              // Embed the same summary that was persisted for semantic search,
+              // so the Fisher update reflects the actual recorded trajectory.
+              const summary = `Task: ${trajectory.task} | Agent: ${trajectory.agent} | Steps: ${trajectory.steps.map(s => `${s.action}=>${s.result}`).join('; ')}${feedback ? ` | Feedback: ${feedback}` : ''}`;
+              const embeddingResult = await generateEmbedding(summary);
+              if (embeddingResult?.embedding && embeddingResult.embedding.length > 0) {
+                gradients = embeddingResult.embedding;
+              }
+            } catch {
+              // Embedding generation unavailable — fall through and skip EWC
+            }
+
+            if (gradients) {
+              ewc.recordGradient(`trajectory-${trajectoryId}`, gradients, success);
+              const stats = ewc.getConsolidationStats();
+              ewcResult = {
+                consolidated: true,
+                penalty: stats.avgPenalty,
+              };
+            }
+            // If no real embedding-derived gradient is available, SKIP the EWC
+            // update rather than feeding the Fisher matrix synthetic noise.
           } catch {
             // EWC consolidation failed, continue without it
           }
@@ -3057,7 +3075,26 @@ export const hooksIntelligenceLearn: MCPTool = {
     const consolidate = params.consolidate !== false;
     const startTime = Date.now();
 
-    // Get SONA statistics
+    // AUDIT FIX #5: actually TRIGGER a learning/consolidation cycle instead of
+    // only reading and echoing stats. This calls the real DISTILL path
+    // (LoRA-style confidence updates with EWC++ consolidation protection) and
+    // the background learning pass, then reports the resulting stats.
+    let distill: { patternsDistilled: number; ewcPenalty: number } | null = null;
+    let distillTriggered = false;
+    try {
+      const intelligence = await import('../memory/intelligence.js');
+      // DISTILL + CONSOLIDATE: real LoRA update with EWC++ protection
+      distill = await intelligence.distillLearning();
+      distillTriggered = distill !== null;
+      // Run background learning (ruvllm) pass as well — best-effort
+      try {
+        await intelligence.runBackgroundLearning();
+      } catch { /* best-effort */ }
+    } catch {
+      // intelligence layer unavailable — fall back to stats-only reporting
+    }
+
+    // Get SONA statistics (AFTER triggering the cycle so they reflect the update)
     let sonaStats = {
       totalPatterns: 0,
       successfulRoutings: 0,
@@ -3077,7 +3114,7 @@ export const hooksIntelligenceLearn: MCPTool = {
       };
     }
 
-    // Get EWC++ statistics and optionally trigger consolidation
+    // Get EWC++ statistics after the consolidation cycle ran
     let ewcStats = {
       consolidation: false,
       fisherUpdated: false,
@@ -3092,17 +3129,21 @@ export const hooksIntelligenceLearn: MCPTool = {
           consolidation: true,
           fisherUpdated: stats.consolidationCount > 0,
           forgettingPrevented: stats.highImportancePatterns,
-          avgPenalty: stats.avgPenalty,
+          avgPenalty: distill?.ewcPenalty ?? stats.avgPenalty,
         };
       }
     }
 
     return {
-      learned: sonaStats.totalPatterns > 0,
+      // "learned" now reflects whether a real distill cycle actually ran
+      learned: distillTriggered || sonaStats.totalPatterns > 0,
+      cycleTriggered: distillTriggered,
+      patternsDistilled: distill?.patternsDistilled ?? 0,
       duration: Date.now() - startTime,
       updates: {
         trajectoriesProcessed: sonaStats.trajectoriesProcessed,
         patternsLearned: sonaStats.totalPatterns,
+        patternsDistilled: distill?.patternsDistilled ?? 0,
         successRate: sonaStats.trajectoriesProcessed > 0
           ? (sonaStats.successfulRoutings / (sonaStats.successfulRoutings + sonaStats.failedRoutings) * 100).toFixed(1) + '%'
           : '0%',
@@ -3112,7 +3153,9 @@ export const hooksIntelligenceLearn: MCPTool = {
         average: sonaStats.avgConfidence,
         implementation: sona ? 'real-sona' : 'not-available',
       },
-      implementation: sona ? 'real-sona-learning' : 'placeholder',
+      implementation: distillTriggered
+        ? 'real-distill-consolidate'
+        : (sona ? 'real-sona-learning' : 'placeholder'),
     };
   },
 };

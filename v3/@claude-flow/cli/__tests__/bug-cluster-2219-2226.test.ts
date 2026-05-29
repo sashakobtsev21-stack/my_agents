@@ -24,6 +24,8 @@ import { systemTools } from '../src/mcp-tools/system-tools.js';
 import { hooksTools } from '../src/mcp-tools/hooks-tools.js';
 import { agentdbPatternStore, agentdbPatternSearch } from '../src/mcp-tools/agentdb-tools.js';
 import { createQLearningRouter } from '../src/ruvector/q-learning-router.js';
+import { CommandParser } from '../src/parser.js';
+import { routeCommand } from '../src/commands/route.js';
 
 function findTool(tools: any[], name: string) {
   const t = tools.find((x) => x.name === name);
@@ -82,6 +84,58 @@ describe('#2222 — route feedback persists the Q-table to disk', () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('audit #1 — negative reward keeps its sign across all flag syntaxes', () => {
+  // Repro: `route feedback -r -1.0` and `--reward -1.0` used to parse as reward=true
+  // (→ +1.0 after numeric coercion), so NEGATIVE feedback REINFORCED the bad agent.
+  // Only the `--reward=-1.0` equals-form preserved the sign. Fix lives in the shared
+  // parser (isFlagValue), so all three forms must now yield reward = -1.0.
+  function parseFeedback(args: string[]) {
+    const parser = new CommandParser({ allowUnknownFlags: true });
+    parser.registerCommand(routeCommand);
+    return parser.parse(['route', 'feedback', ...args]);
+  }
+
+  const baseArgs = ['-t', 'write tests', '-a', 'tester'];
+
+  it('-r -1.0 (short flag, space form) → reward = -1.0', () => {
+    const { flags } = parseFeedback([...baseArgs, '-r', '-1.0']);
+    expect(flags.reward).toBe(-1.0);
+  });
+
+  it('--reward -1.0 (long flag, space form) → reward = -1.0', () => {
+    const { flags } = parseFeedback([...baseArgs, '--reward', '-1.0']);
+    expect(flags.reward).toBe(-1.0);
+  });
+
+  it('--reward=-1.0 (equals form) → reward = -1.0', () => {
+    const { flags } = parseFeedback([...baseArgs, '--reward=-1.0']);
+    expect(flags.reward).toBe(-1.0);
+  });
+
+  it('all three syntaxes agree (no sign-flip regression)', () => {
+    const a = parseFeedback([...baseArgs, '-r', '-1.0']).flags.reward;
+    const b = parseFeedback([...baseArgs, '--reward', '-1.0']).flags.reward;
+    const c = parseFeedback([...baseArgs, '--reward=-1.0']).flags.reward;
+    expect(a).toBe(b);
+    expect(b).toBe(c);
+    expect(c).toBe(-1.0);
+  });
+
+  it('positive and fractional negative values are preserved', () => {
+    expect(parseFeedback([...baseArgs, '-r', '0.9']).flags.reward).toBe(0.9);
+    expect(parseFeedback([...baseArgs, '-r', '-0.5']).flags.reward).toBe(-0.5);
+    expect(parseFeedback([...baseArgs, '--reward', '-3.14']).flags.reward).toBe(-3.14);
+  });
+
+  it('real flags after a value-flag are still parsed as flags, not values', () => {
+    // `-a tester` then `-t ...`: the -t must NOT be swallowed as the value of -a.
+    const { flags } = parseFeedback(['-a', 'tester', '-t', 'write tests', '-r', '-1.0']);
+    expect(flags.agent).toBe('tester');
+    expect(flags.task).toBe('write tests');
+    expect(flags.reward).toBe(-1.0);
   });
 });
 

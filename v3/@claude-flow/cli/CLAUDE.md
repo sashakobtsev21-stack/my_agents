@@ -287,7 +287,7 @@ Bash("npx @claude-flow/cli@latest hooks worker dispatch --trigger optimize")
 | `init` | 4 | Project initialization with wizard, presets, skills, hooks |
 | `agent` | 8 | Agent lifecycle (spawn, list, status, stop, metrics, pool, health, logs) |
 | `swarm` | 6 | Multi-agent swarm coordination and orchestration |
-| `memory` | 11 | AgentDB memory with vector search (150x-12,500x faster) |
+| `memory` | 11 | AgentDB memory with HNSW vector search (measured ~1.9x–4.7x vs brute force above crossover) |
 | `mcp` | 9 | MCP server management and tool execution |
 | `task` | 6 | Task creation, assignment, and lifecycle |
 | `session` | 7 | Session state management and persistence |
@@ -308,7 +308,7 @@ Bash("npx @claude-flow/cli@latest hooks worker dispatch --trigger optimize")
 | `providers` | 5 | AI providers (list, add, remove, test, configure) |
 | `plugins` | 5 | Plugin management (list, install, uninstall, enable, disable) |
 | `deployment` | 5 | Deployment management (deploy, rollback, status, environments, release) |
-| `embeddings` | 4 | Vector embeddings (embed, batch, search, init) - 75x faster with agentic-flow |
+| `embeddings` | 4 | Vector embeddings (embed, batch, search, init) — agentic-flow ONNX backend (speedup unverified, no benchmark) |
 | `claims` | 4 | Claims-based authorization (check, grant, revoke, list) |
 | `migrate` | 5 | V2 to V3 migration with rollback support |
 | `doctor` | 1 | System diagnostics with health checks |
@@ -480,12 +480,12 @@ npx @claude-flow/cli@latest migrate validate
 
 ## 🧠 Intelligence System (RuVector)
 
-V3 includes the RuVector Intelligence System:
-- **SONA**: Self-Optimizing Neural Architecture (<0.05ms adaptation)
-- **MoE**: Mixture of Experts for specialized routing
-- **HNSW**: 150x-12,500x faster pattern search
+V3 includes the RuVector Intelligence System (measured numbers: see [audit](../../../docs/reviews/intelligence-system-audit-2026-05-29.md) + [`scripts/benchmark-intelligence.mjs`](../../../scripts/benchmark-intelligence.mjs)):
+- **SONA**: Self-Optimizing Neural Architecture (measured 0.0043ms/adapt, target <0.05ms met)
+- **MoE**: Mixture of Experts for specialized routing (gate converges — confidence 0.13→0.88 after rewards)
+- **HNSW**: measured ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force (recall@10 ~0.99); ANN wins above the crossover, ruvector NAPI backend (WASM not active on test host)
 - **EWC++**: Elastic Weight Consolidation (prevents forgetting)
-- **Flash Attention**: 2.49x-7.47x speedup
+- **Flash Attention**: unverified — no benchmark exists for this claim
 
 The 4-step intelligence pipeline:
 1. **RETRIEVE** - Fetch relevant patterns via HNSW
@@ -500,7 +500,7 @@ Features:
 - **Document chunking**: Configurable overlap and size
 - **Normalization**: L2, L1, min-max, z-score
 - **Hyperbolic embeddings**: Poincaré ball model for hierarchical data
-- **75x faster**: With agentic-flow ONNX integration
+- **agentic-flow ONNX integration**: speedup unverified (no benchmark; backend reported `onnx`, model all-MiniLM-L6-v2, 384-dim)
 - **Neural substrate**: Integration with RuVector
 
 ## 🐝 Hive-Mind Consensus
@@ -520,14 +520,18 @@ Features:
 
 ## V3 Performance Targets
 
-| Metric | Target |
-|--------|--------|
-| Flash Attention | 2.49x-7.47x speedup |
-| HNSW Search | 150x-12,500x faster |
-| Memory Reduction | 50-75% with quantization |
-| MCP Response | <100ms |
-| CLI Startup | <500ms |
-| SONA Adaptation | <0.05ms |
+> Source of truth: [`docs/reviews/intelligence-system-audit-2026-05-29.md`](../../../docs/reviews/intelligence-system-audit-2026-05-29.md) + [`scripts/benchmark-intelligence.mjs`](../../../scripts/benchmark-intelligence.mjs). Numbers below are measured unless marked "target/unverified".
+
+| Metric | Measured / Target | Status |
+|--------|-------------------|--------|
+| HNSW Search | ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force (recall@10 ~0.99) | **Measured** (ruvector NAPI; 150x-12,500x NOT reproduced) |
+| Int8 Quantization | 3.84x compression, reconstruction cosine 0.99999 | **Measured** |
+| RaBitQ Quantization | 32x compression, 0.60ms/query | **Measured** |
+| SONA Adaptation | 0.0043ms/adapt (target <0.05ms met) | **Measured** |
+| MoE Gate | converges (confidence 0.13→0.88) | **Measured** |
+| Flash Attention | 2.49x-7.47x | **Unverified** (no benchmark) |
+| MCP Response | <100ms | target |
+| CLI Startup | <500ms | target |
 
 ## 📊 Performance Optimization Protocol
 

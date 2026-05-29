@@ -1,15 +1,14 @@
 <div align="center">
 
-[![Ruflo Banner](ruflo/assets/ruflo-small.jpeg)](https://flo.ruv.io/)
+[![Ruflo Banner](ruflo/assets/ruflo-small.jpeg)](https://cognitum.one/agentic-engineering)
 
 [![Try the UI Beta — flo.ruv.io](https://img.shields.io/badge/_Try_the_UI_Beta-flo.ruv.io-6366f1?style=for-the-badge&logoColor=white&logo=svelte)](https://flo.ruv.io/)
 [![Goal Planner — goal.ruv.io](https://img.shields.io/badge/_Goal_Planner-goal.ruv.io-8b5cf6?style=for-the-badge&logoColor=white&logo=react)](https://goal.ruv.io/)
 [![Live Agents — goal.ruv.io/agents](https://img.shields.io/badge/_Live_Agents-goal.ruv.io%2Fagents-10b981?style=for-the-badge&logoColor=white&logo=react)](https://goal.ruv.io/agents)
 
 [![npm version (ruflo)](https://img.shields.io/npm/v/ruflo?label=ruflo&style=for-the-badge&logo=npm&color=cb3837)](https://www.npmjs.com/package/ruflo)
-[![npm downloads (ruflo)](https://img.shields.io/npm/dm/ruflo?label=ruflo%20downloads&style=for-the-badge&logo=npm&color=cb3837)](https://www.npmjs.com/package/ruflo)
-[![npm version (claude-flow)](https://img.shields.io/npm/v/claude-flow?label=claude-flow&style=for-the-badge&logo=npm&color=blue)](https://www.npmjs.com/package/claude-flow)
-[![npm downloads (claude-flow)](https://img.shields.io/npm/dm/claude-flow?label=claude-flow%20downloads&style=for-the-badge&logo=npm&color=blue)](https://www.npmjs.com/package/claude-flow)
+[![Ecosystem downloads](https://img.shields.io/badge/ecosystem%20downloads-22.2M%2B-blue?style=for-the-badge&logo=npm)](https://github.com/ruvnet/ruflo/blob/main/data/clone-data.proof.json)
+[![Git clones (14d)](https://img.shields.io/badge/git%20clones%2014d-115k-blueviolet?style=for-the-badge&logo=github)](https://github.com/ruvnet/ruflo/blob/main/data/clone-data.ledger.json)
 
 [![Star on GitHub](https://img.shields.io/github/stars/ruvnet/claude-flow?style=for-the-badge&logo=github&color=gold)](https://github.com/ruvnet/claude-flow)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
@@ -73,14 +72,14 @@ There are **two different install paths** with very different surface areas. Pic
 # Install core + any plugins you need
 /plugin install ruflo-core@ruflo
 /plugin install ruflo-swarm@ruflo
-/plugin install ruflo-autopilot@ruflo
-/plugin install ruflo-federation@ruflo
+/plugin install ruflo-rag-memory@ruflo
+/plugin install ruflo-neural-trader@ruflo
 ```
 
 This adds slash commands and agent definitions only. The Ruflo MCP server is NOT registered, so `memory_store`, `swarm_init`, `agent_spawn`, etc. won't be callable from Claude. For the full loop, use Path B below.
 
 <details>
-<summary><strong>🔌 All 32 plugins</strong></summary>
+<summary><strong>🔌 All 33 plugins</strong></summary>
 
 #### Core & Orchestration
 
@@ -108,6 +107,7 @@ This adds slash commands and agent definitions only. The Ruflo MCP server is NOT
 | Plugin | What it does |
 |--------|-------------|
 | [**ruflo-intelligence**](plugins/ruflo-intelligence/README.md) | Agents learn from past successes and get smarter |
+| [**ruflo-graph-intelligence**](plugins/ruflo-graph-intelligence/) | Sublinear graph reasoning — PageRank, delta updates, complexity-aware execution (ADR-123) |
 | [**ruflo-daa**](plugins/ruflo-daa/README.md) | Dynamic agent behavior and cognitive patterns |
 | [**ruflo-ruvllm**](plugins/ruflo-ruvllm/README.md) | Run local LLMs (Ollama, etc.) with smart routing |
 | [**ruflo-goals**](plugins/ruflo-goals/README.md) | Break big goals into plans and track progress |
@@ -374,13 +374,17 @@ User --> Claude Code / CLI
 
 ## Documentation
 
-Three docs for three audiences:
+Four docs for four audiences:
 
 | Doc | When to read it |
 |-----|-----------------|
 | **[Status](docs/STATUS.md)** | See what currently works — capability counts, test baselines, recent fixes, what's next. The *is-it-ready* doc. |
 | **[User Guide](docs/USERGUIDE.md)** | Daily reference — every command, every config flag, every plugin. The *how-do-I* doc. |
+| **[Benchmarks](https://gist.github.com/ruvnet/298f8c668c8859b369f91734a0e9cbbe)** | v3.8.0 SOTA matrix vs LangGraph / AutoGen / CrewAI on darwin-arm64 + linux-x64. ruflo wins cold start, single turn, RSS by 1.3×–1953×. The *is-it-fast* doc. |
 | **[Verification](verification.md)** | Cryptographically prove your installed bytes match the signed witness — `ruflo verify`. The *trust-but-verify* doc. |
+| **[Team Gateway Checklist](docs/TEAM-GATEWAY-CHECKLIST.md)** | Before-merge gates, dual-mode handoff, memory namespace sharing, and witness manifest entry per merge. The *safer-team-workflows* doc. |
+
+Benchmark internals (for reproduction): [`sota-workload-spec.md`](https://github.com/ruvnet/ruflo/blob/perf/sota-comparator-benchmarks/docs/benchmarks/sota-workload-spec.md) · [`SOTA-PROGRESS.md`](https://github.com/ruvnet/ruflo/blob/perf/sota-comparator-benchmarks/docs/benchmarks/SOTA-PROGRESS.md) · [raw matrix JSON: darwin](https://github.com/ruvnet/ruflo/blob/perf/sota-comparator-benchmarks/docs/benchmarks/sota-matrix.json) · [linux](https://github.com/ruvnet/ruflo/blob/perf/sota-comparator-benchmarks/docs/benchmarks/sota-matrix-linux.json)
 
 User Guide section index:
 

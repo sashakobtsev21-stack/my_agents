@@ -1078,7 +1078,7 @@ export async function bridgeDeleteEntry(options: {
 export async function bridgeGenerateEmbedding(
   text: string,
   dbPath?: string,
-): Promise<{ embedding: number[]; dimensions: number; model: string } | null> {
+): Promise<{ embedding: number[]; dimensions: number; model: string; backend?: 'onnx' | 'mock' } | null> {
   const registry = await getRegistry(dbPath);
   if (!registry) return null;
 
@@ -1090,10 +1090,16 @@ export async function bridgeGenerateEmbedding(
     const emb = await embedder.embed(text);
     if (!emb) return null;
 
+    // AUDIT #3: surface backend truthfully. AgentDB's embedder is a real ONNX
+    // model when present; if it ever exposes a mock/stub signal, honor it.
+    const isMock = (embedder as { isMock?: boolean; backend?: string }).isMock === true
+      || (embedder as { backend?: string }).backend === 'mock';
+
     return {
       embedding: Array.from(emb),
       dimensions: emb.length,
       model: 'Xenova/all-MiniLM-L6-v2',
+      backend: isMock ? 'mock' : 'onnx',
     };
   } catch {
     return null;

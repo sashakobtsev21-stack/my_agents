@@ -257,6 +257,61 @@ describe('Memory Initializer', () => {
       expect(status.dimensions).toBe(384);
     });
   });
+
+  // AUDIT #3: generateEmbedding must expose a truthful `backend` field so an
+  // operator can distinguish real ONNX semantics from the deterministic hash
+  // fallback (inverted/meaningless semantics) even when `model` reports a
+  // real-looking name.
+  describe('generateEmbedding backend field', () => {
+    const prevDisableBridge = process.env.CLAUDE_FLOW_DISABLE_BRIDGE;
+
+    afterEach(() => {
+      vi.resetModules();
+      vi.doUnmock('@huggingface/transformers');
+      vi.doUnmock('@xenova/transformers');
+      vi.doUnmock('ruvector');
+      vi.doUnmock('agentic-flow');
+      vi.doUnmock('agentic-flow/reasoningbank');
+      if (prevDisableBridge === undefined) delete process.env.CLAUDE_FLOW_DISABLE_BRIDGE;
+      else process.env.CLAUDE_FLOW_DISABLE_BRIDGE = prevDisableBridge;
+    });
+
+    it("reports backend='mock' when no real embedding model is available", async () => {
+      // Force the raw fallback path (no AgentDB bridge) and make every real
+      // embedding provider import fail so loadEmbeddingModel lands on the
+      // hash fallback (model = null).
+      process.env.CLAUDE_FLOW_DISABLE_BRIDGE = '1';
+      vi.resetModules();
+      const fail = () => { throw new Error('unavailable in test'); };
+      vi.doMock('@huggingface/transformers', fail);
+      vi.doMock('@xenova/transformers', fail);
+      vi.doMock('ruvector', fail);
+      vi.doMock('agentic-flow', fail);
+      vi.doMock('agentic-flow/reasoningbank', fail);
+
+      const { generateEmbedding } = await import('../src/memory/memory-initializer.js');
+      const result = await generateEmbedding('audit-3 mock-backend assertion');
+
+      expect(result.backend).toBe('mock');
+      expect(result.model).toBe('hash-fallback');
+      expect(Array.isArray(result.embedding)).toBe(true);
+      expect(result.embedding.length).toBe(result.dimensions);
+    });
+
+    it("always sets backend, and 'mock' implies the hash-fallback model", async () => {
+      // Invariant check that holds regardless of which providers are installed:
+      // backend is one of the two known values, and mock <=> hash-fallback.
+      process.env.CLAUDE_FLOW_DISABLE_BRIDGE = '1';
+      vi.resetModules();
+      const { generateEmbedding } = await import('../src/memory/memory-initializer.js');
+      const result = await generateEmbedding('audit-3 backend invariant');
+
+      expect(['onnx', 'mock']).toContain(result.backend);
+      if (result.backend === 'mock') {
+        expect(result.model).toBe('hash-fallback');
+      }
+    }, 60000); // real ONNX model can be slow to cold-load when installed
+  });
 });
 
 // =============================================================================

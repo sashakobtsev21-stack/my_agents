@@ -926,6 +926,16 @@ export const memoryTools: MCPTool[] = [
         }
       }
 
+      // AUDIT #3: report the embedding backend truthfully — a hash-fallback
+      // import is NOT semantically searchable, so an operator must not read
+      // "ONNX ... (384-dim)" when the vectors are mock.
+      let importBackend: 'onnx' | 'mock' | 'unknown' = 'unknown';
+      try {
+        const { generateEmbedding } = await import('../memory/memory-initializer.js');
+        const probe = await generateEmbedding('memory_import_claude backend probe');
+        importBackend = probe.backend ?? 'unknown';
+      } catch { /* probe failed — leave 'unknown' */ }
+
       return {
         success: true,
         imported,
@@ -935,7 +945,8 @@ export const memoryTools: MCPTool[] = [
         files: memoryFiles.length,
         projects: projects.size,
         namespace: ns,
-        embedding: 'ONNX all-MiniLM-L6-v2 (384-dim)',
+        embedding: `all-MiniLM-L6-v2 (384-dim, backend=${importBackend})`,
+        embeddingBackend: importBackend,
       };
     },
   },
@@ -1001,14 +1012,37 @@ export const memoryTools: MCPTool[] = [
         if (stats) intelligence = { sonaEnabled: stats.sonaEnabled, patternsLearned: stats.patternsLearned, trajectoriesRecorded: stats.trajectoriesRecorded };
       } catch { /* not initialized */ }
 
+      // AUDIT #3: probe the embedding backend so operators can tell real ONNX
+      // output from the deterministic hash fallback (which has inverted/
+      // meaningless semantics). Without this, the status string reports the
+      // model name unconditionally and mock output is indistinguishable.
+      let embeddingBackend: 'onnx' | 'mock' | 'unknown' = 'unknown';
+      try {
+        const { generateEmbedding } = await import('../memory/memory-initializer.js');
+        const probe = await generateEmbedding('memory_bridge_status backend probe');
+        embeddingBackend = probe.backend ?? 'unknown';
+      } catch { /* probe failed — leave 'unknown' */ }
+
+      const embeddingLabel = `all-MiniLM-L6-v2 (384-dim, backend=${embeddingBackend})`;
+
       return {
         claudeCode: { memoryFiles: claudeFiles, projects: claudeProjects },
-        agentdb: { totalEntries: agentdbEntries, claudeMemoryEntries, namespaces: namespaceCounts, backend: 'sql.js + ONNX' },
+        agentdb: {
+          totalEntries: agentdbEntries,
+          claudeMemoryEntries,
+          namespaces: namespaceCounts,
+          backend: embeddingBackend === 'mock' ? 'sql.js + MOCK (hash fallback)' : 'sql.js + ONNX',
+          embeddingBackend,
+        },
         intelligence,
         // #1940: report 'connected' whenever ANY namespace has imported
         // content, not just `claude-memories` — the bridge can be in active
         // use from other import paths (e.g. plugin namespaces, task memory).
-        bridge: { status: agentdbEntries > 0 ? 'connected' : 'not-synced', embedding: 'all-MiniLM-L6-v2 (384-dim)' },
+        bridge: {
+          status: agentdbEntries > 0 ? 'connected' : 'not-synced',
+          embedding: embeddingLabel,
+          embeddingBackend,
+        },
       };
     },
   },
