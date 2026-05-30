@@ -74,10 +74,15 @@ const ALPHA_GRID = QUICK ? [0.5, 0.7] : [0.3, 0.5, 0.7];
 const SUBJ_GRID = QUICK ? [3.0, 5.0] : [2.0, 3.0, 5.0];
 const MMR_GRID = QUICK ? [0.5] : [0.3, 0.5, 0.7];
 
-// Rerank grid: hybridWeight × ceWeight (mutually constrained — they sum to 1)
+// Rerank grid: hybridWeight × ceWeight (sum to 1).
 const RERANK_GRID = QUICK
   ? [[0.5, 0.5]]
-  : [[0.3, 0.7], [0.4, 0.6], [0.5, 0.5], [0.6, 0.4], [0.7, 0.3]];
+  : [[0.2, 0.8], [0.3, 0.7], [0.4, 0.6], [0.5, 0.5], [0.6, 0.4], [0.7, 0.3], [0.8, 0.2]];
+
+// ADR-083: when re-gridding rerank, sweep BOTH the hybrid sub-params (alpha, sw)
+// AND the rerank weights. This catches joint-optima the per-axis grids miss.
+const RERANK_HYBRID_ALPHA = QUICK ? [0.5] : [0.3, 0.5];
+const RERANK_HYBRID_SW    = QUICK ? [2.0] : [2.0, 3.0];
 
 // ---------------------------------------------------------------------------
 // Eval
@@ -128,13 +133,19 @@ async function main() {
     }
   }
 
-  // §B — rerank grid (slow, ~5 configs — each query takes ~1s with CE)
+  // §B — rerank joint grid (ADR-083): hybridWeight × ceWeight × alpha × subjectWeight.
+  // Each query takes ~1s with cross-encoder, so default full grid = 28 configs × 10
+  // queries × 1s ≈ 5 minutes. Use --quick for 1 config (smoke).
   for (const [hybridWeight, ceWeight] of RERANK_GRID) {
-    configs.push({
-      name: `rerank hw=${hybridWeight} cw=${ceWeight}`,
-      rerank: true,
-      params: { rerank: true, alpha: 0.6, subjectWeight: 3.0, hybridWeight, ceWeight },
-    });
+    for (const alpha of RERANK_HYBRID_ALPHA) {
+      for (const subjectWeight of RERANK_HYBRID_SW) {
+        configs.push({
+          name: `rerank hw=${hybridWeight} cw=${ceWeight} α=${alpha} sw=${subjectWeight}`,
+          rerank: true,
+          params: { rerank: true, alpha, subjectWeight, mmrLambda: 0.7, hybridWeight, ceWeight },
+        });
+      }
+    }
   }
 
   console.log(`Grid-search: ${configs.length} configs across ${QUERIES.length} queries\n`);

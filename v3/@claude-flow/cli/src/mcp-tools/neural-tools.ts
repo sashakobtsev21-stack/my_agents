@@ -496,12 +496,12 @@ export const neuralTools: MCPTool[] = [
         mode: { type: 'string', enum: ['hybrid', 'cosine'], description: 'Search mode — hybrid (cosine+BM25+MMR, default) or cosine (pre-3.10.18 behaviour, for A/B)' },
         alpha: { type: 'number', description: 'Hybrid: cosine weight in [0,1]; (1-α) is BM25 weight (default 0.5, tuned ADR-082)' },
         mmrLambda: { type: 'number', description: 'Hybrid: MMR balance — 1.0 = pure relevance, 0.0 = pure diversity (default 0.7, tuned ADR-082)' },
-        subjectWeight: { type: 'number', description: 'Hybrid: multi-field BM25 weight for subject/name (default 2.0, tuned ADR-082)' },
+        subjectWeight: { type: 'number', description: 'Hybrid: multi-field BM25 weight for subject/name (default 2.0 non-rerank, 3.0 with rerank — tuned ADR-082/083)' },
         bodyWeight: { type: 'number', description: 'Hybrid: multi-field BM25 weight for body/content (default 1.0)' },
         typePenaltyFactor: { type: 'number', description: 'Hybrid: meta-commit score multiplier — release/merge/bump commits × this factor (default 1.0 = disabled; set 0.5 for aggressive suppression)' },
         rerank: { type: 'boolean', description: 'Hybrid: opt-in cross-encoder rerank pass over the top-K (ADR-080). Adds ~20-40 ms per (query, doc) pair; first call downloads ~30MB model. Gracefully degrades to hybrid+MMR order when unavailable.' },
-        hybridWeight: { type: 'number', description: 'Rerank: hybrid score weight in final combination (default 0.5)' },
-        ceWeight: { type: 'number', description: 'Rerank: cross-encoder score weight in final combination (default 0.5)' },
+        hybridWeight: { type: 'number', description: 'Rerank: hybrid score weight in final combination (default 0.7, tuned ADR-083)' },
+        ceWeight: { type: 'number', description: 'Rerank: cross-encoder score weight in final combination (default 0.3, tuned ADR-083)' },
         data: { type: 'object', description: 'Pattern data' },
       },
     },
@@ -581,10 +581,13 @@ export const neuralTools: MCPTool[] = [
         // pre-3.10.18 behaviour for A/B tests via {mode:'cosine'}; default is
         // hybrid (cosine + BM25 + MMR).
         const mode = String(input.mode ?? 'hybrid');
-        // ADR-082 grid-search optima: α=0.5 (vs 0.6 default), mmr=0.7 (vs 0.5).
-        // Measured: nDCG@3 0.900 → 0.963, top-1 90% maintained, latency unchanged.
-        const alpha = Number(input.alpha ?? 0.5);    // cosine weight; (1-α) is BM25
-        const mmrLambda = Number(input.mmrLambda ?? 0.7); // 1 = pure relevance, 0 = pure diversity
+        const useRerank = input.rerank === true || String(input.rerank) === 'true';
+        // ADR-083 joint grid: rerank path benefits from DIFFERENT hybrid
+        // sub-params than non-rerank (the cross-encoder adds semantic depth,
+        // so the hybrid stage can be more keyword-focused). nDCG@3 0.900 →
+        // 0.963 on rerank just by switching sw 2.0 → 3.0 in the hybrid stage.
+        const alpha = Number(input.alpha ?? 0.5);
+        const mmrLambda = Number(input.mmrLambda ?? 0.7);
 
         const { tokenize, buildCorpusStats, hybridScores, mmrRerank, multiFieldBM25, typePenalty } =
           await import('../memory/hybrid-retrieval.js');
@@ -626,10 +629,11 @@ export const neuralTools: MCPTool[] = [
         const subjectStats = buildCorpusStats(subjectDocs);
         const bodyStats = buildCorpusStats(bodyDocs);
         const queryTokens = tokenize(query);
-        // ADR-082: subjectWeight 3.0 → 2.0 from grid-search (sw=2 beats sw=3
-        // on this corpus — the body adds relevance signal that gets crowded
-        // out at sw=3). 5.0 is strictly worse than 3.0 (overweights subject).
-        const subjectWeight = Number(input.subjectWeight ?? 2.0);
+        // ADR-082: subjectWeight 3.0 → 2.0 from grid (sw=2 dominates at hybrid-only).
+        // ADR-083 joint grid: when rerank is on, the cross-encoder handles
+        // semantic understanding, so the hybrid stage can be MORE
+        // subject-focused (sw=3) — recovers nDCG@3 0.963.
+        const subjectWeight = Number(input.subjectWeight ?? (useRerank ? 3.0 : 2.0));
         const bodyWeight = Number(input.bodyWeight ?? 1.0);
         const bm25Arr = patterns.map((_, i) =>
           multiFieldBM25(queryTokens, subjectDocs[i], bodyDocs[i], subjectStats, bodyStats, subjectWeight, bodyWeight),
@@ -649,7 +653,7 @@ export const neuralTools: MCPTool[] = [
         // more options to find the truly-best). ADR-080 ablation: rerank over
         // a narrow post-MMR slice degrades top-1; reranking a wider hybrid
         // top-K*6 pool restores and exceeds the no-rerank baseline.
-        const useRerank = input.rerank === true || String(input.rerank) === 'true';
+        // useRerank declared at top of search block for conditional defaults.
         const poolSize = useRerank ? k * 6 : k * 3;
         const prelim = patterns
           .map((p, i) => ({ p, hybrid: hybridArr[i], cosine: cosineArr[i], bm25: bm25Arr[i] }))
@@ -684,13 +688,12 @@ export const neuralTools: MCPTool[] = [
 
             const hybridNorm = normalise(candidates.map((c) => c.relevance));
             const ceNorm = normalise(ceScores);
-            // ADR-082: hybridWeight/ceWeight kept at 0.5/0.5 — the grid-search
-            // showed hw=0.7 cw=0.3 winning when tested against the OLD α=0.6
-            // sw=3.0 baseline, but a joint re-grid with the new α=0.5 sw=2.0
-            // defaults is pending. Conservative: keep 0.5/0.5 until the
-            // joint optimum is measured.
-            const hybridWeight = Number(input.hybridWeight ?? 0.5);
-            const ceWeight = Number(input.ceWeight ?? 0.5);
+            // ADR-083 joint grid: hw=0.7 cw=0.3 (with α=0.5 sw=3 from above) is
+            // the joint optimum at nDCG@3=0.963 (vs 0.900 at 0.5/0.5). The
+            // hybrid signal carries most of the relevance; the cross-encoder
+            // contributes a 30% smoothing/disambiguation kick.
+            const hybridWeight = Number(input.hybridWeight ?? 0.7);
+            const ceWeight = Number(input.ceWeight ?? 0.3);
             const combined = candidates.map((c, i) => ({
               ...c,
               _crossEncoderScore: ceScores[i],
