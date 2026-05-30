@@ -20,22 +20,85 @@ const CLI_ROOT = resolve(SCRIPT_DIR, '..');
 const REPO_ROOT = resolve(SCRIPT_DIR, '../../../..');
 const RUNS_DIR = join(REPO_ROOT, 'docs', 'benchmarks', 'runs');
 
-// Real ruflo-history-shaped queries. Each one targets a concept that should
-// have been seen during pretrain. `expect` is a regex matched against the
-// result's `name` field (commit subject or issue title) to score relevance.
-// A result is "relevant" if its name matches the expect regex (case-insensitive).
+// ADR-081 labelled held-out corpus. Each query has hand-curated
+// `expectedSubstrings` — case-insensitive substring matches against the
+// pattern's name. A result is "relevant" if its name contains ANY of the
+// substrings. Tighter than the regex proxy used in ADRs 077-080 (which
+// matched related-but-not-exact commits).
+//
+// `expect` (regex) is kept for backwards compatibility with the older
+// numbers in ADRs 077-080. New metrics use expectedSubstrings.
 const QUERIES = [
-  { q: 'how was the Opus model alias fixed', expect: /opus|2232|model.*alias|4\.8/i },
-  { q: 'self-learning wiring task-completed pretrain', expect: /self.?learning|task.?completed|pretrain|2245|074/i },
-  { q: 'deterministic codemod engine var-to-const', expect: /codemod|var.?to.?const|143|deterministic/i },
-  { q: 'MCP server orphan leak parent-death', expect: /mcp.*orphan|orphan.*mcp|parent.?death|leak/i },
-  { q: 'unified learning stats aggregator', expect: /unified|stats|aggregator|075/i },
-  { q: 'structured distillation 4-field schema', expect: /distillation|structured|076|4.?field/i },
-  { q: 'SQL injection migrate.ts table identifier', expect: /sql.?injection|migrate|table|identifier/i },
-  { q: 'recall@k HNSW benchmark harness', expect: /recall|hnsw|benchmark|harness/i },
-  { q: 'Q-learning encoder keyword block', expect: /q.?learning|encoder|keyword|2239/i },
-  { q: 'security hardening crypto random IDs', expect: /security|hardening|crypto|random/i },
+  {
+    q: 'how was the Opus model alias fixed',
+    expect: /opus|2232|model.*alias|4\.8/i,
+    expectedSubstrings: ['opus 4.8', 'opus alias', 'opus model alias', '#2232'],
+  },
+  {
+    q: 'self-learning wiring task-completed pretrain',
+    expect: /self.?learning|task.?completed|pretrain|2245|074/i,
+    expectedSubstrings: ['self-learning', 'adr-074', 'self learning', '#2245', 'task-completed'],
+  },
+  {
+    q: 'deterministic codemod engine var-to-const',
+    expect: /codemod|var.?to.?const|143|deterministic/i,
+    expectedSubstrings: ['deterministic tier-1 codemod', 'adr-143', 'codemod', 'var-to-const'],
+  },
+  {
+    q: 'MCP server orphan leak parent-death',
+    expect: /mcp.*orphan|orphan.*mcp|parent.?death|leak/i,
+    expectedSubstrings: ['mcp orphan', 'mcp servers orphan', 'parent-death', '#2234', 'orphan on every claude'],
+  },
+  {
+    q: 'unified learning stats aggregator',
+    expect: /unified|stats|aggregator|075/i,
+    expectedSubstrings: ['unified learning-stats', 'adr-075', 'unified learning stats'],
+  },
+  {
+    q: 'structured distillation 4-field schema',
+    expect: /distillation|structured|076|4.?field/i,
+    expectedSubstrings: ['structured distillation', 'adr-076', '4-field schema'],
+  },
+  {
+    q: 'SQL injection migrate.ts table identifier',
+    expect: /sql.?injection|migrate|table|identifier/i,
+    expectedSubstrings: ['sql injection', 'shell injection', 'migrate.ts', 'agentdb', 'cve'],
+  },
+  {
+    q: 'recall@k HNSW benchmark harness',
+    expect: /recall|hnsw|benchmark|harness/i,
+    expectedSubstrings: ['hnsw', 'memory-recall', 'benchmark suite', 'recall@k', 'benchmark intelligence'],
+  },
+  {
+    q: 'Q-learning encoder keyword block',
+    expect: /q.?learning|encoder|keyword|2239/i,
+    expectedSubstrings: ['q-state encoder', 'route q-state', 'keyword block', '#2239', 'q-encoder'],
+  },
+  {
+    q: 'security hardening crypto random IDs',
+    expect: /security|hardening|crypto|random/i,
+    expectedSubstrings: ['cwe-347', 'crypto.randomuuid', 'security fix', 'random id', 'crypto random'],
+  },
 ];
+
+/** Returns true if name contains ANY of the labelled substrings (case-insensitive). */
+function isRelevant(name, expectedSubstrings) {
+  if (!name || !expectedSubstrings?.length) return false;
+  const lower = String(name).toLowerCase();
+  return expectedSubstrings.some((s) => lower.includes(s.toLowerCase()));
+}
+
+/** nDCG@k with binary relevance (each relevant item contributes 1 / log2(i+1)). */
+function ndcgAtK(rankedRelevance, k) {
+  const arr = rankedRelevance.slice(0, k);
+  const dcg = arr.reduce((acc, rel, i) => acc + (rel ? 1 / Math.log2(i + 2) : 0), 0);
+  const numRelevant = arr.filter(Boolean).length;
+  if (numRelevant === 0) return 0;
+  // Ideal: all relevant items packed at positions 1..numRelevant
+  let idcg = 0;
+  for (let i = 0; i < numRelevant; i++) idcg += 1 / Math.log2(i + 2);
+  return idcg > 0 ? dcg / idcg : 0;
+}
 
 const TOP_K = 5;
 
@@ -66,32 +129,45 @@ async function main() {
 
   const tQuery0 = performance.now();
   const results = [];
-  for (const { q, expect } of QUERIES) {
+  for (const { q, expect, expectedSubstrings } of QUERIES) {
     const r = await listTool.handler({ action: 'search', query: q, mode, limit: TOP_K, rerank: useRerank });
     const matches = (r.patterns || r.results || r.matches || []).slice(0, TOP_K);
     if (matches.length > 0) {
       const top1 = matches[0].id;
       top1Ids.set(top1, (top1Ids.get(top1) ?? 0) + 1);
     }
-    // ADR-078 relevance: does the top-1/top-3 name match the expect regex?
-    const top1Name = matches[0]?.name ?? '';
-    const top1Relevant = expect.test(top1Name);
-    let top3Relevant = false;
-    let firstRelevantRank = -1;
-    for (let i = 0; i < Math.min(matches.length, 3); i++) {
-      if (expect.test(matches[i]?.name ?? '')) {
-        top3Relevant = true;
-        if (firstRelevantRank === -1) firstRelevantRank = i + 1;
-        break;
-      }
+
+    // Two relevance signals per result:
+    //   regexRel — old proxy (kept for back-compat with ADR-077-080 numbers)
+    //   labelRel — ADR-081 hand-curated label match
+    const regexRel = matches.map((m) => expect.test(m?.name ?? ''));
+    const labelRel = matches.map((m) => isRelevant(m?.name, expectedSubstrings));
+
+    // First rank where a labelled-relevant doc appears.
+    let firstLabelRank = -1;
+    for (let i = 0; i < matches.length; i++) {
+      if (labelRel[i]) { firstLabelRank = i + 1; break; }
     }
+    let firstRegexRank = -1;
+    for (let i = 0; i < matches.length; i++) {
+      if (regexRel[i]) { firstRegexRank = i + 1; break; }
+    }
+
     results.push({
       query: q,
       matched: matches.length > 0,
-      top1Relevant,
-      top3Relevant,
-      firstRelevantRank,
-      topK: matches.map((m) => ({
+      // Regex-proxy metrics (back-compat with ADR-077-080)
+      top1Relevant: regexRel[0] || false,
+      top3Relevant: regexRel.slice(0, 3).some(Boolean),
+      firstRelevantRank: firstRegexRank,
+      // ADR-081 labelled metrics
+      label_top1: labelRel[0] || false,
+      label_top3_count: labelRel.slice(0, 3).filter(Boolean).length,
+      label_top5_count: labelRel.slice(0, 5).filter(Boolean).length,
+      label_firstRank: firstLabelRank,
+      label_ndcg3: ndcgAtK(labelRel, 3),
+      label_ndcg5: ndcgAtK(labelRel, 5),
+      topK: matches.map((m, i) => ({
         id: m.id,
         name: m.name?.slice(0, 100),
         type: m.type,
@@ -99,19 +175,37 @@ async function main() {
         cosineScore: m.cosineScore,
         bm25Score: m.bm25Score,
         mmrScore: m.mmrScore,
+        labelRelevant: labelRel[i],
       })),
     });
   }
   const queryMs = performance.now() - tQuery0;
 
   const matchedQueries = results.filter((r) => r.matched).length;
+  // Regex-proxy metrics (back-compat)
   const top1Hits = results.filter((r) => r.top1Relevant).length;
   const top3Hits = results.filter((r) => r.top3Relevant).length;
   const ranks = results.filter((r) => r.firstRelevantRank > 0).map((r) => r.firstRelevantRank);
-  // MRR over the top-3 window (rank-of-first-relevant). Queries with no
-  // relevant result in top-3 contribute 0 to the mean.
   const mrr3 = QUERIES.length > 0
     ? Number((ranks.reduce((s, r) => s + 1 / r, 0) / QUERIES.length).toFixed(4))
+    : 0;
+
+  // ADR-081 labelled metrics — tighter ground truth than regex proxy.
+  const label_top1Hits = results.filter((r) => r.label_top1).length;
+  const label_top3HitsBinary = results.filter((r) => r.label_top3_count > 0).length;
+  const label_ranks = results.filter((r) => r.label_firstRank > 0).map((r) => r.label_firstRank);
+  const label_mrr3 = QUERIES.length > 0
+    ? Number((label_ranks.reduce((s, r) => s + 1 / r, 0) / QUERIES.length).toFixed(4))
+    : 0;
+  const label_ndcg3_mean = QUERIES.length > 0
+    ? Number((results.reduce((s, r) => s + r.label_ndcg3, 0) / QUERIES.length).toFixed(4))
+    : 0;
+  const label_ndcg5_mean = QUERIES.length > 0
+    ? Number((results.reduce((s, r) => s + r.label_ndcg5, 0) / QUERIES.length).toFixed(4))
+    : 0;
+  // Mean precision@3 — fraction of top-3 that's relevant per query, averaged.
+  const label_precision3 = QUERIES.length > 0
+    ? Number((results.reduce((s, r) => s + r.label_top3_count / 3, 0) / QUERIES.length).toFixed(4))
     : 0;
   // top-1 collision: number of distinct top-1 IDs over the query count.
   const uniqueTop1 = top1Ids.size;
@@ -141,9 +235,17 @@ async function main() {
     queries: QUERIES.length,
     matchedQueries,
     matchRate: Number((matchedQueries / QUERIES.length).toFixed(4)),
-    top1HitRate: Number((top1Hits / QUERIES.length).toFixed(4)),  // ADR-078: relevance, not just any-match
+    // Regex-proxy metrics (ADR-077-080 back-compat)
+    top1HitRate: Number((top1Hits / QUERIES.length).toFixed(4)),
     top3HitRate: Number((top3Hits / QUERIES.length).toFixed(4)),
-    mrr3,                              // mean reciprocal rank over top-3
+    mrr3,
+    // ADR-081 labelled metrics — tighter ground truth
+    label_top1HitRate: Number((label_top1Hits / QUERIES.length).toFixed(4)),
+    label_top3HitRate: Number((label_top3HitsBinary / QUERIES.length).toFixed(4)),
+    label_mrr3,
+    label_precision3,
+    label_ndcg3: label_ndcg3_mean,
+    label_ndcg5: label_ndcg5_mean,
     top1Diversity,                     // 1.0 = every query gets a distinct top-1
     top3DupRate,                       // 0.0 = no duplicate IDs inside any top-3
     avgQueryLatencyMs: Number((queryMs / QUERIES.length).toFixed(2)),
@@ -160,9 +262,16 @@ async function main() {
     console.log(`Store size: ${total} patterns`);
     console.log(`Queries: ${QUERIES.length}`);
     console.log(`Match rate: ${(summary.matchRate * 100).toFixed(0)}% (${matchedQueries}/${QUERIES.length})`);
-    console.log(`Top-1 hit rate (RELEVANCE): ${(summary.top1HitRate * 100).toFixed(0)}% (${top1Hits}/${QUERIES.length})`);
-    console.log(`Top-3 hit rate (RELEVANCE): ${(summary.top3HitRate * 100).toFixed(0)}% (${top3Hits}/${QUERIES.length})`);
-    console.log(`MRR@3: ${summary.mrr3}`);
+    console.log(`Top-1 hit rate (regex proxy): ${(summary.top1HitRate * 100).toFixed(0)}% (${top1Hits}/${QUERIES.length})`);
+    console.log(`Top-3 hit rate (regex proxy): ${(summary.top3HitRate * 100).toFixed(0)}% (${top3Hits}/${QUERIES.length})`);
+    console.log(`MRR@3 (regex proxy):          ${summary.mrr3}`);
+    console.log('');
+    console.log(`Top-1 hit rate (ADR-081 labelled): ${(summary.label_top1HitRate * 100).toFixed(0)}% (${label_top1Hits}/${QUERIES.length})`);
+    console.log(`Top-3 hit rate (ADR-081 labelled): ${(summary.label_top3HitRate * 100).toFixed(0)}% (${label_top3HitsBinary}/${QUERIES.length})`);
+    console.log(`MRR@3 (labelled):                  ${summary.label_mrr3}`);
+    console.log(`Precision@3 (labelled, mean):      ${summary.label_precision3}`);
+    console.log(`nDCG@3 (labelled, mean):           ${summary.label_ndcg3}`);
+    console.log(`nDCG@5 (labelled, mean):           ${summary.label_ndcg5}`);
     console.log(`Top-1 diversity: ${(summary.top1Diversity * 100).toFixed(0)}% (${uniqueTop1} distinct top-1 IDs across ${QUERIES.length} queries)`);
     console.log(`Top-3 dup rate: ${(summary.top3DupRate * 100).toFixed(0)}%`);
     console.log(`Avg query latency: ${summary.avgQueryLatencyMs} ms`);
