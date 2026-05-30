@@ -48,7 +48,9 @@ Standalone runner that bypasses the neural-tools BM25/hybrid pipeline entirely �
 
 Why we're slightly below: our multi-field BM25 (subjectWeight=2.0) was tuned for ruflo's commit-style corpus where the "subject" field carries different IDF distribution than NFCorpus's title field. With `subjectWeight=0` (pure body BM25) we get **the same 0.289** — meaning the doc `_id` we passed as the "subject" carries no signal. A tighter BEIR-specific tokenizer + stopword list (Lucene-style) would close the remaining 0.04 gap.
 
-### BGE-base-en-v1.5 (dense retrieval) — **TOP-2 RESULT**
+### BGE-base-en-v1.5 (dense retrieval) — **TOP-2 on BEIR NFCorpus** (1 dataset, not the BEIR average)
+
+**Pipeline reported:** direct BGE dense path (no fine-tuning, no hybrid BM25+dense fusion, no cross-encoder reranker). Our internal hybrid pipeline (ADRs 078-083) is deliberately isolated from this BEIR comparison so the dense-vs-dense numbers stay honest.
 
 Measured N=323 test queries, full corpus 3,633 docs:
 
@@ -76,7 +78,12 @@ Measured N=323 test queries, full corpus 3,633 docs:
 | 10 | ColBERT | 0.305 |
 | 11 | SBERT msmarco | 0.272 |
 
-We beat SPLADE++ (the published "best" before BGE-large landed), GTR-XL, and every other listed dense retriever using a 3× smaller base model (110M vs 335M). The only thing beating us is BGE-large at 0.380, and that's a model-size advantage we could close by passing `BGE_MODEL=Xenova/bge-large-en-v1.5` to the same harness.
+We beat SPLADE++ (the published "best" before BGE-large landed), GTR-XL, and every other listed dense retriever using a 3× smaller base model (110M vs 335M).
+
+**Caveats on the framing:**
+- The 0.005 gap to SPLADE++ (0.352 vs 0.347) is small. A paired bootstrap significance test (ADR-086) is needed to claim a statistically significant win — pending re-run with per-query metrics.
+- **The "swap to BGE-large to close the BGE-large gap" claim is directional, not guaranteed.** Larger model = different dim (1024 vs 768), ~3× larger cache, ~2× query latency. Real number requires the run; we have not yet measured BGE-large on this stack.
+- **One BEIR dataset is not BEIR-SOTA.** BEIR is explicitly an 18-dataset heterogeneous benchmark; rank-2 on NFCorpus is a strong signal, not a generalisation claim. SciFact run (2nd dataset) is queued; broader coverage is tracked.
 
 ## Cumulative SOTA context
 

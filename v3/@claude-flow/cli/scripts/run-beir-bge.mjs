@@ -218,25 +218,26 @@ async function main() {
 
   console.log(`\nRunning ${evalQueryIds.length} queries...`);
   let nSum = 0, mSum = 0, r10Sum = 0, r100Sum = 0, n = 0;
+  // ADR-086 — save per-query metrics for paired bootstrap significance testing.
+  const perQuery = [];
   const tQ = performance.now();
   for (const qid of evalQueryIds) {
     const qtext = queriesById.get(qid);
     if (!qtext) continue;
-    // BGE recommends prepending "Represent this sentence for searching relevant passages:" to queries
-    // but only for v1.5 *en-icl* variants. v1.5 (non-icl) works without it.
+    // BGE v1.5 non-icl works without the query prefix.
     const qEmb = await emb.embed(qtext);
-    // Score every doc, sort.
     const scores = new Array(docEmbeds.length);
     for (let i = 0; i < docEmbeds.length; i++) scores[i] = { id: docIds[i], score: cosine(qEmb, docEmbeds[i]) };
     scores.sort((a, b) => b.score - a.score);
     const top100 = scores.slice(0, 100).map((s) => s.id);
 
     const qmap = qrels.get(qid);
-    nSum += ndcg(top100, qmap, 10);
-    mSum += mrr(top100, qmap, 10);
-    r10Sum += recall(top100, qmap, 10);
-    r100Sum += recall(top100, qmap, 100);
-    n++;
+    const qNdcg = ndcg(top100, qmap, 10);
+    const qMrr = mrr(top100, qmap, 10);
+    const qR10 = recall(top100, qmap, 10);
+    const qR100 = recall(top100, qmap, 100);
+    nSum += qNdcg; mSum += qMrr; r10Sum += qR10; r100Sum += qR100; n++;
+    perQuery.push({ qid, ndcg10: qNdcg, mrr10: qMrr, recall10: qR10, recall100: qR100 });
     if (n % 50 === 0) {
       const elapsed = (performance.now() - tQ) / 1000;
       console.log(`  ${n}/${evalQueryIds.length} in ${elapsed.toFixed(0)}s  running nDCG@10=${(nSum / n).toFixed(4)}`);
@@ -276,6 +277,7 @@ async function main() {
     queries: n,
     corpusSize: corpus.length,
     metrics: { ndcg10, mrr10, recall10, recall100, avgQueryLatencyMs: queryMs / n },
+    perQuery, // ADR-086: per-query metrics for paired bootstrap significance testing
     baselines: BASELINES_NDCG10,
     ourRank,
     leaderboardLength: ranking.length,
