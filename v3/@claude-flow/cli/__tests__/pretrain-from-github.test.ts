@@ -21,7 +21,11 @@ import {
   getUnifiedLearningStats,
   flushIntelligenceStats,
 } from '../src/memory/intelligence.js';
-import { storeNeuralPatterns, getNeuralStoreStats } from '../src/mcp-tools/neural-tools.js';
+import {
+  storeNeuralPatterns,
+  getNeuralStoreStats,
+  neuralTools,
+} from '../src/mcp-tools/neural-tools.js';
 
 // Fixture — a tiny mock "history" shaped like real ruflo commits + issues.
 // Intentionally small so this stays fast. The shape (subject + body + verdict)
@@ -130,5 +134,42 @@ describe('pretrain-from-github wiring guard (#2245 regression)', () => {
     const item = FIXTURE[3]; // issue-2245
     const distilled = distillAndSerialise(`${item.subject}\n\n${item.body}`);
     expect(distilled).toMatch(/2245|self-learning|persists/i);
+  });
+
+  // ADR-078 — hybrid retrieval should be at least as discriminative as cosine
+  // alone on an exact-keyword query. We don't require a strict inequality
+  // because on a 5-item fixture both modes can return the same top-1.
+  it('hybrid search returns a non-empty result and respects mode parameter', async () => {
+    const tool = neuralTools.find((t) => t.name === 'neural_patterns');
+    expect(tool).toBeDefined();
+
+    const hybrid = await tool!.handler({
+      action: 'search',
+      query: 'structured distillation 4-field schema',
+      mode: 'hybrid',
+      limit: 3,
+    });
+    expect(hybrid.mode).toBe('hybrid');
+    expect(Array.isArray(hybrid.results)).toBe(true);
+    expect(hybrid.results.length).toBeGreaterThan(0);
+    // Top-1 of a query targeting commit-aaa3 (Structured Distillation, ADR-076)
+    // should mention either 'structured', 'distillation', or 'ADR-076'.
+    const top1Name = String(hybrid.results[0].name).toLowerCase();
+    expect(top1Name).toMatch(/structured|distillation|adr-076|076/);
+    // Hybrid path returns the extra ADR-078 fields.
+    expect(hybrid.results[0]).toHaveProperty('hybridScore');
+    expect(hybrid.results[0]).toHaveProperty('cosineScore');
+    expect(hybrid.results[0]).toHaveProperty('bm25Score');
+
+    const cosine = await tool!.handler({
+      action: 'search',
+      query: 'structured distillation 4-field schema',
+      mode: 'cosine',
+      limit: 3,
+    });
+    expect(cosine.mode).toBe('cosine');
+    expect(Array.isArray(cosine.results)).toBe(true);
+    // Cosine path does NOT include the hybrid breakdown.
+    expect(cosine.results[0]).not.toHaveProperty('hybridScore');
   });
 });

@@ -97,6 +97,10 @@ interface Pattern {
   name: string;
   type: string;
   embedding: number[];
+  /** Source text the embedding was built from. Cap 4096 chars. Used for
+   *  BM25 in hybrid retrieval (ADR-078). Optional for backwards compat —
+   *  pre-3.10.18 patterns fall back to `name` for BM25 tokenisation. */
+  content?: string;
   metadata: Record<string, unknown>;
   createdAt: string;
   usageCount: number;
@@ -187,13 +191,15 @@ export async function storeNeuralPatterns(items: Array<{
   let stored = 0;
   for (const item of items) {
     if (!item.name || !item.type) continue;
-    const embedding = await generateEmbedding(item.content ?? item.name);
+    const sourceText = item.content ?? item.name;
+    const embedding = await generateEmbedding(sourceText);
     const id = `pattern-${Date.now()}-${stored.toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
     store.patterns[id] = {
       id,
       name: String(item.name).slice(0, 200),
       type: String(item.type).slice(0, 64),
       embedding,
+      content: typeof sourceText === 'string' ? sourceText.slice(0, 4096) : undefined,
       metadata: item.metadata ?? {},
       createdAt: new Date().toISOString(),
       usageCount: 0,
@@ -484,7 +490,12 @@ export const neuralTools: MCPTool[] = [
         patternId: { type: 'string', description: 'Pattern ID' },
         name: { type: 'string', description: 'Pattern name' },
         type: { type: 'string', description: 'Pattern type' },
+        content: { type: 'string', description: 'Pattern source text (used for BM25 in hybrid search; falls back to name)' },
         query: { type: 'string', description: 'Search query' },
+        limit: { type: 'number', description: 'Top-K results to return (default 10, max 100)' },
+        mode: { type: 'string', enum: ['hybrid', 'cosine'], description: 'Search mode — hybrid (cosine+BM25+MMR, default) or cosine (pre-3.10.18 behaviour, for A/B)' },
+        alpha: { type: 'number', description: 'Hybrid: cosine weight in [0,1]; (1-α) is BM25 weight (default 0.6)' },
+        mmrLambda: { type: 'number', description: 'Hybrid: MMR balance — 1.0 = pure relevance, 0.0 = pure diversity (default 0.5)' },
         data: { type: 'object', description: 'Pattern data' },
       },
     },
@@ -525,15 +536,17 @@ export const neuralTools: MCPTool[] = [
       if (action === 'store') {
         const patternId = `pattern-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
         const patternName = (input.name as string) || 'Unnamed pattern';
+        const patternContent = (input.content as string) ?? patternName;
 
-        // Generate embedding from pattern name/content
-        const embedding = await generateEmbedding(patternName, 384);
+        // Generate embedding from pattern content (falls back to name).
+        const embedding = await generateEmbedding(patternContent, 384);
 
         const pattern: Pattern = {
           id: patternId,
           name: patternName,
           type: (input.type as string) || 'general',
           embedding,
+          content: typeof patternContent === 'string' ? patternContent.slice(0, 4096) : undefined,
           metadata: (input.data as Record<string, unknown>) || {},
           createdAt: new Date().toISOString(),
           usageCount: 0,
@@ -557,32 +570,83 @@ export const neuralTools: MCPTool[] = [
 
       if (action === 'search') {
         const query = input.query as string;
+        const k = Math.min(Math.max(Number(input.limit ?? input.topK ?? 10), 1), 100);
+        // ADR-078 hybrid retrieval controls. Cosine-only mode preserves the
+        // pre-3.10.18 behaviour for A/B tests via {mode:'cosine'}; default is
+        // hybrid (cosine + BM25 + MMR).
+        const mode = String(input.mode ?? 'hybrid');
+        const alpha = Number(input.alpha ?? 0.6);    // cosine weight; (1-α) is BM25
+        const mmrLambda = Number(input.mmrLambda ?? 0.5); // 1 = pure relevance, 0 = pure diversity
 
-        // Generate query embedding for real similarity search
+        const { tokenize, buildCorpusStats, bm25Score, hybridScores, mmrRerank } =
+          await import('../memory/hybrid-retrieval.js');
+
         const queryEmbedding = await generateEmbedding(query, 384);
+        const patterns = Object.values(store.patterns);
 
-        // Calculate REAL cosine similarity against stored patterns
-        const results = Object.values(store.patterns)
-          .map(p => ({
-            ...p,
-            similarity: cosineSimilarity(queryEmbedding, p.embedding),
-          }))
-          .sort((a, b) => b.similarity - a.similarity)
-          .slice(0, 10);
+        // Compute cosine for every pattern (this is what the old path did).
+        const cosineArr = patterns.map((p) => cosineSimilarity(queryEmbedding, p.embedding));
+
+        if (mode === 'cosine') {
+          const ranked = patterns
+            .map((p, i) => ({ ...p, similarity: cosineArr[i] }))
+            .sort((a, b) => b.similarity - a.similarity)
+            .slice(0, k);
+          return {
+            _realSimilarity: true,
+            _realEmbedding: !!realEmbeddings,
+            _embeddingSource: embeddingServiceName,
+            embeddingProvider: embeddingServiceName,
+            mode: 'cosine',
+            query,
+            results: ranked.map((r) => ({ id: r.id, name: r.name, type: r.type, similarity: r.similarity })),
+            total: ranked.length,
+          };
+        }
+
+        // Hybrid path — BM25 over the pattern's content (falls back to name
+        // for pre-3.10.18 patterns missing the field).
+        const docs = patterns.map((p) => tokenize(p.content ?? p.name));
+        const stats = buildCorpusStats(docs);
+        const queryTokens = tokenize(query);
+        const bm25Arr = docs.map((d) => bm25Score(queryTokens, d, stats));
+        const hybridArr = hybridScores(cosineArr, bm25Arr, alpha);
+
+        // MMR diversity over top-K*3 hybrid candidates → top-K final.
+        const prelim = patterns
+          .map((p, i) => ({ p, hybrid: hybridArr[i], cosine: cosineArr[i], bm25: bm25Arr[i] }))
+          .sort((a, b) => b.hybrid - a.hybrid)
+          .slice(0, Math.min(k * 3, patterns.length));
+
+        const mmrCandidates = prelim.map(({ p, hybrid, cosine, bm25 }) => ({
+          id: p.id, name: p.name, type: p.type,
+          embedding: p.embedding,
+          relevance: hybrid,
+          _cosine: cosine,
+          _bm25: bm25,
+        }));
+        const picked = mmrRerank(mmrCandidates, k, mmrLambda);
 
         return {
           _realSimilarity: true,
           _realEmbedding: !!realEmbeddings,
           _embeddingSource: embeddingServiceName,
           embeddingProvider: embeddingServiceName,
+          mode: 'hybrid',
+          alpha,
+          mmrLambda,
           query,
-          results: results.map(r => ({
+          results: picked.map((r) => ({
             id: r.id,
             name: r.name,
             type: r.type,
-            similarity: r.similarity,
+            similarity: r.relevance,   // exposed as `similarity` for back-compat
+            hybridScore: r.relevance,
+            cosineScore: r._cosine,
+            bm25Score: r._bm25,
+            mmrScore: r.mmrScore,
           })),
-          total: results.length,
+          total: picked.length,
         };
       }
 

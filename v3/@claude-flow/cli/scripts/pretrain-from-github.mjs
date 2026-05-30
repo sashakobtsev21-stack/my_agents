@@ -43,29 +43,110 @@ const SOURCE  = process.env.SOURCE || 'all'; // 'all' | 'git' | 'issues'
 // Harvesters
 // ---------------------------------------------------------------------------
 
+// ADR-078 outcome signal — classify each commit by whether it was reverted,
+// hotfix-followed, or stuck. Operates on the harvested-commits window plus a
+// wider lookahead window for revert/hotfix detection.
+//
+// Verdicts emitted:
+//   success — landed cleanly, no later commit reverted or fixed it
+//   reverted — a later commit subject starts with `Revert "<this subject>"`
+//   hotfixed — a later commit (within HOTFIX_WINDOW_COMMITS) shares >=50%
+//              of the same touched files AND subject contains fix|hotfix|patch
+//
+// The "later" direction is git-log order (newest first → we look at older
+// indices in the lookahead, which are NEWER commits chronologically).
+const HOTFIX_WINDOW_COMMITS = Number(process.env.HOTFIX_WINDOW_COMMITS) || 20;
+const HOTFIX_FILE_OVERLAP = Number(process.env.HOTFIX_FILE_OVERLAP) || 0.5;
+const HOTFIX_KEYWORDS = /\b(fix|hotfix|patch|revert|bugfix|fixup)\b/i;
+
 function harvestCommits(n) {
   if (SOURCE === 'issues') return [];
   const fmt = '%H%x00%s%x00%b%x01';
+  // Pull a wider window so we have lookahead for revert/hotfix detection
+  // without changing the trained set size n.
+  const lookahead = HOTFIX_WINDOW_COMMITS;
   const raw = execSync(
-    `git log --pretty=format:'${fmt}' -n ${n} 2>/dev/null`,
+    `git log --pretty=format:'${fmt}' -n ${n + lookahead} 2>/dev/null`,
     { cwd: REPO_ROOT, encoding: 'utf-8', maxBuffer: 64 * 1024 * 1024 },
   );
-  const entries = [];
+
+  // Parse all blocks (window + lookahead).
+  const all = [];
   for (const block of raw.split('\x01')) {
     if (!block.trim()) continue;
     const [sha, subject, body] = block.split('\x00');
     if (!sha || !subject) continue;
+    all.push({ sha, subject: subject.trim(), body: (body || '').trim() });
+  }
+
+  // For each commit in the trained slice, get its touched files.
+  const filesCache = new Map();
+  const filesOf = (sha) => {
+    if (filesCache.has(sha)) return filesCache.get(sha);
+    try {
+      const out = execSync(
+        `git show --pretty=format: --name-only ${sha} 2>/dev/null`,
+        { cwd: REPO_ROOT, encoding: 'utf-8', maxBuffer: 8 * 1024 * 1024 },
+      ).trim().split('\n').filter(Boolean);
+      filesCache.set(sha, new Set(out));
+      return filesCache.get(sha);
+    } catch {
+      filesCache.set(sha, new Set());
+      return filesCache.get(sha);
+    }
+  };
+
+  // Build a revert-target map: any commit whose subject starts with
+  // `Revert "<X>"` flags X as reverted.
+  const revertedSubjects = new Set();
+  for (const c of all) {
+    const m = c.subject.match(/^Revert\s+"(.+?)"/);
+    if (m) revertedSubjects.add(m[1].trim());
+  }
+
+  const trained = all.slice(0, n);
+  const entries = [];
+  for (let i = 0; i < trained.length; i++) {
+    const c = trained[i];
+    const myFiles = filesOf(c.sha);
+
+    let verdict = 'success';
+    let outcomeNote = null;
+
+    // Reverted? Check if any later (lower-index = newer) commit reverted us.
+    if (revertedSubjects.has(c.subject)) {
+      verdict = 'reverted';
+      outcomeNote = 'subject reverted by a later commit';
+    } else {
+      // Hotfixed? A later commit within HOTFIX_WINDOW_COMMITS shares files
+      // AND has fix/hotfix in its subject.
+      const start = Math.max(0, i - HOTFIX_WINDOW_COMMITS);
+      for (let j = start; j < i; j++) {
+        const later = trained[j];
+        if (!HOTFIX_KEYWORDS.test(later.subject)) continue;
+        const laterFiles = filesOf(later.sha);
+        if (laterFiles.size === 0 || myFiles.size === 0) continue;
+        let overlap = 0;
+        for (const f of laterFiles) if (myFiles.has(f)) overlap++;
+        // Use min() so a small targeted fix on a big change still triggers
+        // (semantic: "≥half of the smaller commit's files overlap").
+        const overlapFrac = overlap / Math.min(laterFiles.size, myFiles.size);
+        if (overlapFrac >= HOTFIX_FILE_OVERLAP) {
+          verdict = 'hotfixed';
+          outcomeNote = `${(overlapFrac * 100).toFixed(0)}% file overlap with later fix ${later.sha.slice(0, 8)}`;
+          break;
+        }
+      }
+    }
+
     entries.push({
       source: 'commit',
-      id: `commit-${sha.slice(0, 12)}`,
-      subject: subject.trim(),
-      body: (body || '').trim(),
-      // The "verdict" of a commit isn't directly known. Treat all commits as
-      // success — we're learning from intent, not outcome. Failures are
-      // captured separately via the issue stream (closed issues are
-      // success; open issues are partial).
-      verdict: 'success',
-      content: `${subject.trim()}\n\n${(body || '').trim()}`.slice(0, 8192),
+      id: `commit-${c.sha.slice(0, 12)}`,
+      subject: c.subject,
+      body: c.body,
+      verdict,
+      outcomeNote,
+      content: `${c.subject}\n\n${c.body}`.slice(0, 8192),
     });
   }
   return entries;
@@ -126,7 +207,19 @@ async function main() {
     console.log(`Harvested: ${commits.length} commits + ${issues.length} issues = ${items.length} trajectories (${harvestMs.toFixed(0)} ms)`);
   }
 
-  // §3 — feed each item through the trajectory pipeline.
+  // §3 — feed each item through the trajectory pipeline. The harvester
+  // emits one of: success | partial | reverted | hotfixed. We map this to
+  // the trajectory pipeline's binary verdict {success, partial} since the
+  // pipeline doesn't accept arbitrary strings — but we preserve the original
+  // outcome in metadata + the summary's verdictMix so the signal isn't lost.
+  const verdictToPipeline = (v) => {
+    if (v === 'success') return 'success';
+    if (v === 'partial') return 'partial';
+    if (v === 'reverted') return 'partial';   // a revert is the strongest "this was wrong" signal we have
+    if (v === 'hotfixed') return 'partial';   // a same-files fix-followup is "needs adjustment"
+    return 'success';
+  };
+  const verdictMix = { success: 0, partial: 0, reverted: 0, hotfixed: 0 };
   const tFeed0 = performance.now();
   let trained = 0;
   let failed = 0;
@@ -134,6 +227,7 @@ async function main() {
   for (const item of items) {
     try {
       const distilled = distillAndSerialise(item.content);
+      verdictMix[item.verdict] = (verdictMix[item.verdict] ?? 0) + 1;
       await intel.recordTrajectory(
         [{
           type: 'result',
@@ -142,10 +236,12 @@ async function main() {
             source: item.source,
             id: item.id,
             subject: item.subject.slice(0, 200),
+            outcomeVerdict: item.verdict,
+            outcomeNote: item.outcomeNote ?? null,
           },
           timestamp: Date.now(),
         }],
-        item.verdict,
+        verdictToPipeline(item.verdict),
       );
       trained++;
     } catch (err) {
@@ -201,6 +297,7 @@ async function main() {
       avgLatencyMs: items.length > 0 ? Number((feedMs / items.length).toFixed(2)) : 0,
       totalMs: Number(feedMs.toFixed(2)),
       sampleFailures: failures,
+      verdictMix,   // ADR-078 outcome signal — counts per harvested verdict
     },
     seedNeuralStore: {
       stored: seedResult.stored,
@@ -231,6 +328,7 @@ async function main() {
     console.log(`Failed: ${failed}`);
     console.log(`Avg latency per trajectory: ${summary.feed.avgLatencyMs} ms`);
     console.log(`Neural store seeded: ${seedResult.stored}/${seedResult.total}`);
+    console.log(`Verdict mix: success=${verdictMix.success} partial=${verdictMix.partial} reverted=${verdictMix.reverted} hotfixed=${verdictMix.hotfixed}`);
     console.log(`Overall: ${summary.passed ? '✅ PASSED' : '⚠️  partial'}`);
     if (unified1.consistency.notes.length > 0) {
       console.log(`\nConsistency notes:`);
