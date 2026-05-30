@@ -25,11 +25,28 @@ The 95% confidence intervals tell the rigorous story. On NFCorpus, we beat BM25 
 | System | NFCorpus | SciFact | Mean |
 |---|---:|---:|---:|
 | BGE-large-v1.5 (published) | 0.380 | 0.722 | 0.551 |
-| **ruflo + BGE-base-en-v1.5** | **0.352** | **0.626** | **0.489** |
 | SPLADE++ | 0.347 | 0.704 | 0.526 |
-| BM25 (Lucene) | 0.325 | 0.679 | 0.502 |
+| BM25 (Lucene published) | 0.325 | 0.679 | 0.502 |
+| **ruflo + BGE-base (direct dense, no rerank)** | **0.352** | **0.626** | **0.489** |
+| **ruflo + BM25+BGE-base RRF k=60 (3.10.27, did NOT improve)** | 0.328 | 0.569 | 0.449 |
 
-**We're below BM25 on the 2-dataset mean** (0.489 vs 0.502). The BEIR-average story requires more datasets *and* domain-specific tuning. The NFCorpus rank-2 is real but not representative.
+**We're below BM25 on the 2-dataset mean** (0.489 vs 0.502). RRF made it worse (0.449). The BEIR-average story requires more datasets *and* domain-specific tuning. The NFCorpus rank-2 is real but not representative.
+
+### ADR-087 RRF ablation (3.10.27 honest negative result)
+
+Standard BM25+dense RRF k=60 — the textbook "lowest-regret" first move — **degrades nDCG@10 on both datasets** because our multi-field BM25 is weaker than Lucene's (our pure-BM25 NFCorpus = 0.279 vs Lucene 0.325). RRF averages BM25 noise into top-K when one input is materially weaker than the other.
+
+| Config | NFCorpus nDCG@10 | SciFact nDCG@10 | NFCorpus R@100 | SciFact R@100 |
+|---|---:|---:|---:|---:|
+| dense alone (BGE-base) | **0.352** | **0.626** | 0.305 | 0.828 |
+| BM25 alone (ours) | 0.279 | 0.576 | 0.223 | 0.824 |
+| **RRF k=60 equal (default)** | 0.328 ↓ | 0.569 ↓ | **0.321 ↑** | **0.951 ↑** |
+| RRF k=30 equal | 0.335 ↓ | 0.582 ↓ | 0.321 | 0.954 |
+| RRF k=60 dense=1.2, bm25=0.8 | 0.334 ↓ | 0.577 ↓ | 0.324 | 0.961 |
+
+Recall@100 **does** improve (RRF surfaces more candidates) — which makes RRF a useful *first stage* before reranking. Tracked for ADR-088 (cross-encoder rerank).
+
+The default BEIR runner stays at dense-only. RRF is opt-in.
 
 > **What pipeline is reported here:** the NFCorpus 0.352 row is the **direct
 > BGE dense path** — no fine-tuning, no hybrid BM25+dense fusion, no

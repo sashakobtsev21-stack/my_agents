@@ -26,7 +26,10 @@ const RUFLO_ROOT = resolve(SCRIPT_DIR, '../../../..');
 const RUNS_DIR = join(RUFLO_ROOT, 'docs', 'benchmarks', 'runs');
 
 const DATA_DIR = process.env.BEIR_DATA_DIR || '/tmp/beir-nfcorpus/nfcorpus';
-const CACHE_DIR = join('/tmp/beir-nfcorpus', 'bge-cache');
+// BUG-FIX (ADR-087): CACHE_DIR was hardcoded to /tmp/beir-nfcorpus/bge-cache,
+// which made the SciFact run silently overwrite the NFCorpus cache. Now
+// derived from DATA_DIR — each dataset gets its own cache directory.
+const CACHE_DIR = join(dirname(DATA_DIR), 'bge-cache');
 const BGE_MODEL = process.env.BGE_MODEL || 'Xenova/bge-base-en-v1.5';
 const SKIP_INGEST = process.env.SKIP_INGEST === '1';
 const MAX_QUERIES = Number(process.env.MAX_QUERIES) || 0;
