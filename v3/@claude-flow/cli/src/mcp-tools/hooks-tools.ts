@@ -797,17 +797,43 @@ export const hooksPostEdit: MCPTool = {
       // Bridge not available — continue with basic response
     }
 
+    // #2245 Round B — also feed the trajectory pipeline so globalStats
+    // (and the unified-stats aggregator in ADR-075) reflects the activity.
+    // Synthesises a one-step trajectory from the edit outcome.
+    let learningPath: 'trajectory-pipeline' | 'recorded-only' = 'recorded-only';
+    let trajectoriesDelta = 0;
+    try {
+      const intel = await import('../memory/intelligence.js');
+      const before = intel.getIntelligenceStats().trajectoriesRecorded;
+      await intel.recordTrajectory(
+        [{
+          type: 'action',
+          content: `Edit ${filePath}${agent ? ` by ${agent}` : ''}: ${success ? 'success' : 'failure'}`,
+          metadata: { hook: 'post-edit', filePath, agent, success },
+          timestamp: Date.now(),
+        }],
+        success ? 'success' : 'failure',
+      );
+      trajectoriesDelta = intel.getIntelligenceStats().trajectoriesRecorded - before;
+      if (trajectoriesDelta > 0) learningPath = 'trajectory-pipeline';
+    } catch { /* intelligence module not yet initialised — keep recorded-only */ }
+
     return {
       recorded: true,
       filePath,
       success,
       timestamp: new Date().toISOString(),
       learningUpdate: success ? 'pattern_reinforced' : 'pattern_adjusted',
+      learningPath,                  // ADR-074 / ADR-075 — honest path naming
+      trajectoriesDelta,
       feedback: feedbackResult ? {
         recorded: feedbackResult.success,
         controller: feedbackResult.controller,
         updates: feedbackResult.updated,
       } : { recorded: false, controller: 'unavailable', updates: 0 },
+      note: learningPath === 'trajectory-pipeline'
+        ? `Edit outcome fed to the SONA + EWC++ trajectory pipeline (trajectoriesRecorded +${trajectoriesDelta}).`
+        : 'Edit outcome stored via memory-bridge only; the trajectory pipeline was not reachable in this process.',
     };
   },
 };
@@ -905,6 +931,26 @@ export const hooksPostCommand: MCPTool = {
       } catch { /* non-critical */ }
     }
 
+    // #2245 Round B — feed the trajectory pipeline so globalStats reflects
+    // command outcomes alongside the AgentDB entry that already gets written.
+    let learningPath: 'trajectory-pipeline' | 'recorded-only' = 'recorded-only';
+    let trajectoriesDelta = 0;
+    try {
+      const intel = await import('../memory/intelligence.js');
+      const before = intel.getIntelligenceStats().trajectoriesRecorded;
+      await intel.recordTrajectory(
+        [{
+          type: 'action',
+          content: `Command \`${command.slice(0, 200)}\` exited ${exitCode} (${success ? 'success' : 'failure'})`,
+          metadata: { hook: 'post-command', command: command.slice(0, 500), exitCode, success },
+          timestamp: Date.now(),
+        }],
+        success ? 'success' : 'failure',
+      );
+      trajectoriesDelta = intel.getIntelligenceStats().trajectoriesRecorded - before;
+      if (trajectoriesDelta > 0) learningPath = 'trajectory-pipeline';
+    } catch { /* intelligence module not yet initialised — keep recorded-only */ }
+
     return {
       recorded: _storedIn !== 'none',
       command,
@@ -912,6 +958,11 @@ export const hooksPostCommand: MCPTool = {
       success,
       timestamp: new Date().toISOString(),
       _storedIn,
+      learningPath,                  // 'trajectory-pipeline' | 'recorded-only'
+      trajectoriesDelta,
+      note: learningPath === 'trajectory-pipeline'
+        ? `Command outcome fed to the SONA + EWC++ trajectory pipeline (trajectoriesRecorded +${trajectoriesDelta}).`
+        : `Command outcome stored via ${_storedIn}; the trajectory pipeline was not reachable in this process.`,
     };
   },
 };
@@ -2698,6 +2749,30 @@ export const hooksTrajectoryEnd: MCPTool = {
       }
     }
 
+    // #2245 Round B — also bump globalStats so the trajectory-end MCP path
+    // shows up in `hooks_intelligence_unified-stats.global.*` (was only
+    // touching sonaCoordinator before — the "MCP trajectory tools feed sona,
+    // not globalStats" gap from ADR-075). Maps the recorded steps to the
+    // intelligence-module TrajectoryStep shape and runs them through the
+    // canonical recordTrajectory() entry point.
+    let globalStatsDelta = 0;
+    if (trajectory && trajectory.steps && trajectory.steps.length > 0) {
+      try {
+        const intel = await import('../memory/intelligence.js');
+        const before = intel.getIntelligenceStats();
+        await intel.recordTrajectory(
+          trajectory.steps.map((s: { action?: string; result?: string; content?: string; type?: string }) => ({
+            type: (s.type as 'observation' | 'thought' | 'action' | 'result') ?? 'action',
+            content: String(s.content ?? `${s.action ?? ''} → ${s.result ?? ''}`).slice(0, 4096),
+            timestamp: Date.now(),
+          })),
+          success ? 'success' : 'failure',
+        );
+        const after = intel.getIntelligenceStats();
+        globalStatsDelta = after.trajectoriesRecorded - before.trajectoriesRecorded;
+      } catch { /* intelligence module not loadable — keep sona-only behaviour */ }
+    }
+
     const learningTimeMs = Date.now() - startTime;
 
     return {
@@ -2714,6 +2789,7 @@ export const hooksTrajectoryEnd: MCPTool = {
         ewcPenalty: ewcResult.penalty || undefined,
         patternsExtracted: trajectory?.steps.length || 0,
         learningTimeMs,
+        globalStatsTrajectoriesDelta: globalStatsDelta,  // Round B: was 0, now reflects
       },
       trajectory: trajectory ? {
         task: trajectory.task,
