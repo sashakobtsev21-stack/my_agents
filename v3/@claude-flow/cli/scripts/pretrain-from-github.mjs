@@ -32,8 +32,14 @@ import { performance } from 'node:perf_hooks';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const CLI_ROOT = resolve(SCRIPT_DIR, '..');
-const REPO_ROOT = resolve(SCRIPT_DIR, '../../../..');
-const RUNS_DIR = join(REPO_ROOT, 'docs', 'benchmarks', 'runs');
+const RUFLO_ROOT = resolve(SCRIPT_DIR, '../../../..');
+const RUNS_DIR = join(RUFLO_ROOT, 'docs', 'benchmarks', 'runs');
+
+// ADR-084 cross-repo support — REPO_ROOT and GH_REPO env-overridable so the
+// same script can pretrain on agentdb / agentic-flow / any other repo for
+// generalisation testing. Defaults preserve ruflo behaviour.
+const REPO_ROOT = process.env.REPO_ROOT ? resolve(process.env.REPO_ROOT) : RUFLO_ROOT;
+const GH_REPO   = process.env.GH_REPO   || 'ruvnet/ruflo';
 
 const COMMITS = Number(process.env.COMMITS) || 50;
 const ISSUES  = Number(process.env.ISSUES)  || 30;
@@ -156,7 +162,7 @@ function harvestIssues(n) {
   if (SOURCE === 'git') return [];
   try {
     const raw = execSync(
-      `gh issue list --repo ruvnet/ruflo --state all --limit ${n} --json number,title,body,state,closedAt 2>/dev/null`,
+      `gh issue list --repo ${GH_REPO} --state all --limit ${n} --json number,title,body,state,closedAt 2>/dev/null`,
       { cwd: REPO_ROOT, encoding: 'utf-8', maxBuffer: 64 * 1024 * 1024 },
     );
     const items = JSON.parse(raw);
