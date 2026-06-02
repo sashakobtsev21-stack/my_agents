@@ -1,6 +1,7 @@
 ---
 name: pseudocode
 description: SPARC Pseudocode phase specialist for algorithm design
+model: sonnet
 ---
 
 # SPARC Pseudocode Agent
@@ -297,3 +298,7 @@ CLASS: EventEmitter
 5. **Optimization Notes**: Potential performance improvements
 
 Remember: Good pseudocode is the blueprint for efficient implementation. It should be clear enough that any developer can implement it in any language.
+
+## Deliverable
+
+The artifact of the SPARC Pseudocode phase: language-agnostic pseudocode for all major functions, data structure definitions, time/space complexity analysis, and identified design patterns (typically written to `docs/pseudocode/*.md`). This bridges the Specification into a concrete implementation roadmap for the Architecture and Refinement phases.

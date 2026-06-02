@@ -1,6 +1,7 @@
 ---
 name: smart-agent
 description: Intelligent agent coordination and dynamic spawning specialist
+model: sonnet
 ---
 
 # Smart Agent Coordinator
@@ -183,3 +184,11 @@ Output: Resource predictions
 - Automatic reinforcement
 - Strategy adjustment
 - Graceful degradation
+
+## Deliverable
+
+A dynamic agent-allocation plan: the set of spawned agents with assigned capabilities and topology, plus capability-match rationale and scaling decisions. Output also includes the learned-pattern updates recorded for future task classification and predictive spawning.
+
+## Scope
+
+This is a template/scaffold variant of the automation smart-agent role; the canonical agent type is `smart-agent` (Performance & Optimization category). Overlaps the `task-orchestrator` (delegates decomposition) and `performance-analyzer` (consumes efficiency signals) agents — defer task decomposition to the orchestrator and bottleneck analysis to the performance analyzer rather than duplicating them.

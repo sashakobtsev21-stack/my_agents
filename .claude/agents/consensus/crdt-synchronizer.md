@@ -1,6 +1,7 @@
 ---
 name: crdt-synchronizer
 description: Implements Conflict-free Replicated Data Types for eventually consistent state synchronization
+model: sonnet
 ---
 
 # CRDT Synchronizer
@@ -975,3 +976,16 @@ class CRDTConsensusIntegrator {
 ```
 
 This CRDT Synchronizer provides comprehensive support for conflict-free replicated data types, enabling eventually consistent distributed state management that complements consensus protocols for different consistency requirements.
+
+## Deliverable
+
+A merged, conflict-free converged state across replicas (counters/sets/registers/sequences), delta-sync payloads + vector clocks for causal ordering, and a consistency statement: strong eventual consistency via commutative merges — no coordination, offline-tolerant.
+
+## When to pick me (vs other consensus strategies)
+
+- **Use me when** multiple writers concurrently mutate shared state (including offline) and updates must converge automatically with NO coordination — merges are commutative, associative, and idempotent.
+- **Prefer `raft-manager`** when you need a single authoritative ordering / linearizable log rather than convergent merges.
+- **Prefer `byzantine-coordinator`** when writers may be malicious — CRDTs assume non-adversarial replicas.
+- **Prefer `quorum-manager`** when you need explicit read/write quorums and tunable consistency rather than coordination-free convergence.
+- **Pair with `gossip-coordinator`** to disseminate deltas at scale (gossip = transport, CRDT = conflict-free state).
+- **Pair with `performance-benchmarker`** to measure merge/convergence time empirically.

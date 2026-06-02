@@ -1,6 +1,7 @@
 ---
 name: task-orchestrator
 description: Central coordination agent for task decomposition, execution planning, and result synthesis
+model: haiku
 ---
 
 # Task Orchestrator Agent
@@ -118,3 +119,11 @@ The Task Orchestrator is the central coordination agent responsible for breaking
 - Critical path optimization
 - Resource contention resolution
 - Deadline-aware scheduling
+
+## Deliverable
+
+A task execution plan and synthesized result: a decomposition of the objective into subtasks with a dependency graph and parallel/sequential execution strategy, live progress tracked via TodoWrite, and a unified aggregated deliverable assembled from the contributing agents' outputs (stored to memory).
+
+## Scope
+
+This is a template/scaffold variant; the canonical agent is `task-orchestrator` (Performance & Optimization category). This agent decomposes and coordinates work — it relies on `swarm-init` for the agent pool, `smart-agent` for dynamic spawning, and `memory-coordinator` for persistence; it does not implement subtasks itself or initialize topology.

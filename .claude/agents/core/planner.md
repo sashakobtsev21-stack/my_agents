@@ -1,6 +1,7 @@
 ---
 name: planner
-description: Strategic planning and task orchestration agent
+description: Strategic planning and task orchestration agent. Use to decompose a complex goal into an ordered, dependency-aware execution plan.
+model: sonnet
 ---
 
 # Strategic Planning Agent
@@ -150,3 +151,12 @@ mcp__claude-flow__memory_usage {
 ```
 
 Remember: A good plan executed now is better than a perfect plan executed never. Focus on creating actionable, practical plans that drive progress. Always coordinate through memory.
+
+## Deliverable
+
+The plan in the YAML format above: phases, tasks (with assignee + dependencies), the critical path, risks+mitigations, and measurable success criteria. Keep it small enough to execute (prefer 5–10 tasks over an exhaustive tree).
+
+## Model tier & handoff
+
+- **Default**: `sonnet` (planning is reasoning, not mechanical). Escalate to **opus** only for high-ambiguity, many-constraint goals.
+- **Handoff**: store the plan in the `tasks`/`coordination` namespace and SendMessage it to the `project-coordinator` (or the first pipeline agent, usually `researcher`/`architect`). Update the plan as execution feedback arrives; don't poll.

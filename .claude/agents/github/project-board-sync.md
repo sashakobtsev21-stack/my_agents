@@ -3,6 +3,7 @@ name: project-board-sync
 description: |
   Synchronize AI swarms with GitHub Projects for visual task management, progress tracking, and team coordination
 tools: Bash, Read, Write, Edit, Glob, Grep, LS, TodoWrite, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__swarm_status, mcp__claude-flow__memory_usage, mcp__claude-flow__github_repo_analyze, mcp__claude-flow__github_pr_manage, mcp__claude-flow__github_issue_track, mcp__claude-flow__github_metrics, mcp__claude-flow__workflow_create, mcp__claude-flow__workflow_execute
+model: haiku
 ---
 
 # Project Board Sync - GitHub Projects Integration
@@ -476,3 +477,12 @@ npx ruv-swarm github team-metrics \
 ```
 
 See also: [swarm-issue.md](./swarm-issue.md), [multi-repo-swarm.md](./multi-repo-swarm.md)
+
+## Deliverable
+A GitHub Project board kept in sync with reality: cards/columns/fields updated to match current issue and PR state, with mapping rules applied and a sync report (moved cards, conflicts, drift). Output is board state, not issues or PRs themselves.
+NOTE: check `gh api rate-limit` before batch operations and back off near the limit.
+
+## Scope — use me vs siblings
+- Use me to mirror issue/PR status onto project boards: move cards, update columns/custom fields, run board automation and analytics. I am the canonical board-state keeper.
+- I do NOT create or triage the underlying issues — that's `issue-tracker`; I do not manage PR lifecycle — that's `pr-manager`. I only reflect their state on the board.
+- For cross-org/multi-board propagation of a change, escalate to `multi-repo-swarm`.

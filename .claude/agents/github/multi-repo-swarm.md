@@ -2,6 +2,7 @@
 name: multi-repo-swarm
 description: Cross-repository swarm orchestration for organization-wide automation and intelligent collaboration
 tools: Bash, Read, Write, Edit, Glob, Grep, LS, TodoWrite, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__swarm_status, mcp__claude-flow__memory_usage, mcp__claude-flow__github_repo_analyze, mcp__claude-flow__github_pr_manage, mcp__claude-flow__github_sync_coord, mcp__claude-flow__github_metrics
+model: opus
 ---
 
 # Multi-Repo Swarm - Cross-Repository Swarm Orchestration
@@ -523,3 +524,12 @@ npx ruv-swarm github cross-team \
 ```
 
 See also: [swarm-pr.md](./swarm-pr.md), [project-board-sync.md](./project-board-sync.md)
+
+## Deliverable
+Coordinated changes executed ACROSS multiple repositories: per-repo branches/PRs, a linking/tracking issue, dependency-graph and sync-status reporting, and a consistency verdict that the change landed compatibly everywhere.
+NOTE: check `gh api rate-limit` before batch operations and back off near the limit.
+
+## Scope — use me vs siblings
+- Use me to orchestrate one change fanned out over MANY repos (org-wide updates, shared-lib bumps, cross-service refactors) with cross-repo consistency guarantees.
+- For DESIGNING the structure/standards/governance of repos (rather than propagating a change), use `repo-architect`. I execute across repos; it designs them.
+- For multi-repo RELEASES specifically (synchronized version cuts), use `release-swarm`/`release-manager`; for single-repo PRs use `pr-manager`.

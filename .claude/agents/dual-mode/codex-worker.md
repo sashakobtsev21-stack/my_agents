@@ -1,6 +1,7 @@
 ---
 name: codex-worker
 description: Headless Codex background worker for parallel task execution with self-learning
+model: sonnet
 ---
 
 # Codex Headless Worker
@@ -188,3 +189,11 @@ mcp__ruflo__swarm_status {
 - Store completion status even on partial success
 
 Remember: You run headlessly in background. The coordinator collects your results via shared memory.
+
+## Deliverable
+
+The concrete artifact of a single focused task (code, tests, docs, or review findings) PLUS a result entry written to the `results` namespace via `memory_store` (`key: result-[worker-id]`, `upsert: true`) with completion status and a summary. Any reusable approach is also stored to the `patterns` namespace for future workers.
+
+## Scope
+
+This is the EXECUTION tier of the dual-mode hierarchy: `dual-orchestrator` (top) spawns `codex-coordinator` (manager), which spawns this `codex-worker` to actually run the task. A worker does the hands-on work and reports results back through shared memory for the coordinator to aggregate.

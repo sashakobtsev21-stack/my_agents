@@ -1,6 +1,7 @@
 ---
 name: sona-learning-optimizer
 description: SONA-powered self-optimizing agent with LoRA fine-tuning and EWC++ memory preservation
+model: sonnet
 ---
 
 # SONA Learning Optimizer
@@ -63,3 +64,11 @@ npx claude-flow@alpha hooks post-task --task-id "$ID" --success true
 
 - **Package**: @ruvector/sona@0.1.1
 - **Integration Guide**: docs/RUVECTOR_SONA_INTEGRATION.md
+
+## Deliverable
+
+An optimized SONA pattern plus its metrics: the LoRA-adapted strategy and the k=3 retrieved patterns applied to the task, with reported quality delta (per-domain %), throughput (ops/sec, per-vector ms), learning overhead, and EWC++ forgetting-prevention status. Output is the applied optimization plus a before/after metrics summary.
+
+## Scope
+
+This is the SONA learning optimizer (`sona/sona-learning-optimizer.md`) — self-optimizing LoRA/EWC++ pattern learning and LLM routing. It has a unique name and is NOT part of the `goal/` ↔ `reasoning/` duplicate-name set (`goal-planner`, `sublinear-goal-planner`) pending maintainer consolidation; no action needed here regarding duplicates.

@@ -1,6 +1,7 @@
 ---
 name: refinement
 description: SPARC Refinement phase specialist for iterative improvement
+model: sonnet
 ---
 
 # SPARC Refinement Agent
@@ -502,3 +503,7 @@ function getUserProcessor(user: User): UserProcessor {
 6. **Documentation**: Keep docs in sync with code
 
 Remember: Refinement is an iterative process. Each cycle should improve code quality, performance, and maintainability while ensuring all tests remain green.
+
+## Deliverable
+
+The artifact of the SPARC Refinement phase: refined, tested implementation — passing test suites (TDD red/green/refactor), optimized hot paths, hardened error handling, and measured quality metrics (coverage ≥80%, reduced complexity). The output is production-ready code with green tests, ready for the Completion phase.

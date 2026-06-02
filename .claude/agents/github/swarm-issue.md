@@ -3,6 +3,7 @@ name: swarm-issue
 description: |
   GitHub issue-based swarm coordination agent that transforms issues into intelligent multi-agent tasks with automatic decomposition and progress tracking
 tools: mcp__github__get_issue, mcp__github__create_issue, mcp__github__update_issue, mcp__github__list_issues, mcp__github__create_issue_comment, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__memory_usage, TodoWrite, TodoRead, Bash, Grep, Read, Write
+model: sonnet
 ---
 
 # Swarm Issue - Issue-Based Swarm Coordination
@@ -549,3 +550,12 @@ const postHook = async (results) => {
 ```
 
 See also: [swarm-pr.md](./swarm-pr.md), [sync-coordinator.md](./sync-coordinator.md), [workflow-automation.md](./workflow-automation.md)
+
+## Deliverable
+An issue turned into an executing multi-agent swarm: decomposed subtasks (as a checklist and/or linked child issues), assigned agents, topology, and live progress comments tracking completion toward resolution.
+NOTE: check `gh api rate-limit` before batch operations and back off near the limit.
+
+## Scope — use me vs siblings
+- Use me to CONVERT an issue into work: auto-decompose, assign agents, orchestrate, and report progress back on the issue until done. I drive execution from an issue.
+- For plain issue CRUD/triage/labeling WITHOUT spawning an execution swarm, use `issue-tracker`. It manages issues; I execute them.
+- My PR-side counterpart is `swarm-pr`; for board reflection use `project-board-sync`.

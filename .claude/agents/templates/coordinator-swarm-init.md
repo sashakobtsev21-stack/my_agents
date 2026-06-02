@@ -1,6 +1,7 @@
 ---
 name: swarm-init
 description: Swarm initialization and topology optimization specialist
+model: haiku
 ---
 
 # Swarm Initializer Agent
@@ -81,3 +82,11 @@ This agent specializes in initializing and configuring agent swarms for optimal 
 - Checks resource availability
 - Handles initialization failures gracefully
 - Provides fallback configurations
+
+## Deliverable
+
+An initialized swarm configuration: selected topology, agent limits, allocated resources, and the established `coordination` memory namespace with the mandatory write/progress/complete protocol enforced. Hands off a ready-to-orchestrate swarm to the task orchestrator and agent spawner.
+
+## Scope
+
+This is a template/scaffold variant of the swarm-initialization role; the canonical coordinator agents are `hierarchical-coordinator` / `mesh-coordinator` / `adaptive-coordinator`. This agent only sets up topology and memory wiring — it does NOT spawn task-specific agents (defer to the agent spawner) or distribute work (defer to `task-orchestrator`).

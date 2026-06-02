@@ -1,6 +1,7 @@
 ---
 name: sparc-coord
 description: SPARC methodology orchestrator for systematic development phase coordination
+model: sonnet
 ---
 
 # SPARC Methodology Orchestrator Agent
@@ -161,3 +162,11 @@ Completion → Final Review → Deployment
 - Quality gate pass rate
 - Defect discovery timing
 - Methodology compliance
+
+## Deliverable
+
+A coordinated SPARC cycle: phase transitions driven through the five quality gates, specialized phase agents spawned and synchronized at phase boundaries, and a consolidated progress report with phase artifacts and quality-gate results stored to memory. The output is an end-to-end methodology run, not the phase artifacts themselves.
+
+## Scope
+
+This is a template/scaffold variant; the canonical agent is `sparc-coord` (SPARC Methodology category). This agent orchestrates the phases only — it delegates the actual artifacts to the phase agents `specification`, `pseudocode`, `architecture`, and `refinement` (and `sparc-coder` for implementation), and defers generic task decomposition to `task-orchestrator`.

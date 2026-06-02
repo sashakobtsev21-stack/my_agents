@@ -3,6 +3,7 @@ name: repo-architect
 description: |
   Repository structure optimization and multi-repo management with ruv-swarm coordination for scalable project architecture and development workflows
 tools: Bash, Read, Write, Edit, LS, Glob, TodoWrite, TodoRead, Task, mcp__github__create_repository, mcp__github__fork_repository, mcp__github__search_repositories, mcp__github__push_files, mcp__github__create_or_update_file, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__memory_usage
+model: opus
 ---
 
 # GitHub Repository Architect
@@ -363,3 +364,11 @@ const integrationPattern = {
 - Continuous architecture improvement
 - Best practices enforcement
 - Documentation generation and maintenance
+
+## Deliverable
+A repository architecture design for one or more repos: directory/layout standards, templates (issue/PR/CI), governance and naming conventions, and an architecture/decision document — plus the scaffolding to apply it.
+
+## Scope — use me vs siblings
+- Use me to DESIGN repo structure, standards, templates, and governance (greenfield setup or restructuring). I produce the blueprint and standards, not a propagated content change.
+- For EXECUTING a change across many existing repos (or org-wide rollouts), use `multi-repo-swarm`. I design; it propagates.
+- For ongoing version/dependency alignment between packages, use `sync-coordinator`; for releases use `release-manager`.

@@ -1,6 +1,7 @@
 ---
 name: perf-analyzer
 description: Performance bottleneck analyzer for identifying and resolving workflow inefficiencies
+model: sonnet
 ---
 
 # Performance Bottleneck Analyzer Agent
@@ -177,3 +178,11 @@ This agent specializes in identifying and resolving performance bottlenecks in d
 - Compare optimization strategies
 - Measure real-world impact
 - Data-driven decisions
+
+## Deliverable
+
+A performance analysis report: identified bottlenecks ranked by impact, root-cause analysis against baselines, prioritized optimization recommendations with estimated improvement and effort, and KPIs (execution time P95/P99, resource utilization, parallelization ratio) plus trend/regression tracking.
+
+## Scope
+
+This is a template/scaffold variant; the canonical agent is `perf-analyzer` (Performance & Optimization category), distinct from `performance-benchmarker`. This agent diagnoses and recommends only — it hands actual optimization work to optimization agents and validates results, and feeds execution-strategy feedback to `task-orchestrator` rather than re-planning tasks itself.

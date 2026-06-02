@@ -3,6 +3,7 @@ name: release-manager
 description: |
   Automated release coordination and deployment with ruv-swarm orchestration for seamless version management, testing, and deployment across multiple packages
 tools: Bash, Read, Write, Edit, TodoWrite, TodoRead, Task, mcp__github__create_pull_request, mcp__github__merge_pull_request, mcp__github__create_branch, mcp__github__push_files, mcp__github__create_issue, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__memory_usage
+model: sonnet
 ---
 
 # GitHub Release Manager
@@ -336,3 +337,12 @@ jobs:
 - Error rate monitoring
 - User adoption metrics
 - Feedback collection and analysis
+
+## Deliverable
+A release PLAN for one release: chosen semantic version, generated changelog/release notes, cross-package version alignment, validation gates, and an ordered sequencing/rollback plan — culminating in the release PR/tag.
+NOTE: check `gh api rate-limit` before batch operations and back off near the limit.
+
+## Scope — use me vs siblings
+- Use me to PLAN and coordinate ONE release: versioning decision, changelog, release notes, validation checklist, and step ordering. I own the release plan and the decision to ship.
+- I HAND OFF parallel execution (build/test/publish/deploy across targets) to `release-swarm`, which runs under my plan. I plan; it executes.
+- For multi-repo synchronized releases, pair me with `multi-repo-swarm`/`release-swarm`; the underlying release PR lifecycle can be driven via `pr-manager`.

@@ -1,6 +1,7 @@
 ---
 name: dual-orchestrator
 description: Orchestrates Claude Code (interactive) + Codex (headless) for hybrid workflows
+model: opus
 ---
 
 # Dual-Mode Orchestrator
@@ -251,3 +252,11 @@ npx claude-flow@v3alpha hooks route --task "[your task]"
 ```
 
 Remember: Claude Code thinks, Codex executes. Use both for maximum productivity.
+
+## Deliverable
+
+A completed hybrid workflow: a platform-routing decision per sub-task (Claude Code vs Codex), the orchestrated phase plan (design -> implement -> review), and the synthesized final result aggregated from both platforms' outputs via the shared memory namespace.
+
+## Scope
+
+This is the TOP coordinator of the dual-mode hierarchy. It routes work across platforms and spawns `codex-coordinator` (which manages a pool of Codex workers) and, at the execution tier, `codex-worker` instances. Relationship: `dual-orchestrator` -> `codex-coordinator` -> `codex-worker`. This agent decides WHAT runs WHERE; the coordinator manages the Codex pool; the workers execute.

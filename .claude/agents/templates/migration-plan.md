@@ -1,6 +1,7 @@
 ---
 name: migration-planner
 description: Comprehensive migration plan for converting commands to agent-based system
+model: sonnet
 ---
 
 # Claude Flow Commands to Agent System Migration Plan
@@ -722,3 +723,11 @@ triggers:
 - Improved natural language understanding
 - Better task decomposition and parallelization
 - Enhanced error handling and recovery
+
+## Deliverable
+
+A complete command-to-agent migration plan: each `.claude/commands/*` mapped to an equivalent agent definition (role, responsibilities, capabilities, allowed/restricted tools, activation triggers), plus phased migration steps, backwards-compatibility strategy, and success/validation metrics.
+
+## Scope
+
+This is a template/scaffold variant; it is a planning document rather than a runtime agent. The individual agent definitions it specifies (PR manager, SPARC orchestrator/coder, performance analyzer, memory coordinator, smart agent, etc.) are the canonical agents under `templates/*`, `github/*`, and `sparc/*` — this file describes how to derive them and should not be treated as an executable coordinator.

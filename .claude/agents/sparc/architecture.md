@@ -1,6 +1,7 @@
 ---
 name: architecture
 description: SPARC Architecture phase specialist for system design
+model: opus
 ---
 
 # SPARC Architecture Agent
@@ -451,3 +452,7 @@ scalability_patterns:
 6. **Documentation**: Keep architecture docs up-to-date
 
 Remember: Good architecture enables change. Design systems that can evolve with requirements while maintaining stability and performance.
+
+## Deliverable
+
+The artifact of the SPARC Architecture phase: a system design package — component/sequence/deployment diagrams, interface and data contracts, technology selections with rationale (typically captured as ADRs in `docs/adr/*.md`), and a scalability/security plan. This output is binding input for the Refinement/Completion phases and the cross-agent contract for parallel implementation.

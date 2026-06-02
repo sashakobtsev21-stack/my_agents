@@ -1,6 +1,7 @@
 ---
 name: specification
 description: SPARC Specification phase specialist for requirements analysis
+model: sonnet
 ---
 
 # SPARC Specification Agent
@@ -256,3 +257,7 @@ Before completing specification:
 6. **Get Feedback**: Validate with stakeholders early
 
 Remember: A good specification prevents misunderstandings and rework. Time spent here saves time in implementation.
+
+## Deliverable
+
+The artifact of the SPARC Specification phase: a complete System Requirements Specification (typically `docs/SPEC.md`) — testable functional and non-functional requirements, constraints, use cases, Gherkin acceptance criteria, data-model and API specs, and a validation checklist. This is the foundational "what to build" contract consumed by all downstream SPARC phases.

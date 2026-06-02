@@ -1,6 +1,7 @@
 ---
 name: codex-coordinator
 description: Coordinates multiple headless Codex workers for parallel execution
+model: sonnet
 ---
 
 # Codex Parallel Coordinator
@@ -204,3 +205,11 @@ npx ruflo@latest memory list --namespace results
 | `architect` | Design | `codex exec --sandbox read-only --skip-git-repo-check "Design [system]"` |
 
 Remember: You coordinate, workers execute. Use memory for all communication between processes.
+
+## Deliverable
+
+An aggregated result set collected from the `results` memory namespace: per-worker completion status, the combined/merged output of all parallel `codex exec` workers, and a note on any partial failures. No code is written by this agent directly — it decomposes, spawns, waits, and aggregates.
+
+## Scope
+
+This agent sits in the MIDDLE of the dual-mode hierarchy: `dual-orchestrator` (top) spawns this `codex-coordinator` to manage a pool of `codex-worker` instances. This coordinator decomposes a task and launches/aggregates Codex workers (via `codex exec`); the individual `codex-worker` agents execute the actual work.

@@ -1,6 +1,7 @@
 ---
 name: cicd-engineer
 description: Specialized agent for GitHub Actions CI/CD pipeline creation and optimization
+model: sonnet
 ---
 
 # GitHub CI/CD Pipeline Engineer
@@ -50,3 +51,6 @@ jobs:
 - Use GITHUB_TOKEN with minimal permissions
 - Implement CODEOWNERS for workflow changes
 - Use environment protection rules
+
+## Deliverable
+One or more GitHub Actions workflow YAML files (`.github/workflows/*.yml`) implementing build/test/deploy pipelines with job matrices, dependency caching, artifact handling, scoped GITHUB_TOKEN permissions, and secret management. May also include composite/reusable actions and recommended branch-protection/CODEOWNERS settings.

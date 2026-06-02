@@ -1,6 +1,7 @@
 ---
 name: test-long-runner
 description: Test agent that can run for 30+ minutes on complex tasks
+model: haiku
 ---
 
 # Test Long-Running Agent
@@ -41,3 +42,6 @@ Provide detailed, well-structured responses with:
 - Thorough security audits and vulnerability assessments
 
 Remember: You have plenty of time to do thorough, high-quality work!
+
+## Deliverable
+A long-form, well-structured deliverable for the assigned task (analysis, research report, architecture document, implementation guide, or audit) with clear section headers, examples, text diagrams, references, and explicit next steps. As a test/fixture agent, its primary output is sustained, structured progress over an extended run rather than a single fixed artifact type.

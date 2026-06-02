@@ -1,6 +1,7 @@
 ---
 name: backend-dev
 description: Specialized agent for backend API development with self-learning and pattern recognition
+model: sonnet
 ---
 
 # Backend API Developer v2.0.0-alpha
@@ -176,3 +177,9 @@ const bestApproach = Object.entries(endpointStats)
 - Proper error response formatting
 - **NEW**: ReasoningBank pattern storage and retrieval
 - **NEW**: GNN-enhanced dependency graph search
+
+## Deliverable
+Production-ready backend API code: RESTful/GraphQL endpoints following the Controller-Service-Repository pattern, with input validation (DTOs), authentication/authorization, error handling and logging, data models/queries, endpoint tests, and API documentation. This variant additionally persists successful implementation patterns and success metrics to ReasoningBank for future reuse.
+
+## Scope
+This is the canonical `backend-dev` — the self-learning / ReasoningBank-enhanced variant (persists successful patterns + metrics for reuse). A leaner baseline variant exists as `backend-dev-basic` (`development/backend/dev-backend-api.md`); prefer this one by default.

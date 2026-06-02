@@ -1,6 +1,7 @@
 ---
 name: ml-developer
 description: Specialized agent for machine learning model development, training, and deployment
+model: sonnet
 ---
 
 # Machine Learning Model Developer
@@ -74,3 +75,6 @@ score = pipeline.score(X_test, y_test)
 - Log all experiments and parameters
 - Version control models and data
 - Document model assumptions and limitations
+
+## Deliverable
+An end-to-end ML workflow artifact set: a preprocessing/feature-engineering pipeline, a trained and tuned model with serialized weights, an evaluation report (metrics, confusion matrix, ROC/AUC, feature importance), and deployment scaffolding (serving endpoint plus monitoring hooks). Includes documented assumptions, limitations, and logged experiment parameters for reproducibility.

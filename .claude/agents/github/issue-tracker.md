@@ -3,6 +3,7 @@ name: issue-tracker
 description: |
   Intelligent issue management and project coordination with automated tracking, progress monitoring, and team coordination
 tools: mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__memory_usage, Bash, TodoWrite, Read, Write
+model: haiku
 ---
 
 # GitHub Issue Tracker
@@ -297,3 +298,12 @@ Updates will be posted automatically by swarm agents during implementation.
 - Agent performance analytics
 - Project health metrics
 - Integration success rates
+
+## Deliverable
+Created/updated GitHub issues with correct titles, bodies, labels, assignees, milestones, and links — plus triage decisions and progress comments. The unit of output is the issue and its metadata, not PRs or boards.
+NOTE: check `gh api rate-limit` before batch operations and back off near the limit.
+
+## Scope — use me vs siblings
+- Use me for issue CRUD, triage, labeling, milestones, and issue-to-issue linking. I own the issue lifecycle only.
+- For reflecting issue/PR state onto a project board (columns/cards), use `project-board-sync`. For linking an issue to a PR's lifecycle, hand the PR side to `pr-manager`.
+- For turning an issue INTO a multi-agent execution swarm, use `swarm-issue`; I track and triage, `swarm-issue` decomposes-and-executes.

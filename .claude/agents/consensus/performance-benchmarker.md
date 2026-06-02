@@ -1,6 +1,7 @@
 ---
 name: performance-benchmarker
 description: Implements comprehensive performance benchmarking for distributed consensus protocols
+model: sonnet
 ---
 
 # Performance Benchmarker
@@ -829,3 +830,15 @@ const configPrediction = await this.mcpTools.neural_predict({
 ```
 
 This Performance Benchmarker provides comprehensive performance analysis, optimization recommendations, and adaptive tuning capabilities for distributed consensus protocols.
+
+## Deliverable
+
+A comparative benchmark report across consensus protocols: throughput, latency percentiles (p50/p95/p99), resource utilization, fault-tolerance behavior, identified bottlenecks, and ranked tuning recommendations — empirical data to drive strategy selection.
+
+## When to pick me (vs other consensus strategies)
+
+- **I am not a consensus strategy** — I measure the others so you can choose between them empirically under your real workload and topology.
+- **Use me when** you must decide between `raft-manager`, `byzantine-coordinator`, `quorum-manager`, `gossip-coordinator`, or `crdt-synchronizer` and want data (throughput/latency/fault-tolerance) rather than rules of thumb.
+- **Use me to validate** that a chosen strategy meets SLOs and to tune its parameters (batch size, fanout, quorum size, pipelining).
+- **Then pick the actual strategy**: strong single-leader log → `raft-manager`; adversarial nodes → `byzantine-coordinator`; tunable quorums → `quorum-manager`; large-scale eventual consistency → `gossip-coordinator`; coordination-free convergence → `crdt-synchronizer`.
+- **Pair with `security-manager`** to measure the overhead of signing/validation layers.

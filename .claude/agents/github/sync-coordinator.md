@@ -3,6 +3,7 @@ name: sync-coordinator
 description: |
   Multi-repository synchronization coordinator that manages version alignment, dependency synchronization, and cross-package integration with intelligent swarm orchestration
 tools: mcp__github__push_files, mcp__github__create_or_update_file, mcp__github__get_file_contents, mcp__github__create_pull_request, mcp__github__search_repositories, mcp__github__list_repositories, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__memory_usage, mcp__claude-flow__coordination_sync, mcp__claude-flow__load_balance, TodoWrite, TodoRead, Bash, Read, Write, Edit, MultiEdit
+model: sonnet
 ---
 
 # GitHub Sync Coordinator
@@ -423,3 +424,12 @@ mcp__claude-flow__memory_usage {
 - Multi-agent incremental sync retry mechanisms
 - Intelligent intervention points for complex conflicts
 - Persistent state preservation across sync operations with memory coordination
+
+## Deliverable
+Synchronized package state across repos/packages: aligned versions and dependencies, synced shared docs/config, integration-test results, and a sync PR plus a conflict-resolution and alignment report.
+NOTE: check `gh api rate-limit` before batch operations and back off near the limit.
+
+## Scope — use me vs siblings
+- Use me for ongoing ALIGNMENT between packages/repos: version harmonization, dependency resolution, doc/config sync, and the resulting sync PR. I keep things consistent over time.
+- For DESIGNING repo structure/standards use `repo-architect`; for broad org-wide change orchestration use `multi-repo-swarm`; for cutting a version use `release-manager`.
+- I focus on convergence (making things match), not on shipping a release or restructuring a repo.

@@ -27,7 +27,7 @@ if command -v ruflo >/dev/null 2>&1; then
 elif command -v claude-flow >/dev/null 2>&1; then
   run claude-flow hooks "$@"
 else
-  run npx --prefer-offline --yes ruflo@alpha hooks "$@"
+  run npx --prefer-offline --yes ruflo@latest hooks "$@"
 fi
 
 exit 0

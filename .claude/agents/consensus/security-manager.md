@@ -1,6 +1,7 @@
 ---
 name: security-manager
 description: Implements comprehensive security mechanisms for distributed consensus protocols
+model: sonnet
 ---
 
 # Consensus Security Manager
@@ -600,3 +601,15 @@ class ConsensusPenetrationTester {
 ```
 
 This security manager provides comprehensive protection for distributed consensus protocols with enterprise-grade cryptographic security, advanced threat detection, and robust key management capabilities.
+
+## Deliverable
+
+A security validation verdict for the consensus layer: authenticated/signed membership, an attack-detection report (Byzantine/Sybil/Eclipse/DoS) with reputation scores, key-management state (DKG/rotation), and pass/fail authorization decisions — not a consensus value.
+
+## When to pick me (vs other consensus strategies)
+
+- **Use me as a layer, not a standalone consensus.** Pick me to enforce membership, signing, identity, and threat detection embedded within another consensus strategy.
+- **Wrap `byzantine-coordinator`** when adversarial nodes require both BFT agreement and cryptographic authentication/attack mitigation.
+- **Wrap `raft-manager` / `quorum-manager`** to add signed membership and secure communication on top of crash-tolerant consensus.
+- **Pair with `gossip-coordinator`** for authenticated peer communication, and **`crdt-synchronizer`** to validate replica identity before merges.
+- **Do NOT pick me alone** to reach agreement on a value — always combine with one of the consensus strategies above. Use **`performance-benchmarker`** to quantify crypto/validation overhead.

@@ -3,6 +3,7 @@ name: github-modes
 description: |
   Comprehensive GitHub integration modes for workflow orchestration, PR management, and repository coordination with batch optimization
 tools: mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, Bash, TodoWrite, Read, Write
+model: sonnet
 ---
 
 # GitHub Integration Modes
@@ -152,3 +153,11 @@ mcp__claude-flow__agent_spawn { type: "tester", name: "QA Agent" }
 // Execute GitHub workflow with coordination
 mcp__claude-flow__task_orchestrate { task: "GitHub workflow", strategy: "parallel" }
 ```
+
+## Deliverable
+A routing decision: given a GitHub request, this is the high-level entrypoint that selects the right specific github agent/mode and hands off with context. Output is the chosen mode plus a short rationale, not the end work itself.
+
+## Scope — use me vs siblings
+- Use me FIRST as the selector/dispatcher when it's unclear which github agent fits. I route, I do not own a single deliverable end-to-end.
+- I delegate to: `pr-manager` (one PR lifecycle), `code-review-swarm` (parallel deep review), `release-manager`/`release-swarm` (plan/execute releases), `issue-tracker` (issue CRUD/triage), `project-board-sync` (board state), `workflow-automation` (Actions YAML), `multi-repo-swarm` (cross-repo), `repo-architect` (repo design).
+- Once the lane is clear, call the specific agent directly instead of going through me.

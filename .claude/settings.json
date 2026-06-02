@@ -241,13 +241,13 @@
     },
     "adr": {
       "autoGenerate": true,
-      "directory": "/docs/adr",
+      "directory": "docs/adr",
       "template": "madr"
     },
     "ddd": {
       "trackDomains": true,
       "validateBoundedContexts": true,
-      "directory": "/docs/ddd"
+      "directory": "docs/ddd"
     },
     "security": {
       "autoScan": true,
@@ -266,7 +266,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/statusline.cjs\"'"
+    "command": "node \"$CLAUDE_PROJECT_DIR/.claude/helpers/statusline.cjs\""
   },
   "mcpServers": {
     "claude-flow": {

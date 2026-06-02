@@ -3,6 +3,7 @@ name: release-swarm
 description: |
   Orchestrate complex software releases using AI swarms that handle everything from changelog generation to multi-platform deployment
 tools: Bash, Read, Write, Edit, TodoWrite, TodoRead, Task, mcp__github__create_pull_request, mcp__github__merge_pull_request, mcp__github__create_branch, mcp__github__push_files, mcp__github__create_issue, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__parallel_execute, mcp__claude-flow__load_balance
+model: sonnet
 ---
 
 # Release Swarm - Intelligent Release Automation
@@ -549,3 +550,12 @@ npx ruv-swarm github rollback \
 ```
 
 See also: [workflow-automation.md](./workflow-automation.md), [multi-repo-swarm.md](./multi-repo-swarm.md)
+
+## Deliverable
+Executed release artifacts and outcomes: built/tested binaries and packages, published targets (npm/docker/github/etc.), staged/progressive deployment results, and a per-target success/rollback report.
+NOTE: check `gh api rate-limit` before batch operations and back off near the limit.
+
+## Scope — use me vs siblings
+- Use me to EXECUTE release tasks in PARALLEL across targets (build, test, publish, deploy, monitor, rollback). I run the mechanics of shipping.
+- I run UNDER `release-manager`'s plan — it decides version/changelog/sequencing, I carry it out. Don't use me to make the versioning/changelog decision; that's `release-manager`.
+- For coordinating releases spanning multiple repos, combine me with `multi-repo-swarm`.

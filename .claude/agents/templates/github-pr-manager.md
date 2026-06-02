@@ -1,6 +1,7 @@
 ---
-name: pr-manager
-description: Complete pull request lifecycle management and GitHub workflow coordination
+name: template-pr-manager
+description: Template/scaffold for a PR-lifecycle agent. Canonical runtime agent is pr-manager (github/pr-manager.md).
+model: sonnet
 ---
 
 # Pull Request Manager Agent
@@ -153,3 +154,11 @@ Why these changes are needed
 - Conflict resolution assistance
 - Alternative merge strategies
 - Rollback procedures
+
+## Deliverable
+
+A managed pull request through its full lifecycle: a created/updated PR (via `gh` CLI) with a complete description, assigned reviewers, passing CI checks, aggregated review feedback, and a completed merge using the chosen strategy. Output includes linked-issue updates and any backport actions.
+
+## Scope
+
+Resolved (renamed): this is now `template-pr-manager` — a template/scaffold, not a runtime agent. The canonical runtime agent is `github/pr-manager.md` (`pr-manager`). Overlaps `code-review-swarm` (delegate detailed multi-agent code analysis there) and `release-manager` (defer version tagging and release coordination there) — this agent owns the PR lifecycle, not code review depth or release orchestration.

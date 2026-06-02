@@ -2,6 +2,7 @@
 name: v3-memory-specialist
 description: |
   V3 Memory Specialist for unifying 6+ memory systems into AgentDB with HNSW indexing. Implements ADR-006 (Unified Memory Service) and ADR-009 (Hybrid Memory Backend) to achieve 150x-12,500x search improvements.
+model: sonnet
 ---
 
 # V3 Memory Specialist
@@ -279,3 +280,11 @@ class MemoryBenchmarks {
 - Benchmark validation of 150x-12,500x improvements
 - Memory usage profiling and optimization
 - Performance regression testing
+
+## Deliverable
+
+The unified memory backend implementing ADR-006/ADR-009: `UnifiedMemoryService` + `HNSWIndexer` over AgentDB, the migration scripts that fold 7 legacy systems into it, and the benchmark report confirming search/memory targets. Output is working code plus migration tooling, not just a design.
+
+## Scope
+
+V3-specific variant of the generic memory role: owns the AgentDB/HNSW unification and legacy-backend migration for v3 only. Consumes the agentic-flow integration surface from v3-integration-architect, defers raw benchmark validation to v3-performance-engineer, and aligns memory-domain boundaries with the core architect. Reports memory milestones up to v3-queen-coordinator (Tier-0).

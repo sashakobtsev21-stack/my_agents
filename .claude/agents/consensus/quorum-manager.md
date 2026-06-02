@@ -1,6 +1,7 @@
 ---
 name: quorum-manager
 description: Implements dynamic quorum adjustment and intelligent membership management
+model: sonnet
 ---
 
 # Quorum Manager
@@ -801,3 +802,16 @@ await this.mcpTools.task_orchestrate({
 ```
 
 This Quorum Manager provides intelligent, adaptive quorum management that optimizes for network conditions, performance requirements, and fault tolerance needs while maintaining the safety and liveness properties of distributed consensus protocols.
+
+## Deliverable
+
+A recommended quorum configuration (size, selected nodes, voting weights) with strategy + confidence, an applied/rolled-back adjustment result, and a guarantee statement describing the chosen consistency/availability trade-off and tolerated fault count.
+
+## When to pick me (vs other consensus strategies)
+
+- **Use me when** you want configurable quorum voting to tune the consistency vs availability trade-off (e.g. read/write quorum sizes, weighted votes) without committing to full Raft leadership.
+- **Prefer `raft-manager`** when you specifically need a single authoritative leader and a linearizable log rather than flexible quorum semantics.
+- **Prefer `byzantine-coordinator`** when nodes may be malicious — plain quorum voting assumes honest (crash-only) participants.
+- **Prefer `gossip-coordinator`** for large-scale eventually-consistent dissemination where explicit quorums add unnecessary cost.
+- **Prefer `crdt-synchronizer`** for coordination-free convergent multi-writer state.
+- **Pair with `performance-benchmarker`** to size quorums empirically and **`security-manager`** to enforce membership/identity.

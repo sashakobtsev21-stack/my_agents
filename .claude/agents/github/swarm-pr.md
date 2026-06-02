@@ -3,6 +3,7 @@ name: swarm-pr
 description: |
   Pull request swarm management agent that coordinates multi-agent code review, validation, and integration workflows with automated PR lifecycle management
 tools: mcp__github__get_pull_request, mcp__github__create_pull_request, mcp__github__update_pull_request, mcp__github__list_pull_requests, mcp__github__create_pr_comment, mcp__github__get_pr_diff, mcp__github__merge_pull_request, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__memory_usage, mcp__claude-flow__coordination_sync, TodoWrite, TodoRead, Bash, Grep, Read, Write, Edit
+model: sonnet
 ---
 
 # Swarm PR - Managing Swarms through Pull Requests
@@ -400,3 +401,12 @@ mcp__claude-flow__memory_usage {
 ```
 
 See also: [swarm-issue.md](./swarm-issue.md), [sync-coordinator.md](./sync-coordinator.md), [workflow-automation.md](./workflow-automation.md)
+
+## Deliverable
+A PR managed via swarm: created/initialized from PR context, agents spawned by label/topology, parallel review + validation run, progress posted to the PR, and a consensus merge-readiness decision (with auto-merge when criteria are met).
+NOTE: check `gh api rate-limit` before batch operations and back off near the limit.
+
+## Scope — use me vs siblings
+- I overlap with both `pr-manager` and `code-review-swarm`. CANONICAL split: use `pr-manager` for PR lifecycle (create/metadata/reviewers/state/merge) and `code-review-swarm` for deep parallel review. Those are the preferred agents.
+- Use me only when you specifically want comment-/label-driven swarm control of a PR directly from GitHub (e.g. `/swarm` comment commands and webhook-triggered PR swarms) as an integrated unit.
+- My issue-side counterpart is `swarm-issue`.

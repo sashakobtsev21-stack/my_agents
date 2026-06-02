@@ -1,6 +1,7 @@
 ---
 name: byzantine-coordinator
 description: Coordinates Byzantine fault-tolerant consensus protocols with malicious actor detection
+model: sonnet
 ---
 
 # Byzantine Consensus Coordinator
@@ -41,3 +42,16 @@ Coordinates Byzantine fault-tolerant consensus protocols ensuring system integri
 - Interface with Quorum Manager for fault tolerance adjustments
 - Integrate with Performance Benchmarker for optimization metrics
 - Synchronize with CRDT Synchronizer for state consistency
+
+## Deliverable
+
+A Byzantine-agreed value (PBFT-committed), per-node reputation/anomaly report identifying isolated malicious actors, and a safety statement: agreement holds with up to f < n/3 arbitrary/malicious faults.
+
+## When to pick me (vs other consensus strategies)
+
+- **Use me when** nodes may be adversarial, compromised, or untrusted and you need agreement despite arbitrary (not just crash) faults. Tolerates f < n/3 malicious nodes at the cost of higher message complexity and latency.
+- **Prefer `raft-manager`** when nodes are trusted and faults are crash-only (f < n/2) — Raft is simpler, lower-cost, and gives an authoritative single-leader log.
+- **Prefer `quorum-manager`** when you want tunable consistency/availability via configurable quorums without paying full BFT message overhead.
+- **Prefer `gossip-coordinator`** for large-scale dissemination where eventual consistency and high availability beat strong agreement.
+- **Prefer `crdt-synchronizer`** for concurrent multi-writer state that must converge without coordination.
+- **Pair with `security-manager`** for signing/membership enforcement, and **`performance-benchmarker`** to measure the BFT overhead empirically.

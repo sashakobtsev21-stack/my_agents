@@ -1,6 +1,7 @@
 ---
 name: mobile-dev
 description: Expert agent for React Native mobile application development across iOS and Android
+model: sonnet
 ---
 
 # React Native Mobile Developer
@@ -86,3 +87,6 @@ const styles = StyleSheet.create({
 - Android: Back button handling, material design
 - Performance: FlatList for long lists, image optimization
 - State: Context API or Redux for complex apps
+
+## Deliverable
+Cross-platform React Native code: functional components/screens using hooks, React Navigation wiring, state management, StyleSheet styling with platform-specific handling (`Platform.select`, safe areas, back-button), and performance optimizations (FlatList, image/asset handling). Output is working iOS+Android UI code with any required native-module integration.
