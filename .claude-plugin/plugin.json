@@ -1,18 +1,18 @@
 {
-  "name": "claude-flow",
-  "version": "2.5.0",
-  "description": "Enterprise AI agent orchestration plugin with 150+ commands, 74+ specialized agents, SPARC methodology, swarm coordination, GitHub integration, and neural training capabilities",
+  "name": "my_agents",
+  "version": "3.10.31",
+  "description": "my_agents — reusable AI agent team for Claude Code: 121 agents, 39 skills, 168 commands, SPARC methodology, swarm coordination, GitHub integration and neural training. Fork of ruvnet/claude-flow (MIT).",
   "author": {
-    "name": "rUv",
-    "email": "ruv@ruv.net"
+    "name": "Aleksandr",
+    "url": "https://github.com/sashakobtsev21-stack"
   },
-  "homepage": "https://github.com/ruvnet/claude-flow",
+  "homepage": "https://github.com/sashakobtsev21-stack/my_agents",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ruvnet/claude-flow.git"
+    "url": "https://github.com/sashakobtsev21-stack/my_agents.git"
   },
   "bugs": {
-    "url": "https://github.com/ruvnet/claude-flow/issues"
+    "url": "https://github.com/sashakobtsev21-stack/my_agents/issues"
   },
   "license": "MIT",
   "keywords": [

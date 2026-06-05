@@ -1,8 +1,8 @@
-# Claude Code Configuration - Ruflo v3.5
+# Claude Code Configuration — my_agents (v3.10.31)
 
-> **Ruflo v3.6** (2026-04-29) — Stable release with agent federation and comms-first coordination.
-> 6,000+ commits, 314 MCP tools, 16 agent roles + custom types, 19 AgentDB controllers, 21 native plugins.
-> Packages: `@claude-flow/cli@3.6.10`, `claude-flow@3.6.10`, `ruflo@3.6.10`
+> **my_agents** — reusable AI agent team for Claude Code. Fork of [ruvnet/claude-flow](https://github.com/ruvnet/claude-flow) (MIT).
+> Verified in this checkout: 121 agents, 39 skills, 168 commands, 33 plugins, ~313 MCP tools.
+> Packages: `@claude-flow/cli@3.10.31`, root `my_agents@3.10.31`.
 
 ## Behavioral Rules (Always Enforced)
 
@@ -1173,9 +1173,10 @@ Registry source: IPFS via Pinata (`QmXbfEAaR7D2Ujm4GAkbwcGZQMHqAMpwDoje4583uNP83
 
 ## Support
 
-- Documentation: https://github.com/ruvnet/claude-flow
-- Issues: https://github.com/ruvnet/claude-flow/issues
+- This fork: https://github.com/sashakobtsev21-stack/my_agents
+- Issues: https://github.com/sashakobtsev21-stack/my_agents/issues
+- Upstream project: https://github.com/ruvnet/claude-flow
 
 ---
 
-Remember: **Claude Flow coordinates, Claude Code creates!**
+Remember: **the team coordinates, Claude Code creates!**

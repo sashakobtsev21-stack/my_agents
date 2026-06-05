@@ -42,4 +42,4 @@ npx claude-flow@v3alpha hooks worker list
 
 4-step pipeline: RETRIEVE (HNSW) → JUDGE (verdicts) → DISTILL (LoRA) → CONSOLIDATE (EWC++)
 
-Components: SONA (<0.05ms), MoE (8 experts), HNSW (150x-12,500x), Flash Attention (2.49x-7.47x)
+Components: SONA (measured 0.0043ms/adapt), MoE (8 experts), HNSW (measured ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force, recall@10 ~0.99). Note: the old "HNSW 150x-12,500x" and "Flash Attention 2.49x-7.47x" figures are unverified/not reproduced — do not use them.

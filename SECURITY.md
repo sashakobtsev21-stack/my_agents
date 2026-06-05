@@ -2,17 +2,16 @@
 
 ## Supported Versions
 
-| Version | Supported          |
-|---------|--------------------|
-| 3.5.x   | Yes                |
-| 3.0-3.4 | No                 |
-| 2.x     | No                 |
+| Version  | Supported          |
+|----------|--------------------|
+| 3.10.x   | Yes                |
+| < 3.10   | No                 |
 
 ## Reporting a Vulnerability
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Please report vulnerabilities by emailing **security@cognitum.one**. Include the following in your report:
+Please report vulnerabilities privately via **[GitHub Security Advisories](https://github.com/sashakobtsev21-stack/my_agents/security/advisories/new)** on this repository. Include the following in your report:
 
 - A clear description of the vulnerability
 - Steps to reproduce the issue
@@ -50,4 +49,4 @@ This project employs the following security measures at system boundaries:
 - **Path traversal prevention** via the `PathValidator` module
 - **Command injection protection** via the `SafeExecutor` module
 
-For questions about this policy, contact security@ruv.io.
+For questions about this policy, open a private advisory on this repository's Security tab.

@@ -1,9 +1,9 @@
 {
   "name": "ruflo",
-  "description": "RuFlo Marketplace: Claude Code native agents, swarms, workers, and MCP tools for continuous software engineering",
+  "description": "my_agents marketplace: Claude Code native agents, swarms, workers, and MCP tools to plug into any project. Fork of ruvnet/claude-flow.",
   "owner": {
-    "name": "ruvnet",
-    "url": "https://github.com/ruvnet"
+    "name": "sashakobtsev21-stack",
+    "url": "https://github.com/sashakobtsev21-stack"
   },
   "plugins": [
     {
