@@ -1,0 +1,98 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>my_agents — концепции для чайников</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#283040;--fg:#e6edf3;--mut:#9aa7b4;--ok:#3fb950;--gold:#e3b341;--opus:#a371f7;--sonnet:#4493f8;--haiku:#3fb950;--accent:#6366f1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:30px 20px 70px}
+h1{font-size:27px;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 22px}
+h2{font-size:20px;margin:34px 0 12px;border-left:3px solid var(--accent);padding-left:10px}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
+th{text-align:left;color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:9px;border-bottom:1px solid var(--line)}
+td{padding:9px;border-bottom:1px solid var(--line);vertical-align:top}td.num{text-align:right;font-variant-numeric:tabular-nums}
+code{background:#1f2630;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px;color:#cdd9e5}
+pre.diag{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;font-size:12.5px;color:#cdd9e5;white-space:pre;line-height:1.55}
+.cards{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;flex:1;min-width:150px}
+.card .h{font-size:16px;font-weight:700;margin-bottom:4px}.card .d{color:var(--mut);font-size:13px}
+.tldr{background:#11261a;border:1px solid #1f5132;border-radius:10px;padding:6px 18px;margin:10px 0}
+ul{margin:6px 0;padding-left:22px}li{margin:5px 0}.mut{color:var(--mut)}
+b.k{color:var(--gold)}a{color:var(--sonnet)}
+.note{color:var(--mut);font-size:13px;border-left:2px solid var(--line);padding-left:10px;margin:10px 0}
+.foot{color:var(--mut);font-size:12px;margin-top:30px}
+</style></head><body><div class="wrap">
+<h1>🧠 my_agents — концепции для чайников</h1>
+<p class="sub">Кто что делает и чем <b>агент</b> отличается от <b>скилла</b>, <b>команды</b>, <b>плагина</b> и <b>MCP-инструмента</b>.</p>
+
+<div class="tldr">
+<h2 style="border:none;padding:0;margin:10px 0 6px">⚡ TL;DR за 30 секунд</h2>
+<p>my_agents — «коробка с готовой IT-командой» для Claude Code. <b class="k">Главное:</b> агент/скилл/команда — это <b>текст-инструкции</b> (кем быть / как делать / ярлык); MCP-инструмент — это <b>код-действие</b> (реально сделать); плагин — <b>упаковка</b>, которая всё это привозит.</p>
+</div>
+
+<div class="cards">
+<div class="card"><div class="h">🤖 Агент</div><div class="d"><b>кто</b> делает — роль-специалист («бэкендер», «ревьюер»)</div></div>
+<div class="card"><div class="h">🧩 Скилл</div><div class="d"><b>как</b> делать — пошаговый рецепт процедуры</div></div>
+<div class="card"><div class="h">⌨️ Команда</div><div class="d"><b>быстрый запуск</b> — горячая клавиша <code>/...</code></div></div>
+<div class="card"><div class="h">🔌 Плагин</div><div class="d"><b>бандл</b> — готовый «отдел» (агенты+скиллы+команды)</div></div>
+<div class="card"><div class="h">🛠️ MCP-инструмент</div><div class="d"><b>действие</b> — реальная функция (сохранить, создать PR)</div></div>
+</div>
+
+<h2>🏢 Аналогия: IT-компания</h2>
+<ul>
+<li>🤖 <b>Агент</b> — нанятый эксперт с должностной инструкцией. Ставишь задачу — он думает и делает. <span class="mut">Пример: <code>code-review-swarm</code>.</span></li>
+<li>🧩 <b>Скилл</b> — корпоративный плейбук «как провести код-ревью». Любой сотрудник открывает и следует. <span class="mut">Пример: <code>github-code-review</code>.</span></li>
+<li>⌨️ <b>Команда</b> — кнопка на пульте: нажал <code>/init</code> — запустился сценарий. <span class="mut">Пример: <code>/security-review</code>.</span></li>
+<li>🔌 <b>Плагин</b> — коробка «отдел безопасности под ключ»: привозит своих сотрудников (агентов), плейбуки (скиллы) и кнопки (команды). <span class="mut">Пример: <code>ruflo-security-audit</code>.</span></li>
+<li>🛠️ <b>MCP-инструмент</b> — рабочий станок: «сохранить в БД», «создать Pull Request». Не инструкция, а само действие. <span class="mut">Пример: <code>memory_store</code>, <code>swarm_init</code>.</span></li>
+</ul>
+
+<h2>📋 Таблица отличий</h2>
+<table><thead><tr><th>Тип</th><th>Что это</th><th>Где лежит</th><th>Как запускается</th><th>Текст/код</th></tr></thead><tbody>
+<tr><td>🤖 <b>Агент</b></td><td>роль-специалист (персона + зона ответственности)</td><td><code>.claude/agents/имя.md</code></td><td>Claude спавнит как «коллегу» (Task), или координатор делегирует</td><td>промпт</td></tr>
+<tr><td>🧩 <b>Скилл</b></td><td>пошаговый рецепт под процедуру</td><td><code>.claude/skills/имя/SKILL.md</code></td><td>Claude сам подхватывает по описанию задачи</td><td>промпт</td></tr>
+<tr><td>⌨️ <b>Команда</b></td><td>слэш-ярлык быстрого запуска</td><td><code>.claude/commands/имя.md</code></td><td>ты вводишь <code>/имя</code></td><td>промпт</td></tr>
+<tr><td>🔌 <b>Плагин</b></td><td>бандл (агенты+скиллы+команды, иногда хуки/MCP)</td><td><code>plugins/имя/</code></td><td><code>/plugin install имя@ruflo</code></td><td>пакет</td></tr>
+<tr><td>🛠️ <b>MCP-инструмент</b></td><td>функция-действие, которую ИИ вызывает</td><td>MCP-сервер (<code>v3/@claude-flow/cli</code>)</td><td>Claude вызывает как функцию: <code>memory_store</code>, <code>swarm_init</code></td><td>код</td></tr>
+</tbody></table>
+<p class="note">Запомнить просто: <b>3 текстовых</b> (агент = кто, скилл = как, команда = ярлык) + <b>1 действие</b> (MCP-инструмент) + <b>1 упаковка</b> (плагин).</p>
+
+<h2>👔 Кто кем командует (оргструктура агентов)</h2>
+<p><b>Не у каждого агента есть «руководитель» — руководитель это роль, а не обязательный атрибут.</b> Из 121 агента ~28 — координаторы (🎖), остальные ~93 — специалисты-исполнители.</p>
+<pre class="diag">Tier 0 — боссы        queen-coordinator · collective-intelligence-coordinator ·
+                      project-coordinator · v3-queen-coordinator · dual-orchestrator
+   │  владеют целью, собирают команду
+Tier 1 — топологии    hierarchical · mesh · adaptive-coordinator · sparc-coord
+   │  выбирают форму команды, раздают работу
+Tier 2 — консенсус    raft · byzantine · quorum · gossip · crdt
+   │  согласуют общее состояние
+Tier 3 — узкие спецы  load-balancer · performance-monitor · swarm-memory-manager
+   │
+Исполнители (без своего лида)   coder · reviewer · tester · backend-dev · game-dev-студия …</pre>
+<h2 style="font-size:16px;border-left-color:var(--gold)">Почему у части направлений «—» в колонке «Руководители»?</h2>
+<p>Колонка показывает координаторов, которые <b>физически лежат в этой папке-направлении</b>. В <code>core</code> (<code>coder</code>/<code>planner</code>/<code>researcher</code>/<code>reviewer</code>/<code>tester</code>) координаторов нет — это все исполнители, поэтому «—».</p>
+<p><b>Но они НЕ без руководства!</b> Ими командуют боссы из <i>других</i> направлений (<code>project-coordinator</code>, <code>queen-coordinator</code>, топология-координаторы). Координация <b>сквозная</b>, а не внутри каждой папки. Пустое «—» = «в этой папке нет начальника; это доводчики, которыми рулят верхние координаторы».</p>
+<p class="note">Честная оговорка: метка 🎖 ставится эвристикой по имени/направлению — например <code>performance-benchmarker</code> помечен «лидом», хотя по сути это Tier-3 измеритель. Настоящие «боссы» — координаторы/оркестраторы/queen.</p>
+
+<h2>📦 Что внутри проекта (полная составляющая)</h2>
+<table><thead><tr><th>Слой</th><th class="num">Кол-во</th><th>Что делает</th><th>Где</th></tr></thead><tbody>
+<tr><td>🤖 Агенты</td><td class="num">121</td><td>команда специалистов (кто работает)</td><td><code>.claude/agents/</code> → <a href="AGENT-CATALOG.md">реестр</a></td></tr>
+<tr><td>🧩 Скиллы</td><td class="num">39</td><td>рецепты процедур (как делать)</td><td><code>.claude/skills/</code></td></tr>
+<tr><td>⌨️ Команды</td><td class="num">168</td><td>слэш-ярлыки (быстрый запуск)</td><td><code>.claude/commands/</code></td></tr>
+<tr><td>🔌 Плагины</td><td class="num">33</td><td>тематические бандлы</td><td><code>plugins/</code> · <code>marketplace.json</code></td></tr>
+<tr><td>🛠️ MCP-инструменты</td><td class="num">~313</td><td>реальные действия (память/swarm/github/нейро)</td><td><code>v3/@claude-flow/cli/src/mcp-tools/</code></td></tr>
+<tr><td>🧠 Память</td><td class="num">—</td><td>общий контекст между агентами (AgentDB + HNSW)</td><td><code>v3/@claude-flow/memory/</code></td></tr>
+<tr><td>🪝 Хуки</td><td class="num">—</td><td>авто-действия на события (вкл. правило проверки агентов)</td><td><code>.claude/settings.json</code>, <code>.githooks/</code></td></tr>
+<tr><td>🏗️ Движок v3</td><td class="num">40+</td><td>CLI, MCP-сервер, память, swarm, безопасность</td><td><code>v3/@claude-flow/*</code></td></tr>
+</tbody></table>
+
+<h2>🔄 Как это всё работает вместе</h2>
+<ol>
+<li>Ты пишешь задачу. <span class="mut">(опц.) срабатывает <b>хук</b> маршрутизации.</span></li>
+<li>Claude (ведущий) на сложной задаче зовёт <b>координатора</b> (🎖) или сразу спавнит нужных <b>агентов</b>.</li>
+<li>Агенты следуют <b>скиллам</b> (рецептам) и при необходимости дёргают <b>MCP-инструменты</b> (сохранить в память, создать PR, поиск).</li>
+<li><b>Память</b> хранит общий контекст; агенты передают работу по конвейеру <code>researcher → architect → coder → tester → reviewer</code>.</li>
+<li><b>Плагины</b> привозят больше агентов/скиллов/команд, если их установить.</li>
+<li><b>Команды</b> (<code>/...</code>) — твой ручной быстрый запуск любого сценария.</li>
+</ol>
+
+<p class="foot">Связанное: <a href="agent-catalog.html">agent-catalog.html</a> (реестр) · <a href="agent-report.html">agent-report.html</a> (обзор) · <a href="CONCEPTS.md">CONCEPTS.md</a> · <a href="../README.md">README</a>.</p>
+</div></body></html>
