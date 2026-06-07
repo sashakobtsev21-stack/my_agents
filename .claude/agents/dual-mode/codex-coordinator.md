@@ -213,3 +213,6 @@ An aggregated result set collected from the `results` memory namespace: per-work
 ## Scope
 
 This agent sits in the MIDDLE of the dual-mode hierarchy: `dual-orchestrator` (top) spawns this `codex-coordinator` to manage a pool of `codex-worker` instances. This coordinator decomposes a task and launches/aggregates Codex workers (via `codex exec`); the individual `codex-worker` agents execute the actual work.
+
+## Model & cost
+Default `sonnet`.

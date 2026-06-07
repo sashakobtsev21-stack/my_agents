@@ -288,3 +288,6 @@ The unified memory backend implementing ADR-006/ADR-009: `UnifiedMemoryService` 
 ## Scope
 
 V3-specific variant of the generic memory role: owns the AgentDB/HNSW unification and legacy-backend migration for v3 only. Consumes the agentic-flow integration surface from v3-integration-architect, defers raw benchmark validation to v3-performance-engineer, and aligns memory-domain boundaries with the core architect. Reports memory milestones up to v3-queen-coordinator (Tier-0).
+
+## Model & cost
+Default `sonnet`.

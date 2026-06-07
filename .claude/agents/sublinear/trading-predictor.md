@@ -249,3 +249,6 @@ The Trading Predictor Agent represents the pinnacle of algorithmic trading techn
 ## Deliverable
 
 A predictive trading output: computed temporal advantage (light-travel vs computation time in ms), a trade/portfolio recommendation with risk metrics (VaR, exposure, optimized weights), and a go/no-go arbitrage signal gated on the available temporal lead. Produced via `mcp__sublinear-time-solver__predictWithTemporalAdvantage`/`calculateLightTravel`/`solve`.
+
+## Model & cost
+Default `sonnet`.

@@ -827,3 +827,6 @@ This is the canonical `sublinear-goal-planner` (goal-domain) — the sublinear-o
 - `agent.md` (= `sublinear-goal-planner`): the **sublinear-optimized** planner — matrix/PageRank/temporal-advantage optimization over the action graph.
 - `goal-planner`: the **general GOAP** planner — A*-search-based planning without the sublinear-solver layer.
 - `code-goal-planner`: the **code-specific** planner — GOAP fused with SPARC methodology for software-development objectives.
+
+## Model & cost
+Default `sonnet`.

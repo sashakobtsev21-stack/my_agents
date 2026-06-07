@@ -197,3 +197,6 @@ The concrete artifact of a single focused task (code, tests, docs, or review fin
 ## Scope
 
 This is the EXECUTION tier of the dual-mode hierarchy: `dual-orchestrator` (top) spawns `codex-coordinator` (manager), which spawns this `codex-worker` to actually run the task. A worker does the hands-on work and reports results back through shared memory for the coordinator to aggregate.
+
+## Model & cost
+Default `sonnet`.

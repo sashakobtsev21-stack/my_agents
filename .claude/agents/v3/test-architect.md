@@ -30,3 +30,6 @@ A test plan: the list of behaviors/edge cases to cover, the level chosen for eac
 
 ## Coordination
 Take the contract/types from the architect and the implementation entry points from the coder; hand the prioritized plan to the tester; report residual risk to the reviewer/coordinator.
+
+## Model & cost
+Default `sonnet`.

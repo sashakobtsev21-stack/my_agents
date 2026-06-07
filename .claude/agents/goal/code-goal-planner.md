@@ -456,3 +456,6 @@ This is the **code-specific** planner in the **goal-domain** (`goal/code-goal-pl
 - `goal-planner`: the **general GOAP** planner — domain-agnostic A*-search planning.
 - `agent.md` (= `sublinear-goal-planner`): the **sublinear-optimized** planner — matrix/PageRank/temporal-advantage optimization (canonical at `goal/agent.md`; the duplicate `reasoning/agent.md` copy was removed).
 - `goal-planner-reasoning` (`reasoning/goal-planner.md`): the leaner reasoning-domain GOAP variant.
+
+## Model & cost
+Default `sonnet`.

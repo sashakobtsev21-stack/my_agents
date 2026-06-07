@@ -345,3 +345,6 @@ A consensus result object: the agreed value, convergence metrics (iterations, re
 ## Scope
 
 This is the SUBLINEAR-optimized variant of `consensus-coordinator`. It shares the role-name with the consensus/* strategy agents (e.g. byzantine-coordinator, raft-manager, gossip-coordinator, quorum-manager) but is distinct: those implement protocol mechanics/strategy, whereas THIS agent computes consensus via sublinear-time linear-algebra solvers and matrix analysis. Use this variant when agreement can be framed as a fast matrix/PageRank computation; use the consensus/* agents for protocol-level coordination.
+
+## Model & cost
+Default `sonnet`.

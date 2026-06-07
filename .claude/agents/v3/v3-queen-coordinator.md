@@ -70,3 +70,6 @@ The orchestration plan and live coordination state for v3: phased agent assignme
 ## Scope
 
 Tier-0 orchestrator for v3 work — the v3-specific variant of the generic queen role. Owns who-does-what and when across the 15-agent swarm; does not write security, memory, integration, or performance code itself. Delegates to and aggregates milestones from v3-security-architect, v3-memory-specialist, v3-integration-architect, and v3-performance-engineer (all Tier-1 specialists reporting upward).
+
+## Model & cost
+`opus` — architecture/coordination/security reasoning warrants the top tier.

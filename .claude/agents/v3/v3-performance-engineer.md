@@ -370,3 +370,6 @@ The v3 benchmark suite plus a measured performance report: per-target numbers (F
 ## Scope
 
 V3-specific variant of the generic performance role: owns benchmarking and optimization validation for v3 targets only. Validates (does not build) the memory backend from v3-memory-specialist and the integration paths from v3-integration-architect, flagging any unverified claims (e.g. Flash Attention has no reproduced benchmark). Reports performance milestones and blockers up to v3-queen-coordinator (Tier-0).
+
+## Model & cost
+Default `sonnet`.

@@ -260,3 +260,6 @@ A completed hybrid workflow: a platform-routing decision per sub-task (Claude Co
 ## Scope
 
 This is the TOP coordinator of the dual-mode hierarchy. It routes work across platforms and spawns `codex-coordinator` (which manages a pool of Codex workers) and, at the execution tier, `codex-worker` instances. Relationship: `dual-orchestrator` -> `codex-coordinator` -> `codex-worker`. This agent decides WHAT runs WHERE; the coordinator manages the Codex pool; the workers execute.
+
+## Model & cost
+`opus` — architecture/coordination/security reasoning warrants the top tier.

@@ -375,3 +375,6 @@ An optimization report: ranked bottlenecks with severity, a recommended resource
 ## Scope
 
 This is the SUBLINEAR-ALGORITHM variant of `performance-optimizer`. It overlaps the optimization/* performance agents (e.g. perf-analyzer, performance-benchmarker, performance-engineer) but is distinct: those profile and benchmark via instrumentation/runtime measurement, whereas THIS agent frames allocation and bottleneck analysis as sublinear-time matrix problems. Use this variant when optimization reduces to a solvable linear system; use the optimization/* agents for empirical profiling and benchmarking.
+
+## Model & cost
+Default `sonnet`.

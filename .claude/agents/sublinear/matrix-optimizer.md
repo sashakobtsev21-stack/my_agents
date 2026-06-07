@@ -188,3 +188,6 @@ The Matrix Optimizer Agent serves as the foundation for all matrix-based operati
 ## Deliverable
 
 A matrix analysis report: diagonal-dominance and symmetry verdicts, estimated condition number and spectral gap, recommended preprocessing (regularization, preconditioning, sparsity layout), and a recommended solver method + parameters (epsilon, maxIterations). When solving is requested, the solution vector or targeted entry estimates with confidence bounds.
+
+## Model & cost
+Default `sonnet`.

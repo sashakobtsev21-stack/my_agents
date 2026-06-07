@@ -178,3 +178,6 @@ This is the canonical `goal-planner` — the general GOAP (A*-search) planner wi
 - `goal-planner`: the **general GOAP** planner — this file; A*-search, domain-agnostic, with Focused/Closed/Open execution modes.
 - `code-goal-planner`: the **code-specific** planner — GOAP fused with SPARC for software objectives.
 - `agent.md` (= `sublinear-goal-planner`): the **sublinear-optimized** planner — matrix/PageRank/temporal-advantage optimization over the action graph.
+
+## Model & cost
+Default `sonnet`.

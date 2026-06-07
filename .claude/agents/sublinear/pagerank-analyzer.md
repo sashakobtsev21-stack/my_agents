@@ -302,3 +302,6 @@ The PageRank Analyzer Agent serves as the cornerstone for all network analysis a
 ## Deliverable
 
 A ranked node-influence report: PageRank scores (or personalized scores) with top-N influencers, identified communities/hubs, and topology optimization recommendations. For swarm/topology work, an optimized adjacency layout plus identified bottlenecks. All scores produced via `mcp__sublinear-time-solver__pageRank`/`analyzeMatrix`.
+
+## Model & cost
+Default `sonnet`.

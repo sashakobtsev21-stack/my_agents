@@ -319,3 +319,6 @@ The ADR-001 integration architecture: adapter-layer design, phased migration pla
 ## Scope
 
 V3-specific variant of the generic architect role: owns the agentic-flow@alpha extension strategy and code-deduplication for v3, not greenfield system design. Hands AgentDB/SONA wiring to v3-memory-specialist, performance-target validation to v3-performance-engineer, and reports migration milestones up to v3-queen-coordinator (Tier-0). Stays out of security remediation (v3-security-architect).
+
+## Model & cost
+`opus` — architecture/coordination/security reasoning warrants the top tier.

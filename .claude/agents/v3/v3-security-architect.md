@@ -147,3 +147,6 @@ The v3 security architecture package: threat model, CVE-remediation plan (CVE-1/
 ## Scope
 
 V3-specific variant of the generic security role: owns threat modeling and the secure-by-default overhaul for v3 only. Defines specs and reviews changes; hands implementation to the security implementer (Agent #3) and verification to the security tester (Agent #4). Stays out of feature, memory, integration, and performance design (owned by their respective v3 specialists). Reports security milestones up to v3-queen-coordinator (Tier-0).
+
+## Model & cost
+`opus` — architecture/coordination/security reasoning warrants the top tier.
