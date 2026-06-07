@@ -191,7 +191,7 @@ A dynamic agent-allocation plan: the set of spawned agents with assigned capabil
 
 ## Scope
 
-This is a template/scaffold variant of the automation smart-agent role; the canonical agent type is `smart-agent` (Performance & Optimization category). Overlaps the `task-orchestrator` (delegates decomposition) and `performance-analyzer` (consumes efficiency signals) agents — defer task decomposition to the orchestrator and bottleneck analysis to the performance analyzer rather than duplicating them.
+This is a template/scaffold variant of the automation smart-agent role; the canonical agent type is `smart-agent` (Performance & Optimization category). Overlaps the `task-orchestrator` (delegates decomposition) and `perf-analyzer` (consumes efficiency signals) agents — defer task decomposition to the orchestrator and bottleneck analysis to `perf-analyzer` rather than duplicating them.
 
 ## Model & cost
 Default `sonnet`.

@@ -484,64 +484,25 @@ claude -p --resume "abc-123" --fork-session "Try approach B: CQRS pattern"
 | `--permission-mode <mode>` | acceptEdits, bypassPermissions, plan, etc. |
 | `--mcp-config <json>` | Load MCP servers from JSON |
 
-## Available Agents (60+ Types)
+## Available Agents (121) — auto-generated catalog
 
-### Core Development
-`coder`, `reviewer`, `tester`, `planner`, `researcher`
+> The single source of truth for **all agents** is the auto-generated catalog — do **not** hand-maintain an agent list here (it drifts).
+>
+> - 📖 **[`docs/AGENT-CATALOG.md`](docs/AGENT-CATALOG.md)** — full roster by area + model tier, with 🎖 leads/orchestrators and "when to connect" (renders on GitHub).
+> - 🖥️ **[`docs/agent-catalog.html`](docs/agent-catalog.html)** — interactive (search, tier/role filters). **[`docs/agent-report.html`](docs/agent-report.html)** — composition + changes + how it works.
+> - Regenerate any time: `node scripts/gen-agent-catalog.mjs`.
 
-### V3 Specialized Agents
-`security-architect`, `security-auditor`, `memory-specialist`, `performance-engineer`
+### 🔒 Rule — Adding / renaming / removing an agent (MUST follow)
 
-### @claude-flow/security Module
-CVE remediation, input validation, path security:
-- `InputValidator` — Zod-based validation at boundaries
-- `PathValidator` — Path traversal prevention
-- `SafeExecutor` — Command injection protection
-- `PasswordHasher` — bcrypt hashing
-- `TokenGenerator` — Secure token generation
+When you change anything under `.claude/agents/`:
 
-### Token Optimizer (Agent Booster)
-Integrates agentic-flow optimizations for 30-50% token reduction:
-```typescript
-import { getTokenOptimizer } from '@claude-flow/integration';
-const optimizer = await getTokenOptimizer();
+1. **Prompt standard** — frontmatter `name` (unique, kebab-case) + `description` (trigger form, "Use when …") + `model` (`haiku`/`sonnet`/`opus`); body with **When to use**, **How you work**, **Output contract**, **Coordination** (who it hands off to / its Tier), **Quality bar & anti-drift**, and a **`## Model & cost`** section.
+2. **Run the check** — `node scripts/check-agents.mjs`. It (a) validates every agent's frontmatter/standard, (b) **regenerates the catalog + report so the new agent is added to the list**, and (c) **re-verifies connectivity** — every `` `agent-name` `` referenced in any prompt must resolve to a real agent (or a real plugin/skill). Exits non-zero on any problem.
+3. **Commit** the regenerated `docs/AGENT-CATALOG.md`, `docs/agent-catalog.html`, `docs/agent-report.html` together with the agent change.
 
-// Compact context (32% fewer tokens)
-const ctx = await optimizer.getCompactContext("auth patterns");
-
-// 352x faster edits = fewer retries
-await optimizer.optimizedEdit(file, old, new, "typescript");
-
-// Optimal config (100% success rate)
-const config = optimizer.getOptimalConfig(agentCount);
-```
-| Feature | Token Savings |
-|---------|---------------|
-| ReasoningBank retrieval | -32% |
-| Agent Booster edits | -15% |
-| Cache (95% hit rate) | -10% |
-| Optimal batch size | -20% |
-
-### Swarm Coordination
-`hierarchical-coordinator`, `mesh-coordinator`, `adaptive-coordinator`, `collective-intelligence-coordinator`, `swarm-memory-manager`
-
-### Consensus & Distributed
-`byzantine-coordinator`, `raft-manager`, `gossip-coordinator`, `consensus-builder`, `crdt-synchronizer`, `quorum-manager`, `security-manager`
-
-### Performance & Optimization
-`perf-analyzer`, `performance-benchmarker`, `task-orchestrator`, `memory-coordinator`, `smart-agent`
-
-### GitHub & Repository
-`github-modes`, `pr-manager`, `code-review-swarm`, `issue-tracker`, `release-manager`, `workflow-automation`, `project-board-sync`, `repo-architect`, `multi-repo-swarm`
-
-### SPARC Methodology
-`sparc-coord`, `sparc-coder`, `specification`, `pseudocode`, `architecture`, `refinement`
-
-### Specialized Development
-`backend-dev`, `mobile-dev`, `ml-developer`, `cicd-engineer`, `api-docs`, `system-architect`, `code-analyzer`, `base-template-generator`
-
-### Testing & Validation
-`tdd-london-swarm`, `production-validator`
+**Automated enforcement (so the rule runs itself):**
+- `PostToolUse` hook (`.claude/settings.json` → `scripts/agents-hook.mjs`) regenerates the catalog and checks connectivity right after any `.claude/agents/**` edit.
+- Git `pre-commit` (`.githooks/pre-commit`) blocks the commit if the catalog is stale or a reference is dangling — enable once per clone with `git config core.hooksPath .githooks`.
 
 ## Agent Teams & Comms System
 

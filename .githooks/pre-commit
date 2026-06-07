@@ -1,25 +1,27 @@
 #!/bin/bash
-# Pre-commit hook to prevent API key leaks
+# my_agents pre-commit hook.
+# 1) Basic secret-leak guard on staged changes.
+# 2) Keeps the agent catalog + cross-agent connectivity in sync
+#    (see CLAUDE.md → "Rule — Adding / renaming / removing an agent").
+#
+# Enable once per clone:  git config core.hooksPath .githooks
 
-echo "🔒 Running API key redaction check..."
-
-# Run the redaction validator using compiled JavaScript
-if [ -f "dist-cjs/src/hooks/redaction-hook.js" ]; then
-  node dist-cjs/src/hooks/redaction-hook.js
-  exit_code=$?
-else
-  echo "⚠️  Redaction hook not found - skipping check"
-  echo "💡 Run 'npm run build' to enable API key protection"
-  exit 0
-fi
-
-if [ $exit_code -ne 0 ]; then
-  echo ""
-  echo "❌ COMMIT BLOCKED - Sensitive data detected!"
-  echo "⚠️  Please remove API keys and secrets before committing."
-  echo ""
+# --- 1) secret-leak guard -------------------------------------------------
+if git diff --cached -U0 | grep -nE '(sk-ant-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN (RSA|OPENSSH|PRIVATE) KEY-----)' \
+     | grep -vE 'sk-ant-(api03-)?\.\.\.|EXAMPLE|fake|test|redact' >/dev/null; then
+  echo "❌ COMMIT BLOCKED — possible secret/API key in staged changes. Remove it before committing."
   exit 1
 fi
 
-echo "✅ Redaction check passed - safe to commit"
+# --- 2) agent catalog + connectivity rule --------------------------------
+if git diff --cached --name-only | grep -qE '^\.claude/agents/'; then
+  echo "🧭 Agents changed — validating + regenerating catalog/report…"
+  if ! node scripts/check-agents.mjs; then
+    echo "❌ Agent check failed (invalid prompt / dangling reference). Fix before committing."
+    exit 1
+  fi
+  git add docs/AGENT-CATALOG.md docs/agent-catalog.html docs/agent-report.html
+  echo "✅ Catalog + report regenerated and staged."
+fi
+
 exit 0
