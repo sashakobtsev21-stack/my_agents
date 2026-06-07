@@ -1,0 +1,116 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>my_agents — отчёт о модернизации агентов</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#283040;--fg:#e6edf3;--mut:#9aa7b4;--ok:#3fb950;--gold:#e3b341;--opus:#a371f7;--sonnet:#4493f8;--haiku:#3fb950;--accent:#6366f1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:30px 20px 70px}
+h1{font-size:27px;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 22px}
+h2{font-size:19px;margin:34px 0 12px;border-left:3px solid var(--accent);padding-left:10px}
+.cards{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;min-width:120px;flex:1}
+.card .n{font-size:26px;font-weight:700}.card .l{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.04em}.card .s{color:var(--ok);font-size:12px;margin-top:3px}
+.bar{height:10px;background:#21262d;border-radius:6px;overflow:hidden;margin:6px 0 2px}.bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--ok),var(--sonnet))}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
+th{text-align:left;color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}td.num{text-align:right;font-variant-numeric:tabular-nums}td.big{font-size:15px;font-weight:600}
+code{background:#1f2630;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px;color:#cdd9e5}
+.t{font-size:11px;border-radius:20px;padding:1px 7px;border:1px solid;white-space:nowrap}
+.t.opus{color:var(--opus);border-color:var(--opus)}.t.sonnet{color:var(--sonnet);border-color:var(--sonnet)}.t.haiku{color:var(--haiku);border-color:var(--haiku)}
+ul{margin:6px 0 0;padding-left:20px}li{margin:3px 0}.mut{color:var(--mut)}
+.pill{display:inline-block;background:#11261a;border:1px solid var(--ok);color:var(--ok);border-radius:20px;padding:3px 12px;font-size:13px;font-weight:600}
+a{color:var(--sonnet)}.foot{color:var(--mut);font-size:12px;margin-top:30px}
+</style></head><body><div class="wrap">
+<h1>🧭 my_agents — отчёт о модернизации агентов</h1>
+<p class="sub">Все промпты <code>.claude/agents/</code> приведены к единому современному стандарту. <span class="pill">121/121 · 100%</span></p>
+
+<div class="cards">
+<div class="card"><div class="n">121</div><div class="l">агентов</div><div class="s">100% по стандарту</div></div>
+<div class="card"><div class="n">28</div><div class="l">направлений</div></div>
+<div class="card"><div class="n">28</div><div class="l">руководителей</div><div class="s">🎖 оркестраторы</div></div>
+<div class="card"><div class="n"><span class="t opus">opus 12</span> <span class="t sonnet">sonnet 97</span> <span class="t haiku">haiku 12</span></div><div class="l">тиры моделей</div></div>
+</div>
+
+<h2>📉 Что изменилось — объём</h2>
+<p>Суммарный размер промптов: <b>27 713</b> → <b>11 241</b> строк — <b style="color:var(--ok)">−59%</b> (минус 16 472 строк generic-боилерплейта), без потери сути.</p>
+<div class="bar"><i style="width:41%"></i></div>
+<div class="mut" style="font-size:12px">▮ осталось 41% · вырезано 59%</div>
+
+<h2>🧱 Единый стандарт промпта</h2>
+<ul>
+<li><b>description</b> — триггерный («Use when …») для точного авто-роутинга</li>
+<li><b>When to use</b> + «не этот агент → передать такому-то» (разведение пересекающихся ролей)</li>
+<li><b>How you work</b> · <b>Output contract</b> (что отдаёт) · <b>Coordination</b> (кому передаёт, позиция в иерархии Tier 0/1/2/3)</li>
+<li><b>Quality bar &amp; anti-drift</b> · <b>Model &amp; cost</b> (выверенный тир)</li>
+<li>Вырезаны generic-дампы (SOLID/KISS, фейковые метрики, гигантские JSON-блоки <code>memory_usage</code>); сохранён уникальный домен (consensus, GOAP, Unity, tool-каталоги, иерархии)</li>
+</ul>
+
+<h2>🛠️ Подход по категориям</h2>
+<table><thead><tr><th>Категория</th><th class="num">N</th><th>Строки (было → стало)</th><th>Подход</th></tr></thead><tbody>
+<tr><td>Core</td><td class="num">5</td><td><code>264–318 → 33–49</code></td><td>rewrite</td></tr>
+<tr><td>Swarm (топологии)</td><td class="num">3</td><td><code>311–340 → ~55</code></td><td>rewrite</td></tr>
+<tr><td>Consensus</td><td class="num">7</td><td><code>56–990 → 31–34</code></td><td>rewrite</td></tr>
+<tr><td>Hive-Mind</td><td class="num">5</td><td><code>139–251 → 33–36</code></td><td>rewrite</td></tr>
+<tr><td>GitHub</td><td class="num">13</td><td><code>162–614 → 26–29</code></td><td>rewrite (tools preserved)</td></tr>
+<tr><td>SPARC</td><td class="num">4</td><td><code>262–508 → 30</code></td><td>rewrite</td></tr>
+<tr><td>Optimization</td><td class="num">5</td><td><code>441–818 → 35</code></td><td>rewrite + renamed to kebab-case</td></tr>
+<tr><td>Dev cluster (dev/devops/data/testing/analysis)</td><td class="num">12</td><td><code>35–381 → 30–45</code></td><td>rewrite / align</td></tr>
+<tr><td>Game Dev</td><td class="num">15</td><td><code>34–37 (already tight)</code></td><td>align (+ Model &amp; cost)</td></tr>
+<tr><td>Flow-Nexus</td><td class="num">9</td><td><code>77–104 (tool catalogs kept)</code></td><td>align</td></tr>
+<tr><td>Templates / scaffolds</td><td class="num">9</td><td><code>91–732 (scope kept)</code></td><td>align</td></tr>
+<tr><td>V3 / Sublinear / Dual-Mode / Goal</td><td class="num">17</td><td><code>domain reference kept</code></td><td>align</td></tr>
+<tr><td>Root + single-category</td><td class="num">17</td><td><code>32–135</code></td><td>align</td></tr>
+</tbody></table>
+<p class="mut" style="font-size:12.5px"><b>rewrite</b> — раздутые файлы дистиллированы заново · <b>align</b> — уже структурированные выровнены (добавлены недостающие секции/Model&amp;cost), доменный референс сохранён.</p>
+
+<h2>🧹 Сопутствующая чистка</h2>
+<ul>
+<li>Удалён сломанный <code>plugin/</code>-shim и осиротевший <code>v3/package-lock.json</code></li>
+<li>Имена optimization приведены к kebab-case (<code>load-balancer</code>, <code>performance-monitor</code> …) — синхронны со ссылками из других агентов</li>
+<li>Добавлен <code>SKILL.md</code> для <code>dual-mode</code> → все 39 скиллов валидны</li>
+<li>Создан авто-реестр: <a href="agent-catalog.html">agent-catalog.html</a> + <a href="AGENT-CATALOG.md">AGENT-CATALOG.md</a> (генератор <code>scripts/gen-agent-catalog.mjs</code>)</li>
+</ul>
+
+<h2>👥 Текущий состав агентов (по направлениям)</h2>
+<table><thead><tr><th>Направление</th><th class="num">Агентов</th><th>Руководители</th><th>Тиры</th></tr></thead><tbody>
+<tr><td>Game Dev</td><td class="num">15</td><td>🎖 1</td><td><span class="t opus">opus 2</span> <span class="t sonnet">sonnet 13</span></td></tr>
+<tr><td>GitHub</td><td class="num">13</td><td>🎖 3</td><td><span class="t opus">opus 2</span> <span class="t sonnet">sonnet 9</span> <span class="t haiku">haiku 2</span></td></tr>
+<tr><td>Root</td><td class="num">9</td><td>🎖 1</td><td><span class="t sonnet">sonnet 8</span> <span class="t haiku">haiku 1</span></td></tr>
+<tr><td>Flow-Nexus</td><td class="num">9</td><td>—</td><td><span class="t sonnet">sonnet 6</span> <span class="t haiku">haiku 3</span></td></tr>
+<tr><td>Templates</td><td class="num">9</td><td>🎖 4</td><td><span class="t sonnet">sonnet 6</span> <span class="t haiku">haiku 3</span></td></tr>
+<tr><td>Consensus</td><td class="num">7</td><td>🎖 7</td><td><span class="t sonnet">sonnet 7</span></td></tr>
+<tr><td>V3</td><td class="num">6</td><td>🎖 1</td><td><span class="t opus">opus 3</span> <span class="t sonnet">sonnet 3</span></td></tr>
+<tr><td>Core</td><td class="num">5</td><td>—</td><td><span class="t sonnet">sonnet 5</span></td></tr>
+<tr><td>Hive-Mind</td><td class="num">5</td><td>🎖 5</td><td><span class="t opus">opus 2</span> <span class="t sonnet">sonnet 2</span> <span class="t haiku">haiku 1</span></td></tr>
+<tr><td>Optimization</td><td class="num">5</td><td>—</td><td><span class="t sonnet">sonnet 4</span> <span class="t haiku">haiku 1</span></td></tr>
+<tr><td>Sublinear</td><td class="num">5</td><td>🎖 1</td><td><span class="t sonnet">sonnet 5</span></td></tr>
+<tr><td>SPARC</td><td class="num">4</td><td>—</td><td><span class="t opus">opus 1</span> <span class="t sonnet">sonnet 3</span></td></tr>
+<tr><td>Development</td><td class="num">3</td><td>—</td><td><span class="t sonnet">sonnet 3</span></td></tr>
+<tr><td>DevOps</td><td class="num">3</td><td>—</td><td><span class="t sonnet">sonnet 3</span></td></tr>
+<tr><td>Dual-Mode</td><td class="num">3</td><td>🎖 2</td><td><span class="t opus">opus 1</span> <span class="t sonnet">sonnet 2</span></td></tr>
+<tr><td>Goal</td><td class="num">3</td><td>—</td><td><span class="t sonnet">sonnet 3</span></td></tr>
+<tr><td>Swarm</td><td class="num">3</td><td>🎖 3</td><td><span class="t sonnet">sonnet 3</span></td></tr>
+<tr><td>Analysis</td><td class="num">2</td><td>—</td><td><span class="t sonnet">sonnet 2</span></td></tr>
+<tr><td>Data</td><td class="num">2</td><td>—</td><td><span class="t sonnet">sonnet 2</span></td></tr>
+<tr><td>Testing</td><td class="num">2</td><td>—</td><td><span class="t sonnet">sonnet 2</span></td></tr>
+<tr><td>Architecture</td><td class="num">1</td><td>—</td><td><span class="t opus">opus 1</span></td></tr>
+<tr><td>Custom</td><td class="num">1</td><td>—</td><td><span class="t haiku">haiku 1</span></td></tr>
+<tr><td>Documentation</td><td class="num">1</td><td>—</td><td><span class="t sonnet">sonnet 1</span></td></tr>
+<tr><td>Neural</td><td class="num">1</td><td>—</td><td><span class="t sonnet">sonnet 1</span></td></tr>
+<tr><td>Payments</td><td class="num">1</td><td>—</td><td><span class="t sonnet">sonnet 1</span></td></tr>
+<tr><td>Reasoning</td><td class="num">1</td><td>—</td><td><span class="t sonnet">sonnet 1</span></td></tr>
+<tr><td>SONA</td><td class="num">1</td><td>—</td><td><span class="t sonnet">sonnet 1</span></td></tr>
+<tr><td>Specialized</td><td class="num">1</td><td>—</td><td><span class="t sonnet">sonnet 1</span></td></tr>
+</tbody></table>
+
+<h2>📦 Полная составляющая проекта</h2>
+<table><thead><tr><th>Компонент</th><th class="num">Кол-во</th><th>Где / что</th></tr></thead><tbody>
+<tr><td class="big">🤖 Agents</td><td class="num big">121</td><td>.claude/agents/ — reusable team, 100% on the unified standard</td></tr>
+<tr><td class="big">🧩 Skills</td><td class="num big">39</td><td>.claude/skills/ — step-by-step recipes (all with SKILL.md)</td></tr>
+<tr><td class="big">⌨️ Commands</td><td class="num big">168</td><td>.claude/commands/ — slash commands</td></tr>
+<tr><td class="big">🔌 Plugins</td><td class="num big">33</td><td>plugins/ — marketplace modules, each with own agents/skills/commands</td></tr>
+<tr><td class="big">🛠️ MCP tools</td><td class="num big">~313</td><td>v3/@claude-flow/cli/src/mcp-tools/ — registry</td></tr>
+<tr><td class="big">📦 v3 packages</td><td class="num big">40+</td><td>v3/@claude-flow/* — cli, memory, neural, security, swarm, guidance …</td></tr>
+</tbody></table>
+
+<p class="foot">Композиция вычислена из <code>.claude/agents/**.md</code>; метрики изменений — из коммитов модернизации (<code>3b495ddf9 … d1b2f4cb7</code>). Перегенерация: <code>node scripts/gen-agent-report.mjs</code>. Реестр: <a href="agent-catalog.html">agent-catalog.html</a>.</p>
+</div></body></html>
