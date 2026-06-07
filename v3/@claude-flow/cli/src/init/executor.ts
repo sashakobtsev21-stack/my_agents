@@ -1568,7 +1568,7 @@ async function writeCapabilitiesDoc(
 RuFlo V3 is a domain-driven design architecture for multi-agent AI coordination with:
 
 - **15-Agent Swarm Coordination** with hierarchical and mesh topologies
-- **HNSW Vector Search** - 150x-12,500x faster pattern retrieval
+- **HNSW Vector Search** - ~1.9x–4.7x faster pattern retrieval (measured, vs brute force above crossover)
 - **SONA Neural Learning** - Self-optimizing with <0.05ms adaptation
 - **Byzantine Fault Tolerance** - Queen-led consensus mechanisms
 - **MCP Server Integration** - Model Context Protocol support
@@ -1773,9 +1773,9 @@ npx @claude-flow/cli@latest doctor --fix
 ### RuVector Intelligence System
 - **SONA**: Self-Optimizing Neural Architecture (<0.05ms)
 - **MoE**: Mixture of Experts routing
-- **HNSW**: 150x-12,500x faster search
+- **HNSW**: ~1.9x–4.7x faster search (measured)
 - **EWC++**: Prevents catastrophic forgetting
-- **Flash Attention**: 2.49x-7.47x speedup
+- **Flash Attention**: experimental (unverified)
 - **Int8 Quantization**: 3.92x memory reduction
 
 ### 4-Step Intelligence Pipeline
@@ -1862,10 +1862,10 @@ npx @claude-flow/cli@latest hive-mind consensus --propose "task"
 
 | Metric | Target | Status |
 |--------|--------|--------|
-| HNSW Search | 150x-12,500x faster | ✅ Implemented |
+| HNSW Search | ~1.9x–4.7x faster (measured) | ✅ Implemented |
 | Memory Reduction | 50-75% | ✅ Implemented (3.92x) |
 | SONA Integration | Pattern learning | ✅ Implemented |
-| Flash Attention | 2.49x-7.47x | 🔄 In Progress |
+| Flash Attention | experimental (unverified) | 🔄 In Progress |
 | MCP Response | <100ms | ✅ Achieved |
 | CLI Startup | <500ms | ✅ Achieved |
 | SONA Adaptation | <0.05ms | 🔄 In Progress |

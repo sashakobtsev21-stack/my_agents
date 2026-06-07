@@ -344,8 +344,8 @@ const initCommand: Command = {
       output.writeln(output.dim('  Setting up communication channels...'));
 
       if (v3Mode) {
-        output.writeln(output.dim('  Enabling Flash Attention (2.49x-7.47x speedup)...'));
-        output.writeln(output.dim('  Configuring AgentDB integration (150x faster)...'));
+        output.writeln(output.dim('  Enabling Flash Attention (experimental)...'));
+        output.writeln(output.dim('  Configuring AgentDB integration (HNSW ANN search)...'));
         output.writeln(output.dim('  Initializing SONA learning system...'));
       }
 
