@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **42/121**.
+> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **54/121**.
 
 ## Как выбрать агента
 
@@ -211,17 +211,17 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`backend-dev`](../.claude/agents/development/dev-backend-api.md) | 🔵 sonnet | Specialized agent for backend API development with self-learning and pattern recognition |
-| [`backend-dev-basic`](../.claude/agents/development/backend/dev-backend-api.md) | 🔵 sonnet | Baseline backend API developer (REST/GraphQL). Leaner variant of backend-dev without ReasoningBank pattern persistence. |
-| [`migration-engineer`](../.claude/agents/development/migration-engineer.md) | 🔵 sonnet | Migration specialist — version upgrades, schema/data migrations, and breaking-change rollouts with safe, reversible, incremental steps. Use to plan and execute v2→v3-style migrations or risky cutovers. |
+| [`backend-dev`](../.claude/agents/development/dev-backend-api.md) ✓ | 🔵 sonnet | Backend API developer (self-learning). Use to build/review REST or GraphQL APIs with the Controller-Service-Repository pattern, validation, authz, and tests. The canonical backend agent; persists successful patterns to ReasoningBank. |
+| [`backend-dev-basic`](../.claude/agents/development/backend/dev-backend-api.md) ✓ | 🔵 sonnet | Baseline backend API developer (REST/GraphQL). Leaner variant of backend-dev without ReasoningBank pattern persistence. Use when you want the baseline without self-learning overhead. |
+| [`migration-engineer`](../.claude/agents/development/migration-engineer.md) ✓ | 🔵 sonnet | Migration specialist — version upgrades, schema/data migrations, and breaking-change rollouts with safe, reversible, incremental steps. Use to plan/execute v2→v3-style migrations or risky cutovers. |
 
 ### DevOps (3)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`cicd-engineer`](../.claude/agents/devops/ci-cd/ops-cicd-github.md) | 🔵 sonnet | Specialized agent for GitHub Actions CI/CD pipeline creation and optimization |
-| [`devops-engineer`](../.claude/agents/devops/devops-engineer.md) | 🔵 sonnet | DevOps / infrastructure specialist — IaC (Terraform/Pulumi), containers, Kubernetes, and deployment pipelines. Use to provision infra, write/review IaC, containerize, and design safe deploys. |
-| [`observability-engineer`](../.claude/agents/devops/observability-engineer.md) | 🔵 sonnet | Observability specialist — logging, distributed tracing, metrics, dashboards, and alerting. Use to instrument code, diagnose production issues from telemetry, or design SLO-based alerts. |
+| [`cicd-engineer`](../.claude/agents/devops/ci-cd/ops-cicd-github.md) ✓ | 🔵 sonnet | GitHub Actions CI/CD specialist. Use to create/optimize build-test-deploy pipelines as Actions YAML — job matrices, caching, scoped tokens, secrets, reusable actions. Produces workflow files. |
+| [`devops-engineer`](../.claude/agents/devops/devops-engineer.md) ✓ | 🔵 sonnet | DevOps / infrastructure specialist — IaC (Terraform/Pulumi), containers, Kubernetes, and deployment pipelines. Use to provision infra, write/review IaC, containerize, and design safe deploys. |
+| [`observability-engineer`](../.claude/agents/devops/observability-engineer.md) ✓ | 🔵 sonnet | Observability specialist — logging, distributed tracing, metrics, dashboards, and alerting. Use to instrument code, diagnose production issues from telemetry, or design SLO-based alerts. |
 
 ### Goal / GOAP (3)
 
@@ -243,22 +243,22 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`analyst`](../.claude/agents/analysis/code-analyzer.md) | 🔵 sonnet | Advanced code quality analysis agent for comprehensive code reviews and improvements |
-| [`code-analyzer`](../.claude/agents/analysis/analyze-code-quality.md) | 🔵 sonnet | Advanced code quality analysis agent for comprehensive code reviews and improvements |
+| [`analyst`](../.claude/agents/analysis/code-analyzer.md) ✓ | 🔵 sonnet | Structural code analyst (heavier lane). Use for module dependency mapping, circular-dependency detection, architectural-consistency review, and quality-trend tracking over time. Produces structural analysis + actionable insights. |
+| [`code-analyzer`](../.claude/agents/analysis/analyze-code-quality.md) ✓ | 🔵 sonnet | Code quality reviewer (metrics lane). Use for readability, maintainability, complexity thresholds, coding-standard adherence, and surface smell detection. Produces a quality report — review feedback, not refactored code. |
 
 ### Data (2)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`data-engineer`](../.claude/agents/data/data-engineer.md) | 🔵 sonnet | Data engineering specialist — ETL/ELT pipelines, ingestion, transformation, and data quality/validation. Use to build/review data pipelines, schemas-in-motion, and batch/stream processing. |
-| [`ml-developer`](../.claude/agents/data/ml/data-ml-model.md) | 🔵 sonnet | Specialized agent for machine learning model development, training, and deployment |
+| [`data-engineer`](../.claude/agents/data/data-engineer.md) ✓ | 🔵 sonnet | Data engineering specialist — ETL/ELT pipelines, ingestion, transformation, and data quality/validation. Use to build/review data pipelines, schemas-in-motion, and batch/stream processing. |
+| [`ml-developer`](../.claude/agents/data/ml/data-ml-model.md) ✓ | 🔵 sonnet | Machine-learning developer — end-to-end ML workflows: feature engineering, training, tuning, evaluation, and deployment scaffolding. Use to build/train/evaluate a model or stand up serving + monitoring. |
 
 ### Testing (2)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`production-validator`](../.claude/agents/testing/production-validator.md) | 🔵 sonnet | Production validation specialist ensuring applications are fully implemented and deployment-ready |
-| [`tdd-london-swarm`](../.claude/agents/testing/tdd-london-swarm.md) | 🔵 sonnet | TDD London School specialist for mock-driven development within swarm coordination |
+| [`production-validator`](../.claude/agents/testing/production-validator.md) ✓ | 🔵 sonnet | Pre-production readiness gate. Use last, before deploy, to verify a built system is REAL and deployment-ready — no surviving mocks/stubs, integration tests against real services, performance under load. Produces a go/no-go verdict. |
+| [`tdd-london-swarm`](../.claude/agents/testing/tdd-london-swarm.md) ✓ | 🔵 sonnet | TDD London-School (mockist) specialist. Use up front to drive NEW code's design outside-in via mock expectations and collaborator contracts, within a swarm. Produces failing-then-passing tests + contracts, not production code. |
 
 ### Payments (1)
 
