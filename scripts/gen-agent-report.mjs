@@ -93,7 +93,7 @@ const compRows = COMPONENTS.map((r) => `<tr><td class="big">${r[0]}</td><td clas
 const pct = Math.round((1 - AFTER_LINES / BEFORE_LINES) * 100);
 
 const html = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>my_agents — отчёт о модернизации агентов</title>
+<title>my_agents — обзор: состав · изменения · как работает</title>
 <style>
 :root{--bg:#0d1117;--panel:#161b22;--line:#283040;--fg:#e6edf3;--mut:#9aa7b4;--ok:#3fb950;--gold:#e3b341;--opus:#a371f7;--sonnet:#4493f8;--haiku:#3fb950;--accent:#6366f1}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
@@ -112,9 +112,10 @@ code{background:#1f2630;border:1px solid var(--line);border-radius:5px;padding:1
 .t.opus{color:var(--opus);border-color:var(--opus)}.t.sonnet{color:var(--sonnet);border-color:var(--sonnet)}.t.haiku{color:var(--haiku);border-color:var(--haiku)}
 ul{margin:6px 0 0;padding-left:20px}li{margin:3px 0}.mut{color:var(--mut)}
 .pill{display:inline-block;background:#11261a;border:1px solid var(--ok);color:var(--ok);border-radius:20px;padding:3px 12px;font-size:13px;font-weight:600}
+pre.diag{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow:auto;font-size:12.5px;color:#cdd9e5;white-space:pre;line-height:1.5}
 a{color:var(--sonnet)}.foot{color:var(--mut);font-size:12px;margin-top:30px}
 </style></head><body><div class="wrap">
-<h1>🧭 my_agents — отчёт о модернизации агентов</h1>
+<h1>🧭 my_agents — обзор проекта</h1>
 <p class="sub">Все промпты <code>.claude/agents/</code> приведены к единому современному стандарту. <span class="pill">${rows.filter(() => true).length}/${total} · 100%</span></p>
 
 <div class="cards">
@@ -161,6 +162,25 @@ ${catRows}
 <table><thead><tr><th>Компонент</th><th class="num">Кол-во</th><th>Где / что</th></tr></thead><tbody>
 ${compRows}
 </tbody></table>
+
+<h2>⚙️ Как это работает</h2>
+<p>Claude Code выступает ведущим: разбивает задачу и через <code>SendMessage</code> раздаёт её именованным агентам. Те работают параллельно и передают результат дальше по конвейеру. Координаторы (🎖) держат топологию и консенсус, специалисты исполняют, память (AgentDB/HNSW) хранит общий контекст.</p>
+<pre class="diag">User
+ └─ Claude Code (lead)
+     ├─ 🎖 coordinator      queen · hierarchical · mesh · adaptive
+     │    ├─ researcher → architect → coder → tester → reviewer   (конвейер)
+     │    ├─ 🎖 consensus    raft · byzantine · quorum · gossip · crdt
+     │    └─ memory-manager  AgentDB + HNSW  (общий namespace)
+     └─ синтез результата ←┘</pre>
+<p><b>Тиры моделей:</b> <span class="t opus">opus</span> — архитектура/безопасность/сложное · <span class="t sonnet">sonnet</span> — основная работа · <span class="t haiku">haiku</span> — простое/механическое. Каждый агент объявляет свой тир в секции <code>Model &amp; cost</code> — дорогая модель тратится только там, где реально нужна.</p>
+
+<h2>🔗 Как подключить к проекту</h2>
+<table><thead><tr><th>Способ</th><th>Команда / действие</th><th>Что даёт</th></tr></thead><tbody>
+<tr><td><b>1. Плагины</b><br>(рекомендуется)</td><td><code>/plugin marketplace add sashakobtsev21-stack/my_agents</code><br><code>/plugin install ruflo-core@ruflo</code></td><td>агенты + скиллы + команды выбранных плагинов</td></tr>
+<tr><td><b>2. Копирование</b></td><td><code>cp -r my_agents/.claude/{agents,skills,commands} .claude/</code></td><td>весь каталог команды напрямую в проект</td></tr>
+<tr><td><b>3. MCP</b><br>(полный цикл)</td><td><code>cd v3 &amp;&amp; pnpm install &amp;&amp; pnpm build</code><br><code>claude mcp add my-agents -- node v3/@claude-flow/cli/bin/cli.js mcp start</code></td><td>+ MCP-сервер (~313 инструментов)</td></tr>
+</tbody></table>
+<p class="mut" style="font-size:13px">Дальше просто ставь задачу — Claude Code сам подберёт агентов и скиллы. Примеры: «собери swarm и добавь OAuth с тестами», «запусти security-аудит проекта», «найди пробелы в тестах <code>src/api</code> и сгенерируй недостающие».</p>
 
 <p class="foot">Композиция вычислена из <code>.claude/agents/**.md</code>; метрики изменений — из коммитов модернизации (<code>3b495ddf9 … d1b2f4cb7</code>). Перегенерация: <code>node scripts/gen-agent-report.mjs</code>. Реестр: <a href="agent-catalog.html">agent-catalog.html</a>.</p>
 </div></body></html>`;
