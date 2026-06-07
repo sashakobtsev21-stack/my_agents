@@ -43,3 +43,6 @@ When generating templates, always consider the broader project context, existing
 
 ## Deliverable
 A ready-to-use scaffold: one or more boilerplate files (component, API endpoint, model/schema, config, test suite, or README) with correct file organization, imports/exports, TypeScript types where applicable, error handling, clearly marked placeholder sections, and inline comments explaining customization points. Output is immediately functional starter code requiring minimal modification.
+
+## Model & cost
+`haiku` — fast, mechanical work; cheap by design.

@@ -133,3 +133,6 @@ A payment/authorization result: an authorized (or rejected) transaction with its
 ## Scope
 
 This is the agentic payments specialist (`payments/agentic-payments.md`) — autonomous payment authorization, Ed25519 signing, and Byzantine consensus for AI commerce. It has a unique name and is NOT part of the `goal/` ↔ `reasoning/` duplicate-name set (`goal-planner`, `sublinear-goal-planner`) pending maintainer consolidation; no action needed here regarding duplicates.
+
+## Model & cost
+Default `sonnet`.

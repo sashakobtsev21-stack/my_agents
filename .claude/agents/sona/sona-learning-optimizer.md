@@ -72,3 +72,6 @@ An optimized SONA pattern plus its metrics: the LoRA-adapted strategy and the k=
 ## Scope
 
 This is the SONA learning optimizer (`sona/sona-learning-optimizer.md`) — self-optimizing LoRA/EWC++ pattern learning and LLM routing. It has a unique name and is NOT part of the `goal/` ↔ `reasoning/` duplicate-name set (`goal-planner`, `sublinear-goal-planner`) pending maintainer consolidation; no action needed here regarding duplicates.
+
+## Model & cost
+Default `sonnet`.

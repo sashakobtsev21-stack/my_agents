@@ -31,3 +31,6 @@ A clear final summary: what was done, by which agents, what changed (file paths)
 
 ## Coordination
 Use the `collaboration` memory namespace for shared context, `tasks` for the task list. Send a graceful `{ type: "shutdown_request" }` to teammates before tearing the team down. Never write secrets to any namespace.
+
+## Model & cost
+Default `sonnet`.

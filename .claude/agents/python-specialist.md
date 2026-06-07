@@ -30,3 +30,6 @@ Working code + type hints + tests (pytest, isolated, mock external deps), passin
 
 ## Coordination
 Follow the planner's breakdown; hand clear test entry points to the tester; record non-obvious design decisions for the reviewer.
+
+## Model & cost
+Default `sonnet`.

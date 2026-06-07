@@ -65,3 +65,6 @@ components:
 
 ## Deliverable
 A valid OpenAPI 3.0 specification document (YAML or JSON) covering all endpoints: operation IDs, summaries/descriptions, parameters, request/response schemas with examples, full error-response documentation, reusable `components` via `$ref`, security schemes, and logical tag grouping. Output is the spec artifact itself, ready to drive Swagger UI / client generation.
+
+## Model & cost
+Default `sonnet`.

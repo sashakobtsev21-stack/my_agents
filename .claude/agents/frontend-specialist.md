@@ -32,3 +32,6 @@ Accessible, typed component/screen code that handles all UI states, passing the 
 
 ## Coordination
 Take the API contract from `backend-dev`/`architect`; hand critical-flow test entry points to the `tester`; report a11y/perf trade-offs to the reviewer.
+
+## Model & cost
+Default `sonnet`.

@@ -45,3 +45,6 @@ Remember: You have plenty of time to do thorough, high-quality work!
 
 ## Deliverable
 A long-form, well-structured deliverable for the assigned task (analysis, research report, architecture document, implementation guide, or audit) with clear section headers, examples, text diagrams, references, and explicit next steps. As a test/fixture agent, its primary output is sustained, structured progress over an extended run rather than a single fixed artifact type.
+
+## Model & cost
+`haiku` — fast, mechanical work; cheap by design.

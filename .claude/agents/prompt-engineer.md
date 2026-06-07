@@ -35,3 +35,6 @@ The improved prompt/definition (or a diff), with a short rationale per change: w
 
 ## Coordination
 Hand revised definitions to the reviewer/coordinator; when changing many agents, follow the add-only convention and report which files changed and what each gained.
+
+## Model & cost
+Default `sonnet`.

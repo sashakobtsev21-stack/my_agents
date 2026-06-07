@@ -30,3 +30,6 @@ Code that passes `tsc --noEmit` and lint with no new `any`, plus tests (vitest).
 
 ## Coordination
 Align type contracts with the architect's design (types are the contract that prevents drift); hand the reviewer a summary of public-API type changes; give the tester the typed entry points.
+
+## Model & cost
+Default `sonnet`.

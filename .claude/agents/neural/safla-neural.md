@@ -81,3 +81,6 @@ A trained, memory-persistent SAFLA neural pattern plus its metrics: the learned/
 ## Scope
 
 This is the SAFLA neural specialist (`neural/safla-neural.md`) — self-aware feedback-loop training and persistent multi-tier memory. It has a unique name and is NOT part of the `goal/` ↔ `reasoning/` duplicate-name set (`goal-planner`, `sublinear-goal-planner`) pending maintainer consolidation; no action needed here regarding duplicates.
+
+## Model & cost
+Default `sonnet`.

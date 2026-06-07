@@ -30,3 +30,6 @@ For design: the schema (DDL or model definitions) + the indexes + a one-line rat
 
 ## Coordination
 Surface data-model decisions to the architect/coordinator (they may belong in an ADR). Hand integrity/perf assumptions to the tester so they can be verified. Never put real credentials or production data in any memory namespace.
+
+## Model & cost
+Default `sonnet`.

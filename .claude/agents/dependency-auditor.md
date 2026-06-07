@@ -33,3 +33,6 @@ A triage table: each advisory with **package**, **prod/dev/optional**, **reachab
 
 ## Coordination
 Report the triage to the reviewer/coordinator; never commit a dependency bump without the test baseline passing. Don't write registry tokens/credentials to any namespace.
+
+## Model & cost
+Default `sonnet`.

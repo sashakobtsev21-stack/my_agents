@@ -36,3 +36,6 @@ A findings list, each with: **severity** (critical/high/medium/low), **file:line
 
 ## Coordination
 Report to the reviewer/coordinator via SendMessage when done. Do not write credentials or raw keys to any memory namespace (namespaces are not access-controlled).
+
+## Model & cost
+Default `sonnet`.

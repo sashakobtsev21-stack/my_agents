@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **104/121**.
+> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **121/121**.
 
 ## Как выбрать агента
 
@@ -89,15 +89,15 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`base-template-generator`](../.claude/agents/base-template-generator.md) | 🟢 haiku | Use this agent when you need to create foundational templates, boilerplate code, or starter configurations for new projects, components, or features. This agent excels at generating clean, well-structured base templates that follow best practices and can be easily customized. Examples: <example>Context: User needs to start a new React component and wants a solid foundation. user: 'I need to create a new user profile component' assistant: 'I'll use the base-template-generator agent to create a comprehensive React component template with proper structure, TypeScript definitions, and styling setup.' <commentary>Since the user needs a foundational template for a new component, use the base-template-generator agent to create a well-structured starting point.</commentary></example> <example>Context: User is setting up a new API endpoint and needs a template. user: 'Can you help me set up a new REST API endpoint for user management?' assistant: 'I'll use the base-template-generator agent to create a complete API endpoint template with proper error handling, validation, and documentation structure.' <commentary>The user needs a foundational template for an API endpoint, so use the base-template-generator agent to provide a comprehensive starting point.</commentary></example> |
-| [`database-specialist`](../.claude/agents/database-specialist.md) | 🔵 sonnet | Database design and optimization specialist — schema design, query tuning, indexing, migrations, data integrity. Use for data-model decisions, slow-query diagnosis, and migration safety. |
-| [`dependency-auditor`](../.claude/agents/dependency-auditor.md) | 🔵 sonnet | Dependency & supply-chain specialist — CVE triage by reachability, lockfile/version hygiene, and safe upgrades. Use for npm-audit triage, dependency upgrades, and supply-chain risk review. |
-| [`frontend-specialist`](../.claude/agents/frontend-specialist.md) | 🔵 sonnet | Web frontend specialist — accessible, performant, type-safe UI (React/Vue/Svelte). Use to build/review web components, fix UI bugs, and improve accessibility and client performance. |
-| [`project-coordinator`](../.claude/agents/project-coordinator.md) 🎖 | 🔵 sonnet | Coordinates multi-agent workflows — decomposes the goal, assigns named agents, sequences handoffs via SendMessage, and synthesizes results. Use as the lead for multi-step, multi-agent tasks. |
-| [`prompt-engineer`](../.claude/agents/prompt-engineer.md) | 🔵 sonnet | Prompt & agent-definition specialist — writes and optimizes agent prompts, tool descriptions, and instructions for clarity, correct routing, and cost. Use to improve this repo's agent/skill definitions or any LLM prompt. |
-| [`python-specialist`](../.claude/agents/python-specialist.md) | 🔵 sonnet | Python development specialist — idiomatic, typed, tested Python. Use for writing/reviewing Python services, scripts, and packaging, with async, typing, and performance awareness. |
-| [`security-auditor`](../.claude/agents/security-auditor.md) | 🔵 sonnet | Security audit and hardening specialist — finds and remediates vulnerabilities, validates inputs, reviews auth/crypto. Use for security reviews, threat modeling, and CVE triage. |
-| [`typescript-specialist`](../.claude/agents/typescript-specialist.md) | 🔵 sonnet | TypeScript development specialist — strict typing, sound domain models, modern ESM. Use for writing/reviewing TS, fixing type errors, and designing type-safe APIs. |
+| [`base-template-generator`](../.claude/agents/base-template-generator.md) ✓ | 🟢 haiku | Use this agent when you need to create foundational templates, boilerplate code, or starter configurations for new projects, components, or features. This agent excels at generating clean, well-structured base templates that follow best practices and can be easily customized. Examples: <example>Context: User needs to start a new React component and wants a solid foundation. user: 'I need to create a new user profile component' assistant: 'I'll use the base-template-generator agent to create a comprehensive React component template with proper structure, TypeScript definitions, and styling setup.' <commentary>Since the user needs a foundational template for a new component, use the base-template-generator agent to create a well-structured starting point.</commentary></example> <example>Context: User is setting up a new API endpoint and needs a template. user: 'Can you help me set up a new REST API endpoint for user management?' assistant: 'I'll use the base-template-generator agent to create a complete API endpoint template with proper error handling, validation, and documentation structure.' <commentary>The user needs a foundational template for an API endpoint, so use the base-template-generator agent to provide a comprehensive starting point.</commentary></example> |
+| [`database-specialist`](../.claude/agents/database-specialist.md) ✓ | 🔵 sonnet | Database design and optimization specialist — schema design, query tuning, indexing, migrations, data integrity. Use for data-model decisions, slow-query diagnosis, and migration safety. |
+| [`dependency-auditor`](../.claude/agents/dependency-auditor.md) ✓ | 🔵 sonnet | Dependency & supply-chain specialist — CVE triage by reachability, lockfile/version hygiene, and safe upgrades. Use for npm-audit triage, dependency upgrades, and supply-chain risk review. |
+| [`frontend-specialist`](../.claude/agents/frontend-specialist.md) ✓ | 🔵 sonnet | Web frontend specialist — accessible, performant, type-safe UI (React/Vue/Svelte). Use to build/review web components, fix UI bugs, and improve accessibility and client performance. |
+| [`project-coordinator`](../.claude/agents/project-coordinator.md) 🎖 ✓ | 🔵 sonnet | Coordinates multi-agent workflows — decomposes the goal, assigns named agents, sequences handoffs via SendMessage, and synthesizes results. Use as the lead for multi-step, multi-agent tasks. |
+| [`prompt-engineer`](../.claude/agents/prompt-engineer.md) ✓ | 🔵 sonnet | Prompt & agent-definition specialist — writes and optimizes agent prompts, tool descriptions, and instructions for clarity, correct routing, and cost. Use to improve this repo's agent/skill definitions or any LLM prompt. |
+| [`python-specialist`](../.claude/agents/python-specialist.md) ✓ | 🔵 sonnet | Python development specialist — idiomatic, typed, tested Python. Use for writing/reviewing Python services, scripts, and packaging, with async, typing, and performance awareness. |
+| [`security-auditor`](../.claude/agents/security-auditor.md) ✓ | 🔵 sonnet | Security audit and hardening specialist — finds and remediates vulnerabilities, validates inputs, reviews auth/crypto. Use for security reviews, threat modeling, and CVE triage. |
+| [`typescript-specialist`](../.claude/agents/typescript-specialist.md) ✓ | 🔵 sonnet | TypeScript development specialist — strict typing, sound domain models, modern ESM. Use for writing/reviewing TS, fixing type errors, and designing type-safe APIs. |
 
 ### Flow-Nexus (облако) (9)
 
@@ -264,49 +264,49 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`agentic-payments`](../.claude/agents/payments/agentic-payments.md) | 🔵 sonnet | Multi-agent payment authorization specialist for autonomous AI commerce with cryptographic verification and Byzantine consensus |
+| [`agentic-payments`](../.claude/agents/payments/agentic-payments.md) ✓ | 🔵 sonnet | Multi-agent payment authorization specialist for autonomous AI commerce with cryptographic verification and Byzantine consensus |
 
 ### Documentation (1)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`api-docs`](../.claude/agents/documentation/api-docs/docs-api-openapi.md) | 🔵 sonnet | Expert agent for creating and maintaining OpenAPI/Swagger documentation |
+| [`api-docs`](../.claude/agents/documentation/api-docs/docs-api-openapi.md) ✓ | 🔵 sonnet | Expert agent for creating and maintaining OpenAPI/Swagger documentation |
 
 ### Reasoning (1)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`goal-planner-reasoning`](../.claude/agents/reasoning/goal-planner.md) | 🔵 sonnet | Reasoning-domain GOAP (Goal-Oriented Action Planning) variant focused on adaptive replanning and multi-step reasoning via MCP integration. Leaner reasoning-side counterpart to the canonical goal-planner. Discovers novel solutions by combining actions and finding optimal paths through complex state spaces. |
+| [`goal-planner-reasoning`](../.claude/agents/reasoning/goal-planner.md) ✓ | 🔵 sonnet | Reasoning-domain GOAP (Goal-Oriented Action Planning) variant focused on adaptive replanning and multi-step reasoning via MCP integration. Leaner reasoning-side counterpart to the canonical goal-planner. Discovers novel solutions by combining actions and finding optimal paths through complex state spaces. |
 
 ### Specialized (1)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`mobile-dev`](../.claude/agents/specialized/mobile/spec-mobile-react-native.md) | 🔵 sonnet | Expert agent for React Native mobile application development across iOS and Android |
+| [`mobile-dev`](../.claude/agents/specialized/mobile/spec-mobile-react-native.md) ✓ | 🔵 sonnet | Expert agent for React Native mobile application development across iOS and Android |
 
 ### Neural (1)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`safla-neural`](../.claude/agents/neural/safla-neural.md) | 🔵 sonnet | Self-Aware Feedback Loop Algorithm (SAFLA) neural specialist that creates intelligent, memory-persistent AI systems with self-learning capabilities. Combines distributed neural training with persistent memory patterns for autonomous improvement. Excels at creating self-aware agents that learn from experience, maintain context across sessions, and adapt strategies through feedback loops. |
+| [`safla-neural`](../.claude/agents/neural/safla-neural.md) ✓ | 🔵 sonnet | Self-Aware Feedback Loop Algorithm (SAFLA) neural specialist that creates intelligent, memory-persistent AI systems with self-learning capabilities. Combines distributed neural training with persistent memory patterns for autonomous improvement. Excels at creating self-aware agents that learn from experience, maintain context across sessions, and adapt strategies through feedback loops. |
 
 ### SONA (1)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`sona-learning-optimizer`](../.claude/agents/sona/sona-learning-optimizer.md) | 🔵 sonnet | SONA-powered self-optimizing agent with LoRA fine-tuning and EWC++ memory preservation |
+| [`sona-learning-optimizer`](../.claude/agents/sona/sona-learning-optimizer.md) ✓ | 🔵 sonnet | SONA-powered self-optimizing agent with LoRA fine-tuning and EWC++ memory preservation |
 
 ### Architecture (1)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`system-architect`](../.claude/agents/architecture/system-design/arch-system-design.md) | 🟣 opus | Expert agent for system architecture design, patterns, and high-level technical decisions |
+| [`system-architect`](../.claude/agents/architecture/system-design/arch-system-design.md) ✓ | 🟣 opus | Expert agent for system architecture design, patterns, and high-level technical decisions |
 
 ### Custom (1)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`test-long-runner`](../.claude/agents/custom/test-long-runner.md) | 🟢 haiku | Test agent that can run for 30+ minutes on complex tasks |
+| [`test-long-runner`](../.claude/agents/custom/test-long-runner.md) ✓ | 🟢 haiku | Test agent that can run for 30+ minutes on complex tasks |
 
 ---
 
