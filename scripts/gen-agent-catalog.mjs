@@ -51,7 +51,7 @@ function frontmatter(text) {
   return { name: obj.name || '', description: obj.description || '', model: obj.model || '' };
 }
 
-const LEAD_RE = /coordinator|orchestrat|manager|queen|hierarchical|mesh|adaptive|consensus|synchroniz|raft|byzantine|gossip|quorum|crdt|sparc-coord|collective|load balanc/i;
+const LEAD_RE = /coordinator|orchestrat|manager|queen|hierarchical|mesh|adaptive|consensus|synchroniz|raft|byzantine|gossip|quorum|crdt|sparc-coord|collective|director/i;
 const LEAD_CATS = new Set(['swarm', 'hive-mind', 'consensus']);
 const MODERN_RE = /^##\s*Model & cost/m; // marker of the modernized prompt standard
 const PRIORITY = ['queen-coordinator', 'v3-queen-coordinator', 'collective-intelligence-coordinator',

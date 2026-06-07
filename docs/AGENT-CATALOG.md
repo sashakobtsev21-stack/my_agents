@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **121/121**.
+> Агентов: **121** · направлений: **28** · руководителей: **28** · модернизировано: **121/121**.
 
 ## Как выбрать агента
 
@@ -29,6 +29,7 @@
 | [`codex-coordinator`](../.claude/agents/dual-mode/codex-coordinator.md) | 🔵 sonnet | Dual-Mode (Claude + Codex) | Coordinates multiple headless Codex workers for parallel execution |
 | [`consensus-coordinator`](../.claude/agents/sublinear/consensus-coordinator.md) | 🔵 sonnet | Sublinear | Distributed consensus agent that uses sublinear solvers for fast agreement protocols in multi-agent systems. Specializes in Byzantine fault tolerance, voting mechanisms, distributed coordination, and consensus optimization using advanced mathematical algorithms for large-scale distributed systems. |
 | [`crdt-synchronizer`](../.claude/agents/consensus/crdt-synchronizer.md) | 🔵 sonnet | Consensus / распределённые | CRDT state-synchronization coordinator. Use when multiple writers (incl. offline) concurrently mutate shared state and it must converge automatically with no coordination. Produces a merged, conflict-free state. |
+| [`game-director`](../.claude/agents/game-dev/game-director.md) | 🟣 opus | Game Dev (Unity / 3D mobile) | Creative & technical director for the game — owns the vision, pillars, and Game Design Document, and keeps every discipline coherent. Use as the Tier-0 lead for the whole game project. |
 | [`gossip-coordinator`](../.claude/agents/consensus/gossip-coordinator.md) | 🔵 sonnet | Consensus / распределённые | Gossip/epidemic consensus coordinator. Use for large-scale, highly-available dissemination where eventual consistency beats strong agreement. Scales to many nodes with probabilistic guarantees. |
 | [`memory-coordinator`](../.claude/agents/templates/memory-coordinator.md) | 🟢 haiku | Templates | Manage persistent memory across sessions and facilitate cross-agent memory sharing |
 | [`performance-benchmarker`](../.claude/agents/consensus/performance-benchmarker.md) | 🔵 sonnet | Consensus / распределённые | Consensus benchmarking specialist. Use to measure and compare consensus protocols (throughput/latency/fault-tolerance) under your real workload so you can choose between them empirically. Not a consensus strategy itself. |
@@ -56,7 +57,7 @@
 | [`build-release-engineer`](../.claude/agents/game-dev/build-release-engineer.md) ✓ | 🔵 sonnet | Build & release engineer — Unity build pipeline, Android (Gradle/AAB/Play Console) now and iOS (Xcode/Metal/App Store) later, CI automation, signing, and store submission. Use to ship the game to stores. |
 | [`character-animator`](../.claude/agents/game-dev/character-animator.md) ✓ | 🔵 sonnet | Animation specialist — rigging, skinning, Mecanim animator controllers, blend trees, IK, and procedural animation for responsive, believable motion. Use for anything that moves and deforms. |
 | [`game-designer`](../.claude/agents/game-dev/game-designer.md) ✓ | 🔵 sonnet | Gameplay systems & level designer — core loop, mechanics, progression, economy, balance, and level layouts. Use to design what the player does and how it stays fun and fair. |
-| [`game-director`](../.claude/agents/game-dev/game-director.md) ✓ | 🟣 opus | Creative & technical director for the game — owns the vision, pillars, and Game Design Document, and keeps every discipline coherent. Use as the Tier-0 lead for the whole game project. |
+| [`game-director`](../.claude/agents/game-dev/game-director.md) 🎖 ✓ | 🟣 opus | Creative & technical director for the game — owns the vision, pillars, and Game Design Document, and keeps every discipline coherent. Use as the Tier-0 lead for the whole game project. |
 | [`game-qa-engineer`](../.claude/agents/game-dev/game-qa-engineer.md) ✓ | 🔵 sonnet | Game QA engineer — playtesting, automated tests (Unity Test Framework), device-matrix coverage, and bug reproduction for a stable, fun, shippable build. Use to validate the game on real devices. |
 | [`gameplay-programmer`](../.claude/agents/game-dev/gameplay-programmer.md) ✓ | 🔵 sonnet | Unity C# gameplay programmer — implements mechanics, player/camera control, game state, AI behaviors, and input from design specs. Use to build the playable systems in-engine. |
 | [`mobile-performance-engineer`](../.claude/agents/game-dev/mobile-performance-engineer.md) ✓ | 🔵 sonnet | Mobile performance engineer — profiles and optimizes frame time, memory, battery, and thermals on real Android (then iOS) devices against the budget. Use to hit/keep frame rate and diagnose hitches. |
