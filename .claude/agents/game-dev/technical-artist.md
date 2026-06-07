@@ -32,3 +32,6 @@ The art pipeline + standards doc (import presets, budgets, naming, LOD/texture r
 
 ## Coordination
 Take look targets from `game-director` and budgets from `unity-engine-architect`/`rendering-engineer`; hand standards + presets to `3d-artist`/`vfx-artist`; flag costly assets to `mobile-performance-engineer`.
+
+## Model & cost
+Default `sonnet`.

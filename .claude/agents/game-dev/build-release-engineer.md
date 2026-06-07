@@ -33,3 +33,6 @@ A reproducible build pipeline + CI config, a signed store-ready package (AAB for
 
 ## Coordination
 Build on `unity-engine-architect`'s pipeline decisions; gate releases on `game-qa-engineer` sign-off and `mobile-performance-engineer`'s budget pass; never commit signing keys/store credentials to any namespace.
+
+## Model & cost
+Default `sonnet`.

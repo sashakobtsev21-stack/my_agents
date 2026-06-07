@@ -33,3 +33,6 @@ The GDD (vision, pillars, core loop, scope for v1), a prioritized milestone road
 
 ## Coordination
 Spawn and brief the discipline agents (game-designer, unity-engine-architect, and through them the rest); collect their results and judge against the pillars. Use the `collaboration` namespace for the shared GDD/decisions. Don't micromanage implementation — set the bar and the brief, then synthesize.
+
+## Model & cost
+`opus` — high-leverage creative/architecture decisions warrant the top tier.

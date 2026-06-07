@@ -33,3 +33,6 @@ System specs (mechanic rules + tunable parameters + states + feedback), the prog
 
 ## Coordination
 Take pillars from `game-director`; hand mechanic specs to `gameplay-programmer`, feel cues to `animator`/`vfx-artist`/`audio-designer`, control/HUD needs to `ui-ux-designer`, and balance-test plans to `game-qa-engineer`.
+
+## Model & cost
+Default `sonnet`.

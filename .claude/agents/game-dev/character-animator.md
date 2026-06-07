@@ -33,3 +33,6 @@ The rig + skinning, Animator Controller(s) with blend trees/layers/masks, IK set
 
 ## Coordination
 Take feel from `game-designer` and hook points from `gameplay-programmer`; align mesh topology with `3d-artist`; sync animation-event timings with `vfx-artist`/`audio-designer`.
+
+## Model & cost
+Default `sonnet`.

@@ -32,3 +32,6 @@ Game-ready assets: optimized mesh + LODs within budget, clean UVs, PBR texture s
 
 ## Coordination
 Work to `technical-artist`'s standards and budgets; coordinate deforming-mesh topology with `character-animator`; deliver assets for look-dev/integration to `technical-artist`.
+
+## Model & cost
+Default `sonnet`.

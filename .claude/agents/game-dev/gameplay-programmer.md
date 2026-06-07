@@ -33,3 +33,6 @@ Working, profiler-clean C# implementing the spec: components/systems, designer-t
 
 ## Coordination
 Take specs from `game-designer` and structure from `unity-engine-architect`; coordinate physics seams with `physics-programmer`; expose anim/VFX/audio/UI hook points for those agents; hand testable entry points to `game-qa-engineer`.
+
+## Model & cost
+Default `sonnet`.

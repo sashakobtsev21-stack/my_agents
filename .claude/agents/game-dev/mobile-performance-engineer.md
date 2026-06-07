@@ -35,3 +35,6 @@ A profiling report from real devices: the measured numbers vs budget (frame time
 
 ## Coordination
 Enforce `unity-engine-architect`'s budget; feed specific findings to the responsible discipline; give the device test matrix results to `game-qa-engineer` and `build-release-engineer`.
+
+## Model & cost
+Default `sonnet`.

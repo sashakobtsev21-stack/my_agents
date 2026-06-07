@@ -32,3 +32,6 @@ The effects (VFX Graph/Shuriken assets + effect shaders), pooled and wired to th
 
 ## Coordination
 Take cues from `game-designer`, timings from `character-animator`, and the budget from `rendering-engineer`/`technical-artist`; sync impact moments with `audio-designer`; hook spawn points from `gameplay-programmer`.
+
+## Model & cost
+Default `sonnet`.

@@ -34,3 +34,6 @@ The architecture: project/folder + asmdef layout, render-pipeline + input + phys
 
 ## Coordination
 Take scope from `game-director`; publish budgets + structure ADRs to all engineers and tech-art; review that implementations respect the assembly boundaries and budgets.
+
+## Model & cost
+`opus` — high-leverage creative/architecture decisions warrant the top tier.

@@ -33,3 +33,6 @@ The configured URP + quality tiers, optimized shaders/materials, the lighting se
 
 ## Coordination
 Take budget from `unity-engine-architect` and look targets from `technical-artist`; give shader/material standards to `3d-artist`/`vfx-artist`; hand GPU-cost numbers to `mobile-performance-engineer`.
+
+## Model & cost
+Default `sonnet`.

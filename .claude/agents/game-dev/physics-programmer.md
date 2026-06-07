@@ -34,3 +34,6 @@ Tuned, stable physics systems: the controller/joint/collider setup, exposed tuna
 
 ## Coordination
 Take feel targets from `game-designer` and budget from `unity-engine-architect`; share the rigidbody/collision seams with `gameplay-programmer`; hand stress-test cases to `game-qa-engineer`.
+
+## Model & cost
+Default `sonnet`.

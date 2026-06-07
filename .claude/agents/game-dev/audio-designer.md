@@ -32,3 +32,6 @@ The implemented audio: SFX wired to gameplay/anim/VFX events, the adaptive music
 
 ## Coordination
 Take cues from `game-designer`, timings from `character-animator`/`vfx-artist`, and UI hooks from `ui-ux-designer`; report audio memory/CPU to `mobile-performance-engineer`.
+
+## Model & cost
+Default `sonnet`.

@@ -32,3 +32,6 @@ The UI implementation (UI Toolkit/UGUI screens + control scheme), responsive acr
 
 ## Coordination
 Take control/feedback needs from `game-designer` and state hooks from `gameplay-programmer`; request UI SFX from `audio-designer`; validate touch ergonomics with `game-qa-engineer` on real devices.
+
+## Model & cost
+Default `sonnet`.

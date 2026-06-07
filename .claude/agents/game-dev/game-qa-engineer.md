@@ -32,3 +32,6 @@ A test report: automated test results (pass/fail + coverage of the loop/logic), 
 
 ## Coordination
 Take intent/budget from `game-designer`/`mobile-performance-engineer`; route reproducible bugs to the owning agent (gameplay/physics/UI/etc.); give the build sign-off to `build-release-engineer`.
+
+## Model & cost
+Default `sonnet`.

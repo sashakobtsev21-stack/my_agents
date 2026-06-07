@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **54/121**.
+> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **69/121**.
 
 ## Как выбрать агента
 
@@ -51,21 +51,21 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`3d-artist`](../.claude/agents/game-dev/3d-artist.md) | 🔵 sonnet | 3D artist — models, sculpts, retopologizes, UVs, and PBR-textures game-ready assets (characters, props, environments) within mobile poly/texture budgets. Use to create the game's 3D content. |
-| [`audio-designer`](../.claude/agents/game-dev/audio-designer.md) | 🔵 sonnet | Audio designer — SFX, adaptive music, mixing, and middleware (FMOD/Wwise or Unity audio) for immersive, responsive sound that fits the mobile memory/CPU budget. Use for all game audio. |
-| [`build-release-engineer`](../.claude/agents/game-dev/build-release-engineer.md) | 🔵 sonnet | Build & release engineer — Unity build pipeline, Android (Gradle/AAB/Play Console) now and iOS (Xcode/Metal/App Store) later, CI automation, signing, and store submission. Use to ship the game to stores. |
-| [`character-animator`](../.claude/agents/game-dev/character-animator.md) | 🔵 sonnet | Animation specialist — rigging, skinning, Mecanim animator controllers, blend trees, IK, and procedural animation for responsive, believable motion. Use for anything that moves and deforms. |
-| [`game-designer`](../.claude/agents/game-dev/game-designer.md) | 🔵 sonnet | Gameplay systems & level designer — core loop, mechanics, progression, economy, balance, and level layouts. Use to design what the player does and how it stays fun and fair. |
-| [`game-director`](../.claude/agents/game-dev/game-director.md) | 🟣 opus | Creative & technical director for the game — owns the vision, pillars, and Game Design Document, and keeps every discipline coherent. Use as the Tier-0 lead for the whole game project. |
-| [`game-qa-engineer`](../.claude/agents/game-dev/game-qa-engineer.md) | 🔵 sonnet | Game QA engineer — playtesting, automated tests (Unity Test Framework), device-matrix coverage, and bug reproduction for a stable, fun, shippable build. Use to validate the game on real devices. |
-| [`gameplay-programmer`](../.claude/agents/game-dev/gameplay-programmer.md) | 🔵 sonnet | Unity C# gameplay programmer — implements mechanics, player/camera control, game state, AI behaviors, and input from design specs. Use to build the playable systems in-engine. |
-| [`mobile-performance-engineer`](../.claude/agents/game-dev/mobile-performance-engineer.md) | 🔵 sonnet | Mobile performance engineer — profiles and optimizes frame time, memory, battery, and thermals on real Android (then iOS) devices against the budget. Use to hit/keep frame rate and diagnose hitches. |
-| [`physics-programmer`](../.claude/agents/game-dev/physics-programmer.md) | 🔵 sonnet | Physics & simulation specialist — character/vehicle/ragdoll physics, colliders, joints, and PhysX tuning for great-feeling, stable, performant motion on mobile. Use for anything physics-driven. |
-| [`rendering-engineer`](../.claude/agents/game-dev/rendering-engineer.md) | 🔵 sonnet | Graphics/rendering engineer — URP setup, shaders, lighting, post-processing, and GPU performance for great-looking 3D that holds frame rate on mobile. Use for the visual pipeline and render perf. |
-| [`technical-artist`](../.claude/agents/game-dev/technical-artist.md) | 🔵 sonnet | Technical artist — the bridge between art and engine. Owns look-dev, material/shader standards, the art pipeline, and asset optimization so art looks great and runs fast. Use for art-engine integration. |
-| [`ui-ux-designer`](../.claude/agents/game-dev/ui-ux-designer.md) | 🔵 sonnet | Mobile UI/UX designer — touch controls, HUD, menus, and flows that are thumb-friendly, readable, and responsive across screen sizes. Use for all on-screen interface and player-facing UX. |
-| [`unity-engine-architect`](../.claude/agents/game-dev/unity-engine-architect.md) | 🟣 opus | Unity engine & project architect — project structure, render pipeline choice, Addressables, assembly/build setup, performance budgets, and Android→iOS strategy. Use for engine-level architecture decisions. |
-| [`vfx-artist`](../.claude/agents/game-dev/vfx-artist.md) | 🔵 sonnet | VFX artist — particle systems and effects (VFX Graph / Shuriken), effect shaders, and game-feel juice (impacts, trails, magic, weather) within the mobile overdraw budget. Use to make actions feel impactful. |
+| [`3d-artist`](../.claude/agents/game-dev/3d-artist.md) ✓ | 🔵 sonnet | 3D artist — models, sculpts, retopologizes, UVs, and PBR-textures game-ready assets (characters, props, environments) within mobile poly/texture budgets. Use to create the game's 3D content. |
+| [`audio-designer`](../.claude/agents/game-dev/audio-designer.md) ✓ | 🔵 sonnet | Audio designer — SFX, adaptive music, mixing, and middleware (FMOD/Wwise or Unity audio) for immersive, responsive sound that fits the mobile memory/CPU budget. Use for all game audio. |
+| [`build-release-engineer`](../.claude/agents/game-dev/build-release-engineer.md) ✓ | 🔵 sonnet | Build & release engineer — Unity build pipeline, Android (Gradle/AAB/Play Console) now and iOS (Xcode/Metal/App Store) later, CI automation, signing, and store submission. Use to ship the game to stores. |
+| [`character-animator`](../.claude/agents/game-dev/character-animator.md) ✓ | 🔵 sonnet | Animation specialist — rigging, skinning, Mecanim animator controllers, blend trees, IK, and procedural animation for responsive, believable motion. Use for anything that moves and deforms. |
+| [`game-designer`](../.claude/agents/game-dev/game-designer.md) ✓ | 🔵 sonnet | Gameplay systems & level designer — core loop, mechanics, progression, economy, balance, and level layouts. Use to design what the player does and how it stays fun and fair. |
+| [`game-director`](../.claude/agents/game-dev/game-director.md) ✓ | 🟣 opus | Creative & technical director for the game — owns the vision, pillars, and Game Design Document, and keeps every discipline coherent. Use as the Tier-0 lead for the whole game project. |
+| [`game-qa-engineer`](../.claude/agents/game-dev/game-qa-engineer.md) ✓ | 🔵 sonnet | Game QA engineer — playtesting, automated tests (Unity Test Framework), device-matrix coverage, and bug reproduction for a stable, fun, shippable build. Use to validate the game on real devices. |
+| [`gameplay-programmer`](../.claude/agents/game-dev/gameplay-programmer.md) ✓ | 🔵 sonnet | Unity C# gameplay programmer — implements mechanics, player/camera control, game state, AI behaviors, and input from design specs. Use to build the playable systems in-engine. |
+| [`mobile-performance-engineer`](../.claude/agents/game-dev/mobile-performance-engineer.md) ✓ | 🔵 sonnet | Mobile performance engineer — profiles and optimizes frame time, memory, battery, and thermals on real Android (then iOS) devices against the budget. Use to hit/keep frame rate and diagnose hitches. |
+| [`physics-programmer`](../.claude/agents/game-dev/physics-programmer.md) ✓ | 🔵 sonnet | Physics & simulation specialist — character/vehicle/ragdoll physics, colliders, joints, and PhysX tuning for great-feeling, stable, performant motion on mobile. Use for anything physics-driven. |
+| [`rendering-engineer`](../.claude/agents/game-dev/rendering-engineer.md) ✓ | 🔵 sonnet | Graphics/rendering engineer — URP setup, shaders, lighting, post-processing, and GPU performance for great-looking 3D that holds frame rate on mobile. Use for the visual pipeline and render perf. |
+| [`technical-artist`](../.claude/agents/game-dev/technical-artist.md) ✓ | 🔵 sonnet | Technical artist — the bridge between art and engine. Owns look-dev, material/shader standards, the art pipeline, and asset optimization so art looks great and runs fast. Use for art-engine integration. |
+| [`ui-ux-designer`](../.claude/agents/game-dev/ui-ux-designer.md) ✓ | 🔵 sonnet | Mobile UI/UX designer — touch controls, HUD, menus, and flows that are thumb-friendly, readable, and responsive across screen sizes. Use for all on-screen interface and player-facing UX. |
+| [`unity-engine-architect`](../.claude/agents/game-dev/unity-engine-architect.md) ✓ | 🟣 opus | Unity engine & project architect — project structure, render pipeline choice, Addressables, assembly/build setup, performance budgets, and Android→iOS strategy. Use for engine-level architecture decisions. |
+| [`vfx-artist`](../.claude/agents/game-dev/vfx-artist.md) ✓ | 🔵 sonnet | VFX artist — particle systems and effects (VFX Graph / Shuriken), effect shaders, and game-feel juice (impacts, trails, magic, weather) within the mobile overdraw budget. Use to make actions feel impactful. |
 
 ### GitHub (13)
 
