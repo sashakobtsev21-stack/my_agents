@@ -170,3 +170,6 @@ A coordinated SPARC cycle: phase transitions driven through the five quality gat
 ## Scope
 
 This is a template/scaffold variant; the canonical agent is `sparc-coord` (SPARC Methodology category). This agent orchestrates the phases only — it delegates the actual artifacts to the phase agents `specification`, `pseudocode`, `architecture`, and `refinement` (and `sparc-coder` for implementation), and defers generic task decomposition to `task-orchestrator`.
+
+## Model & cost
+Default `sonnet`.

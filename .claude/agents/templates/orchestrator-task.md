@@ -127,3 +127,6 @@ A task execution plan and synthesized result: a decomposition of the objective i
 ## Scope
 
 This is a template/scaffold variant; the canonical agent is `task-orchestrator` (Performance & Optimization category). This agent decomposes and coordinates work — it relies on `swarm-init` for the agent pool, `smart-agent` for dynamic spawning, and `memory-coordinator` for persistence; it does not implement subtasks itself or initialize topology.
+
+## Model & cost
+`haiku` — coordination/memory plumbing is mechanical; cheap and fast.

@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **78/121**.
+> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **87/121**.
 
 ## Как выбрать агента
 
@@ -117,15 +117,15 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`memory-coordinator`](../.claude/agents/templates/memory-coordinator.md) 🎖 | 🟢 haiku | Manage persistent memory across sessions and facilitate cross-agent memory sharing |
-| [`migration-planner`](../.claude/agents/templates/migration-plan.md) | 🔵 sonnet | Comprehensive migration plan for converting commands to agent-based system |
-| [`perf-analyzer`](../.claude/agents/templates/performance-analyzer.md) | 🔵 sonnet | Performance bottleneck analyzer for identifying and resolving workflow inefficiencies |
-| [`smart-agent`](../.claude/agents/templates/automation-smart-agent.md) | 🔵 sonnet | Intelligent agent coordination and dynamic spawning specialist |
-| [`sparc-coder`](../.claude/agents/templates/implementer-sparc-coder.md) | 🔵 sonnet | Transform specifications into working code with TDD practices |
-| [`sparc-coord`](../.claude/agents/templates/sparc-coordinator.md) 🎖 | 🔵 sonnet | SPARC methodology orchestrator for systematic development phase coordination |
-| [`swarm-init`](../.claude/agents/templates/coordinator-swarm-init.md) | 🟢 haiku | Swarm initialization and topology optimization specialist |
-| [`task-orchestrator`](../.claude/agents/templates/orchestrator-task.md) 🎖 | 🟢 haiku | Central coordination agent for task decomposition, execution planning, and result synthesis |
-| [`template-pr-manager`](../.claude/agents/templates/github-pr-manager.md) 🎖 | 🔵 sonnet | Template/scaffold for a PR-lifecycle agent. Canonical runtime agent is pr-manager (github/pr-manager.md). |
+| [`memory-coordinator`](../.claude/agents/templates/memory-coordinator.md) 🎖 ✓ | 🟢 haiku | Manage persistent memory across sessions and facilitate cross-agent memory sharing |
+| [`migration-planner`](../.claude/agents/templates/migration-plan.md) ✓ | 🔵 sonnet | Comprehensive migration plan for converting commands to agent-based system |
+| [`perf-analyzer`](../.claude/agents/templates/performance-analyzer.md) ✓ | 🔵 sonnet | Performance bottleneck analyzer for identifying and resolving workflow inefficiencies |
+| [`smart-agent`](../.claude/agents/templates/automation-smart-agent.md) ✓ | 🔵 sonnet | Intelligent agent coordination and dynamic spawning specialist |
+| [`sparc-coder`](../.claude/agents/templates/implementer-sparc-coder.md) ✓ | 🔵 sonnet | Transform specifications into working code with TDD practices |
+| [`sparc-coord`](../.claude/agents/templates/sparc-coordinator.md) 🎖 ✓ | 🔵 sonnet | SPARC methodology orchestrator for systematic development phase coordination |
+| [`swarm-init`](../.claude/agents/templates/coordinator-swarm-init.md) ✓ | 🟢 haiku | Swarm initialization and topology optimization specialist |
+| [`task-orchestrator`](../.claude/agents/templates/orchestrator-task.md) 🎖 ✓ | 🟢 haiku | Central coordination agent for task decomposition, execution planning, and result synthesis |
+| [`template-pr-manager`](../.claude/agents/templates/github-pr-manager.md) 🎖 ✓ | 🔵 sonnet | Template/scaffold for a PR-lifecycle agent. Canonical runtime agent is pr-manager (github/pr-manager.md). |
 
 ### Consensus / распределённые (7)
 

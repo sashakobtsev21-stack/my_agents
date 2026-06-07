@@ -250,3 +250,6 @@ Working, tested code that satisfies the Specification and ADRs: source modules p
 ## Scope
 
 This is a template/scaffold variant; the canonical agent is `sparc-coder` (SPARC Methodology category, also surfaced via `sparc/refinement.md`). This agent owns implementation (Refinement/Completion) only — defer requirements to `specification`, algorithm shape to `pseudocode`, and tech/structure decisions to `architecture`; do not redo those phases.
+
+## Model & cost
+Default `sonnet`.

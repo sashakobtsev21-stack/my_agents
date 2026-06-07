@@ -186,3 +186,6 @@ A performance analysis report: identified bottlenecks ranked by impact, root-cau
 ## Scope
 
 This is a template/scaffold variant; the canonical agent is `perf-analyzer` (Performance & Optimization category), distinct from `performance-benchmarker`. This agent diagnoses and recommends only — it hands actual optimization work to optimization agents and validates results, and feeds execution-strategy feedback to `task-orchestrator` rather than re-planning tasks itself.
+
+## Model & cost
+Default `sonnet`.

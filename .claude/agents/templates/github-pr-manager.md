@@ -162,3 +162,6 @@ A managed pull request through its full lifecycle: a created/updated PR (via `gh
 ## Scope
 
 Resolved (renamed): this is now `template-pr-manager` — a template/scaffold, not a runtime agent. The canonical runtime agent is `github/pr-manager.md` (`pr-manager`). Overlaps `code-review-swarm` (delegate detailed multi-agent code analysis there) and `release-manager` (defer version tagging and release coordination there) — this agent owns the PR lifecycle, not code review depth or release orchestration.
+
+## Model & cost
+Default `sonnet`.

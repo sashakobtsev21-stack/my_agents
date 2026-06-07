@@ -731,3 +731,6 @@ A complete command-to-agent migration plan: each `.claude/commands/*` mapped to 
 ## Scope
 
 This is a template/scaffold variant; it is a planning document rather than a runtime agent. The individual agent definitions it specifies (PR manager, SPARC orchestrator/coder, performance analyzer, memory coordinator, smart agent, etc.) are the canonical agents under `templates/*`, `github/*`, and `sparc/*` — this file describes how to derive them and should not be treated as an executable coordinator.
+
+## Model & cost
+Default `sonnet`.
