@@ -105,3 +105,6 @@ npx -y @claude-flow/cli@latest hooks post-task --task-id "$SID" \
 ```
 
 This feeds the trajectory into ruvector's SONA distillation. Patterns surface on next invocation via `hooks route-enhanced`.
+
+## Model & cost
+Default `sonnet`.

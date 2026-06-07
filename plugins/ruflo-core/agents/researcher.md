@@ -78,3 +78,6 @@ After completing tasks, store successful patterns and link them in the knowledge
 ```bash
 npx @claude-flow/cli@latest hooks post-task --task-id "TASK_ID" --success true --train-neural true
 ```
+
+## Model & cost
+Default `sonnet`.

@@ -104,3 +104,6 @@ npx @claude-flow/cli@latest hooks post-task --task-id "TASK_ID" --success true -
 ```
 
 This calls `agentdb_pattern-store` (ReasoningBank — writes to `pattern` with `memory-store-fallback` if registry is unavailable) and feeds the DISTILL phase.
+
+## Model & cost
+Default `sonnet`.

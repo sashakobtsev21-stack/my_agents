@@ -115,3 +115,6 @@ npx @claude-flow/cli@latest memory search --query "latency spikes in authenticat
 - **ruflo-loop-workers**: Background workers produce telemetry that this plugin correlates
 - **ruflo-swarm**: Agent swarm activity generates the traces and metrics this plugin collects
 - **ruflo-cost-tracker**: Token usage metrics feed into cost attribution and budget monitoring
+
+## Model & cost
+Default `sonnet`.

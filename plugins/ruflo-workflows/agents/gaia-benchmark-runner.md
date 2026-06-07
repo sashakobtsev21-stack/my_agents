@@ -76,3 +76,6 @@ When part of a multi-agent workflow:
 1. Report pass-rate summary via SendMessage to the submission coordinator
 2. Flag any new failure modes discovered
 3. Recommend configuration changes for the next run based on what failed
+
+## Model & cost
+Default `sonnet`.

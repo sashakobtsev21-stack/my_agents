@@ -43,3 +43,6 @@ After completing tasks, feed the ADR-lifecycle learning so future ADR-violation 
 ```bash
 npx @claude-flow/cli@latest hooks post-task --task-id "TASK_ID" --success true --train-neural true
 ```
+
+## Model & cost
+Default `sonnet`.

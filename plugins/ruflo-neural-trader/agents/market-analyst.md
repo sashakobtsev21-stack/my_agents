@@ -90,3 +90,6 @@ SendMessage({
 Message schema: `RegimeVerdict` in `plugins/ruflo-neural-trader/src/pipeline-messages.ts`.
 
 You do NOT message `risk-analyst` or any other agent directly — the pipeline is strictly linear `market-analyst → trading-strategist → risk-analyst`.
+
+## Model & cost
+Default `sonnet`.

@@ -168,3 +168,6 @@ SendMessage({
 Message schemas: `RegimeVerdict`, `SignalProposal`, `RiskDecision` in `plugins/ruflo-neural-trader/src/pipeline-messages.ts`.
 
 **Note on `backtest-engineer`:** that agent runs in an orthogonal lane — it produces signed-artifact promotion candidates (ADR-126 Phase 4) and does NOT participate in the live pipeline. Do not consume or send messages to it from the live execution path.
+
+## Model & cost
+`opus` — high-leverage reasoning warrants the top tier.

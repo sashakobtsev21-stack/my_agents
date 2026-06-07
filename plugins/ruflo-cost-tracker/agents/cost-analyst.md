@@ -89,3 +89,6 @@ npx @claude-flow/cli@latest neural train --pattern-type cost-optimization --epoc
 - **ruflo-observability**: Token usage metrics collected via observability instrumentation.
 - **ruflo-swarm**: Agent spawn/stop decisions informed by budget remaining.
 - **ruflo-federation**: Federation budget circuit breaker (ADR-097) — federation_send `maxTokens` / `maxUsd` enforcement complements local cost tracking.
+
+## Model & cost
+`haiku` — fast, mechanical work; cheap by design.

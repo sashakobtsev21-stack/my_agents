@@ -17,3 +17,6 @@ Report findings with severity (critical/warning/info). Store patterns:
 `npx @claude-flow/cli@latest memory store --key "review-PATTERN" --value "DESCRIPTION" --namespace patterns`
 
 Use `npx @claude-flow/cli@latest hooks post-task --task-id "TASK_ID" --success true` when complete.
+
+## Model & cost
+Default `sonnet`.

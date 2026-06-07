@@ -52,3 +52,6 @@ After completing tasks, store successful patterns so future domain models inheri
 npx @claude-flow/cli@latest hooks post-task --task-id "TASK_ID" --success true --train-neural true
 npx @claude-flow/cli@latest memory store --key "ddd-pattern-CONTEXT" --value "APPROACH" --namespace patterns
 ```
+
+## Model & cost
+Default `sonnet`.

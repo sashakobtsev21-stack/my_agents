@@ -35,3 +35,6 @@ After each routing or fine-tune cycle, feed the router outcome learning so futur
 ```bash
 npx @claude-flow/cli@latest hooks post-task --task-id "TASK_ID" --success true --train-neural true
 ```
+
+## Model & cost
+Default `sonnet`.

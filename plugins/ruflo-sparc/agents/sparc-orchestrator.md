@@ -143,3 +143,6 @@ After each phase or full SPARC cycle, feed the phase-quality learning loop so qu
 ```bash
 npx @claude-flow/cli@latest hooks post-task --task-id "TASK_ID" --success true --train-neural true
 ```
+
+## Model & cost
+Default `sonnet`.

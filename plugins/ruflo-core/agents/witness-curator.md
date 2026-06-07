@@ -77,3 +77,6 @@ When CI reports a fix as `regressed`:
 
 For users adopting the toolkit, a similar job in their own CI gates
 their own publishes the same way.
+
+## Model & cost
+Default `sonnet`.

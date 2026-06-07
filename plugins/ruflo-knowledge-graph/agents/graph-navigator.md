@@ -78,3 +78,6 @@ npx @claude-flow/cli@latest memory search --query "entities related to authentic
 - **ruflo-core**: Researcher agent uses pathfinder traversal for codebase exploration
 - **ruflo-ruvector**: HNSW indexing for fast semantic search across graph nodes
 - **ruflo-intelligence**: SONA neural patterns learn from graph traversal trajectories
+
+## Model & cost
+Default `sonnet`.

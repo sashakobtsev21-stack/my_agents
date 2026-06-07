@@ -66,3 +66,6 @@ Three artifacts, all written under `v3/docs/examples/dossiers/<seed-slug>/` unle
 - You have a question, not a seed → use `deep-researcher` (linear, evidence-graded).
 - The objective is multi-step planning, not enumeration → use `goal-planner`.
 - You're tracking progress over weeks → use `horizon-tracker`.
+
+## Model & cost
+Default `sonnet`.

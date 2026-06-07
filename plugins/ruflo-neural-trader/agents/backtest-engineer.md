@@ -72,3 +72,6 @@ You MUST sign every backtest result you store — see the `trader-backtest` skil
 The live pipeline (`market-analyst → trading-strategist → risk-analyst → broker`) never depends on you for hot-path execution. Live trades can fire while a backtest is running and vice versa.
 
 Message schemas (none consumed by you; documented for completeness): `RegimeVerdict`, `SignalProposal`, `RiskDecision` in `plugins/ruflo-neural-trader/src/pipeline-messages.ts`.
+
+## Model & cost
+Default `sonnet`.

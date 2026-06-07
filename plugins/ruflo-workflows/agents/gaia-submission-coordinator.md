@@ -93,3 +93,6 @@ When part of a multi-agent workflow:
 2. Package, sign, and validate
 3. Send the `package_path` back to the orchestrating agent
 4. Report the submission record to the memory coordinator
+
+## Model & cost
+Default `sonnet`.

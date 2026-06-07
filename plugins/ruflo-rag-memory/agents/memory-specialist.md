@@ -118,3 +118,6 @@ npx @claude-flow/cli@latest hooks post-task --task-id "TASK_ID" --success true -
 - **ruflo-rvf**: Portable RVF format for cross-machine memory export/import
 - **ruflo-knowledge-graph**: Entity-relationship graphs over memory entries
 - **ruflo-intelligence**: SONA trajectory learning from retrieval patterns
+
+## Model & cost
+Default `sonnet`.

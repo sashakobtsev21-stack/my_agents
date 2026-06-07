@@ -83,3 +83,6 @@ npx @claude-flow/cli@latest memory search --query "bearish reversal patterns for
 - **ruflo-ruvector**: HNSW indexing engine for fast pattern similarity search
 - **ruflo-agentdb**: Persistent storage for OHLCV data and pattern vectors
 - **ruflo-observability**: Metrics dashboards for data feed health and ingestion latency
+
+## Model & cost
+Default `sonnet`.

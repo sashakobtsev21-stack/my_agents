@@ -125,3 +125,6 @@ SendMessage({
 **The `signalId` MUST match the upstream proposal** — `trading-strategist` correlates by signalId to enforce the gate.
 
 Message schemas: `SignalProposal`, `RiskDecision` in `plugins/ruflo-neural-trader/src/pipeline-messages.ts`.
+
+## Model & cost
+Default `sonnet`.

@@ -96,3 +96,6 @@ npx @claude-flow/cli@latest memory search --query "migrations adding foreign key
 - **ruflo-adr**: Documents schema change decisions as Architecture Decision Records
 - **ruflo-ddd**: Aligns migration boundaries with DDD aggregate roots and bounded contexts
 - **ruflo-observability**: Tracks migration execution duration and failure rates
+
+## Model & cost
+Default `sonnet`.
