@@ -24,9 +24,9 @@
 | [`dual-orchestrator`](../.claude/agents/dual-mode/dual-orchestrator.md) | 🟣 opus | Dual-Mode (Claude + Codex) | Orchestrates Claude Code (interactive) + Codex (headless) for hybrid workflows |
 | [`task-orchestrator`](../.claude/agents/templates/orchestrator-task.md) | 🟢 haiku | Templates | Central coordination agent for task decomposition, execution planning, and result synthesis |
 | [`sparc-coord`](../.claude/agents/templates/sparc-coordinator.md) | 🔵 sonnet | Templates | SPARC methodology orchestrator for systematic development phase coordination |
-| [`adaptive-coordinator`](../.claude/agents/swarm/adaptive-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Dynamic topology switching coordinator with self-organizing swarm patterns and real-time optimization |
-| [`hierarchical-coordinator`](../.claude/agents/swarm/hierarchical-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Queen-led hierarchical swarm coordination with specialized worker delegation |
-| [`mesh-coordinator`](../.claude/agents/swarm/mesh-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Peer-to-peer mesh network swarm with distributed decision making and fault tolerance |
+| [`adaptive-coordinator`](../.claude/agents/swarm/adaptive-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Adaptive topology coordinator. Use when the best swarm shape isn't known up front and should switch on live metrics — picks hierarchical/mesh/ring/hybrid, monitors performance, and migrates safely with rollback. Produces the active topology plus a migration plan. |
+| [`hierarchical-coordinator`](../.claude/agents/swarm/hierarchical-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Hierarchical (queen-led) swarm coordinator. Use when a complex task needs central planning with one coordinator delegating to specialized workers — the anti-drift default for coding swarms. Produces a task tree, an agent-assignment map, and an integrated result. |
+| [`mesh-coordinator`](../.claude/agents/swarm/mesh-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Peer-to-peer mesh swarm coordinator. Use when agents must collaborate as equals with no single point of failure — fault-tolerant, partition-resilient, distributed decision-making. Produces peer assignments and consensus decisions. |
 | [`byzantine-coordinator`](../.claude/agents/consensus/byzantine-coordinator.md) | 🔵 sonnet | Consensus / распределённые | Coordinates Byzantine fault-tolerant consensus protocols with malicious actor detection |
 | [`codex-coordinator`](../.claude/agents/dual-mode/codex-coordinator.md) | 🔵 sonnet | Dual-Mode (Claude + Codex) | Coordinates multiple headless Codex workers for parallel execution |
 | [`consensus-coordinator`](../.claude/agents/sublinear/consensus-coordinator.md) | 🔵 sonnet | Sublinear | Distributed consensus agent that uses sublinear solvers for fast agreement protocols in multi-agent systems. Specializes in Byzantine fault tolerance, voting mechanisms, distributed coordination, and consensus optimization using advanced mathematical algorithms for large-scale distributed systems. |
@@ -206,9 +206,9 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`adaptive-coordinator`](../.claude/agents/swarm/adaptive-coordinator.md) 🎖 | 🔵 sonnet | Dynamic topology switching coordinator with self-organizing swarm patterns and real-time optimization |
-| [`hierarchical-coordinator`](../.claude/agents/swarm/hierarchical-coordinator.md) 🎖 | 🔵 sonnet | Queen-led hierarchical swarm coordination with specialized worker delegation |
-| [`mesh-coordinator`](../.claude/agents/swarm/mesh-coordinator.md) 🎖 | 🔵 sonnet | Peer-to-peer mesh network swarm with distributed decision making and fault tolerance |
+| [`adaptive-coordinator`](../.claude/agents/swarm/adaptive-coordinator.md) 🎖 | 🔵 sonnet | Adaptive topology coordinator. Use when the best swarm shape isn't known up front and should switch on live metrics — picks hierarchical/mesh/ring/hybrid, monitors performance, and migrates safely with rollback. Produces the active topology plus a migration plan. |
+| [`hierarchical-coordinator`](../.claude/agents/swarm/hierarchical-coordinator.md) 🎖 | 🔵 sonnet | Hierarchical (queen-led) swarm coordinator. Use when a complex task needs central planning with one coordinator delegating to specialized workers — the anti-drift default for coding swarms. Produces a task tree, an agent-assignment map, and an integrated result. |
+| [`mesh-coordinator`](../.claude/agents/swarm/mesh-coordinator.md) 🎖 | 🔵 sonnet | Peer-to-peer mesh swarm coordinator. Use when agents must collaborate as equals with no single point of failure — fault-tolerant, partition-resilient, distributed decision-making. Produces peer assignments and consensus decisions. |
 
 ### Development (3)
 
