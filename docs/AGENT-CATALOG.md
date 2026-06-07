@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **121** · направлений: **28** · руководителей: **28** · модернизировано: **33/121**.
+> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **42/121**.
 
 ## Как выбрать агента
 
@@ -30,7 +30,6 @@
 | [`consensus-coordinator`](../.claude/agents/sublinear/consensus-coordinator.md) | 🔵 sonnet | Sublinear | Distributed consensus agent that uses sublinear solvers for fast agreement protocols in multi-agent systems. Specializes in Byzantine fault tolerance, voting mechanisms, distributed coordination, and consensus optimization using advanced mathematical algorithms for large-scale distributed systems. |
 | [`crdt-synchronizer`](../.claude/agents/consensus/crdt-synchronizer.md) | 🔵 sonnet | Consensus / распределённые | CRDT state-synchronization coordinator. Use when multiple writers (incl. offline) concurrently mutate shared state and it must converge automatically with no coordination. Produces a merged, conflict-free state. |
 | [`gossip-coordinator`](../.claude/agents/consensus/gossip-coordinator.md) | 🔵 sonnet | Consensus / распределённые | Gossip/epidemic consensus coordinator. Use for large-scale, highly-available dissemination where eventual consistency beats strong agreement. Scales to many nodes with probabilistic guarantees. |
-| [`Load Balancing Coordinator`](../.claude/agents/optimization/load-balancer.md) | 🔵 sonnet | Optimization / Performance | Dynamic task distribution, work-stealing algorithms and adaptive load balancing |
 | [`memory-coordinator`](../.claude/agents/templates/memory-coordinator.md) | 🟢 haiku | Templates | Manage persistent memory across sessions and facilitate cross-agent memory sharing |
 | [`performance-benchmarker`](../.claude/agents/consensus/performance-benchmarker.md) | 🔵 sonnet | Consensus / распределённые | Consensus benchmarking specialist. Use to measure and compare consensus protocols (throughput/latency/fault-tolerance) under your real workload so you can choose between them empirically. Not a consensus strategy itself. |
 | [`pr-manager`](../.claude/agents/github/pr-manager.md) | 🔵 sonnet | GitHub | Pull-request lifecycle owner. Use to drive ONE PR end-to-end — create, metadata, reviewers, labels, CI/test reconciliation, conflict handling, and merge. The canonical owner of PR lifecycle. |
@@ -155,11 +154,11 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`Benchmark Suite`](../.claude/agents/optimization/benchmark-suite.md) | 🔵 sonnet | Comprehensive performance benchmarking, regression detection and performance validation |
-| [`Load Balancing Coordinator`](../.claude/agents/optimization/load-balancer.md) 🎖 | 🔵 sonnet | Dynamic task distribution, work-stealing algorithms and adaptive load balancing |
-| [`Performance Monitor`](../.claude/agents/optimization/performance-monitor.md) | 🟢 haiku | Real-time metrics collection, bottleneck analysis, SLA monitoring and anomaly detection |
-| [`Resource Allocator`](../.claude/agents/optimization/resource-allocator.md) | 🔵 sonnet | Adaptive resource allocation, predictive scaling and intelligent capacity planning |
-| [`Topology Optimizer`](../.claude/agents/optimization/topology-optimizer.md) | 🔵 sonnet | Dynamic swarm topology reconfiguration and communication pattern optimization |
+| [`benchmark-suite`](../.claude/agents/optimization/benchmark-suite.md) ✓ | 🔵 sonnet | MEASURE tier. Use to run controlled benchmark/load/stress campaigns and produce baselines, regression verdicts, and pass/fail SLA validation. Quantifies performance — does not change the running system. |
+| [`load-balancer`](../.claude/agents/optimization/load-balancer.md) ✓ | 🔵 sonnet | IMPROVE/DISTRIBUTE tier. Use to actively redistribute work across agents (work-stealing, migration, capability-based routing) to even out utilization in a running swarm. Acts in real time. |
+| [`performance-monitor`](../.claude/agents/optimization/performance-monitor.md) ✓ | 🟢 haiku | OBSERVE tier. Use to continuously collect live metrics, detect bottlenecks/anomalies, and track SLA compliance for a running swarm. Watches and reports — never changes the system. The signal source for the other optimization agents. |
+| [`resource-allocator`](../.claude/agents/optimization/resource-allocator.md) ✓ | 🔵 sonnet | ALLOCATE tier. Use to decide how much compute/memory each agent class gets and when to scale the swarm up/down based on predicted demand. Sizes the pool; load-balancer then distributes work within it. |
+| [`topology-optimizer`](../.claude/agents/optimization/topology-optimizer.md) ✓ | 🔵 sonnet | OPTIMIZE-SHAPE tier. Use to tune the communication graph of an existing swarm (edges, fan-out, routing, agent placement) to cut latency and bottlenecks. Refines the shape; the Tier 1 coordinator owns switching topology mode. |
 
 ### Core (разработка) (5)
 
@@ -195,10 +194,10 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`architecture`](../.claude/agents/sparc/architecture.md) | 🟣 opus | SPARC Architecture phase specialist for system design |
-| [`pseudocode`](../.claude/agents/sparc/pseudocode.md) | 🔵 sonnet | SPARC Pseudocode phase specialist for algorithm design |
-| [`refinement`](../.claude/agents/sparc/refinement.md) | 🔵 sonnet | SPARC Refinement phase specialist for iterative improvement |
-| [`specification`](../.claude/agents/sparc/specification.md) | 🔵 sonnet | SPARC Specification phase specialist for requirements analysis |
+| [`architecture`](../.claude/agents/sparc/architecture.md) ✓ | 🟣 opus | SPARC Architecture phase. Use after Pseudocode to design the system — components, interfaces/contracts, tech-stack choices (as ADRs), scalability/security. Produces the binding design package for implementation. |
+| [`pseudocode`](../.claude/agents/sparc/pseudocode.md) ✓ | 🔵 sonnet | SPARC Pseudocode phase. Use after Specification to translate requirements into language-agnostic algorithms, data structures, and complexity analysis. Produces the implementation roadmap (docs/pseudocode/*.md). |
+| [`refinement`](../.claude/agents/sparc/refinement.md) ✓ | 🔵 sonnet | SPARC Refinement phase. Use after Architecture to turn the design into production-ready code via TDD, optimization, refactoring, and hardening. Produces tested, optimized implementation with green tests. |
+| [`specification`](../.claude/agents/sparc/specification.md) ✓ | 🔵 sonnet | SPARC Specification phase. Use first in a SPARC run to turn a goal into a complete, testable requirements spec (functional + non-functional, constraints, acceptance criteria). Produces docs/SPEC.md — the "what to build" contract. |
 
 ### Swarm (топологии) (3)
 
