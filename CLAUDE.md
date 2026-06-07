@@ -960,7 +960,7 @@ npm dist-tag add @claude-flow/cli@3.7.1 alpha     # historical compat
 npm dist-tag add @claude-flow/cli@3.7.1 v3alpha   # historical compat
 
 # STEP 2: Publish claude-flow umbrella
-cd /Users/cohen/Projects/ruflo                    # or your repo root
+cd <your-repo-root>                    # or your repo root
 npm version 3.7.1 --no-git-tag-version
 npm publish
 npm dist-tag add claude-flow@3.7.1 alpha

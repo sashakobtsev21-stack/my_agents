@@ -1,5 +1,7 @@
 # Ruflo — Overview · Usage · Status
 
+> ⚠️ **Upstream reference doc.** Версии, счётчики и ссылки (включая `verification.md`) относятся к upstream `ruvnet/claude-flow` и могут не совпадать с этим форком. Источник правды по `my_agents` — корневой [`README.md`](../README.md) и [`CLAUDE.md`](../CLAUDE.md).
+
 > The complementary doc to [`USERGUIDE.md`](USERGUIDE.md) (deep reference) and [`/verification.md`](../verification.md) (cryptographic witness). This doc tells you **what Ruflo is**, **how to use it day-to-day**, and **what currently works** — without the encyclopedic reference depth.
 
 ---

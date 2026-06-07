@@ -1,5 +1,7 @@
 # Ruflo User Guide
 
+> ⚠️ **Upstream reference doc.** Версия и счётчики ниже относятся к upstream `ruvnet/claude-flow` (напр. v3.7), а не к этому форку (`my_agents` @ 3.10.31). Источник правды по форку — корневой [`README.md`](../README.md) и [`CLAUDE.md`](../CLAUDE.md).
+
 > Complete reference documentation for Ruflo v3.7. For a quick overview, see the [README](../README.md).
 >
 > **Latest:** `npx ruflo@latest --version` → **3.7.0-alpha.8**. See [What's new in 3.7](#whats-new-in-37) below.
