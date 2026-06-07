@@ -109,6 +109,9 @@ importers:
       '@claude-flow/shared':
         specifier: ^3.0.0-alpha.7
         version: 3.0.0-alpha.7
+      '@claude-flow/swarm':
+        specifier: ^3.0.0-alpha.7
+        version: 3.0.0-alpha.8
       '@noble/ed25519':
         specifier: ^2.1.0
         version: 2.3.0
