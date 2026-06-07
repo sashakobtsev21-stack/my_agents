@@ -612,7 +612,7 @@ export class AgentDBBackend extends EventEmitter implements IMemoryBackend {
         updated_at INTEGER NOT NULL,
         expires_at INTEGER,
         version INTEGER NOT NULL,
-        references TEXT,
+        "references" TEXT,
         access_count INTEGER DEFAULT 0,
         last_accessed_at INTEGER
       )
@@ -662,7 +662,7 @@ export class AgentDBBackend extends EventEmitter implements IMemoryBackend {
       `
       INSERT OR REPLACE INTO memory_entries
       (id, key, content, embedding, type, namespace, tags, metadata, owner_id,
-       access_level, created_at, updated_at, expires_at, version, references,
+       access_level, created_at, updated_at, expires_at, version, "references",
        access_count, last_accessed_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
