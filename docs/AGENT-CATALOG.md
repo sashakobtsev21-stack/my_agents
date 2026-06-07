@@ -1,19 +1,17 @@
 # 🧭 Каталог агентов — my_agents
 
-> Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — запусти `node scripts/gen-agent-catalog.mjs`.
-> Всего агентов: **121** в **28** направлениях · из них руководителей: **28**.
+> Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
+> Агентов: **121** · направлений: **28** · руководителей: **28** · модернизировано: **8/121**.
 
 ## Как выбрать агента
 
-- **Сложная задача из нескольких шагов?** Подключи **руководителя** (оркестратор/координатор) из таблицы ниже — он соберёт команду и раздаст работу.
-- **Узкая конкретная задача?** Бери **специалиста** из нужного направления.
-- **Тиры модели:** 🟣 opus — сложное рассуждение/архитектура/безопасность · 🔵 sonnet — основная работа · 🟢 haiku — простое/механическое.
+- **Сложная многошаговая задача?** Подключи **руководителя** (оркестратор/координатор) — он соберёт команду и раздаст работу.
+- **Узкая задача?** Бери **специалиста** из направления.
+- **Тиры:** 🟣 opus — сложное/архитектура/безопасность · 🔵 sonnet — основное · 🟢 haiku — простое.
 
 ---
 
 ## 🎖 Оркестраторы, координаторы и руководители
-
-Эти агенты управляют другими — координируют swarm, держат консенсус, ведут пайплайны.
 
 | Агент | Тир | Направление | Когда подключать |
 |---|---|---|---|
@@ -167,11 +165,11 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`coder`](../.claude/agents/core/coder.md) | 🔵 sonnet | Implementation specialist. Use when turning a design, spec, or ADR into production code, fixing a bug, or refactoring. Produces working, tested code with explicit verification notes. |
-| [`planner`](../.claude/agents/core/planner.md) | 🔵 sonnet | Strategic planning agent. Use when a goal is complex enough to need decomposition into an ordered, dependency-aware plan before work starts. Produces a small executable plan with owners, dependencies, a critical path, and risks. |
-| [`researcher`](../.claude/agents/core/researcher.md) | 🔵 sonnet | Codebase/topic investigation agent. Use when you need to understand existing code, patterns, or dependencies before designing or implementing. Produces evidence-backed findings with file:line citations. |
-| [`reviewer`](../.claude/agents/core/reviewer.md) | 🔵 sonnet | Code review agent. Use when a diff/PR needs a correctness, security, performance, and maintainability check before merge. Produces a prioritized review ending in one explicit verdict. |
-| [`tester`](../.claude/agents/core/tester.md) | 🔵 sonnet | Testing & QA agent. Use when an implementation needs tests written/run and validated against requirements and edge cases. Produces test files plus an honest run summary. |
+| [`coder`](../.claude/agents/core/coder.md) ✓ | 🔵 sonnet | Implementation specialist. Use when turning a design, spec, or ADR into production code, fixing a bug, or refactoring. Produces working, tested code with explicit verification notes. |
+| [`planner`](../.claude/agents/core/planner.md) ✓ | 🔵 sonnet | Strategic planning agent. Use when a goal is complex enough to need decomposition into an ordered, dependency-aware plan before work starts. Produces a small executable plan with owners, dependencies, a critical path, and risks. |
+| [`researcher`](../.claude/agents/core/researcher.md) ✓ | 🔵 sonnet | Codebase/topic investigation agent. Use when you need to understand existing code, patterns, or dependencies before designing or implementing. Produces evidence-backed findings with file:line citations. |
+| [`reviewer`](../.claude/agents/core/reviewer.md) ✓ | 🔵 sonnet | Code review agent. Use when a diff/PR needs a correctness, security, performance, and maintainability check before merge. Produces a prioritized review ending in one explicit verdict. |
+| [`tester`](../.claude/agents/core/tester.md) ✓ | 🔵 sonnet | Testing & QA agent. Use when an implementation needs tests written/run and validated against requirements and edge cases. Produces test files plus an honest run summary. |
 
 ### Hive-Mind (5)
 
@@ -206,9 +204,9 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`adaptive-coordinator`](../.claude/agents/swarm/adaptive-coordinator.md) 🎖 | 🔵 sonnet | Adaptive topology coordinator. Use when the best swarm shape isn't known up front and should switch on live metrics — picks hierarchical/mesh/ring/hybrid, monitors performance, and migrates safely with rollback. Produces the active topology plus a migration plan. |
-| [`hierarchical-coordinator`](../.claude/agents/swarm/hierarchical-coordinator.md) 🎖 | 🔵 sonnet | Hierarchical (queen-led) swarm coordinator. Use when a complex task needs central planning with one coordinator delegating to specialized workers — the anti-drift default for coding swarms. Produces a task tree, an agent-assignment map, and an integrated result. |
-| [`mesh-coordinator`](../.claude/agents/swarm/mesh-coordinator.md) 🎖 | 🔵 sonnet | Peer-to-peer mesh swarm coordinator. Use when agents must collaborate as equals with no single point of failure — fault-tolerant, partition-resilient, distributed decision-making. Produces peer assignments and consensus decisions. |
+| [`adaptive-coordinator`](../.claude/agents/swarm/adaptive-coordinator.md) 🎖 ✓ | 🔵 sonnet | Adaptive topology coordinator. Use when the best swarm shape isn't known up front and should switch on live metrics — picks hierarchical/mesh/ring/hybrid, monitors performance, and migrates safely with rollback. Produces the active topology plus a migration plan. |
+| [`hierarchical-coordinator`](../.claude/agents/swarm/hierarchical-coordinator.md) 🎖 ✓ | 🔵 sonnet | Hierarchical (queen-led) swarm coordinator. Use when a complex task needs central planning with one coordinator delegating to specialized workers — the anti-drift default for coding swarms. Produces a task tree, an agent-assignment map, and an integrated result. |
+| [`mesh-coordinator`](../.claude/agents/swarm/mesh-coordinator.md) 🎖 ✓ | 🔵 sonnet | Peer-to-peer mesh swarm coordinator. Use when agents must collaborate as equals with no single point of failure — fault-tolerant, partition-resilient, distributed decision-making. Produces peer assignments and consensus decisions. |
 
 ### Development (3)
 
@@ -313,4 +311,4 @@
 
 ---
 
-_🎖 = руководитель/координатор. Каталог покрывает `.claude/agents/` (канон). Плагины в `plugins/*/agents/` несут собственных агентов._
+_🎖 = руководитель · ✓ = промпт модернизирован. Каталог покрывает `.claude/agents/`; плагины несут собственных агентов в `plugins/*/agents/`._
