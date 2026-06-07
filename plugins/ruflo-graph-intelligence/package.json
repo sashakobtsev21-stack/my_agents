@@ -46,7 +46,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ruvnet/ruflo.git",
+    "url": "https://github.com/sashakobtsev21-stack/my_agents.git",
     "directory": "plugins/ruflo-graph-intelligence"
   },
   "engines": {
