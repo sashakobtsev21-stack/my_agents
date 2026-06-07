@@ -15,7 +15,7 @@ process.stdin.on('data', (d) => (input += d));
 process.stdin.on('end', () => {
   let p = '';
   try { const j = JSON.parse(input); p = (j.tool_input && (j.tool_input.file_path || j.tool_input.path)) || ''; } catch { /* no payload */ }
-  if (!/[\\/]\.claude[\\/]agents[\\/].+\.md$/.test(p)) process.exit(0); // not an agent edit
+  if (!/[\\/]\.claude[\\/](agents|skills)[\\/].+\.md$/.test(p)) process.exit(0); // not an agent/skill edit
 
   const cwd = process.env.CLAUDE_PROJECT_DIR || process.cwd();
   try {

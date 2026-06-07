@@ -83,13 +83,25 @@ for (const { file, body } of bodies) {
 for (const [tok, set] of Object.entries(danglers))
   errors.push(`dangling reference \`${tok}\` (in ${[...set].join(', ')}) — not a known agent/plugin/skill; fix the name or add the target`);
 
-// Regenerate the catalog + report so the list stays in sync (new agents added automatically)
-for (const gen of ['gen-agent-catalog.mjs', 'gen-agent-report.mjs']) {
+// Validate skills (each .claude/skills/<name>/SKILL.md needs name + description)
+let skillCount = 0;
+for (const sdir of dirNames('.claude/skills')) {
+  const sf = path.join('.claude/skills', sdir, 'SKILL.md');
+  if (!fs.existsSync(sf)) { warnings.push(`skill "${sdir}" has no SKILL.md (won't load)`); continue; }
+  skillCount++;
+  const sm = fs.readFileSync(sf, 'utf8').replace(/\r/g, '').match(/^---\n([\s\S]*?)\n---/);
+  if (!sm) { errors.push(`skill ${sdir}/SKILL.md: no frontmatter`); continue; }
+  if (!/^name:/m.test(sm[1])) errors.push(`skill ${sdir}: missing \`name\``);
+  if (!/^description:/m.test(sm[1])) errors.push(`skill ${sdir}: missing \`description\``);
+}
+
+// Regenerate the catalog + report + full breakdown so the lists stay in sync
+for (const gen of ['gen-agent-catalog.mjs', 'gen-agent-report.mjs', 'gen-full-breakdown.mjs']) {
   try { execFileSync('node', ['scripts/' + gen], { stdio: 'pipe' }); }
   catch (e) { errors.push(`generator failed: ${gen} — ${String(e.message).split('\n')[0]}`); }
 }
 
-console.log(`check-agents: ${Object.keys(agents).length} agents · ${errors.length} error(s) · ${warnings.length} warning(s)`);
+console.log(`check-agents: ${Object.keys(agents).length} agents · ${skillCount} skills · ${errors.length} error(s) · ${warnings.length} warning(s)`);
 warnings.forEach((w) => console.log('  ⚠ ' + w));
 errors.forEach((e) => console.error('  ✗ ' + e));
 if (errors.length) { console.error('FAILED — fix the above before committing.'); process.exit(1); }

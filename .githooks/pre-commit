@@ -13,15 +13,15 @@ if git diff --cached -U0 | grep -nE '(sk-ant-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}
   exit 1
 fi
 
-# --- 2) agent catalog + connectivity rule --------------------------------
-if git diff --cached --name-only | grep -qE '^\.claude/agents/'; then
-  echo "🧭 Agents changed — validating + regenerating catalog/report…"
+# --- 2) agent/skill catalog + connectivity rule --------------------------
+if git diff --cached --name-only | grep -qE '^\.claude/(agents|skills)/'; then
+  echo "🧭 Agents/skills changed — validating + regenerating catalog/report/breakdown…"
   if ! node scripts/check-agents.mjs; then
-    echo "❌ Agent check failed (invalid prompt / dangling reference). Fix before committing."
+    echo "❌ Check failed (invalid prompt / dangling reference / bad skill). Fix before committing."
     exit 1
   fi
-  git add docs/AGENT-CATALOG.md docs/agent-catalog.html docs/agent-report.html
-  echo "✅ Catalog + report regenerated and staged."
+  git add docs/AGENT-CATALOG.md docs/agent-catalog.html docs/agent-report.html docs/FULL-BREAKDOWN.md docs/full-breakdown.html
+  echo "✅ Catalog + report + breakdown regenerated and staged."
 fi
 
 exit 0

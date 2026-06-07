@@ -142,7 +142,7 @@
 | `ruflo-docs` | a:1 s:2 c:1 | Documentation generation, drift detection, and API docs automation |
 | `ruflo-federation` | a:1 s:3 c:1 | Cross-installation agent federation with zero-trust security, PII-gated data flow, and compliance-grade audit trails |
 | `ruflo-goals` | a:4 s:5 c:1 | Long-horizon goal planning, deep research orchestration, and adaptive replanning using GOAP |
-| `ruflo-graph-intelligence` | a:0 s:0 c:0 | Real-time graph intelligence — personalized PageRank, streaming delta updates, witness-signed reasoning, and federation-distributable vector |
+| `ruflo-graph-intelligence` | a:0 s:0 c:1 | Real-time graph intelligence — personalized PageRank, streaming delta updates, witness-signed reasoning, and federation-distributable vector |
 | `ruflo-intelligence` | a:1 s:3 c:2 | Self-learning neural intelligence with SONA patterns, trajectory learning, and model routing |
 | `ruflo-iot-cognitum` | a:4 s:5 c:1 | IoT device lifecycle, telemetry anomaly detection, fleet management, and witness chain verification for Cognitum Seed hardware |
 | `ruflo-jujutsu` | a:1 s:2 c:1 | Advanced git workflows with diff analysis, risk scoring, and reviewer recommendations |
