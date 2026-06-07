@@ -60,7 +60,7 @@ if (isMCPMode) {
   // Run MCP server mode
   const { listMCPTools, callMCPTool, hasTool } = await import('../dist/src/mcp-client.js');
 
-  const VERSION = '3.0.0';
+  const VERSION = '3.10.31';
   const sessionId = `mcp-${Date.now()}-${randomUUID().slice(0, 8)}`;
 
   console.error(

@@ -328,7 +328,7 @@ This costs nothing on the green path and gives you a concrete failure cause on t
 
 ## References
 
-- [verification.md](../../verification.md) — the witness manifest itself + how-to-verify
+- verification.md — the witness manifest itself + how-to-verify
 - [verification.md.json](../../verification.md.json) — current signed manifest (82 fixes)
 - [verification-history.jsonl](../../verification-history.jsonl) — temporal log
 - [witness-fixes.json](../../witness-fixes.json) — ruflo's project-specific NEW_FIXES
