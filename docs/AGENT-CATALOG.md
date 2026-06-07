@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **121** · направлений: **28** · руководителей: **28** · модернизировано: **8/121**.
+> Агентов: **121** · направлений: **28** · руководителей: **28** · модернизировано: **20/121**.
 
 ## Как выбрать агента
 
@@ -15,9 +15,9 @@
 
 | Агент | Тир | Направление | Когда подключать |
 |---|---|---|---|
-| [`queen-coordinator`](../.claude/agents/hive-mind/queen-coordinator.md) | 🟣 opus | Hive-Mind | The sovereign orchestrator of hierarchical hive operations, managing strategic decisions, resource allocation, and maintaining hive coherence through centralized-decentralized hybrid control |
+| [`queen-coordinator`](../.claude/agents/hive-mind/queen-coordinator.md) | 🟣 opus | Hive-Mind | Sovereign hive orchestrator (Tier 0). Use as the top-level lead of a hive-mind run — owns the goal, picks the topology, allocates resources across agent classes, and keeps the hive coherent. Produces the authoritative strategic plan. |
 | [`v3-queen-coordinator`](../.claude/agents/v3/v3-queen-coordinator.md) | 🟣 opus | V3 | V3 Queen Coordinator for 15-agent concurrent swarm orchestration, GitHub issue management, and cross-agent coordination. Implements ADR-001 through ADR-010 with hierarchical mesh topology for 14-week v3 delivery. |
-| [`collective-intelligence-coordinator`](../.claude/agents/hive-mind/collective-intelligence-coordinator.md) | 🟣 opus | Hive-Mind | Orchestrates distributed cognitive processes across the hive mind, ensuring coherent collective decision-making through memory synchronization and consensus protocols |
+| [`collective-intelligence-coordinator`](../.claude/agents/hive-mind/collective-intelligence-coordinator.md) | 🟣 opus | Hive-Mind | Collective-intelligence nexus (Tier 0). Use to orchestrate distributed cognition across the hive — aggregate decisions, synchronize shared knowledge, and balance cognitive load. Produces a coherent collective decision + synchronized knowledge graph. |
 | [`project-coordinator`](../.claude/agents/project-coordinator.md) | 🔵 sonnet | Прочие | Coordinates multi-agent workflows — decomposes the goal, assigns named agents, sequences handoffs via SendMessage, and synthesizes results. Use as the lead for multi-step, multi-agent tasks. |
 | [`dual-orchestrator`](../.claude/agents/dual-mode/dual-orchestrator.md) | 🟣 opus | Dual-Mode (Claude + Codex) | Orchestrates Claude Code (interactive) + Codex (headless) for hybrid workflows |
 | [`task-orchestrator`](../.claude/agents/templates/orchestrator-task.md) | 🟢 haiku | Templates | Central coordination agent for task decomposition, execution planning, and result synthesis |
@@ -25,24 +25,24 @@
 | [`adaptive-coordinator`](../.claude/agents/swarm/adaptive-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Adaptive topology coordinator. Use when the best swarm shape isn't known up front and should switch on live metrics — picks hierarchical/mesh/ring/hybrid, monitors performance, and migrates safely with rollback. Produces the active topology plus a migration plan. |
 | [`hierarchical-coordinator`](../.claude/agents/swarm/hierarchical-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Hierarchical (queen-led) swarm coordinator. Use when a complex task needs central planning with one coordinator delegating to specialized workers — the anti-drift default for coding swarms. Produces a task tree, an agent-assignment map, and an integrated result. |
 | [`mesh-coordinator`](../.claude/agents/swarm/mesh-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Peer-to-peer mesh swarm coordinator. Use when agents must collaborate as equals with no single point of failure — fault-tolerant, partition-resilient, distributed decision-making. Produces peer assignments and consensus decisions. |
-| [`byzantine-coordinator`](../.claude/agents/consensus/byzantine-coordinator.md) | 🔵 sonnet | Consensus / распределённые | Coordinates Byzantine fault-tolerant consensus protocols with malicious actor detection |
+| [`byzantine-coordinator`](../.claude/agents/consensus/byzantine-coordinator.md) | 🔵 sonnet | Consensus / распределённые | Byzantine fault-tolerant consensus coordinator. Use when nodes may be adversarial/compromised and you need agreement despite arbitrary faults (tolerates f < n/3). Produces a PBFT-committed value + malicious-actor report. |
 | [`codex-coordinator`](../.claude/agents/dual-mode/codex-coordinator.md) | 🔵 sonnet | Dual-Mode (Claude + Codex) | Coordinates multiple headless Codex workers for parallel execution |
 | [`consensus-coordinator`](../.claude/agents/sublinear/consensus-coordinator.md) | 🔵 sonnet | Sublinear | Distributed consensus agent that uses sublinear solvers for fast agreement protocols in multi-agent systems. Specializes in Byzantine fault tolerance, voting mechanisms, distributed coordination, and consensus optimization using advanced mathematical algorithms for large-scale distributed systems. |
-| [`crdt-synchronizer`](../.claude/agents/consensus/crdt-synchronizer.md) | 🔵 sonnet | Consensus / распределённые | Implements Conflict-free Replicated Data Types for eventually consistent state synchronization |
-| [`gossip-coordinator`](../.claude/agents/consensus/gossip-coordinator.md) | 🔵 sonnet | Consensus / распределённые | Coordinates gossip-based consensus protocols for scalable eventually consistent systems |
+| [`crdt-synchronizer`](../.claude/agents/consensus/crdt-synchronizer.md) | 🔵 sonnet | Consensus / распределённые | CRDT state-synchronization coordinator. Use when multiple writers (incl. offline) concurrently mutate shared state and it must converge automatically with no coordination. Produces a merged, conflict-free state. |
+| [`gossip-coordinator`](../.claude/agents/consensus/gossip-coordinator.md) | 🔵 sonnet | Consensus / распределённые | Gossip/epidemic consensus coordinator. Use for large-scale, highly-available dissemination where eventual consistency beats strong agreement. Scales to many nodes with probabilistic guarantees. |
 | [`Load Balancing Coordinator`](../.claude/agents/optimization/load-balancer.md) | 🔵 sonnet | Optimization / Performance | Dynamic task distribution, work-stealing algorithms and adaptive load balancing |
 | [`memory-coordinator`](../.claude/agents/templates/memory-coordinator.md) | 🟢 haiku | Templates | Manage persistent memory across sessions and facilitate cross-agent memory sharing |
-| [`performance-benchmarker`](../.claude/agents/consensus/performance-benchmarker.md) | 🔵 sonnet | Consensus / распределённые | Implements comprehensive performance benchmarking for distributed consensus protocols |
+| [`performance-benchmarker`](../.claude/agents/consensus/performance-benchmarker.md) | 🔵 sonnet | Consensus / распределённые | Consensus benchmarking specialist. Use to measure and compare consensus protocols (throughput/latency/fault-tolerance) under your real workload so you can choose between them empirically. Not a consensus strategy itself. |
 | [`pr-manager`](../.claude/agents/github/pr-manager.md) | 🔵 sonnet | GitHub | Comprehensive pull request management with swarm coordination for automated reviews, testing, and merge workflows |
-| [`quorum-manager`](../.claude/agents/consensus/quorum-manager.md) | 🔵 sonnet | Consensus / распределённые | Implements dynamic quorum adjustment and intelligent membership management |
-| [`raft-manager`](../.claude/agents/consensus/raft-manager.md) | 🔵 sonnet | Consensus / распределённые | Manages Raft consensus algorithm with leader election and log replication |
+| [`quorum-manager`](../.claude/agents/consensus/quorum-manager.md) | 🔵 sonnet | Consensus / распределённые | Dynamic quorum & membership coordinator. Use when you want configurable read/write quorums to tune the consistency-vs-availability trade-off without committing to full Raft leadership. |
+| [`raft-manager`](../.claude/agents/consensus/raft-manager.md) | 🔵 sonnet | Consensus / распределённые | Raft consensus coordinator. Use when nodes are trusted (crash-only faults) and you need a single authoritative leader with a linearizable replicated log. Tolerates f < n/2 crash faults. The hive-mind default. |
 | [`release-manager`](../.claude/agents/github/release-manager.md) | 🔵 sonnet | GitHub | Automated release coordination and deployment with ruv-swarm orchestration for seamless version management, testing, and deployment across multiple packages |
-| [`scout-explorer`](../.claude/agents/hive-mind/scout-explorer.md) | 🔵 sonnet | Hive-Mind | Information reconnaissance specialist that explores unknown territories, gathers intelligence, and reports findings to the hive mind through continuous memory updates |
-| [`security-manager`](../.claude/agents/consensus/security-manager.md) | 🔵 sonnet | Consensus / распределённые | Implements comprehensive security mechanisms for distributed consensus protocols |
-| [`swarm-memory-manager`](../.claude/agents/hive-mind/swarm-memory-manager.md) | 🟢 haiku | Hive-Mind | Manages distributed memory across the hive mind, ensuring data consistency, persistence, and efficient retrieval through advanced caching and synchronization protocols |
+| [`scout-explorer`](../.claude/agents/hive-mind/scout-explorer.md) | 🔵 sonnet | Hive-Mind | Reconnaissance specialist (Tier 3). Use to explore unknown territory — map a codebase/dependencies, scan the environment, surface threats and opportunities — and report intelligence to the hive. Gathers and reports only; never changes code. |
+| [`security-manager`](../.claude/agents/consensus/security-manager.md) | 🔵 sonnet | Consensus / распределённые | Consensus security layer. Use to add cryptographic authentication, membership enforcement, and attack detection (Byzantine/Sybil/Eclipse/DoS) on top of a consensus strategy — not a standalone consensus. |
+| [`swarm-memory-manager`](../.claude/agents/hive-mind/swarm-memory-manager.md) | 🟢 haiku | Hive-Mind | Hive memory/persistence layer (Tier 3). Use to manage distributed memory — consistency, persistence, fast retrieval, caching, and sync — the durable substrate every agent reads/writes. Mechanical and frequent. |
 | [`sync-coordinator`](../.claude/agents/github/sync-coordinator.md) | 🔵 sonnet | GitHub | Multi-repository synchronization coordinator that manages version alignment, dependency synchronization, and cross-package integration with intelligent swarm orchestration |
 | [`template-pr-manager`](../.claude/agents/templates/github-pr-manager.md) | 🔵 sonnet | Templates | Template/scaffold for a PR-lifecycle agent. Canonical runtime agent is pr-manager (github/pr-manager.md). |
-| [`worker-specialist`](../.claude/agents/hive-mind/worker-specialist.md) | 🔵 sonnet | Hive-Mind | Dedicated task execution specialist that carries out assigned work with precision, continuously reporting progress through memory coordination |
+| [`worker-specialist`](../.claude/agents/hive-mind/worker-specialist.md) | 🔵 sonnet | Hive-Mind | Hive task-execution specialist (execution layer). Use to carry out a concrete assigned task with precision, reporting progress before/during/after. Produces the completed work product, never strategy. |
 
 ---
 
@@ -132,13 +132,13 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`byzantine-coordinator`](../.claude/agents/consensus/byzantine-coordinator.md) 🎖 | 🔵 sonnet | Coordinates Byzantine fault-tolerant consensus protocols with malicious actor detection |
-| [`crdt-synchronizer`](../.claude/agents/consensus/crdt-synchronizer.md) 🎖 | 🔵 sonnet | Implements Conflict-free Replicated Data Types for eventually consistent state synchronization |
-| [`gossip-coordinator`](../.claude/agents/consensus/gossip-coordinator.md) 🎖 | 🔵 sonnet | Coordinates gossip-based consensus protocols for scalable eventually consistent systems |
-| [`performance-benchmarker`](../.claude/agents/consensus/performance-benchmarker.md) 🎖 | 🔵 sonnet | Implements comprehensive performance benchmarking for distributed consensus protocols |
-| [`quorum-manager`](../.claude/agents/consensus/quorum-manager.md) 🎖 | 🔵 sonnet | Implements dynamic quorum adjustment and intelligent membership management |
-| [`raft-manager`](../.claude/agents/consensus/raft-manager.md) 🎖 | 🔵 sonnet | Manages Raft consensus algorithm with leader election and log replication |
-| [`security-manager`](../.claude/agents/consensus/security-manager.md) 🎖 | 🔵 sonnet | Implements comprehensive security mechanisms for distributed consensus protocols |
+| [`byzantine-coordinator`](../.claude/agents/consensus/byzantine-coordinator.md) 🎖 ✓ | 🔵 sonnet | Byzantine fault-tolerant consensus coordinator. Use when nodes may be adversarial/compromised and you need agreement despite arbitrary faults (tolerates f < n/3). Produces a PBFT-committed value + malicious-actor report. |
+| [`crdt-synchronizer`](../.claude/agents/consensus/crdt-synchronizer.md) 🎖 ✓ | 🔵 sonnet | CRDT state-synchronization coordinator. Use when multiple writers (incl. offline) concurrently mutate shared state and it must converge automatically with no coordination. Produces a merged, conflict-free state. |
+| [`gossip-coordinator`](../.claude/agents/consensus/gossip-coordinator.md) 🎖 ✓ | 🔵 sonnet | Gossip/epidemic consensus coordinator. Use for large-scale, highly-available dissemination where eventual consistency beats strong agreement. Scales to many nodes with probabilistic guarantees. |
+| [`performance-benchmarker`](../.claude/agents/consensus/performance-benchmarker.md) 🎖 ✓ | 🔵 sonnet | Consensus benchmarking specialist. Use to measure and compare consensus protocols (throughput/latency/fault-tolerance) under your real workload so you can choose between them empirically. Not a consensus strategy itself. |
+| [`quorum-manager`](../.claude/agents/consensus/quorum-manager.md) 🎖 ✓ | 🔵 sonnet | Dynamic quorum & membership coordinator. Use when you want configurable read/write quorums to tune the consistency-vs-availability trade-off without committing to full Raft leadership. |
+| [`raft-manager`](../.claude/agents/consensus/raft-manager.md) 🎖 ✓ | 🔵 sonnet | Raft consensus coordinator. Use when nodes are trusted (crash-only faults) and you need a single authoritative leader with a linearizable replicated log. Tolerates f < n/2 crash faults. The hive-mind default. |
+| [`security-manager`](../.claude/agents/consensus/security-manager.md) 🎖 ✓ | 🔵 sonnet | Consensus security layer. Use to add cryptographic authentication, membership enforcement, and attack detection (Byzantine/Sybil/Eclipse/DoS) on top of a consensus strategy — not a standalone consensus. |
 
 ### V3 (6)
 
@@ -175,11 +175,11 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`collective-intelligence-coordinator`](../.claude/agents/hive-mind/collective-intelligence-coordinator.md) 🎖 | 🟣 opus | Orchestrates distributed cognitive processes across the hive mind, ensuring coherent collective decision-making through memory synchronization and consensus protocols |
-| [`queen-coordinator`](../.claude/agents/hive-mind/queen-coordinator.md) 🎖 | 🟣 opus | The sovereign orchestrator of hierarchical hive operations, managing strategic decisions, resource allocation, and maintaining hive coherence through centralized-decentralized hybrid control |
-| [`scout-explorer`](../.claude/agents/hive-mind/scout-explorer.md) 🎖 | 🔵 sonnet | Information reconnaissance specialist that explores unknown territories, gathers intelligence, and reports findings to the hive mind through continuous memory updates |
-| [`swarm-memory-manager`](../.claude/agents/hive-mind/swarm-memory-manager.md) 🎖 | 🟢 haiku | Manages distributed memory across the hive mind, ensuring data consistency, persistence, and efficient retrieval through advanced caching and synchronization protocols |
-| [`worker-specialist`](../.claude/agents/hive-mind/worker-specialist.md) 🎖 | 🔵 sonnet | Dedicated task execution specialist that carries out assigned work with precision, continuously reporting progress through memory coordination |
+| [`collective-intelligence-coordinator`](../.claude/agents/hive-mind/collective-intelligence-coordinator.md) 🎖 ✓ | 🟣 opus | Collective-intelligence nexus (Tier 0). Use to orchestrate distributed cognition across the hive — aggregate decisions, synchronize shared knowledge, and balance cognitive load. Produces a coherent collective decision + synchronized knowledge graph. |
+| [`queen-coordinator`](../.claude/agents/hive-mind/queen-coordinator.md) 🎖 ✓ | 🟣 opus | Sovereign hive orchestrator (Tier 0). Use as the top-level lead of a hive-mind run — owns the goal, picks the topology, allocates resources across agent classes, and keeps the hive coherent. Produces the authoritative strategic plan. |
+| [`scout-explorer`](../.claude/agents/hive-mind/scout-explorer.md) 🎖 ✓ | 🔵 sonnet | Reconnaissance specialist (Tier 3). Use to explore unknown territory — map a codebase/dependencies, scan the environment, surface threats and opportunities — and report intelligence to the hive. Gathers and reports only; never changes code. |
+| [`swarm-memory-manager`](../.claude/agents/hive-mind/swarm-memory-manager.md) 🎖 ✓ | 🟢 haiku | Hive memory/persistence layer (Tier 3). Use to manage distributed memory — consistency, persistence, fast retrieval, caching, and sync — the durable substrate every agent reads/writes. Mechanical and frequent. |
+| [`worker-specialist`](../.claude/agents/hive-mind/worker-specialist.md) 🎖 ✓ | 🔵 sonnet | Hive task-execution specialist (execution layer). Use to carry out a concrete assigned task with precision, reporting progress before/during/after. Produces the completed work product, never strategy. |
 
 ### Sublinear (5)
 
