@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **121** · направлений: **28** · руководителей: **28** · модернизировано: **20/121**.
+> Агентов: **121** · направлений: **28** · руководителей: **28** · модернизировано: **33/121**.
 
 ## Как выбрать агента
 
@@ -33,14 +33,14 @@
 | [`Load Balancing Coordinator`](../.claude/agents/optimization/load-balancer.md) | 🔵 sonnet | Optimization / Performance | Dynamic task distribution, work-stealing algorithms and adaptive load balancing |
 | [`memory-coordinator`](../.claude/agents/templates/memory-coordinator.md) | 🟢 haiku | Templates | Manage persistent memory across sessions and facilitate cross-agent memory sharing |
 | [`performance-benchmarker`](../.claude/agents/consensus/performance-benchmarker.md) | 🔵 sonnet | Consensus / распределённые | Consensus benchmarking specialist. Use to measure and compare consensus protocols (throughput/latency/fault-tolerance) under your real workload so you can choose between them empirically. Not a consensus strategy itself. |
-| [`pr-manager`](../.claude/agents/github/pr-manager.md) | 🔵 sonnet | GitHub | Comprehensive pull request management with swarm coordination for automated reviews, testing, and merge workflows |
+| [`pr-manager`](../.claude/agents/github/pr-manager.md) | 🔵 sonnet | GitHub | Pull-request lifecycle owner. Use to drive ONE PR end-to-end — create, metadata, reviewers, labels, CI/test reconciliation, conflict handling, and merge. The canonical owner of PR lifecycle. |
 | [`quorum-manager`](../.claude/agents/consensus/quorum-manager.md) | 🔵 sonnet | Consensus / распределённые | Dynamic quorum & membership coordinator. Use when you want configurable read/write quorums to tune the consistency-vs-availability trade-off without committing to full Raft leadership. |
 | [`raft-manager`](../.claude/agents/consensus/raft-manager.md) | 🔵 sonnet | Consensus / распределённые | Raft consensus coordinator. Use when nodes are trusted (crash-only faults) and you need a single authoritative leader with a linearizable replicated log. Tolerates f < n/2 crash faults. The hive-mind default. |
-| [`release-manager`](../.claude/agents/github/release-manager.md) | 🔵 sonnet | GitHub | Automated release coordination and deployment with ruv-swarm orchestration for seamless version management, testing, and deployment across multiple packages |
+| [`release-manager`](../.claude/agents/github/release-manager.md) | 🔵 sonnet | GitHub | Release planner & coordinator. Use to PLAN one release — semver decision, changelog/release notes, cross-package version alignment, validation gates, and sequencing/rollback — culminating in the release PR/tag. |
 | [`scout-explorer`](../.claude/agents/hive-mind/scout-explorer.md) | 🔵 sonnet | Hive-Mind | Reconnaissance specialist (Tier 3). Use to explore unknown territory — map a codebase/dependencies, scan the environment, surface threats and opportunities — and report intelligence to the hive. Gathers and reports only; never changes code. |
 | [`security-manager`](../.claude/agents/consensus/security-manager.md) | 🔵 sonnet | Consensus / распределённые | Consensus security layer. Use to add cryptographic authentication, membership enforcement, and attack detection (Byzantine/Sybil/Eclipse/DoS) on top of a consensus strategy — not a standalone consensus. |
 | [`swarm-memory-manager`](../.claude/agents/hive-mind/swarm-memory-manager.md) | 🟢 haiku | Hive-Mind | Hive memory/persistence layer (Tier 3). Use to manage distributed memory — consistency, persistence, fast retrieval, caching, and sync — the durable substrate every agent reads/writes. Mechanical and frequent. |
-| [`sync-coordinator`](../.claude/agents/github/sync-coordinator.md) | 🔵 sonnet | GitHub | Multi-repository synchronization coordinator that manages version alignment, dependency synchronization, and cross-package integration with intelligent swarm orchestration |
+| [`sync-coordinator`](../.claude/agents/github/sync-coordinator.md) | 🔵 sonnet | GitHub | Multi-package alignment coordinator. Use for ongoing alignment between packages/repos — version harmonization, dependency resolution, doc/config sync — and the resulting sync PR. Keeps things consistent over time. |
 | [`template-pr-manager`](../.claude/agents/templates/github-pr-manager.md) | 🔵 sonnet | Templates | Template/scaffold for a PR-lifecycle agent. Canonical runtime agent is pr-manager (github/pr-manager.md). |
 | [`worker-specialist`](../.claude/agents/hive-mind/worker-specialist.md) | 🔵 sonnet | Hive-Mind | Hive task-execution specialist (execution layer). Use to carry out a concrete assigned task with precision, reporting progress before/during/after. Produces the completed work product, never strategy. |
 
@@ -72,19 +72,19 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`code-review-swarm`](../.claude/agents/github/code-review-swarm.md) | 🔵 sonnet | Deploy specialized AI agents to perform comprehensive, intelligent code reviews that go beyond traditional static analysis |
-| [`github-modes`](../.claude/agents/github/github-modes.md) | 🔵 sonnet | Comprehensive GitHub integration modes for workflow orchestration, PR management, and repository coordination with batch optimization |
-| [`issue-tracker`](../.claude/agents/github/issue-tracker.md) | 🟢 haiku | Intelligent issue management and project coordination with automated tracking, progress monitoring, and team coordination |
-| [`multi-repo-swarm`](../.claude/agents/github/multi-repo-swarm.md) | 🟣 opus | Cross-repository swarm orchestration for organization-wide automation and intelligent collaboration |
-| [`pr-manager`](../.claude/agents/github/pr-manager.md) 🎖 | 🔵 sonnet | Comprehensive pull request management with swarm coordination for automated reviews, testing, and merge workflows |
-| [`project-board-sync`](../.claude/agents/github/project-board-sync.md) | 🟢 haiku | Synchronize AI swarms with GitHub Projects for visual task management, progress tracking, and team coordination |
-| [`release-manager`](../.claude/agents/github/release-manager.md) 🎖 | 🔵 sonnet | Automated release coordination and deployment with ruv-swarm orchestration for seamless version management, testing, and deployment across multiple packages |
-| [`release-swarm`](../.claude/agents/github/release-swarm.md) | 🔵 sonnet | Orchestrate complex software releases using AI swarms that handle everything from changelog generation to multi-platform deployment |
-| [`repo-architect`](../.claude/agents/github/repo-architect.md) | 🟣 opus | Repository structure optimization and multi-repo management with ruv-swarm coordination for scalable project architecture and development workflows |
-| [`swarm-issue`](../.claude/agents/github/swarm-issue.md) | 🔵 sonnet | GitHub issue-based swarm coordination agent that transforms issues into intelligent multi-agent tasks with automatic decomposition and progress tracking |
-| [`swarm-pr`](../.claude/agents/github/swarm-pr.md) | 🔵 sonnet | Pull request swarm management agent that coordinates multi-agent code review, validation, and integration workflows with automated PR lifecycle management |
-| [`sync-coordinator`](../.claude/agents/github/sync-coordinator.md) 🎖 | 🔵 sonnet | Multi-repository synchronization coordinator that manages version alignment, dependency synchronization, and cross-package integration with intelligent swarm orchestration |
-| [`workflow-automation`](../.claude/agents/github/workflow-automation.md) | 🔵 sonnet | GitHub Actions workflow automation agent that creates intelligent, self-organizing CI/CD pipelines with adaptive multi-agent coordination and automated optimization |
+| [`code-review-swarm`](../.claude/agents/github/code-review-swarm.md) ✓ | 🔵 sonnet | Parallel multi-agent deep code review. Use to run several specialist reviewers (security/performance/style/architecture/accessibility) over an existing PR's diff. Produces consolidated findings + an aggregate verdict. |
+| [`github-modes`](../.claude/agents/github/github-modes.md) ✓ | 🔵 sonnet | GitHub request dispatcher. Use FIRST when it's unclear which github agent fits — routes a GitHub task to the right specialist (pr-manager, code-review-swarm, release-*, issue-tracker, …) with context. Produces a routing decision, not the end work. |
+| [`issue-tracker`](../.claude/agents/github/issue-tracker.md) ✓ | 🟢 haiku | GitHub issue lifecycle manager. Use for issue CRUD, triage, labeling, milestones, and issue-to-issue linking + progress comments. Produces issues with correct metadata — not PRs or boards. |
+| [`multi-repo-swarm`](../.claude/agents/github/multi-repo-swarm.md) ✓ | 🟣 opus | Cross-repository change orchestrator. Use to fan ONE change out across MANY repos (org-wide updates, shared-lib bumps, cross-service refactors) with cross-repo consistency guarantees. Produces per-repo PRs + a consistency verdict. |
+| [`pr-manager`](../.claude/agents/github/pr-manager.md) 🎖 ✓ | 🔵 sonnet | Pull-request lifecycle owner. Use to drive ONE PR end-to-end — create, metadata, reviewers, labels, CI/test reconciliation, conflict handling, and merge. The canonical owner of PR lifecycle. |
+| [`project-board-sync`](../.claude/agents/github/project-board-sync.md) ✓ | 🟢 haiku | GitHub Projects board keeper. Use to mirror issue/PR state onto a project board — move cards, update columns/custom fields, run board automation. Produces board state, not issues or PRs. |
+| [`release-manager`](../.claude/agents/github/release-manager.md) 🎖 ✓ | 🔵 sonnet | Release planner & coordinator. Use to PLAN one release — semver decision, changelog/release notes, cross-package version alignment, validation gates, and sequencing/rollback — culminating in the release PR/tag. |
+| [`release-swarm`](../.claude/agents/github/release-swarm.md) ✓ | 🔵 sonnet | Release execution swarm. Use to EXECUTE release tasks in parallel across targets (build, test, publish, deploy, monitor, rollback) under a release-manager plan. Produces built/published artifacts + per-target results. |
+| [`repo-architect`](../.claude/agents/github/repo-architect.md) ✓ | 🟣 opus | Repository architecture designer. Use to DESIGN repo structure, standards, templates, and governance (greenfield setup or restructuring). Produces a blueprint + scaffolding, not a propagated content change. |
+| [`swarm-issue`](../.claude/agents/github/swarm-issue.md) ✓ | 🔵 sonnet | Issue-to-swarm executor. Use to CONVERT a GitHub issue into executing work — auto-decompose into subtasks, assign agents, orchestrate, and report progress back on the issue until done. |
+| [`swarm-pr`](../.claude/agents/github/swarm-pr.md) ✓ | 🔵 sonnet | Comment/label-driven PR swarm. Use only when you want swarm control of a PR directly from GitHub (/swarm comment commands, webhook-triggered PR swarms). For canonical PR lifecycle use pr-manager; for deep review use code-review-swarm. |
+| [`sync-coordinator`](../.claude/agents/github/sync-coordinator.md) 🎖 ✓ | 🔵 sonnet | Multi-package alignment coordinator. Use for ongoing alignment between packages/repos — version harmonization, dependency resolution, doc/config sync — and the resulting sync PR. Keeps things consistent over time. |
+| [`workflow-automation`](../.claude/agents/github/workflow-automation.md) ✓ | 🔵 sonnet | GitHub Actions author. Use to author/maintain CI/CD as code (Actions YAML) — pipelines, matrices, caching, self-healing, optimization. Produces workflow files, not PRs/releases/issues. |
 
 ### Прочие (9)
 
