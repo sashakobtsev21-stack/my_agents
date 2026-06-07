@@ -3,10 +3,10 @@
   "description": "Workflow automation across two surfaces: the 10 workflow_* MCP tools (create/run/execute/status/list/pause/resume/cancel/delete/template) with full state-machine lifecycle (created → running ↔ paused → completed/cancelled), and native Claude Code Workflow JS orchestration (.claude/workflows/*.js — agent/parallel/pipeline/phase fan-out). Includes GAIA benchmark component for Princeton HAL leaderboard submissions.",
   "version": "0.4.0",
   "author": {
-    "name": "ruvnet",
-    "url": "https://github.com/ruvnet"
+    "name": "Aleksandr",
+    "url": "https://github.com/sashakobtsev21-stack"
   },
-  "homepage": "https://github.com/ruvnet/ruflo",
+  "homepage": "https://github.com/sashakobtsev21-stack/my_agents",
   "license": "MIT",
   "keywords": [
     "ruflo",

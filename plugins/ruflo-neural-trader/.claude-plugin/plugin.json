@@ -3,8 +3,8 @@
   "description": "Neural trading via npx neural-trader — self-learning strategies, Rust/NAPI backtesting, 112+ MCP tools, swarm coordination, and portfolio optimization",
   "version": "0.2.0",
   "author": {
-    "name": "ruvnet",
-    "url": "https://github.com/ruvnet"
+    "name": "Aleksandr",
+    "url": "https://github.com/sashakobtsev21-stack"
   },
   "homepage": "https://github.com/ruvnet/neural-trader",
   "license": "MIT",

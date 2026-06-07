@@ -3,10 +3,10 @@
   "description": "Long-horizon goal planning, deep research orchestration, and adaptive replanning using GOAP algorithms",
   "version": "0.2.0",
   "author": {
-    "name": "ruvnet",
-    "url": "https://github.com/ruvnet"
+    "name": "Aleksandr",
+    "url": "https://github.com/sashakobtsev21-stack"
   },
-  "homepage": "https://github.com/ruvnet/ruflo",
+  "homepage": "https://github.com/sashakobtsev21-stack/my_agents",
   "license": "MIT",
   "keywords": [
     "ruflo",

@@ -3,10 +3,10 @@
   "description": "Agent runtimes for ruflo \u2014 local WASM-sandboxed agents (rvagent: 10 wasm_agent_*/wasm_gallery_* MCP tools, built on @ruvector/rvagent-wasm + @ruvector/ruvllm-wasm per ADR-070) plus Anthropic Claude Managed Agents as a cloud backend (managed_agent_* MCP tools per ADR-115). One interface, local-vs-cloud runtimes.",
   "version": "0.2.0",
   "author": {
-    "name": "ruvnet",
-    "url": "https://github.com/ruvnet"
+    "name": "Aleksandr",
+    "url": "https://github.com/sashakobtsev21-stack"
   },
-  "homepage": "https://github.com/ruvnet/ruflo",
+  "homepage": "https://github.com/sashakobtsev21-stack/my_agents",
   "license": "MIT",
   "keywords": [
     "ruflo",

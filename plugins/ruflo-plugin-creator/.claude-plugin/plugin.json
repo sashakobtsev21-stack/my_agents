@@ -3,10 +3,10 @@
   "description": "Scaffold, validate, and publish new Claude Code plugins with the canonical plugin contract — ADR + smoke + Compatibility + namespace coordination + MCP-tool drift warnings",
   "version": "0.2.0",
   "author": {
-    "name": "ruvnet",
-    "url": "https://github.com/ruvnet"
+    "name": "Aleksandr",
+    "url": "https://github.com/sashakobtsev21-stack"
   },
-  "homepage": "https://github.com/ruvnet/ruflo",
+  "homepage": "https://github.com/sashakobtsev21-stack/my_agents",
   "license": "MIT",
   "keywords": [
     "ruflo",

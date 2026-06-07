@@ -7,14 +7,14 @@
   "bin": {
     "ruflo": "./bin/ruflo.js"
   },
-  "homepage": "https://github.com/ruvnet/claude-flow#readme",
+  "homepage": "https://github.com/sashakobtsev21-stack/my_agents#readme",
   "bugs": {
-    "url": "https://github.com/ruvnet/claude-flow/issues",
-    "email": "support@ruv.io"
+    "url": "https://github.com/sashakobtsev21-stack/my_agents/issues",
+    "email": "sashakobtsev21@gmail.com"
   },
   "funding": {
     "type": "github",
-    "url": "https://github.com/sponsors/ruvnet"
+    "url": "https://github.com/sponsors/sashakobtsev21-stack"
   },
   "files": [
     "bin/**",
@@ -78,7 +78,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ruvnet/claude-flow.git",
+    "url": "https://github.com/sashakobtsev21-stack/my_agents.git",
     "directory": "ruflo"
   },
   "keywords": [
@@ -101,9 +101,9 @@
     "self-learning"
   ],
   "author": {
-    "name": "RuvNet",
-    "email": "ruv@ruv.io",
-    "url": "https://ruv.io"
+    "name": "Aleksandr",
+    "email": "sashakobtsev21@gmail.com",
+    "url": "https://github.com/sashakobtsev21-stack"
   },
   "license": "MIT",
   "publishConfig": {

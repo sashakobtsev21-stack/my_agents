@@ -164,11 +164,11 @@
     ]
   },
   "attribution": {
-    "commit": "Co-Authored-By: RuFlo <ruv@ruv.net>",
-    "pr": "\ud83e\udd16 Generated with [RuFlo](https://github.com/ruvnet/ruflo)"
+    "commit": "Co-Authored-By: Aleksandr <sashakobtsev21@gmail.com>",
+    "pr": "\ud83e\udd16 my_agents (https://github.com/sashakobtsev21-stack/my_agents)"
   },
   "claudeFlow": {
-    "version": "3.6.11",
+    "version": "3.10.31",
     "enabled": true,
     "modelPreferences": {
       "default": "claude-opus-4-7",

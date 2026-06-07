@@ -41,14 +41,14 @@
     "hooks"
   ],
   "author": {
-    "name": "ruvnet",
-    "url": "https://github.com/ruvnet"
+    "name": "Aleksandr",
+    "url": "https://github.com/sashakobtsev21-stack"
   },
   "license": "MIT",
-  "homepage": "https://github.com/ruvnet/ruflo",
+  "homepage": "https://github.com/sashakobtsev21-stack/my_agents",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ruvnet/ruflo.git",
+    "url": "https://github.com/sashakobtsev21-stack/my_agents.git",
     "directory": "v3/@claude-flow/cli-core"
   },
   "publishConfig": {
