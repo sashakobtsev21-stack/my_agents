@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **69/121**.
+> Агентов: **121** · направлений: **28** · руководителей: **27** · модернизировано: **78/121**.
 
 ## Как выбрать агента
 
@@ -103,15 +103,15 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`flow-nexus-app-store`](../.claude/agents/flow-nexus/app-store.md) | 🟢 haiku | Application marketplace and template management specialist. Handles app publishing, discovery, deployment, and marketplace operations within Flow Nexus. |
-| [`flow-nexus-auth`](../.claude/agents/flow-nexus/authentication.md) | 🔵 sonnet | Flow Nexus authentication and user management specialist. Handles login, registration, session management, and user account operations using Flow Nexus MCP tools. |
-| [`flow-nexus-challenges`](../.claude/agents/flow-nexus/challenges.md) | 🟢 haiku | Coding challenges and gamification specialist. Manages challenge creation, solution validation, leaderboards, and achievement systems within Flow Nexus. |
-| [`flow-nexus-neural`](../.claude/agents/flow-nexus/neural-network.md) | 🔵 sonnet | Neural network training and deployment specialist. Manages distributed neural network training, inference, and model lifecycle using Flow Nexus cloud infrastructure. |
-| [`flow-nexus-payments`](../.claude/agents/flow-nexus/payments.md) | 🔵 sonnet | Credit management and billing specialist. Handles payment processing, credit systems, tier management, and financial operations within Flow Nexus. |
-| [`flow-nexus-sandbox`](../.claude/agents/flow-nexus/sandbox.md) | 🔵 sonnet | E2B sandbox deployment and management specialist. Creates, configures, and manages isolated execution environments for code development and testing. |
-| [`flow-nexus-swarm`](../.claude/agents/flow-nexus/swarm.md) | 🔵 sonnet | AI swarm orchestration and management specialist. Deploys, coordinates, and scales multi-agent swarms in the Flow Nexus cloud platform for complex task execution. |
-| [`flow-nexus-user-tools`](../.claude/agents/flow-nexus/user-tools.md) | 🟢 haiku | User management and system utilities specialist. Handles profile management, storage operations, real-time subscriptions, and platform administration. |
-| [`flow-nexus-workflow`](../.claude/agents/flow-nexus/workflow.md) | 🔵 sonnet | Event-driven workflow automation specialist. Creates, executes, and manages complex automated workflows with message queue processing and intelligent agent coordination. |
+| [`flow-nexus-app-store`](../.claude/agents/flow-nexus/app-store.md) ✓ | 🟢 haiku | Application marketplace and template management specialist. Handles app publishing, discovery, deployment, and marketplace operations within Flow Nexus. |
+| [`flow-nexus-auth`](../.claude/agents/flow-nexus/authentication.md) ✓ | 🔵 sonnet | Flow Nexus authentication and user management specialist. Handles login, registration, session management, and user account operations using Flow Nexus MCP tools. |
+| [`flow-nexus-challenges`](../.claude/agents/flow-nexus/challenges.md) ✓ | 🟢 haiku | Coding challenges and gamification specialist. Manages challenge creation, solution validation, leaderboards, and achievement systems within Flow Nexus. |
+| [`flow-nexus-neural`](../.claude/agents/flow-nexus/neural-network.md) ✓ | 🔵 sonnet | Neural network training and deployment specialist. Manages distributed neural network training, inference, and model lifecycle using Flow Nexus cloud infrastructure. |
+| [`flow-nexus-payments`](../.claude/agents/flow-nexus/payments.md) ✓ | 🔵 sonnet | Credit management and billing specialist. Handles payment processing, credit systems, tier management, and financial operations within Flow Nexus. |
+| [`flow-nexus-sandbox`](../.claude/agents/flow-nexus/sandbox.md) ✓ | 🔵 sonnet | E2B sandbox deployment and management specialist. Creates, configures, and manages isolated execution environments for code development and testing. |
+| [`flow-nexus-swarm`](../.claude/agents/flow-nexus/swarm.md) ✓ | 🔵 sonnet | AI swarm orchestration and management specialist. Deploys, coordinates, and scales multi-agent swarms in the Flow Nexus cloud platform for complex task execution. |
+| [`flow-nexus-user-tools`](../.claude/agents/flow-nexus/user-tools.md) ✓ | 🟢 haiku | User management and system utilities specialist. Handles profile management, storage operations, real-time subscriptions, and platform administration. |
+| [`flow-nexus-workflow`](../.claude/agents/flow-nexus/workflow.md) ✓ | 🔵 sonnet | Event-driven workflow automation specialist. Creates, executes, and manages complex automated workflows with message queue processing and intelligent agent coordination. |
 
 ### Templates (9)
 

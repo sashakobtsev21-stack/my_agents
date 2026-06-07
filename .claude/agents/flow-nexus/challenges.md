@@ -88,3 +88,6 @@ Challenge listings, validated submissions with scored feedback, updated leaderbo
 Service layer — runs in any order after the compute layer. Validates user-submitted solutions, optionally executing them in compute resources.
 - Runs after: `flow-nexus-auth` (submissions, leaderboards, and achievements are tied to a user_id) and, when sandboxed validation is used, `flow-nexus-sandbox`.
 - Required by / unblocks: no service sibling hard-blocks on it; `flow-nexus-app-store`, `flow-nexus-workflow`, `flow-nexus-neural`, and `flow-nexus-user-tools` run independently. Credit rewards it grants feed `flow-nexus-payments`.
+
+## Model & cost
+`haiku` — high-volume, mechanical platform operations; cheap and fast.

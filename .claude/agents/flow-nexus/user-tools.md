@@ -103,3 +103,6 @@ Updated user profiles/preferences, managed storage objects (uploads + signed URL
 Service layer — runs in any order after the compute layer. Provides cross-cutting profile, storage, and real-time utilities to the user and other agents.
 - Runs after: `flow-nexus-auth` (all profile, storage, and subscription operations are scoped to an authenticated user_id).
 - Required by / unblocks: no service sibling hard-blocks on it; `flow-nexus-app-store`, `flow-nexus-workflow`, `flow-nexus-challenges`, and `flow-nexus-neural` run independently and may read/write artifacts via its storage. Storage/subscription usage it records feeds `flow-nexus-payments`.
+
+## Model & cost
+`haiku` — high-volume, mechanical platform operations; cheap and fast.

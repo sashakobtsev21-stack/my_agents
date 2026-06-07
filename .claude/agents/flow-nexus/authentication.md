@@ -76,3 +76,6 @@ An authenticated Flow Nexus session: a valid user record plus an active session 
 Init layer — runs first in the Flow Nexus lifecycle. This is the foundational gate; no agent that needs a session may proceed until authentication succeeds.
 - Runs after: nothing (entry point of the flow).
 - Required by / unblocks: every other agent. The compute layer (`flow-nexus-sandbox`, `flow-nexus-swarm`) and the billing layer (`flow-nexus-payments`) all depend on a valid authenticated user_id, as do all service-layer agents.
+
+## Model & cost
+Default `sonnet`.

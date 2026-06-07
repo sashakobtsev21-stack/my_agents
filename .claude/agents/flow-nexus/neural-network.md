@@ -95,3 +95,6 @@ A trained, versioned model (model_id) with evaluation metrics and checkpoints, a
 Service layer — runs in any order after the compute layer. Trains and serves models using distributed compute.
 - Runs after: `flow-nexus-auth` (model lifecycle is scoped to a user_id) and `flow-nexus-sandbox` (distributed training runs across E2B sandboxes); may also leverage `flow-nexus-swarm` for cluster coordination.
 - Required by / unblocks: no service sibling hard-blocks on it; `flow-nexus-app-store`, `flow-nexus-workflow`, `flow-nexus-challenges`, and `flow-nexus-user-tools` run independently. Compute usage it records feeds `flow-nexus-payments`.
+
+## Model & cost
+Default `sonnet`.

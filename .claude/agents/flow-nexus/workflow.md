@@ -91,3 +91,6 @@ A defined and executable workflow (workflow_id): ordered steps with triggers, ag
 Service layer — runs in any order after the compute layer. Orchestrates multi-step automation across compute resources.
 - Runs after: `flow-nexus-auth` (workflows run under an authenticated user) and the compute layer — `flow-nexus-swarm` (steps are assigned to swarm agents) and `flow-nexus-sandbox` (steps execute in E2B environments).
 - Required by / unblocks: no service sibling hard-blocks on it; `flow-nexus-app-store`, `flow-nexus-challenges`, `flow-nexus-neural`, and `flow-nexus-user-tools` run independently. Execution usage it records feeds `flow-nexus-payments`.
+
+## Model & cost
+Default `sonnet`.

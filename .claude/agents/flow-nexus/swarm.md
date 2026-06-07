@@ -83,3 +83,6 @@ A running swarm (swarm_id) with its topology, spawned agents, and orchestrated t
 Compute layer — runs after the init layer, in parallel with `flow-nexus-sandbox`. Supplies multi-agent coordination that service-layer agents orchestrate work through.
 - Runs after: `flow-nexus-auth` (needs a valid session before spawning a swarm).
 - Required by / unblocks: `flow-nexus-workflow` (assigns workflow steps to swarm agents) and other service-layer agents needing parallel execution. May co-schedule with `flow-nexus-sandbox` for sandboxed agent execution. Resource usage it records feeds `flow-nexus-payments`.
+
+## Model & cost
+Default `sonnet`.

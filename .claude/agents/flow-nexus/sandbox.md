@@ -83,3 +83,6 @@ A live, configured E2B sandbox (sandbox_id) with its template, env vars, and pac
 Compute layer — runs after the init layer. Provides isolated execution environments that service-layer agents build on.
 - Runs after: `flow-nexus-auth` (needs a valid session before any sandbox can be created).
 - Required by / unblocks: `flow-nexus-neural` (distributed training runs in E2B sandboxes), `flow-nexus-workflow` and `flow-nexus-app-store` (execute/deploy code in sandboxes). Runs alongside `flow-nexus-swarm` in the compute layer. Usage it records feeds `flow-nexus-payments`.
+
+## Model & cost
+Default `sonnet`.
