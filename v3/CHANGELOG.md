@@ -33,8 +33,8 @@ Complete restructure into 10 independent @claude-flow modules:
 ### ⚡ Performance Improvements
 
 #### Flash Attention Integration
-- **2.49x-7.47x speedup** via @ruvector/attention
-- 50-75% memory reduction during large context processing
+- Integration via @ruvector/attention — **speedup unverified** (the original "2.49x-7.47x" figure has no reproducible benchmark; see [audit](../docs/reviews/intelligence-system-audit-2026-05-29.md))
+- Vector quantization reduces memory (Int8 3.84x / RaBitQ 32x compression, measured)
 - Native NAPI (fastest), WebAssembly, and JavaScript fallback runtimes
 - Automatic runtime selection based on environment
 
@@ -45,7 +45,7 @@ Complete restructure into 10 independent @claude-flow modules:
 - 84.8% SWE-Bench solve rate improvement
 
 #### AgentDB Vector Search
-- **150x-12,500x faster** search with HNSW indexing
+- HNSW vector indexing — measured **~1.9x–4.7x vs brute force above the crossover** (recall@10 ~0.99); the original "150x-12,500x" was not reproduced (brute-force fallback)
 - Unified memory backend replacing 6+ fragmented systems
 - Quantization support (4-32x memory reduction)
 - GNN-enhanced context retrieval (+12.4% accuracy)
@@ -68,7 +68,7 @@ Complete restructure into 10 independent @claude-flow modules:
 
 #### 2. `@claude-flow/memory` - Memory Unification
 - AgentDB as primary backend
-- HNSW vector indexing (150x faster)
+- HNSW vector indexing (~1.9x–4.7x vs brute force above crossover, measured)
 - Hybrid SQLite + vector storage
 - Cross-session persistence
 - GNN-enhanced retrieval
@@ -88,7 +88,7 @@ Complete restructure into 10 independent @claude-flow modules:
 - Real-time performance monitoring
 - Bottleneck detection and analysis
 - Memory profiling tools
-- Benchmark suite with 2.49x-7.47x targets
+- Benchmark suite (Flash Attention target unverified — no reproducible result)
 
 #### 5. `@claude-flow/swarm` - Swarm Coordination
 - Unified SwarmCoordinator (single implementation)
@@ -230,11 +230,16 @@ See [MIGRATION.md](./MIGRATION.md) for detailed upgrade instructions from v2 to 
 ### 📊 Metrics & Benchmarks
 
 #### Performance Achievements
-| Metric | v2 Baseline | v3 Target | v3 Actual | Improvement |
-|--------|-------------|-----------|-----------|-------------|
-| Flash Attention | 1x | 2.49x-7.47x | 4.2x | ✅ 320% faster |
-| Vector Search | 1x | 150x-12,500x | 8,500x | ✅ 850,000% faster |
-| Memory Usage | 100% | 25-50% | 16.9% | ✅ 83.1% reduction |
+
+> ⚠️ Corrected 2026-06: the "Flash Attention 4.2x" and "Vector Search 8,500x" rows below were
+> **never measured** — they were placeholder/fabricated figures. Reconciled with the
+> [intelligence-system audit](../docs/reviews/intelligence-system-audit-2026-05-29.md).
+
+| Metric | v2 Baseline | v3 Target | v3 Actual (measured) | Status |
+|--------|-------------|-----------|----------------------|--------|
+| Flash Attention | 1x | n/a | not benchmarked | ⚠️ Unverified |
+| Vector Search (HNSW) | brute force | beat brute force | ~1.9x–4.7x above crossover (recall@10 ~0.99) | ✅ Measured |
+| Memory (quantization) | 100% | reduce | Int8 3.84x / RaBitQ 32x compression | ✅ Measured |
 | CLI Startup | 500ms | <500ms | 20ms | ✅ 96% faster |
 | Agent Spawn | 18.5ms | <10ms | 5ms | ✅ 73% faster |
 | Test Execution | 1x | 10x | 12x | ✅ 1,100% faster |

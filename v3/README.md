@@ -12,10 +12,14 @@
 Claude Flow V3 is a next-generation AI agent coordination system built on 10 Architecture Decision Records (ADRs). It provides a modular, security-first, high-performance platform for orchestrating multi-agent swarms with hierarchical mesh topology.
 
 V3 represents a complete architectural overhaul:
-- **10x faster testing** with Vitest
-- **150x-12,500x faster search** with HNSW indexing
-- **2.49x-7.47x Flash Attention speedup**
-- **50-75% memory reduction**
+- **Vitest test suite** — parallel, ESM-native, threaded
+- **HNSW vector search** — measured ~1.9x–4.7x vs brute force above the crossover (recall@10 ~0.99); the old "150x-12,500x" figure was **not reproduced** (it was a brute-force fallback)
+- **Flash Attention integration** — speedup **unverified** (no benchmark exists)
+- **Vector quantization** — Int8 3.84x / RaBitQ 32x compression (measured)
+
+> Performance numbers in this README are reconciled with the audit in
+> [`docs/reviews/intelligence-system-audit-2026-05-29.md`](../docs/reviews/intelligence-system-audit-2026-05-29.md).
+> Claims marked **unverified** have no reproducible benchmark and must not be cited as fact.
 
 ## Features
 
@@ -42,9 +46,9 @@ V3 represents a complete architectural overhaul:
 |--------|--------|----------|
 | Event Bus (100k events) | <50ms | ~6ms |
 | Map Lookup (100k gets) | <20ms | ~16ms |
-| Array.find vs Map O(1) | N/A | 978x speedup |
-| Flash Attention | 2.49x-7.47x | Validated |
-| AgentDB Search | 150x-12,500x | HNSW indexed |
+| Array.find vs Map O(1) | N/A | 978x speedup (microbench) |
+| Flash Attention | n/a | **Unverified** (no benchmark) |
+| AgentDB HNSW search | brute force | ~1.9x–4.7x above crossover (measured) |
 
 ## Architecture
 
@@ -59,7 +63,7 @@ V3 represents a complete architectural overhaul:
 | ADR-005 | MCP-first API design |
 | ADR-006 | Unified memory service (AgentDB) |
 | ADR-007 | Event sourcing for state changes |
-| ADR-008 | Vitest over Jest (10x faster) |
+| ADR-008 | Vitest over Jest (ESM-native) |
 | ADR-009 | Hybrid memory backend default |
 | ADR-010 | Remove Deno support (Node.js 20+ only) |
 
@@ -219,7 +223,7 @@ const valid = await hasher.verify('password', hash);
 ```
 
 ### @claude-flow/memory
-Unified memory service with AgentDB, HNSW indexing, and 150x-12,500x faster search.
+Unified memory service with AgentDB and HNSW vector indexing (measured ~1.9x–4.7x vs brute force above the crossover).
 
 ```typescript
 import { HybridMemoryRepository, HNSWIndex } from '@claude-flow/memory';
@@ -436,9 +440,9 @@ pnpm test:coverage
 
 | Category | Metric | Target |
 |----------|--------|--------|
-| **Search** | AgentDB HNSW | 150x-12,500x faster |
-| **Attention** | Flash Attention | 2.49x-7.47x speedup |
-| **Memory** | Reduction | 50-75% |
+| **Search** | AgentDB HNSW | ~1.9x–4.7x vs brute force (measured) |
+| **Attention** | Flash Attention | Unverified (no benchmark) |
+| **Memory** | Quantization | Int8 3.84x / RaBitQ 32x compression |
 | **Code** | Total lines | <5,000 |
 | **Startup** | Cold start | <500ms |
 | **Learning** | SONA adaptation | <0.05ms |

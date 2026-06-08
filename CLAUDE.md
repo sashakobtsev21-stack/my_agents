@@ -1,7 +1,7 @@
 # Claude Code Configuration — my_agents (v3.10.31)
 
 > **my_agents** — reusable AI agent team for Claude Code. Fork of [ruvnet/claude-flow](https://github.com/ruvnet/claude-flow) (MIT).
-> Verified in this checkout: 121 agents, 39 skills, 168 commands, 33 plugins, ~313 MCP tools.
+> Verified in this checkout: 121 agents, 39 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, ~313 MCP tools.
 > Packages: `@claude-flow/cli@3.10.31`, root `my_agents@3.10.31`.
 
 ## Behavioral Rules (Always Enforced)
@@ -1066,7 +1066,11 @@ export const LIVE_REGISTRY_CID = 'NEW_CID_FROM_PINATA';
 curl -s "https://gateway.pinata.cloud/ipfs/{NEW_CID}" | jq '.totalPlugins'
 ```
 
-## Optional Plugins (20 Available)
+## Optional Plugins (20 in the IPFS registry)
+
+> Note: this is a different set from the **33 bundled plugins** counted in the header above.
+> The 33 are the `plugins/ruflo-*` wrappers shipped in this repo; the 20 below are the
+> optional plugins distributed via the IPFS registry and installed on demand.
 
 Plugins are distributed via IPFS and can be installed with the CLI. Browse and install from the official registry:
 
