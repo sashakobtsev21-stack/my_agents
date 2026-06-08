@@ -32,6 +32,8 @@ A triage table: each advisory with **package**, **prod/dev/optional**, **reachab
 - I own **third-party/dependency risk**. For application-code vulnerabilities (injection, authz, crypto misuse in our own code) defer to `security-auditor`; for CVE *remediation code* I hand off the upgrade to `coder`. The `ruflo-security-audit` plugin is my tooling.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist)
 Report the triage to the reviewer/coordinator; never commit a dependency bump without the test baseline passing. Don't write registry tokens/credentials to any namespace.
 
 ## Model & cost

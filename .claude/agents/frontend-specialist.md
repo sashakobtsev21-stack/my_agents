@@ -31,6 +31,8 @@ Accessible, typed component/screen code that handles all UI states, passing the 
 - I own the **web client**. For mobile/React-Native UI use `specialized/mobile/spec-mobile-react-native`; for backend/API work use `backend-dev`; for pure TypeScript type design defer to `typescript-specialist`; for browser-automation test execution lean on the `ruflo-browser` skills.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist)
 Take the API contract from `backend-dev`/`architect`; hand critical-flow test entry points to the `tester`; report a11y/perf trade-offs to the reviewer.
 
 ## Model & cost
