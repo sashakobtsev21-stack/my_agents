@@ -15,7 +15,7 @@ import type { InitOptions } from './types.js';
 /**
  * Generate optimized statusline script
  * Output format:
- * ▊ RuFlo V3.6 ● user  │  ⎇ branch  │  Opus 4.7
+ * ▊ AlexKo V3.6 ● user  │  ⎇ branch  │  Opus 4.7
  * ─────────────────────────────────────────────────────
  * 🏗️  DDD Domains    [●●○○○]  2/5    ⚡ HNSW
  * 🤖 Swarm  ◉ [ 5/15]  👥 2    🪝 10/17    🟢 CVE 3/3    💾 4MB    🧠  63%
@@ -27,7 +27,7 @@ export function generateStatuslineScript(options: InitOptions): string {
 
   return `#!/usr/bin/env node
 /**
- * RuFlo V3 Statusline — delegation build (#2195)
+ * AlexKo V3 Statusline — delegation build (#2195)
  *
  * Fix for ruvnet/ruflo#2195: the previous version re-implemented all data
  * readers locally using fragile file probes that missed AgentDB patterns,
@@ -448,7 +448,7 @@ function generateStatusline() {
   const lines = [];
 
   // Header
-  let header = c.bold + c.brightPurple + '▊ RuFlo V' + pkgVersion + ' ' + c.reset;
+  let header = c.bold + c.brightPurple + '▊ AlexKo V' + pkgVersion + ' ' + c.reset;
   header += (coordinationActive ? c.brightCyan : c.dim) + '● ' + c.brightCyan + git.name + c.reset;
   if (git.gitBranch) {
     header += '  ' + c.dim + '│' + c.reset + '  ' + c.brightBlue + '⏇ ' + git.gitBranch + c.reset;
@@ -583,7 +583,7 @@ export function generateStatuslineHook(options: InitOptions): string {
   }
 
   return `#!/bin/bash
-# RuFlo V3 Statusline Hook
+# AlexKo V3 Statusline Hook
 # Source this in your .bashrc/.zshrc for terminal statusline
 
 # Function to get statusline

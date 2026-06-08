@@ -41,7 +41,7 @@ export function generateSettings(options: InitOptions): object {
     ],
   };
 
-  // #1670 — RuFlo attribution (Co-Authored-By trailer + PR footer) is now
+  // #1670 — AlexKo attribution (Co-Authored-By trailer + PR footer) is now
   // OPT-IN. Default behavior no longer injects a third-party Co-Authored-By
   // line into the user's commits — that pattern silently inflated GitHub
   // contributor graphs and was hard to undo without rewriting history. Pass
@@ -55,7 +55,7 @@ export function generateSettings(options: InitOptions): object {
   if (options.attribution === true) {
     settings.attribution = {
       commit: 'Co-Authored-By: ruflo-bot <ruflo-bot@users.noreply.github.com>',
-      pr: '🤖 Generated with [RuFlo](https://github.com/ruvnet/ruflo)',
+      pr: '🤖 Generated with [AlexKo](https://github.com/ruvnet/ruflo)',
     };
   }
 

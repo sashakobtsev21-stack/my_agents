@@ -87,8 +87,8 @@
     particles = new THREE.Points(pGeo, pMat);
     scene.add(particles);
 
-    // "RuFlo" text sprite
-    const textCanvas = createTextTexture("RuFlo", 512, 128);
+    // "AlexKo" text sprite
+    const textCanvas = createTextTexture("AlexKo", 512, 128);
     const tex = new THREE.CanvasTexture(textCanvas);
     const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.9 });
     textSprite = new THREE.Sprite(spriteMat);

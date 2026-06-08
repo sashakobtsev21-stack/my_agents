@@ -141,7 +141,7 @@
 
 	const tips = [
 		"**MCP (n) pill** above the message box opens the server manager — toggle individual servers, add custom MCP endpoints, run health checks.",
-		'**AUTO toggle**: green/lit means tool chains continue automatically. Gray means RuFlo stops after each tool result so you can inspect before continuing.',
+		'**AUTO toggle**: green/lit means tool chains continue automatically. Gray means AlexKo stops after each tool result so you can inspect before continuing.',
 		'**Parallel tool calls** — when your prompt implies multiple steps ("get system status AND list memory namespaces AND check performance"), the model emits all `tool_calls` in one response and they run via `Promise.all`. Watch for the "Step N — M tools completed" cards.',
 		'**Memory just works** — say "remember my favorite color is indigo" and later "what color do I like?" — no explicit tool name needed.',
 		'**Trajectory mode** — for long multi-step work, prefix with "Use `ruvector__hooks_trajectory_begin`" so the system learns from the run for future routing.',
@@ -153,7 +153,7 @@
 		'"Run ruflo__system_status, ruflo__performance_metrics, and ruflo__memory_list in parallel and summarize."',
 		'"Spawn a 5-agent hierarchical swarm (architect, coder, tester, reviewer, security-auditor) for a Python→TypeScript refactor."',
 		'"Use ruvector__hooks_route on the task: add OAuth to a SvelteKit API. Then spawn the recommended agent."',
-		'"Search RuFlo memory for prior decisions about authentication, then web_research recent OAuth2 best practices, in parallel."',
+		'"Search AlexKo memory for prior decisions about authentication, then web_research recent OAuth2 best practices, in parallel."',
 		'"Analyze the diff at github.com/ruvnet/ruflo/pull/1687 — risk score, classify, and suggest reviewers."',
 	];
 
@@ -199,7 +199,7 @@
 			<div class="flex items-start gap-3">
 				<span class="text-3xl leading-none">📘</span>
 				<div>
-					<h2 class="text-lg font-semibold">RuFlo Capabilities</h2>
+					<h2 class="text-lg font-semibold">AlexKo Capabilities</h2>
 					<p class="text-xs text-gray-500 dark:text-gray-400">~210 MCP tools · 5 server groups · 18 in-browser WASM tools · 6 frontier models · parallel tool calling</p>
 				</div>
 			</div>
@@ -219,7 +219,7 @@
 				<ol class="list-decimal space-y-1.5 pl-5 text-sm">
 					<li>Pick a model below (default: <code class="rounded bg-gray-100 px-1 dark:bg-gray-800">Claude Haiku 4.5</code>).</li>
 					<li>Click an example prompt below the chat box, or type your own.</li>
-					<li>RuFlo decides which tools to call. Watch the streaming tool-call cards below your message — multiple cards = parallel execution.</li>
+					<li>AlexKo decides which tools to call. Watch the streaming tool-call cards below your message — multiple cards = parallel execution.</li>
 					<li>Use <strong>AUTO</strong> on the chat box to chain tool calls automatically.</li>
 					<li>Need to add a custom MCP server? Click the <strong>MCP (n)</strong> pill → Add Server.</li>
 				</ol>
@@ -258,7 +258,7 @@
 				<p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">Cloud models route through OpenRouter — switch any time via <strong>Models</strong> in the sidebar.</p>
 				<div class="mt-3 rounded-lg border border-emerald-300/40 bg-emerald-50/50 px-3 py-2 text-xs dark:border-emerald-700/40 dark:bg-emerald-900/10">
 					<p class="font-semibold text-emerald-900 dark:text-emerald-200">🦾 Any model — including local + self-learning</p>
-					<p class="mt-1 text-emerald-900/80 dark:text-emerald-200/80">RuFlo speaks any OpenAI-compatible endpoint: vLLM, Ollama, LM Studio, Together, Groq, or self-hosted. Native support for <a href="https://github.com/ruvnet/RuVector/tree/main/examples/ruvLLM" target="_blank" rel="noopener" class="underline">ruvLLM</a> (lives in <code>ruvnet/RuVector/examples/ruvLLM</code>) — RuFlo's self-improving local model layer with MicroLoRA adapters that learn from your trajectories via SONA. Pair cloud + local, or run fully offline.</p>
+					<p class="mt-1 text-emerald-900/80 dark:text-emerald-200/80">AlexKo speaks any OpenAI-compatible endpoint: vLLM, Ollama, LM Studio, Together, Groq, or self-hosted. Native support for <a href="https://github.com/ruvnet/RuVector/tree/main/examples/ruvLLM" target="_blank" rel="noopener" class="underline">ruvLLM</a> (lives in <code>ruvnet/RuVector/examples/ruvLLM</code>) — AlexKo's self-improving local model layer with MicroLoRA adapters that learn from your trajectories via SONA. Pair cloud + local, or run fully offline.</p>
 				</div>
 			</section>
 
@@ -322,7 +322,7 @@
 
 			<section class="mb-6">
 				<h3 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Under the hood</h3>
-				<p class="mb-2 text-xs text-gray-600 dark:text-gray-400">RuFlo's web UI is a fork of the open-source HuggingFace chat-ui (SvelteKit) wired to a custom MCP bridge that fans out to two backend kernels. Everything runs on Google Cloud Run.</p>
+				<p class="mb-2 text-xs text-gray-600 dark:text-gray-400">AlexKo's web UI is a fork of the open-source HuggingFace chat-ui (SvelteKit) wired to a custom MCP bridge that fans out to two backend kernels. Everything runs on Google Cloud Run.</p>
 				<div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
 					<table class="w-full text-xs">
 						<tbody class="divide-y divide-gray-200 dark:divide-gray-700">

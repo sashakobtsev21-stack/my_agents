@@ -18,7 +18,7 @@
 		canvas.height = height * dpr;
 		ctx.scale(dpr, dpr);
 
-		// Nodes — tightly clustered around center where RuFlo text sits
+		// Nodes — tightly clustered around center where AlexKo text sits
 		const nodes = [
 			{ x: 0.50, y: 0.50, r: 4, color: "#3b82f6" },
 			{ x: 0.35, y: 0.42, r: 2.5, color: "#06b6d4" },
@@ -178,7 +178,7 @@
 			class="text-3xl font-light tracking-[0.3em] text-indigo-100"
 			style="text-shadow: 0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.2);"
 		>
-			RuFlo
+			AlexKo
 		</h2>
 		<p class="mt-1 text-[10px] tracking-[0.25em] text-slate-400/70">INTELLIGENT WORKFLOWS</p>
 	</div>

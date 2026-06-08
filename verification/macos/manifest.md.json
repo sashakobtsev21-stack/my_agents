@@ -571,7 +571,7 @@
       },
       {
         "id": "#1670",
-        "desc": "RuFlo Co-Authored-By trailer made opt-in",
+        "desc": "AlexKo Co-Authored-By trailer made opt-in",
         "file": "v3/@claude-flow/cli/dist/src/init/settings-generator.js",
         "sha256": "77c786ea94f2a2a5571f4a58d75a54f6e0945fd2e64f2b0be79d8a083e60f081",
         "marker": "options.attribution === true",

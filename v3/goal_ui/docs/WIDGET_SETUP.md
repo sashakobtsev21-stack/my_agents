@@ -1,4 +1,4 @@
-# RuFlo Research Widget - Embeddable Research Interface
+# AlexKo Research Widget - Embeddable Research Interface
 
 ## Overview
 The GOAP widget is a fully-featured, embeddable research planning interface with 100% fidelity to the main application. It can be embedded on any website using a simple script tag.
@@ -45,7 +45,7 @@ The widget.js is a self-contained bundle that includes:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Site with RuFlo Research Widget</title>
+  <title>My Site with AlexKo Research Widget</title>
 </head>
 <body>
   <!-- Widget Container -->
@@ -188,5 +188,5 @@ Ensure your Supabase project is configured with the required edge functions:
 
 For issues or questions:
 - Check the demo page at `/demo`
-- Review console logs with `[RuFlo Research]` prefix
+- Review console logs with `[AlexKo Research]` prefix
 - Inspect network requests for API failures

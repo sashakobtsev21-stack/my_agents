@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * RuFlo Statusline Generator
+ * AlexKo Statusline Generator
  * Displays real-time V3 implementation progress and system status.
  * Version is read from the installed @claude-flow/cli package.json at
  * runtime — #1892 fix: previously hardcoded to V3.5 which drifted from
@@ -13,9 +13,9 @@ const fs = require('fs');
 const path = require('path');
 const { execSync, execFileSync } = require('child_process');
 
-// #1892 — derive RuFlo banner version from the installed cli package.json
+// #1892 — derive AlexKo banner version from the installed cli package.json
 // so the statusline never drifts from `ruflo doctor`. Falls back to a
-// generic "RuFlo" label only if every resolution path fails.
+// generic "AlexKo" label only if every resolution path fails.
 function resolveBannerVersion() {
   const candidates = [
     // Local-checkout / monorepo case
@@ -37,7 +37,7 @@ function resolveBannerVersion() {
       }
     } catch {/* try next */}
   }
-  return ''; // empty → header just says "RuFlo"
+  return ''; // empty → header just says "AlexKo"
 }
 const BANNER_VERSION = resolveBannerVersion();
 
@@ -278,7 +278,7 @@ function generateStatusline() {
   const lines = [];
 
   // Header Line — #1892: BANNER_VERSION resolved at module load from package.json
-  let header = `${c.bold}${c.brightPurple}▊ RuFlo${BANNER_VERSION ? ' ' + BANNER_VERSION : ''} ${c.reset}`;
+  let header = `${c.bold}${c.brightPurple}▊ AlexKo${BANNER_VERSION ? ' ' + BANNER_VERSION : ''} ${c.reset}`;
   header += `${swarm.coordinationActive ? c.brightCyan : c.dim}● ${c.brightCyan}${user.name}${c.reset}`;
   if (user.gitBranch) {
     header += `  ${c.dim}│${c.reset}  ${c.brightBlue}⎇ ${user.gitBranch}${c.reset}`;

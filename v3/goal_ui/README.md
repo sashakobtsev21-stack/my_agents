@@ -1,15 +1,15 @@
-# RuFlo Research
+# AlexKo Research
 
-> Goal-Oriented Action Planning UI for autonomous AI research workflows. Part of the [RuFlo](https://github.com/ruvnet/ruflo) platform.
+> Goal-Oriented Action Planning UI for autonomous AI research workflows. Part of the [AlexKo](https://github.com/ruvnet/ruflo) platform.
 > Live: [goal.ruv.io](https://goal.ruv.io/) · Agents dashboard: [goal.ruv.io/agents](https://goal.ruv.io/agents)
 
-Turn plain-English research goals into executable agent plans. RuFlo Research applies classic Goal-Oriented Action Planning (GOAP) — A* search through a state space of actions with preconditions and effects — to autonomous AI research, then dispatches the work to live agents you can inspect in real time.
+Turn plain-English research goals into executable agent plans. AlexKo Research applies classic Goal-Oriented Action Planning (GOAP) — A* search through a state space of actions with preconditions and effects — to autonomous AI research, then dispatches the work to live agents you can inspect in real time.
 
 ## Highlights
 
 | | |
 |---|---|
-| 🎯 **Plain-English goals** | Describe an outcome — RuFlo extracts success criteria, constraints, and implicit preconditions |
+| 🎯 **Plain-English goals** | Describe an outcome — AlexKo extracts success criteria, constraints, and implicit preconditions |
 | 🧭 **GOAP A\* planner** | Shortest-path search through actions with preconditions/effects; replans on the fly when state changes |
 | 🤖 **Live agent dashboard** | `/agents` shows every spawned agent — role, current step, status, trajectories |
 | 🌳 **Visual plan tree** | Goals render as collapsible action trees with progress, blocked branches, rollbacks |
@@ -83,4 +83,4 @@ VITE_SUPABASE_PUBLISHABLE_KEY=...
 
 ## License
 
-MIT — same as the parent [RuFlo](https://github.com/ruvnet/ruflo) project.
+MIT — same as the parent [AlexKo](https://github.com/ruvnet/ruflo) project.

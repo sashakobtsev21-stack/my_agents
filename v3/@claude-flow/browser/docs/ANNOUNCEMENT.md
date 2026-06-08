@@ -1,6 +1,6 @@
-# RuFlo Browser Substrate — `@claude-flow/browser@3.0.0-alpha.4`
+# AlexKo Browser Substrate — `@claude-flow/browser@3.0.0-alpha.4`
 
-> **TL;DR.** RuFlo is no longer "a browser agent." With ADR-122 it becomes the **substrate** underneath Stagehand, Browser Use, Surfer-H, Playwright, Browserbase, and Operator: signed-replay trajectories, causal-graph self-healing, attested cookie vaults, federated MCTS, risk-class gating, and a workflow compiler that emits replayable YAML. **230 tests, 0 new CVEs, all under 100µs.**
+> **TL;DR.** AlexKo is no longer "a browser agent." With ADR-122 it becomes the **substrate** underneath Stagehand, Browser Use, Surfer-H, Playwright, Browserbase, and Operator: signed-replay trajectories, causal-graph self-healing, attested cookie vaults, federated MCTS, risk-class gating, and a workflow compiler that emits replayable YAML. **230 tests, 0 new CVEs, all under 100µs.**
 
 ## Why this is beyond current public SOTA
 
@@ -10,17 +10,17 @@ The public stack today:
 agent → browser → action → observation → next action
 ```
 
-RuFlo should be:
+AlexKo should be:
 
 ```
 agent → governed Session Capsule → distributed MCTS search →
   Browser Execution Adapter → replay verification → RuVector memory →
-  Workflow Compiler → reusable RuFlo primitive
+  Workflow Compiler → reusable AlexKo primitive
 ```
 
 Stagehand makes browser automation portable. Browserbase persists sessions. Browser Use exposes real session-reuse pain. Surfer-H+Holo1 improves visual navigation (92.2% WebVoyager). Reflective MCTS improves agent search. **None of them ship cryptographic provenance, queryable causal recovery, attested cookie vaults, federated MCTS, or compiled workflows.**
 
-RuFlo combines the missing parts.
+AlexKo combines the missing parts.
 
 ## The eight phases
 

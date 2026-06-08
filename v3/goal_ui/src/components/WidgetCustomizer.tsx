@@ -48,7 +48,7 @@ export const WidgetCustomizer = ({ config, onConfigChange, onGenerate }: WidgetC
   };
 
   const generateEmbedCode = () => {
-    const embedCode = `<!-- RuFlo Research Widget -->
+    const embedCode = `<!-- AlexKo Research Widget -->
 <div id="ruflo-research-widget-container"></div>
 <script>
   window.RufloResearchWidgetConfig = ${JSON.stringify(config, null, 2)};

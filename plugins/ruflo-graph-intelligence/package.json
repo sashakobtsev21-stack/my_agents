@@ -1,7 +1,7 @@
 {
   "name": "ruflo-graph-intelligence",
   "version": "0.1.0-alpha.1",
-  "description": "RuFlo Graph Intelligence Engine — real-time relationship intelligence with complexity-aware execution. Single-entry personalized PageRank, streaming delta updates, witness-signed reasoning artifacts over RuFlo's substrate graphs.",
+  "description": "AlexKo Graph Intelligence Engine — real-time relationship intelligence with complexity-aware execution. Single-entry personalized PageRank, streaming delta updates, witness-signed reasoning artifacts over AlexKo's substrate graphs.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

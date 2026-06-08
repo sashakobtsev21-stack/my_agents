@@ -1,8 +1,8 @@
-# RuFlo Research Widget Integration Guide
+# AlexKo Research Widget Integration Guide
 
 ## 📦 Overview
 
-The RuFlo Research Widget is a standalone, embeddable component that brings Goal-Oriented Action Planning research capabilities to any website. It's fully self-contained with no external dependencies required on the host page.
+The AlexKo Research Widget is a standalone, embeddable component that brings Goal-Oriented Action Planning research capabilities to any website. It's fully self-contained with no external dependencies required on the host page.
 
 ## 🚀 Quick Start
 

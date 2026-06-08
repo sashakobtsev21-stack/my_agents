@@ -12,7 +12,7 @@ import { generateStatuslineScript, generateStatuslineHook } from './statusline-g
 // PR body templates and release notes.  It is NEVER hard-wired into the
 // static command-file templates — those are user-owned content.
 export const ATTRIBUTION_FOOTER =
-  '🤖 Generated with [RuFlo](https://github.com/ruvnet/ruflo)';
+  '🤖 Generated with [AlexKo](https://github.com/ruvnet/ruflo)';
 
 /**
  * Generate pre-commit hook script
@@ -946,7 +946,7 @@ process.exit(0);
  * Generate Windows PowerShell daemon manager
  */
 export function generateWindowsDaemonManager(): string {
-  return `# RuFlo V3 Daemon Manager for Windows
+  return `# AlexKo V3 Daemon Manager for Windows
 # PowerShell script for managing background processes
 
 param(
@@ -1012,7 +1012,7 @@ function Stop-SwarmMonitor {
 
 function Show-Status {
     Write-Host ""
-    Write-Host "RuFlo V3 Daemon Status" -ForegroundColor Cyan
+    Write-Host "AlexKo V3 Daemon Status" -ForegroundColor Cyan
     Write-Host "=============================" -ForegroundColor Cyan
 
     $swarmPid = Join-Path $PidDir 'swarm-monitor.pid'
@@ -1053,7 +1053,7 @@ switch ($Action) {
  */
 export function generateWindowsBatchWrapper(): string {
   return `@echo off
-REM RuFlo V3 - Windows Batch Wrapper
+REM AlexKo V3 - Windows Batch Wrapper
 REM Routes to PowerShell daemon manager
 
 PowerShell -ExecutionPolicy Bypass -File "%~dp0daemon-manager.ps1" %*

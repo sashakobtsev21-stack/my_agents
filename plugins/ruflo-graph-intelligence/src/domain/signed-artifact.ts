@@ -1,7 +1,7 @@
 /**
  * Signed PageRank Artifact (Phase 7 — beyond-SOTA, ADR-123)
  *
- * RuFlo gains a primitive no competing memory framework can ship: a portable,
+ * AlexKo gains a primitive no competing memory framework can ship: a portable,
  * Ed25519-signed PageRank result that carries enough metadata for a remote
  * peer to verify provenance + budget compliance + input stability without
  * trusting the producer. Federation peers exchange these instead of

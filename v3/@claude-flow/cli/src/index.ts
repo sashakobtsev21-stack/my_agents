@@ -1,6 +1,6 @@
 /**
  * V3 CLI Main Entry Point
- * Modernized CLI for RuFlo V3
+ * Modernized CLI for AlexKo V3
  *
  * Created with ❤️ by ruv.io
  */
@@ -59,7 +59,7 @@ export class CLI {
 
   constructor(options: CLIOptions = {}) {
     this.name = options.name || 'ruflo';
-    this.description = options.description || 'RuFlo V3 - AI Agent Orchestration Platform';
+    this.description = options.description || 'AlexKo V3 - AI Agent Orchestration Platform';
     this.version = options.version || VERSION;
     this.parser = commandParser;
     this.output = output;

@@ -1756,7 +1756,7 @@ export const embeddingsCommand: Command = {
   ],
   action: async (): Promise<CommandResult> => {
     output.writeln();
-    output.writeln(output.bold('RuFlo Embeddings'));
+    output.writeln(output.bold('AlexKo Embeddings'));
     output.writeln(output.dim('Vector embeddings and semantic search'));
     output.writeln();
     output.writeln('Core Commands:');

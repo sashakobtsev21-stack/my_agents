@@ -37,20 +37,20 @@ declare global {
 
 // Widget initialization function
 function initRufloResearchWidget(containerId: string = "ruflo-research-widget-container"): void {
-  console.log("[RuFlo Research] Starting initialization...");
+  console.log("[AlexKo Research] Starting initialization...");
   
   const container = document.getElementById(containerId);
   if (!container) {
-    console.error(`[RuFlo Research] Container with id "${containerId}" not found`);
+    console.error(`[AlexKo Research] Container with id "${containerId}" not found`);
     return;
   }
 
-  console.log("[RuFlo Research] Container found:", containerId);
+  console.log("[AlexKo Research] Container found:", containerId);
 
   // Apply widget config if provided
   const config = window.RufloResearchWidgetConfig;
   if (config) {
-    console.log("[RuFlo Research] Applying configuration:", config);
+    console.log("[AlexKo Research] Applying configuration:", config);
     if (config.primaryColor) container.style.setProperty("--primary", config.primaryColor);
     if (config.accentColor) container.style.setProperty("--accent", config.accentColor);
     if (config.backgroundColor) container.style.setProperty("--background", config.backgroundColor);
@@ -78,9 +78,9 @@ function initRufloResearchWidget(containerId: string = "ruflo-research-widget-co
       )
     );
 
-    console.log("[RuFlo Research] ✅ Successfully initialized and rendered");
+    console.log("[AlexKo Research] ✅ Successfully initialized and rendered");
   } catch (error) {
-    console.error("[RuFlo Research] ❌ Initialization error:", error);
+    console.error("[AlexKo Research] ❌ Initialization error:", error);
   }
 }
 
@@ -88,11 +88,11 @@ function initRufloResearchWidget(containerId: string = "ruflo-research-widget-co
 function autoInit(): void {
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
-      console.log("[RuFlo Research] DOM ready, auto-initializing...");
+      console.log("[AlexKo Research] DOM ready, auto-initializing...");
       initRufloResearchWidget();
     });
   } else {
-    console.log("[RuFlo Research] DOM already loaded, initializing...");
+    console.log("[AlexKo Research] DOM already loaded, initializing...");
     // Use setTimeout to ensure script has fully loaded
     setTimeout(() => initRufloResearchWidget(), 0);
   }
@@ -106,7 +106,7 @@ if (typeof window !== "undefined") {
     version: "1.0.0",
   };
   
-  console.log("[RuFlo Research] API exposed on window.RufloResearchWidget");
+  console.log("[AlexKo Research] API exposed on window.RufloResearchWidget");
   
   // Auto-initialize
   autoInit();

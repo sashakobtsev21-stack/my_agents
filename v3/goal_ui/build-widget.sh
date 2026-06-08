@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Building RuFlo Research Widget..."
+echo "Building AlexKo Research Widget..."
 echo ""
 
 # Build the widget

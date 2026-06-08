@@ -1,14 +1,14 @@
 ---
 layout: default
-title: RuFlo Marketplace
+title: AlexKo Marketplace
 description: Claude Code native agents, swarms, workers, and MCP tools for continuous software engineering
 ---
 
-# RuFlo Marketplace
+# AlexKo Marketplace
 
 **Installable agentic workflows for Claude Code -- not just commands.**
 
-RuFlo provides native Claude Code plugins for multi-agent orchestration, /loop workers, security auditing, memory-powered RAG, and test generation.
+AlexKo provides native Claude Code plugins for multi-agent orchestration, /loop workers, security auditing, memory-powered RAG, and test generation.
 
 ## Quick Install
 
@@ -48,7 +48,7 @@ RuFlo provides native Claude Code plugins for multi-agent orchestration, /loop w
 
 ## How It Works
 
-RuFlo plugins extend Claude Code with:
+AlexKo plugins extend Claude Code with:
 - **Skills** -- Teach Claude Code new workflows (swarm init, /loop workers, security scans)
 - **Commands** -- Slash commands for common operations (/status, /audit, /memory)
 - **Agents** -- Specialized agent definitions (coder, reviewer, architect, security-auditor)
@@ -56,7 +56,7 @@ RuFlo plugins extend Claude Code with:
 
 ## Claude Code Native Integration
 
-RuFlo plugins use Claude Code's native capabilities when available:
+AlexKo plugins use Claude Code's native capabilities when available:
 
 | Feature | Plugin | Claude Code Native |
 |---------|--------|--------------------|

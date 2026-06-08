@@ -766,7 +766,7 @@ export const doctorCommand: Command = {
     const verbose = ctx.flags.verbose as boolean;
 
     output.writeln();
-    output.writeln(output.bold('RuFlo Doctor'));
+    output.writeln(output.bold('AlexKo Doctor'));
     output.writeln(output.dim('System diagnostics and health check'));
     output.writeln(output.dim('─'.repeat(50)));
     output.writeln();

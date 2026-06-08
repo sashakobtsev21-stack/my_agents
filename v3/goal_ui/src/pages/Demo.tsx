@@ -10,7 +10,7 @@ const Demo = () => {
   const [copied, setCopied] = useState(false);
   const [widgetLoaded, setWidgetLoaded] = useState(false);
 
-  const embedCode = `<!-- RuFlo Research Widget -->
+  const embedCode = `<!-- AlexKo Research Widget -->
 <div id="ruflo-research-widget-container"></div>
 
 <!-- Optional: Configure widget appearance -->
@@ -94,7 +94,7 @@ const Demo = () => {
             console.log("[Demo] Widget version:", (window as any).RufloResearchWidget.version);
             toast({
               title: "Widget Ready",
-              description: "RuFlo Research Widget loaded successfully",
+              description: "AlexKo Research Widget loaded successfully",
             });
           }
         };

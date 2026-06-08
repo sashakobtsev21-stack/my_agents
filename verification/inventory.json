@@ -1619,7 +1619,7 @@
     },
     {
       "name": "init",
-      "description": "Initialize RuFlo in the current directory",
+      "description": "Initialize AlexKo in the current directory",
       "sourceFile": "v3\\@claude-flow\\cli\\src\\commands\\init.ts"
     },
     {
@@ -1714,7 +1714,7 @@
     },
     {
       "name": "start",
-      "description": "Start the RuFlo orchestration system",
+      "description": "Start the AlexKo orchestration system",
       "sourceFile": "v3\\@claude-flow\\cli\\src\\commands\\start.ts"
     },
     {

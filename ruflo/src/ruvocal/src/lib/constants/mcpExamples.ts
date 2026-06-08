@@ -1,6 +1,6 @@
 import type { RouterExample } from "./routerExamples";
 
-// Examples that showcase RuFlo MCP capabilities — agents, memory,
+// Examples that showcase AlexKo MCP capabilities — agents, memory,
 // intelligence, dev tools, and the WASM gallery.
 export const mcpExamples: RouterExample[] = [
 	{

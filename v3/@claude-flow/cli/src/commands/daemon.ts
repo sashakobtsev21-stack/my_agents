@@ -701,7 +701,7 @@ const statusCommand: Command = {
           `Max CPU Load: ${status.config.resourceThresholds.maxCpuLoad}`,
           `Min Free Memory: ${status.config.resourceThresholds.minFreeMemoryPercent}%`,
         ].filter(Boolean).join('\n'),
-        'RuFlo Daemon'
+        'AlexKo Daemon'
       );
 
       output.writeln();
@@ -781,7 +781,7 @@ const statusCommand: Command = {
           '',
           'Run "claude-flow daemon start" to start the daemon',
         ].join('\n'),
-        'RuFlo Daemon'
+        'AlexKo Daemon'
       );
 
       return { success: true };
@@ -1012,7 +1012,7 @@ const installSupervisorCommand: Command = {
     const unitDir = join(home, '.config', 'systemd', 'user');
     const unitPath = join(unitDir, 'ruflo-daemon.service');
     const unit = `[Unit]
-Description=RuFlo background worker daemon
+Description=AlexKo background worker daemon
 After=default.target
 
 [Service]
@@ -1125,7 +1125,7 @@ export const daemonCommand: Command = {
   ],
   action: async (): Promise<CommandResult> => {
     output.writeln();
-    output.writeln(output.bold('RuFlo Daemon - Background Task Management'));
+    output.writeln(output.bold('AlexKo Daemon - Background Task Management'));
     output.writeln();
     output.writeln('Node.js-based background worker system that auto-runs like shell daemons.');
     output.writeln('Manages 12 specialized workers for continuous optimization and monitoring.');

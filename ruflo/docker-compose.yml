@@ -1,4 +1,4 @@
-# RuFlo Chat UI (ruvocal fork) + MCP Bridge
+# AlexKo Chat UI (ruvocal fork) + MCP Bridge
 # All secrets via environment variables. Never commit .env files with keys.
 #
 # Usage:
@@ -74,7 +74,7 @@ services:
       timeout: 5s
       retries: 3
 
-  # --- RuFlo Chat UI (ruvocal SvelteKit fork — built from source) ---
+  # --- AlexKo Chat UI (ruvocal SvelteKit fork — built from source) ---
   chat-ui:
     build:
       context: ./src/ruvocal
@@ -89,7 +89,7 @@ services:
       DOTENV_LOCAL: |
         MONGODB_URL=mongodb://mongodb:27017
         MONGODB_DB_NAME=${MONGODB_DB_NAME:-chat-db}
-        PUBLIC_APP_NAME=${BRAND_NAME:-RuFlo}
+        PUBLIC_APP_NAME=${BRAND_NAME:-AlexKo}
         PUBLIC_APP_DESCRIPTION=${BRAND_DESCRIPTION:-Enterprise AI Agent Orchestration Platform}
         PUBLIC_APP_ASSETS=chatui
         PUBLIC_ORIGIN=

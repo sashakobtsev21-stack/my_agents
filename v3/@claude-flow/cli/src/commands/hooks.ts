@@ -4037,7 +4037,7 @@ const statuslineCommand: Command = {
     };
 
     // Generate lines
-    let header = `${c.bold}${c.brightPurple}▊ RuFlo V3 ${c.reset}`;
+    let header = `${c.bold}${c.brightPurple}▊ AlexKo V3 ${c.reset}`;
     header += `${swarm.coordinationActive ? c.brightCyan : c.dim}● ${c.brightCyan}${user.name}${c.reset}`;
     if (user.gitBranch) {
       header += `  ${c.dim}│${c.reset}  ${c.brightBlue}⎇ ${user.gitBranch}${c.reset}`;

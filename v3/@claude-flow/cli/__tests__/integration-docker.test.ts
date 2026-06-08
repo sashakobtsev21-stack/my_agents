@@ -1,7 +1,7 @@
 /**
  * Integration Docker Validation Tests
  *
- * Validates the RuFlo Docker-based deployment stack without running Docker.
+ * Validates the AlexKo Docker-based deployment stack without running Docker.
  * Checks docker-compose.yml, nginx.conf, MCP bridge source, CLI Dockerfile,
  * and CLI build/init/doctor commands for correctness.
  *
@@ -230,7 +230,7 @@ describe('Nginx Configuration', () => {
     expect(nginxContent).toContain('proxy_set_header Accept-Encoding ""');
   });
 
-  it('injects RuFlo welcome.js script via sub_filter', () => {
+  it('injects AlexKo welcome.js script via sub_filter', () => {
     expect(nginxContent).toMatch(/sub_filter\s+'<\/head>'\s+'<script src="\/ruflo\/welcome\.js"/);
   });
 

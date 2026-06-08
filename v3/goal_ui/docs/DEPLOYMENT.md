@@ -137,7 +137,7 @@ Once deployed, your widget will be available at:
 Share this code with users who want to embed the widget:
 
 ```html
-<!-- RuFlo Research Widget Container -->
+<!-- AlexKo Research Widget Container -->
 <div id="ruflo-research-widget-container"></div>
 
 <!-- Configuration (optional) -->

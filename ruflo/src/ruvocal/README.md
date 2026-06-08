@@ -1,24 +1,24 @@
-# RuVocal — RuFlo Web UI
+# RuVocal — AlexKo Web UI
 
-> RuFlo's multi-model AI chat with built-in Model Context Protocol (MCP) tool calling. Live at [**flo.ruv.io**](https://flo.ruv.io/).
+> AlexKo's multi-model AI chat with built-in Model Context Protocol (MCP) tool calling. Live at [**flo.ruv.io**](https://flo.ruv.io/).
 
 [![Try the Web UI — flo.ruv.io](https://img.shields.io/badge/✨_Try_it-flo.ruv.io-6366f1?style=for-the-badge&logo=svelte&logoColor=white)](https://flo.ruv.io/)
 
-RuVocal is the SvelteKit web app that lets you chat with Qwen, Claude, Gemini, or OpenAI while [RuFlo](https://github.com/ruvnet/ruflo) invokes the same ~210 MCP tools the CLI uses — agent orchestration, persistent memory, swarm coordination, code review, GitHub ops — all directly from chat. No install, no API key needed to try the hosted demo.
+RuVocal is the SvelteKit web app that lets you chat with Qwen, Claude, Gemini, or OpenAI while [AlexKo](https://github.com/ruvnet/ruflo) invokes the same ~210 MCP tools the CLI uses — agent orchestration, persistent memory, swarm coordination, code review, GitHub ops — all directly from chat. No install, no API key needed to try the hosted demo.
 
-It started as a fork of the [HuggingFace chat-ui](https://github.com/huggingface/chat-ui) v0.20.0 and has been extended with a WASM-MCP integration layer, parallel tool execution, an in-browser tool gallery, and a "RuFlo Capabilities" tour modal. See [ADR-033](../../docs/adr/ADR-033-RUVOCAL-WASM-MCP-INTEGRATION.md) for the architecture.
+It started as a fork of the [HuggingFace chat-ui](https://github.com/huggingface/chat-ui) v0.20.0 and has been extended with a WASM-MCP integration layer, parallel tool execution, an in-browser tool gallery, and a "AlexKo Capabilities" tour modal. See [ADR-033](../../docs/adr/ADR-033-RUVOCAL-WASM-MCP-INTEGRATION.md) for the architecture.
 
 ## What RuVocal adds on top of upstream chat-ui
 
 | | |
 |---|---|
-| 🛠️ **~210 MCP tools, prefixed** | Five RuFlo server groups (Core, Intelligence, Agents, Memory, DevTools) plus a 18-tool in-browser WASM gallery |
+| 🛠️ **~210 MCP tools, prefixed** | Five AlexKo server groups (Core, Intelligence, Agents, Memory, DevTools) plus a 18-tool in-browser WASM gallery |
 | ⚡ **Parallel tool calls** | One model turn fires 4–6+ tools at once via `Promise.all`. The UI shows a *Step N — X tools completed* badge per turn |
-| 📘 **RuFlo Capabilities modal** | Question-mark icon → multi-section tour: models, tools, architecture, shortcuts |
+| 📘 **AlexKo Capabilities modal** | Question-mark icon → multi-section tour: models, tools, architecture, shortcuts |
 | 💾 **AgentDB-backed memory** | "Remember my favorite color is indigo" → recalled weeks later via HNSW vector search |
 | 🧠 **6 curated frontier models** | Qwen 3.6 Max (default), Claude Sonnet 4.6, Claude Haiku 4.5, Gemini 2.5 Pro, Gemini 2.5 Flash, OpenAI — via OpenRouter |
 | 🔌 **Bring-your-own MCP servers** | Add HTTP/SSE/stdio endpoints from the chat input; they join the parallel-execution flow |
-| 🦾 **ruvLLM ready** | Native support for [ruvLLM](https://github.com/ruvnet/RuVector/tree/main/examples/ruvLLM) — RuFlo's self-improving local model layer |
+| 🦾 **ruvLLM ready** | Native support for [ruvLLM](https://github.com/ruvnet/RuVector/tree/main/examples/ruvLLM) — AlexKo's self-improving local model layer |
 | 🏠 **Self-hostable** | Multi-stage Dockerfile (`INCLUDE_DB=true` builds in MongoDB), `cloudbuild.yaml` for Google Cloud Run |
 
 ## Quick Start
@@ -43,9 +43,9 @@ Minimum `.env.local` to use OpenRouter (matches the hosted setup):
 OPENAI_BASE_URL=https://openrouter.ai/api/v1
 OPENAI_API_KEY=sk-or-v1-...
 
-# Curated RuFlo model list (optional — defaults to /models from the base URL)
+# Curated AlexKo model list (optional — defaults to /models from the base URL)
 TASK_MODEL=qwen/qwen3.6-max-preview
-PUBLIC_APP_NAME=RuFlo
+PUBLIC_APP_NAME=AlexKo
 PUBLIC_APP_DESCRIPTION="Intelligent workflow automation assistant powered by Claude/Gemini/Qwen and MCP tools."
 ```
 
@@ -84,17 +84,17 @@ Chat history, users, settings, files, and stats live in MongoDB. Three options:
 
 `MONGODB_DB_NAME` defaults to `chat-ui` (kept for upstream compatibility); change per environment.
 
-## MCP Tools (the RuFlo difference)
+## MCP Tools (the AlexKo difference)
 
 RuVocal calls tools exposed by Model Context Protocol servers and feeds results back to the model via OpenAI function calling. Configure trusted servers via env, let users add their own, and the router auto-selects tools-capable models when needed.
 
 ```env
 MCP_SERVERS=[
-  {"name":"RuFlo Core","url":"https://mcp-bridge-...run.app/mcp/core","transport":"sse"},
-  {"name":"RuFlo Intelligence","url":"https://mcp-bridge-...run.app/mcp/intelligence","transport":"sse"},
-  {"name":"RuFlo Agents","url":"https://mcp-bridge-...run.app/mcp/agents","transport":"sse"},
-  {"name":"RuFlo Memory","url":"https://mcp-bridge-...run.app/mcp/memory","transport":"sse"},
-  {"name":"RuFlo DevTools","url":"https://mcp-bridge-...run.app/mcp/devtools","transport":"sse"},
+  {"name":"AlexKo Core","url":"https://mcp-bridge-...run.app/mcp/core","transport":"sse"},
+  {"name":"AlexKo Intelligence","url":"https://mcp-bridge-...run.app/mcp/intelligence","transport":"sse"},
+  {"name":"AlexKo Agents","url":"https://mcp-bridge-...run.app/mcp/agents","transport":"sse"},
+  {"name":"AlexKo Memory","url":"https://mcp-bridge-...run.app/mcp/memory","transport":"sse"},
+  {"name":"AlexKo DevTools","url":"https://mcp-bridge-...run.app/mcp/devtools","transport":"sse"},
   {"name":"π Shared Brain","url":"https://mcp.pi.ruv.io","transport":"streamable-http"}
 ]
 ```
@@ -122,7 +122,7 @@ Display: `PUBLIC_LLM_ROUTER_ALIAS_ID` (default `omni`), `PUBLIC_LLM_ROUTER_DISPL
 ## Theming
 
 ```env
-PUBLIC_APP_NAME=RuFlo
+PUBLIC_APP_NAME=AlexKo
 PUBLIC_APP_ASSETS=chatui
 PUBLIC_APP_DESCRIPTION="Intelligent workflow automation assistant powered by Claude/Gemini/Qwen and MCP tools."
 PUBLIC_APP_DATA_SHARING=
@@ -153,7 +153,7 @@ For deeper internals, see [`CLAUDE.md`](./CLAUDE.md) (Claude Code agent guide) a
 
 ## Related
 
-- 🏠 **Parent project** — [RuFlo](https://github.com/ruvnet/ruflo)
+- 🏠 **Parent project** — [AlexKo](https://github.com/ruvnet/ruflo)
 - 🎯 **Goal Planner UI** — [goal.ruv.io](https://goal.ruv.io/) · [/agents](https://goal.ruv.io/agents)
 - 📖 **ADR-033** — RuVocal/WASM-MCP integration architecture
 - 📋 **Roadmap** — [issue #1689](https://github.com/ruvnet/ruflo/issues/1689)
@@ -161,4 +161,4 @@ For deeper internals, see [`CLAUDE.md`](./CLAUDE.md) (Claude Code agent guide) a
 
 ## License
 
-MIT — same as the parent [RuFlo](https://github.com/ruvnet/ruflo) project.
+MIT — same as the parent [AlexKo](https://github.com/ruvnet/ruflo) project.

@@ -42,7 +42,7 @@ export const graphIntelligenceTools: MCPTool[] = [
   {
     name: 'sublinear/page-rank-entry',
     description:
-      'Single-entry personalized PageRank over a registered RuFlo graph. O(log n) on DD inputs. Returns score + observed complexity-class + coherence margin. Accepts maxComplexityClass budget gate (default linear) and coherenceThreshold (default 0 = disabled).',
+      'Single-entry personalized PageRank over a registered AlexKo graph. O(log n) on DD inputs. Returns score + observed complexity-class + coherence margin. Accepts maxComplexityClass budget gate (default linear) and coherenceThreshold (default 0 = disabled).',
     category: 'graph-intelligence',
     inputSchema: {
       type: 'object',

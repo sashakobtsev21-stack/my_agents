@@ -1,5 +1,5 @@
 /**
- * ruflo-graph-intelligence — RuFlo Graph Intelligence Engine (ADR-123)
+ * ruflo-graph-intelligence — AlexKo Graph Intelligence Engine (ADR-123)
  *
  * Real-time relationship intelligence with complexity-aware execution.
  *

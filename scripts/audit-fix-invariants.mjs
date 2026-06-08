@@ -100,7 +100,7 @@ const INVARIANTS = [
     issue: '#1951',
     file: 'v3/@claude-flow/cli/.claude/helpers/statusline.cjs',
     substring: 'RUFLO_VERSION',
-    why: 'Startup version-probe variable in the deployed statusline — without it the header reverts to a hard-coded `RuFlo V3.5`.',
+    why: 'Startup version-probe variable in the deployed statusline — without it the header reverts to a hard-coded `AlexKo V3.5`.',
   },
   {
     issue: '#1951',
