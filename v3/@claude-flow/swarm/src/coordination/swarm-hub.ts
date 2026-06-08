@@ -590,8 +590,8 @@ export class SwarmHub implements ISwarmHub {
         'agent-13', 'agent-14', 'agent-15'
       ],
       goals: [
-        'Achieve 2.49x-7.47x Flash Attention speedup',
-        'Verify 150x-12,500x AgentDB search improvement',
+        'Achieve unverified Flash Attention speedup',
+        'Verify ~1.9x-4.7x (measured) AgentDB search improvement',
         'Complete deployment pipeline',
         'Final test coverage push (>90%)',
         'Release v3.0.0'
@@ -670,8 +670,8 @@ export class SwarmHub implements ISwarmHub {
         name: 'Performance Targets Met',
         description: 'All performance targets achieved and verified',
         criteria: [
-          { description: '2.49x-7.47x Flash Attention speedup', met: false, evidence: null },
-          { description: '150x-12,500x AgentDB search', met: false, evidence: null },
+          { description: 'unverified Flash Attention speedup', met: false, evidence: null },
+          { description: '~1.9x-4.7x (measured) AgentDB search', met: false, evidence: null },
           { description: '50-75% memory reduction', met: false, evidence: null },
           { description: '<500ms startup time', met: false, evidence: null }
         ],

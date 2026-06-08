@@ -19,7 +19,7 @@
  *
  * Performance Targets:
  * - Micro-LoRA: <0.05ms latency
- * - Pattern Search: 150x-12,500x faster via HNSW
+ * - Pattern Search: ~1.9x-4.7x (measured) via HNSW
  *
  * Implements ADR-005: MCP-First API Design
  * Implements ADR-001: agentic-flow@alpha compatibility

@@ -281,7 +281,7 @@ export function assertV3PerformanceTargets(metrics: V3PerformanceMetrics): void 
     expect(metrics.searchSpeedup).toBeLessThanOrEqual(12500);
   }
 
-  // Flash attention speedup: 2.49x - 7.47x
+  // Flash attention speedup: unverified
   if (metrics.flashAttentionSpeedup !== undefined) {
     expect(metrics.flashAttentionSpeedup).toBeGreaterThanOrEqual(2.49);
     expect(metrics.flashAttentionSpeedup).toBeLessThanOrEqual(7.47);

@@ -2,7 +2,7 @@
  * AgentDB Backend - Integration with agentdb@2.0.0-alpha.3.4
  *
  * Provides IMemoryBackend implementation using AgentDB with:
- * - HNSW vector search (150x-12,500x faster than brute-force)
+ * - HNSW vector search (~1.9x-4.7x (measured) than brute-force)
  * - Native or WASM backend support with graceful fallback
  * - Optional dependency handling (works without hnswlib-node)
  * - Seamless integration with HybridBackend
@@ -119,7 +119,7 @@ const DEFAULT_CONFIG: Required<
  * AgentDB Backend
  *
  * Integrates AgentDB for vector search with the V3 memory system.
- * Provides 150x-12,500x faster search compared to brute-force approaches.
+ * Provides ~1.9x-4.7x (measured) search compared to brute-force approaches.
  *
  * Features:
  * - HNSW indexing for fast approximate nearest neighbor search
@@ -554,7 +554,7 @@ export class AgentDBBackend extends EventEmitter implements IMemoryBackend {
     if (!this.agentdb) {
       indexHealth.status = 'degraded';
       indexHealth.message = 'HNSW index not available';
-      recommendations.push('Install agentdb for 150x-12,500x faster vector search');
+      recommendations.push('Install agentdb for ~1.9x-4.7x (measured) vector search');
     }
 
     // Check cache health

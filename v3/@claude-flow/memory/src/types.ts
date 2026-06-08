@@ -2,7 +2,7 @@
  * V3 Unified Memory Types
  *
  * Type definitions for the unified memory system based on AgentDB with HNSW indexing.
- * Supports 150x-12,500x faster vector search compared to brute-force approaches.
+ * Supports ~1.9x-4.7x (measured) vector search compared to brute-force approaches.
  *
  * @module v3/memory/types
  */
@@ -723,7 +723,7 @@ export const PERFORMANCE_TARGETS = {
   MIN_SEARCH_IMPROVEMENT: 150, // 150x
 
   /** Maximum search improvement over brute force */
-  MAX_SEARCH_IMPROVEMENT: 12500, // 12,500x
+  MAX_SEARCH_IMPROVEMENT: 5, // ~4.7x measured ceiling vs brute force
 } as const;
 
 // ===== Re-exports from ADR-049 modules =====

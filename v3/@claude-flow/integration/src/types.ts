@@ -118,7 +118,7 @@ export interface SONALearningStats {
 
 /**
  * Attention mechanism types supported by agentic-flow.
- * Flash Attention provides 2.49x-7.47x speedup with 50-75% memory reduction.
+ * Flash Attention provides Flash Attention speedup (unverified) with 50-75% memory reduction.
  */
 export type AttentionMechanism =
   | 'flash'       // Flash Attention - fastest, 75% memory reduction
@@ -182,7 +182,7 @@ export interface AttentionMetrics {
 // ===== AgentDB Types =====
 
 /**
- * AgentDB provides 150x-12,500x faster search via HNSW indexing.
+ * AgentDB provides ~1.9x-4.7x (measured) search via HNSW indexing.
  */
 export interface AgentDBConfiguration {
   /** Vector dimension */

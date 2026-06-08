@@ -5,7 +5,7 @@
  * Handles storage and retrieval of test patterns, coverage data,
  * and learning trajectories via HNSW-indexed memory.
  *
- * Performance: 150x-12,500x faster search via HNSW indexing
+ * Performance: ~1.9x-4.7x (measured) search via HNSW indexing
  *
  * Based on:
  * - ADR-030: Agentic-QE Plugin Integration
@@ -140,7 +140,7 @@ const QE_NAMESPACES = {
  * QE Memory Bridge Implementation
  *
  * Bridges agentic-qe memory needs to V3's unified memory service.
- * Uses HNSW indexing for 150x-12,500x faster pattern search.
+ * Uses HNSW indexing for ~1.9x-4.7x pattern search (measured).
  */
 export class QEMemoryBridge implements IQEMemoryBridge {
   private memory: IMemoryService;
@@ -226,7 +226,7 @@ export class QEMemoryBridge implements IQEMemoryBridge {
   }
 
   /**
-   * Search for similar patterns using HNSW (150x faster)
+   * Search for similar patterns using HNSW (HNSW-indexed (measured ~1.9x-4.7x))
    */
   async searchSimilarPatterns(
     query: string,
@@ -244,7 +244,7 @@ export class QEMemoryBridge implements IQEMemoryBridge {
       // Build filter object for HNSW search
       const searchFilters = this.buildPatternFilters(filters);
 
-      // Execute HNSW search (150x-12,500x faster than brute force)
+      // Execute HNSW search (~1.9x-4.7x (measured) than brute force)
       const results = await this.memory.search(embedding, k, {
         namespace: QE_NAMESPACES.testPatterns.name,
         filters: searchFilters,

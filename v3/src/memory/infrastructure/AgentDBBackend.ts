@@ -3,7 +3,7 @@
  *
  * Vector database backend using AgentDB for semantic search.
  * Part of the hybrid memory system per ADR-009.
- * Provides 150x-12,500x faster search via HNSW indexing.
+ * Provides ~1.9x-4.7x (measured) search via HNSW indexing.
  */
 
 import type {

@@ -140,7 +140,7 @@ export class AttentionBridge {
 
   /**
    * Compute flash attention (optimized for long sequences)
-   * Achieves 2.49x-7.47x speedup over standard attention
+   * Achieves Flash Attention speedup (unverified) over standard attention
    */
   flashAttention(
     query: Float32Array,

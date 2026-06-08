@@ -9,8 +9,8 @@
  *
  * Key Features:
  * - SONA Learning: Real-time adaptation with <0.05ms response
- * - Flash Attention: 2.49x-7.47x speedup with 50-75% memory reduction
- * - AgentDB: 150x-12,500x faster search via HNSW indexing
+ * - Flash Attention: Flash Attention speedup (unverified) with 50-75% memory reduction
+ * - AgentDB: ~1.9x-4.7x (measured) search via HNSW indexing
  * - Intelligence Bridge: 19 hook tools + 9 learning tools
  * - Trajectory Tracking: Experience replay for continuous learning
  *
@@ -451,8 +451,8 @@ export const METADATA = {
     'Multi-Model Router (cost optimization)',
   ],
   performance: {
-    flashAttentionSpeedup: '2.49x-7.47x',
-    agentDBSearchSpeedup: '150x-12,500x',
+    flashAttentionSpeedup: 'unverified',
+    agentDBSearchSpeedup: '~1.9x-4.7x (measured)',
     sonaAdaptationLatency: '<0.05ms',
     memoryReduction: '50-75%',
   },

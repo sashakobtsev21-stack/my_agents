@@ -212,7 +212,7 @@ const cooked = await plugin.tools.gt_wasm_cook_batch({
   vars: [{ env: 'prod' }, { env: 'staging' }],
 });
 
-// Find similar patterns (1000x-12500x faster)
+// Find similar patterns (HNSW-indexed; measured ~1.9x-4.7x vs brute force)
 const matches = await plugin.tools.gt_wasm_match_pattern({
   query: 'authentication flow',
   candidates: formulaNames,

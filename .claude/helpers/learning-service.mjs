@@ -6,7 +6,7 @@
  *
  * Features:
  * - Persistent pattern storage via AgentDB
- * - HNSW indexing for 150x-12,500x faster search
+ * - HNSW indexing for ~1.9x-4.7x (measured) search
  * - ONNX embeddings via agentic-flow@alpha
  * - Session-level pattern loading and consolidation
  * - Short-term → Long-term pattern promotion

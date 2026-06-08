@@ -189,7 +189,7 @@ export interface IQEMemoryBridge {
   storeTestPattern(pattern: TestPattern): Promise<string>;
 
   /**
-   * Search for similar patterns using HNSW (150x faster)
+   * Search for similar patterns using HNSW (HNSW-indexed (measured ~1.9x-4.7x))
    */
   searchSimilarPatterns(
     query: string,

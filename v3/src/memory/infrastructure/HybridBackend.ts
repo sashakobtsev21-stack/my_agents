@@ -100,7 +100,7 @@ export class HybridBackend implements MemoryBackend {
   }
 
   /**
-   * Vector search using AgentDB (150x-12,500x faster with HNSW)
+   * Vector search using AgentDB (~1.9x-4.7x (measured) with HNSW)
    */
   async vectorSearch(embedding: number[], k: number = 10): Promise<MemorySearchResult[]> {
     return this.agentDbBackend.vectorSearch(embedding, k);

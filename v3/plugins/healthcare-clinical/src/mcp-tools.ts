@@ -166,7 +166,7 @@ async function patientSimilarityHandler(
 
 export const patientSimilarityTool: MCPTool = {
   name: 'healthcare/patient-similarity',
-  description: 'Find similar patient cases based on clinical features for treatment guidance. Uses HNSW vector search for 150x faster similarity matching.',
+  description: 'Find similar patient cases based on clinical features for treatment guidance. Uses HNSW vector search for HNSW-indexed (measured ~1.9x-4.7x) similarity matching.',
   category: 'healthcare',
   version: '1.0.0',
   tags: ['patient', 'similarity', 'clinical', 'hipaa', 'hnsw'],

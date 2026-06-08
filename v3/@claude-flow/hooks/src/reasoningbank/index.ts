@@ -5,7 +5,7 @@
  * No JSON - all patterns stored as vectors in memory.db
  *
  * Features:
- * - Real HNSW indexing (M=16, efConstruction=200) for 150x+ faster search
+ * - Real HNSW indexing (M=16, efConstruction=200) for HNSW-indexed (measured ~1.9x-4.7x) search
  * - ONNX embeddings via @claude-flow/embeddings (MiniLM-L6 384-dim)
  * - AgentDB backend for persistence
  * - Pattern promotion from short-term to long-term memory
@@ -376,7 +376,7 @@ export class ReasoningBank extends EventEmitter {
 
     let results: Array<{ pattern: GuidancePattern; similarity: number }> = [];
 
-    // Try HNSW search first (150x+ faster)
+    // Try HNSW search first (HNSW-indexed (measured ~1.9x-4.7x))
     if (this.hnswIndex && this.useRealBackend) {
       const hnswStart = performance.now();
       try {

@@ -338,7 +338,7 @@ export class SONAAdapter extends EventEmitter {
    *
    * ADR-001: When agentic-flow is available, delegates to its optimized
    * pattern storage which uses AgentDB with HNSW indexing for
-   * 150x-12,500x faster similarity search.
+   * ~1.9x-4.7x (measured) similarity search.
    */
   async storePattern(params: {
     pattern: string;
@@ -410,7 +410,7 @@ export class SONAAdapter extends EventEmitter {
    * Find similar patterns to a query
    *
    * ADR-001: When agentic-flow is available, delegates to its optimized
-   * HNSW-indexed search for 150x-12,500x faster retrieval.
+   * HNSW-indexed search for ~1.9x-4.7x (measured) retrieval.
    */
   async findSimilarPatterns(params: {
     query: string;

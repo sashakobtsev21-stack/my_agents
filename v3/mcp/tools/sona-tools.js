@@ -19,7 +19,7 @@
  *
  * Performance Targets:
  * - Micro-LoRA: <0.05ms latency
- * - Pattern Search: 150x-12,500x faster via HNSW
+ * - Pattern Search: ~1.9x-4.7x (measured) via HNSW
  *
  * Implements ADR-005: MCP-First API Design
  * Implements ADR-001: agentic-flow@alpha compatibility
@@ -320,7 +320,7 @@ async function handlePatternFind(input, context) {
     const searchLatency = performance.now() - startTime;
     state.stats.patternSearches++;
     state.stats.totalSearchLatency += searchLatency;
-    // HNSW provides 150x-12,500x speedup over brute force
+    // HNSW provides ~1.9x-4.7x (measured) speedup over brute force
     const estimatedBruteForce = searchLatency * 1000; // Simulated brute force time
     const speedup = estimatedBruteForce / Math.max(searchLatency, 0.01);
     return {
@@ -459,7 +459,7 @@ async function handleBenchmark(input, context) {
         },
         hnswSearch: {
             avg: '0.5ms',
-            speedup: '150x-12,500x',
+            speedup: '~1.9x-4.7x (measured)',
         },
         trajectoryOverhead: {
             avg: '0.1ms',
@@ -560,7 +560,7 @@ export const sonaTools = [
     },
     {
         name: 'sona/pattern/find',
-        description: 'Find similar patterns using HNSW (150x-12,500x faster)',
+        description: 'Find similar patterns using HNSW (~1.9x-4.7x (measured))',
         inputSchema: {
             type: 'object',
             properties: {

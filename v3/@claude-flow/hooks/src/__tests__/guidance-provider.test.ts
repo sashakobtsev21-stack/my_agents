@@ -38,7 +38,7 @@ describe('GuidanceProvider', () => {
       const context = await provider.generateSessionContext();
 
       expect(context).toContain('HNSW search');
-      expect(context).toContain('150x');
+      expect(context).toContain('~1.9x-4.7x');
     });
 
     it('should include code quality rules', async () => {

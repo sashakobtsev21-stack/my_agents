@@ -189,7 +189,7 @@ describe('generateAgentsMd', () => {
 
       const result = await generateAgentsMd(options);
 
-      expect(result).toContain('Co-Authored-By: claude-flow');
+      expect(result).toContain('Co-Authored-By: ruflo-bot');
       expect(result).toContain('feat');
       expect(result).toContain('fix');
     });
@@ -206,7 +206,7 @@ describe('generateAgentsMd', () => {
 
       expect(result).toContain('## Performance Targets');
       expect(result).toContain('HNSW Search');
-      expect(result).toContain('150x-12,500x faster');
+      expect(result).toContain('~1.9x-4.7x (measured)');
     });
 
     it('should include testing section', async () => {

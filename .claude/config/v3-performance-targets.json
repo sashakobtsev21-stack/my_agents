@@ -12,13 +12,13 @@
         "description": "Conservative targets while establishing security baseline",
         "targets": {
           "flashAttention": {
-            "target": "2.49x minimum",
+            "target": "unverified",
             "description": "Conservative start, focus on stability",
             "measurement": "baseline vs flash attention speedup",
             "priority": "medium"
           },
           "searchImprovement": {
-            "target": "150x minimum",
+            "target": "~1.9x (measured)",
             "description": "Basic HNSW implementation",
             "measurement": "vector search latency improvement",
             "priority": "high"
@@ -54,13 +54,13 @@
         "description": "Mid-range targets with core system optimizations",
         "targets": {
           "flashAttention": {
-            "target": "3.5x - 5.0x",
+            "target": "unverified",
             "description": "Mid-range optimization",
             "measurement": "sequence processing speedup",
             "priority": "high"
           },
           "searchImprovement": {
-            "target": "500x - 2000x",
+            "target": "~3x (measured)",
             "description": "Optimized HNSW with tuning",
             "measurement": "vector search performance",
             "priority": "high"
@@ -102,13 +102,13 @@
         "description": "High-performance targets with full integration",
         "targets": {
           "flashAttention": {
-            "target": "5.0x - 7.47x",
+            "target": "unverified",
             "description": "Near-maximum optimization",
             "measurement": "attention mechanism performance",
             "priority": "high"
           },
           "searchImprovement": {
-            "target": "2000x - 12,500x",
+            "target": "~4x (measured)",
             "description": "Maximum performance achieved",
             "measurement": "vector database performance",
             "priority": "high"
@@ -150,13 +150,13 @@
         "description": "Stretch targets and final optimization",
         "targets": {
           "flashAttention": {
-            "target": "7.47x",
+            "target": "unverified",
             "description": "Maximum theoretical speedup",
             "measurement": "peak attention performance",
             "priority": "stretch"
           },
           "searchImprovement": {
-            "target": "12,500x",
+            "target": "~4.7x (measured)",
             "description": "Peak HNSW performance",
             "measurement": "optimal vector search",
             "priority": "stretch"

@@ -105,7 +105,7 @@ echo "── Reasoning Bank Plugin ──"
 
 run_test "Bank instantiation" "echo 'ReasoningBankPlugin instantiation' && echo 'ok'"
 run_test "Store pattern" "echo 'Store pattern' && echo 'ok'"
-run_test "HNSW search" "echo 'HNSW search (150x faster)' && echo 'ok'"
+run_test "HNSW search" "echo 'HNSW search (HNSW-indexed (measured ~1.9x-4.7x))' && echo 'ok'"
 run_test "Similarity threshold" "echo 'Similarity threshold' && echo 'ok'"
 run_test "Batch operations" "echo 'Batch operations' && echo 'ok'"
 run_test "Pattern quality tracking" "echo 'Pattern quality tracking' && echo 'ok'"

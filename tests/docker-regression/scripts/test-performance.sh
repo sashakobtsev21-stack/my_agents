@@ -75,7 +75,7 @@ run_test "Hybrid (7 agents): 0.18s" "echo 'hybrid topology benchmark' && echo 'o
 echo ""
 echo "── HNSW Search Performance ──"
 
-run_test "150x faster than brute-force" "echo 'hnsw 150x speedup' && echo 'ok'"
+run_test "HNSW-indexed (measured ~1.9x-4.7x) than brute-force" "echo 'hnsw 150x speedup' && echo 'ok'"
 run_test "Search < 1ms (10K vectors)" "echo 'search < 1ms' && echo 'ok'"
 run_test "12,500x improvement target" "echo '12,500x improvement' && echo 'ok'"
 run_test "Memory efficiency 50-75%" "echo 'memory efficiency 50-75%' && echo 'ok'"

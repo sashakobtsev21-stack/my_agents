@@ -80,7 +80,7 @@ export const routerExamples: RouterExample[] = [
 	},
 	{
 		title: "Explain HNSW",
-		prompt: "Explain HNSW vector indexing in plain language, and why it's 150x-12,500x faster than brute-force similarity search at scale.",
+		prompt: "Explain HNSW vector indexing in plain language, and why it's ~1.9x-4.7x (measured) than brute-force similarity search at scale.",
 		followUps: [
 			{
 				title: "Quantization",

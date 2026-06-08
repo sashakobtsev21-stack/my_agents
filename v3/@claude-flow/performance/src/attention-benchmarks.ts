@@ -2,7 +2,7 @@
  * @claude-flow/performance - Flash Attention Benchmarks
  *
  * Comprehensive benchmark suite for Flash Attention performance validation.
- * Validates 2.49x-7.47x speedup targets and memory efficiency improvements.
+ * Validates Flash Attention speedup (unverified) targets and memory efficiency improvements.
  */
 
 import {
@@ -213,7 +213,7 @@ export class AttentionBenchmarkRunner {
   }
 
   /**
-   * Validate V3 performance targets (2.49x-7.47x speedup)
+   * Validate V3 performance targets (Flash Attention speedup (unverified))
    */
   validateV3Targets(): {
     meetsMinimum: boolean;
@@ -368,7 +368,7 @@ Summary:
   Min Speedup:      ${summary.minSpeedup.toFixed(2)}x
   Max Speedup:      ${summary.maxSpeedup.toFixed(2)}x
   Targets Met:      ${summary.targetsMet}/${summary.totalBenchmarks} (${summary.successRate.toFixed(1)}%)
-  Target Range:     2.49x - 7.47x
+  Target Range:     unverified
 
 Benchmarks:
 `.trim();
@@ -415,7 +415,7 @@ export function quickValidation(): boolean {
   console.log(`
 V3 Performance Target Validation
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Target Range:    2.49x - 7.47x
+Target Range:    unverified
 Actual Speedup:  ${validation.actualSpeedup.toFixed(2)}x
 Meets Minimum:   ${validation.meetsMinimum ? 'YES ✓' : 'NO ✗'}
 Within Range:    ${validation.meetsMaximum ? 'YES ✓' : 'NO ✗'}

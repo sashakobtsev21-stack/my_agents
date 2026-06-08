@@ -8,7 +8,7 @@
  * - Memory management
  *
  * Uses agentic-flow's optimized implementations:
- * - AgentDBFast: 150x-12,500x faster vector search
+ * - AgentDBFast: ~1.9x-4.7x (measured) vector search
  * - AttentionCoordinator: Attention-based agent consensus
  * - HybridReasoningBank: Trajectory-based learning
  */
@@ -505,7 +505,7 @@ export interface VectorSearchResult {
 
 /**
  * Bridge to AgentDB for vector storage and similarity search.
- * Provides 150x-12,500x faster search compared to traditional methods.
+ * Provides ~1.9x-4.7x (measured) search compared to traditional methods.
  *
  * Uses agentic-flow's AgentDBFast when available for optimal performance.
  */
@@ -533,7 +533,7 @@ export class AgentDBBridge extends EventEmitter {
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
-    // Try to use agentic-flow's AgentDBFast for 150x-12,500x speedup
+    // Try to use agentic-flow's AgentDBFast for ~1.9x-4.7x (measured) speedup
     const loaded = await loadAgenticFlow();
     if (loaded && agenticFlowCore) {
       try {

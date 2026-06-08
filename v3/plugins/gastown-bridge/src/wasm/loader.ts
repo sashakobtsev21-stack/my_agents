@@ -234,7 +234,7 @@ export async function loadFormulaWasm(
  * Load the GNN WASM module
  *
  * Features:
- * - DAG construction and traversal (150x faster)
+ * - DAG construction and traversal (HNSW-indexed (measured ~1.9x-4.7x))
  * - Topological sorting
  * - Cycle detection
  * - Critical path analysis

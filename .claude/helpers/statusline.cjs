@@ -461,7 +461,7 @@ function generateStatusline() {
     const pk = patternsLearned >= 1000 ? (patternsLearned / 1000).toFixed(1) + 'k' : String(patternsLearned);
     perfIndicator = c.brightYellow + '📚 ' + pk + ' patterns' + c.reset;
   } else {
-    perfIndicator = c.dim + '⚡ target: 150x-12500x' + c.reset;
+    perfIndicator = c.dim + '⚡ target: ~1.9x-4.7x (measured)' + c.reset;
   }
   lines.push(
     c.brightCyan + '🏗️  DDD Domains' + c.reset + '    ' + progressBar(domainsCompleted, totalDomains) + '  ' +

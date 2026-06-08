@@ -6,7 +6,7 @@
  * graph neural networks for patient pathway analysis.
  *
  * Features:
- * - Patient similarity search using HNSW (150x faster)
+ * - Patient similarity search using HNSW (HNSW-indexed (measured ~1.9x-4.7x))
  * - Drug interaction detection using GNN
  * - Clinical pathway recommendations
  * - Medical literature semantic search
