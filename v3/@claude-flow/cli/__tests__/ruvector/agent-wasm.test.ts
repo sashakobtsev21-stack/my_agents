@@ -135,7 +135,11 @@ import {
 // the real @ruvector/rvagent-wasm import still happens. Local runs where
 // the WASM binary is built work fine; CI without postinstall doesn't.
 // See ruvllm-wasm.test.ts for the same pattern.
-const __SKIP_WASM_TESTS = process.env.CI === 'true';
+// Skip in CI; also skip on Windows where the node:module createRequire mock
+// returns undefined inside the dynamically-imported package, so init throws
+// `Cannot read properties of undefined (reading 'resolve')`. Tests run on
+// non-Windows local where the WASM is built.
+const __SKIP_WASM_TESTS = process.env.CI === 'true' || process.platform === 'win32';
 
 describe.skipIf(__SKIP_WASM_TESTS)('agent-wasm integration', () => {
   describe('detection and init', () => {

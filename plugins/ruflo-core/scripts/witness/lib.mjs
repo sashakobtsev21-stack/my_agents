@@ -120,7 +120,7 @@ export function refreshFix(repoRoot, fix) {
  * @returns {{witness: object, summary: string}}
  */
 export function regenerate(opts) {
-  const { repoRoot, manifestPath, newFixes = [], releases = {}, ed25519Roots = [] } = opts;
+  const { repoRoot, manifestPath, newFixes = [], releases = {}, ed25519Roots = [], osOverride } = opts;
   const ed = loadEd25519(ed25519Roots.length ? ed25519Roots : [repoRoot, join(repoRoot, 'v3')]);
 
   const existing = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : null;
@@ -144,7 +144,7 @@ export function regenerate(opts) {
     issuedAt,
     gitCommit,
     branch,
-    os: osDir(),
+    os: osOverride ?? osDir(),
     releases,
     summary: { totalFixes: merged.length, verified: verifiedCount, missing: missingCount },
     fixes: merged.map(f => { const { _missing, ...c } = f; return c; }),

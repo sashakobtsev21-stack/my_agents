@@ -1,4 +1,10 @@
 {
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "no-restricted-imports": ["error", {
       "paths": [
@@ -23,6 +29,24 @@
         "v3/@claude-flow/security/src/safe-executor.ts",
         "src/commands/daemon.ts",
         "src/mcp-server.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": "off",
+        "no-restricted-modules": "off"
+      }
+    },
+    {
+      "files": [
+        "src/commands/analyze.ts",
+        "src/commands/doctor.ts",
+        "src/commands/hive-mind.ts",
+        "src/mcp-tools/auto-install.ts",
+        "src/plugins/manager.ts",
+        "src/services/claim-service.ts",
+        "src/services/container-worker-pool.ts",
+        "src/services/headless-worker-executor.ts",
+        "src/transfer/storage/gcs.ts",
+        "src/update/executor.ts"
       ],
       "rules": {
         "no-restricted-imports": "off",

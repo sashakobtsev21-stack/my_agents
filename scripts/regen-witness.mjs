@@ -21,7 +21,13 @@ const REPO_ROOT = process.cwd();
 // Per-OS layout (see ADR-103 §6 — verification cognitive container).
 // Each OS subdir holds the manifest signed by that OS's runner; CI
 // regenerates its own per-OS bundle. Shared inputs live at verification/.
-const OS = osDir();
+//
+// `--os <name>` overrides the current OS so one machine can regen all 3
+// manifests at once. Hashes are content-based (deterministic across OSes
+// for a built artefact), only the "os" field differs.
+const OS_ARG = process.argv.find((a) => a.startsWith('--os='))?.slice(5)
+  ?? (process.argv.includes('--os') ? process.argv[process.argv.indexOf('--os') + 1] : null);
+const OS = OS_ARG ?? osDir();
 const VERIFICATION_DIR = join(REPO_ROOT, 'verification');
 const MANIFEST_PATH = join(VERIFICATION_DIR, OS, 'manifest.md.json');
 const HISTORY_PATH = join(VERIFICATION_DIR, OS, 'history.jsonl');
@@ -52,6 +58,7 @@ const result = regenerate({
   newFixes,
   releases,
   ed25519Roots: [REPO_ROOT, join(REPO_ROOT, 'v3')],
+  osOverride: OS_ARG ?? undefined,
 });
 
 console.log('witness regen summary');

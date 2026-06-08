@@ -219,8 +219,11 @@ vi.mock('node:module', () => ({
 // initial module evaluation — once vi.mock can replace the package itself
 // cleanly, this skip can come off.
 //
-// Skip in CI; run locally where WASM is built.
-const __SKIP_WASM_TESTS = process.env.CI === 'true';
+// Skip in CI; also skip on Windows where the node:module createRequire mock
+// returns undefined inside the dynamically-imported package, so init throws
+// `Cannot read properties of undefined (reading 'resolve')`. Tests run on
+// non-Windows local where the WASM is built.
+const __SKIP_WASM_TESTS = process.env.CI === 'true' || process.platform === 'win32';
 
 describe.skipIf(__SKIP_WASM_TESTS)('ruvllm-wasm integration', () => {
   beforeEach(() => {

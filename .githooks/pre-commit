@@ -24,4 +24,15 @@ if git diff --cached --name-only | grep -qE '^\.claude/(agents|skills)/'; then
   echo "✅ Catalog + report + breakdown regenerated and staged."
 fi
 
+# --- 3) count drift in README/CLAUDE.md/package.json --------------------
+# Triggered when agents, skills, or plugins are added/removed/renamed.
+if git diff --cached --name-only | grep -qE '^(\.claude/(agents|skills)/|plugins/)'; then
+  echo "🔢 Agents/skills/plugins changed — checking count drift in README/CLAUDE/package…"
+  if ! node scripts/gen-counts.mjs; then
+    echo "❌ Count drift in docs. Run \`node scripts/gen-counts.mjs --fix\` and re-stage."
+    exit 1
+  fi
+  echo "✅ Counts in sync."
+fi
+
 exit 0
