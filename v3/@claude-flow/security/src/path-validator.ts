@@ -232,24 +232,25 @@ export class PathValidator {
       if (this.config.resolveSymlinks) {
         try {
           resolvedPath = await fs.realpath(resolvedPath);
-        } catch (error: any) {
+        } catch (error) {
           // Path doesn't exist yet - use resolved path
-          if (error.code !== 'ENOENT' || !this.config.allowNonExistent) {
-            if (error.code === 'ENOENT') {
+          const err = error as NodeJS.ErrnoException;
+          if (err.code !== 'ENOENT' || !this.config.allowNonExistent) {
+            if (err.code === 'ENOENT') {
               errors.push('Path does not exist');
             } else {
-              errors.push(`Failed to resolve path: ${error.message}`);
+              errors.push(`Failed to resolve path: ${err.message}`);
             }
           }
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       return {
         isValid: false,
         resolvedPath: '',
         relativePath: '',
         matchedPrefix: '',
-        errors: [`Invalid path: ${error.message}`],
+        errors: [`Invalid path: ${(error as Error).message}`],
       };
     }
 

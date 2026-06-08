@@ -341,9 +341,14 @@ export class SafeExecutor {
         args,
         duration: Date.now() - startTime,
       };
-    } catch (error: any) {
+    } catch (error) {
       // Handle execution errors
-      if (error.killed) {
+      const err = error as NodeJS.ErrnoException & {
+        killed?: boolean;
+        stdout?: { toString(): string };
+        stderr?: { toString(): string };
+      };
+      if (err.killed) {
         throw new SafeExecutorError(
           'Command execution timed out',
           'TIMEOUT',
@@ -352,7 +357,7 @@ export class SafeExecutor {
         );
       }
 
-      if (error.code === 'ENOENT') {
+      if (err.code === 'ENOENT') {
         throw new SafeExecutorError(
           `Command not found: ${command}`,
           'COMMAND_NOT_FOUND',
@@ -363,9 +368,9 @@ export class SafeExecutor {
 
       // Return result with non-zero exit code
       return {
-        stdout: error.stdout?.toString() ?? '',
-        stderr: error.stderr?.toString() ?? error.message,
-        exitCode: error.code ?? 1,
+        stdout: err.stdout?.toString() ?? '',
+        stderr: err.stderr?.toString() ?? err.message,
+        exitCode: (err.code as unknown as number) ?? 1,
         command,
         args,
         duration: Date.now() - startTime,

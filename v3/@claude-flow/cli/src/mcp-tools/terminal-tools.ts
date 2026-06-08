@@ -198,7 +198,8 @@ export const terminalTools: MCPTool[] = [
           env: { ...process.env, ...session.env },
         });
         exitCode = 0;
-      } catch (err: any) {
+      } catch (caught) {
+        const err = caught as { stdout?: string; stderr?: string; status?: number };
         output = (err.stdout || '') + (err.stderr ? `\n[stderr] ${err.stderr}` : '');
         exitCode = err.status ?? 1;
       }

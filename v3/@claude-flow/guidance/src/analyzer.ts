@@ -641,8 +641,9 @@ class DefaultHeadlessExecutor implements IContentAwareExecutor {
         { timeout: 60000, maxBuffer: 10 * 1024 * 1024, encoding: 'utf-8', cwd: workDir }
       );
       return { stdout, stderr, exitCode: 0 };
-    } catch (error: any) {
-      return { stdout: error.stdout ?? '', stderr: error.stderr ?? '', exitCode: error.code ?? 1 };
+    } catch (error) {
+      const err = error as { stdout?: string; stderr?: string; code?: number };
+      return { stdout: err.stdout ?? '', stderr: err.stderr ?? '', exitCode: err.code ?? 1 };
     } finally {
       if (swapped) {
         try {

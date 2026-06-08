@@ -242,9 +242,10 @@ export async function validateAgentSpawn(input: Record<string, unknown>): Promis
         type: input.agentType,
         id: input.agentId,
       });
-    } catch (zodErr: any) {
-      if (zodErr.issues) {
-        for (const issue of zodErr.issues) {
+    } catch (zodErr) {
+      const ze = zodErr as { issues?: Array<{ code: string; path: (string | number)[]; message: string }> };
+      if (ze.issues) {
+        for (const issue of ze.issues) {
           if (issue.code === 'invalid_enum_value') continue;
           errors.push(`${issue.path.join('.')}: ${issue.message}`);
         }

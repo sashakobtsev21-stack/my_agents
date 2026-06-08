@@ -157,11 +157,12 @@ export class ProcessExecutor implements ICommandExecutor {
         encoding: 'utf-8',
       });
       return { stdout, stderr, exitCode: 0 };
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { stdout?: string; stderr?: string; code?: number };
       return {
-        stdout: error.stdout ?? '',
-        stderr: error.stderr ?? '',
-        exitCode: error.code ?? 1,
+        stdout: err.stdout ?? '',
+        stderr: err.stderr ?? '',
+        exitCode: err.code ?? 1,
       };
     }
   }
@@ -258,7 +259,7 @@ export class HeadlessRunner {
         runEvent,
         durationMs,
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         task,
         success: false,
@@ -268,7 +269,7 @@ export class HeadlessRunner {
         evaluatorResults: [],
         runEvent: null,
         durationMs: Date.now() - startTime,
-        error: error.message,
+        error: (error as Error).message,
       };
     }
   }

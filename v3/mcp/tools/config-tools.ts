@@ -263,9 +263,9 @@ async function handleLoadConfig(
     } else {
       config = loadedConfig;
     }
-  } catch (error: any) {
+  } catch (error) {
     // If file doesn't exist, use defaults
-    if (error.code !== 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
       console.error('Failed to load config:', error);
     }
     // Continue with default config
@@ -307,9 +307,9 @@ async function handleSaveConfig(
         const existingContent = await fs.readFile(safePath, 'utf-8');
         backupPath = `${safePath}.backup.${Date.now()}`;
         await fs.writeFile(backupPath, existingContent, 'utf-8');
-      } catch (error: any) {
+      } catch (error) {
         // Ignore if file doesn't exist
-        if (error.code !== 'ENOENT') {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
           console.error('Failed to create backup:', error);
         }
       }
@@ -322,9 +322,9 @@ async function handleSaveConfig(
         const existingContent = await fs.readFile(safePath, 'utf-8');
         const existingConfig = JSON.parse(existingContent);
         configToSave = { ...existingConfig, ...input.config };
-      } catch (error: any) {
+      } catch (error) {
         // If file doesn't exist, just save new config
-        if (error.code !== 'ENOENT') {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
           console.error('Failed to load existing config for merge:', error);
         }
       }

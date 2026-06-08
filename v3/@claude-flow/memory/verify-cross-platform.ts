@@ -99,22 +99,22 @@ async function main() {
       // Expected to fail at runtime, we're just checking compilation
     });
     verify('Syntax', true, 'SqlJsBackend imports without syntax errors ✓');
-  } catch (error: any) {
-    if (error.code === 'ERR_MODULE_NOT_FOUND') {
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ERR_MODULE_NOT_FOUND') {
       verify('Syntax', true, 'SqlJsBackend syntax valid (not compiled yet) ✓');
     } else {
-      verify('Syntax', false, `Syntax error: ${error.message}`);
+      verify('Syntax', false, `Syntax error: ${(error as Error).message}`);
     }
   }
 
   try {
     await import('./src/database-provider.js').catch(() => {});
     verify('Syntax', true, 'DatabaseProvider imports without syntax errors ✓');
-  } catch (error: any) {
-    if (error.code === 'ERR_MODULE_NOT_FOUND') {
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ERR_MODULE_NOT_FOUND') {
       verify('Syntax', true, 'DatabaseProvider syntax valid (not compiled yet) ✓');
     } else {
-      verify('Syntax', false, `Syntax error: ${error.message}`);
+      verify('Syntax', false, `Syntax error: ${(error as Error).message}`);
     }
   }
 
