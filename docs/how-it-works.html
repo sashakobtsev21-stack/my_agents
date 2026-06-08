@@ -1,0 +1,139 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AlexKo / my_agents — что и как работает</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#283040;--fg:#e6edf3;--mut:#9aa7b4;--ok:#3fb950;--warn:#d29922;--accent:#6366f1;--cy:#39c5cf;--pu:#a371f7}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.62 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:42px 20px 80px}
+h1{font-size:30px;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 22px;font-size:16px}
+h2{font-size:21px;margin:34px 0 12px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:16px;margin:18px 0 6px;color:var(--cy)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+.stats{color:var(--mut);font-size:13px;margin:6px 0 18px}
+table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:600}
+code{background:#0a0d12;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px}
+pre{background:#0a0d12;border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow:auto;font-size:12.5px;line-height:1.5}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.mut{color:var(--mut)}.pu{color:var(--pu)}.cy{color:var(--cy)}
+ul{margin:6px 0;padding-left:20px}li{margin:5px 0}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0;font-size:13.5px}
+.chip{background:#0a0d12;border:1px solid var(--line);border-radius:20px;padding:4px 11px;white-space:nowrap}
+.arrow{color:var(--mut)}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.row a{color:#4493f8;font-size:14px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:7px 12px}
+.row a:hover{border-color:var(--accent)}
+.foot{color:var(--mut);font-size:12px;margin-top:30px}
+b.k{color:var(--fg)}
+</style></head><body><div class="wrap">
+
+<h1>⚙️ Что и как работает</h1>
+<p class="sub">AlexKo (репозиторий <code>my_agents</code>) — переиспользуемая AI-команда для Claude Code. Как она устроена и как ею пользоваться.</p>
+<p class="stats">121 агент · 41 скилл · 168 команд · 33 плагина · ~313 MCP-инструментов · 24 v3-пакета · форк <code>ruvnet/claude-flow</code> (MIT)</p>
+
+<h2>1 · Что это, в двух словах</h2>
+<div class="card">
+Это «коробка с готовой IT-командой» для Claude Code. Ты подключаешь её к своему проекту — и у Claude появляется
+набор <b>ролей</b> (агенты), <b>сценариев</b> (скиллы/команды) и <b>реальных действий</b> (MCP-инструменты),
+плюс координация между ними. Claude перестаёт быть «одним помощником» и становится <b>оркестратором команды</b>.
+</div>
+
+<h2>2 · Строительные блоки (главное различие)</h2>
+<table>
+<tr><th>Блок</th><th>Что это</th><th>Природа</th></tr>
+<tr><td><b class="cy">Агент</b></td><td>роль: «кем быть» (coder, security-auditor, reviewer…). 121 шт.</td><td>текст-инструкция</td></tr>
+<tr><td><b class="cy">Скилл / Команда</b></td><td>сценарий: «как делать» / ярлык (<code>/analyze-project</code>). 41 скилл.</td><td>текст-инструкция</td></tr>
+<tr><td><b class="cy">MCP-инструмент</b></td><td>действие: реально что-то <b>сделать</b> (записать память, запустить сворм). ~313 шт.</td><td><b class="pu">код-действие</b></td></tr>
+<tr><td><b class="cy">Плагин</b></td><td>упаковка: привозит агентов/скиллы/MCP пачкой. 33 шт.</td><td>упаковка</td></tr>
+</table>
+<p class="mut">Ключ: агент/скилл/команда — это <b>инструкции</b> (текст). MCP-инструмент — это <b>код</b>, который реально действует. Плагин — то, что всё это доставляет.</p>
+
+<h2>3 · Как Claude Code этим управляет</h2>
+<div class="card">
+<b class="k">Главный принцип: «команда координирует — Claude Code создаёт».</b>
+<ul>
+<li><b>Claude Code = оркестратор + исполнитель.</b> Он читает файлы, гоняет реальные тулзы (build, <code>npm audit</code>,
+тесты, git), пишет код — и <b>делегирует</b> подзадачи параллельным агентам-специалистам через Task-tool.</li>
+<li><b>CLI / MCP = координация.</b> Инициализация сворма, выбор топологии, общая память, маршрутизация —
+это «штаб». Саму работу делают агенты Task-tool.</li>
+<li><b>Связь между агентами — SendMessage.</b> Именованные агенты общаются напрямую (pipeline: architect → coder → tester → reviewer),
+а не только через лида.</li>
+</ul>
+<div class="flow"><span class="chip">🔍 researcher</span><span class="arrow">→</span><span class="chip">🏗️ architect</span><span class="arrow">→</span><span class="chip">💻 coder</span><span class="arrow">→</span><span class="chip">🧪 tester</span><span class="arrow">→</span><span class="chip">👀 reviewer</span></div>
+<span class="mut">Анти-дрейф по умолчанию: иерархическая топология, 6–8 агентов, чёткие роли (specialized), consensus raft.</span>
+</div>
+
+<h2>4 · Умная маршрутизация по стоимости (3 уровня)</h2>
+<table>
+<tr><th>Tier</th><th>Кто</th><th>Когда</th><th>Цена</th></tr>
+<tr><td>1</td><td>детерминированный codemod (без LLM)</td><td>структурные правки: <code>var→const</code>, remove-console</td><td><b class="ok">$0, ~1ms</b></td></tr>
+<tr><td>2</td><td>Haiku</td><td>простые задачи, низкая сложность</td><td>~$0.0002</td></tr>
+<tr><td>3</td><td>Sonnet / Opus</td><td>архитектура, безопасность, сложное рассуждение</td><td>$0.003–0.015</td></tr>
+</table>
+<p class="mut">Перед спавном агентов система подсказывает тир/модель — простые правки не уходят на дорогой Opus.</p>
+
+<h2>5 · Два главных рабочих флоу</h2>
+<div class="card">
+<h3>🔍 /analyze-project — аудит существующего репозитория</h3>
+Указываешь репо → 3 параллельных специалиста (безопасность / качество / архитектура) + реальные тулзы
+(<code>npm audit</code>, typecheck, lint, тесты) → отчёт с приоритетами <b>P1/P2/P3</b> и планом. Опционально — фиксы + PR.
+<div class="flow"><span class="chip">репо</span><span class="arrow">→</span><span class="chip">параллельный аудит</span><span class="arrow">→</span><span class="chip">отчёт P1/P2/P3</span><span class="arrow">→</span><span class="chip">фиксы → PR</span></div>
+<h3>🆕 /new-project — сборка нового продукта с нуля</h3>
+Идея → требования → архитектура → реализация → тесты → рабочая первая версия.
+<div class="card" style="margin-top:8px;background:#0a0d12">
+<b class="ok">Verify-гейт у обоих:</b> «готово» = <b>собирается + тесты проходят + реально запускается</b>. Не «по словам».
+</div>
+</div>
+
+<h2>6 · Память и «интеллект» (честные цифры)</h2>
+<div class="card">
+<ul>
+<li><b>AgentDB + HNSW</b> — векторная память с семантическим поиском. Измерено: <b>~1.9x при N=20k, ~3.2x–4.7x при N=5k</b>
+против полного перебора (recall@10 ~0.99); ANN выигрывает выше точки перелома.</li>
+<li><b>SONA</b> — само-оптимизация (измерено 0.0043ms/adapt) · <b>MoE</b> — маршрутизация экспертов · <b>EWC++</b> — против забывания.</li>
+<li>Пайплайн: <b>RETRIEVE</b> (HNSW) → <b>JUDGE</b> (вердикты) → <b>DISTILL</b> (LoRA) → <b>CONSOLIDATE</b> (EWC++).</li>
+</ul>
+<span class="warn">⚠️ Старые рекламные цифры «HNSW 150x–12,500x» и «Flash Attention 2.49x–7.47x» — не воспроизведены / без бенчмарка. В проекте заменены на измеренные или помечены «unverified».</span>
+</div>
+
+<h2>7 · Статуслайн в Claude Code</h2>
+<div class="card">
+Внизу AlexKo рисует живую панель (скрипт <code>.claude/helpers/statusline.cjs</code>): версия/модель/контекст/стоимость,
+прогресс DDD-доменов, сворм (агенты/хуки/CVE/память/🧠%), архитектура (ADR/DDD/Security), AgentDB (векторы/тесты).
+Это барометр состояния, а не статичный баннер. Полная расшифровка — в <a href="../README.md">README</a>.
+<pre>▊ AlexKo V3.6 ● user │ Opus 4.8 │ ⏱ 269m │ ● 90% ctx │ $130
+🏗️ DDD Domains [○○○○○] 0/5   🤖 Swarm ○[0/15] 🪝0/0 CVE0/0 💾5MB 🧠0%</pre>
+</div>
+
+<h2>8 · Как подключить к своему проекту</h2>
+<div class="card">
+<ul>
+<li><b>Плагины Claude Code</b> (рекомендуется) — установить из этого репозитория в сессии Claude Code.</li>
+<li><b>Копирование <code>.claude/</code></b> — положить агентов/скиллы в целевой проект.</li>
+<li><b><code>npx alexko …</code></b> (алиас <code>npx ruflo …</code>) — публичный npm-пакет CLI (общий движок, не твоя кастомная команда).</li>
+</ul>
+<span class="mut">Чтобы подключить именно мою команду агентов/скиллов — способ 1 или 2 (npm-пакет ставит общий движок). Детали — в README.</span>
+</div>
+
+<h2>9 · Из чего собрано (пакеты)</h2>
+<table>
+<tr><th>Пакет</th><th>Назначение</th></tr>
+<tr><td><code>@claude-flow/cli</code></td><td>точка входа CLI (26 команд)</td></tr>
+<tr><td><code>@claude-flow/memory</code></td><td>AgentDB + HNSW-поиск</td></tr>
+<tr><td><code>@claude-flow/security</code></td><td>валидация входа, защита путей, CVE</td></tr>
+<tr><td><code>@claude-flow/hooks</code></td><td>17 хуков + 12 фоновых воркеров</td></tr>
+<tr><td><code>@claude-flow/shared</code></td><td>общие типы, event-sourcing</td></tr>
+<tr><td><code>@claude-flow/swarm</code></td><td>координация агентов, оркестрация задач</td></tr>
+</table>
+<span class="mut">Монорепо из 24 v3-пакетов (pnpm workspace). Бренд — AlexKo; npm-пакеты — <code>ruflo</code>/<code>alexko</code> (один и тот же CLI) + <code>@claude-flow/*</code>.</span>
+
+<div class="row">
+<a href="start.html">🏠 Точка входа</a>
+<a href="session-summary.html">🏁 Что было сделано</a>
+<a href="concepts.html">🧠 Для чайников</a>
+<a href="full-breakdown.html">📚 Полный разбор</a>
+<a href="agent-catalog.html">🧭 Реестр агентов</a>
+<a href="../README.md">📄 README</a>
+</div>
+
+<p class="foot">Витрины каталога/разбора авто-генерируются <code>scripts/gen-*.mjs</code>. Измеренные цифры — <code>docs/reviews/intelligence-system-audit-2026-05-29.md</code>.</p>
+</div></body></html>
