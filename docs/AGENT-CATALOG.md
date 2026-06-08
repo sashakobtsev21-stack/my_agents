@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **126** · направлений: **28** · руководителей: **28** · модернизировано: **126/126**.
+> Агентов: **123** · направлений: **28** · руководителей: **25** · модернизировано: **123/123**.
 
 ## Как выбрать агента
 
@@ -16,7 +16,6 @@
 | Агент | Тир | Направление | Когда подключать |
 |---|---|---|---|
 | [`queen-coordinator`](../.claude/agents/hive-mind/queen-coordinator.md) | 🟣 opus | Hive-Mind | Sovereign hive orchestrator (Tier 0). Use as the top-level lead of a hive-mind run — owns the goal, picks the topology, allocates resources across agent classes, and keeps the hive coherent. Produces the authoritative strategic plan. |
-| [`v3-queen-coordinator`](../.claude/agents/v3/v3-queen-coordinator.md) | 🟣 opus | V3 | V3 Queen Coordinator for 15-agent concurrent swarm orchestration, GitHub issue management, and cross-agent coordination. Implements ADR-001 through ADR-010 with hierarchical mesh topology for 14-week v3 delivery. |
 | [`collective-intelligence-coordinator`](../.claude/agents/hive-mind/collective-intelligence-coordinator.md) | 🟣 opus | Hive-Mind | Collective-intelligence nexus (Tier 0). Use to orchestrate distributed cognition across the hive — aggregate decisions, synchronize shared knowledge, and balance cognitive load. Produces a coherent collective decision + synchronized knowledge graph. |
 | [`project-coordinator`](../.claude/agents/project-coordinator.md) | 🔵 sonnet | Прочие | Coordinates multi-agent workflows — decomposes the goal, assigns named agents, sequences handoffs via SendMessage, and synthesizes results. Use as the lead for multi-step, multi-agent tasks. |
 | [`dual-orchestrator`](../.claude/agents/dual-mode/dual-orchestrator.md) | 🟣 opus | Dual-Mode (Claude + Codex) | Orchestrates Claude Code (interactive) + Codex (headless) for hybrid workflows |
@@ -27,7 +26,6 @@
 | [`mesh-coordinator`](../.claude/agents/swarm/mesh-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Peer-to-peer mesh swarm coordinator. Use when agents must collaborate as equals with no single point of failure — fault-tolerant, partition-resilient, distributed decision-making. Produces peer assignments and consensus decisions. |
 | [`byzantine-coordinator`](../.claude/agents/consensus/byzantine-coordinator.md) | 🔵 sonnet | Consensus / распределённые | Byzantine fault-tolerant consensus coordinator. Use when nodes may be adversarial/compromised and you need agreement despite arbitrary faults (tolerates f < n/3). Produces a PBFT-committed value + malicious-actor report. |
 | [`codex-coordinator`](../.claude/agents/dual-mode/codex-coordinator.md) | 🔵 sonnet | Dual-Mode (Claude + Codex) | Coordinates multiple headless Codex workers for parallel execution |
-| [`consensus-coordinator`](../.claude/agents/sublinear/consensus-coordinator.md) | 🔵 sonnet | Sublinear | Distributed consensus agent that uses sublinear solvers for fast agreement protocols in multi-agent systems. Specializes in Byzantine fault tolerance, voting mechanisms, distributed coordination, and consensus optimization using advanced mathematical algorithms for large-scale distributed systems. |
 | [`crdt-synchronizer`](../.claude/agents/consensus/crdt-synchronizer.md) | 🔵 sonnet | Consensus / распределённые | CRDT state-synchronization coordinator. Use when multiple writers (incl. offline) concurrently mutate shared state and it must converge automatically with no coordination. Produces a merged, conflict-free state. |
 | [`game-director`](../.claude/agents/game-dev/game-director.md) | 🟣 opus | Game Dev (Unity / 3D mobile) | Creative & technical director for the game — owns the vision, pillars, and Game Design Document, and keeps every discipline coherent. Use as the Tier-0 lead for the whole game project. |
 | [`gossip-coordinator`](../.claude/agents/consensus/gossip-coordinator.md) | 🔵 sonnet | Consensus / распределённые | Gossip/epidemic consensus coordinator. Use for large-scale, highly-available dissemination where eventual consistency beats strong agreement. Scales to many nodes with probabilistic guarantees. |
@@ -41,7 +39,6 @@
 | [`security-manager`](../.claude/agents/consensus/security-manager.md) | 🔵 sonnet | Consensus / распределённые | Consensus security layer. Use to add cryptographic authentication, membership enforcement, and attack detection (Byzantine/Sybil/Eclipse/DoS) on top of a consensus strategy — not a standalone consensus. |
 | [`swarm-memory-manager`](../.claude/agents/hive-mind/swarm-memory-manager.md) | 🟢 haiku | Hive-Mind | Hive memory/persistence layer (Tier 3). Use to manage distributed memory — consistency, persistence, fast retrieval, caching, and sync — the durable substrate every agent reads/writes. Mechanical and frequent. |
 | [`sync-coordinator`](../.claude/agents/github/sync-coordinator.md) | 🔵 sonnet | GitHub | Multi-package alignment coordinator. Use for ongoing alignment between packages/repos — version harmonization, dependency resolution, doc/config sync — and the resulting sync PR. Keeps things consistent over time. |
-| [`template-pr-manager`](../.claude/agents/templates/github-pr-manager.md) | 🔵 sonnet | Templates | Template/scaffold for a PR-lifecycle agent. Canonical runtime agent is pr-manager (github/pr-manager.md). |
 | [`worker-specialist`](../.claude/agents/hive-mind/worker-specialist.md) | 🔵 sonnet | Hive-Mind | Hive task-execution specialist (execution layer). Use to carry out a concrete assigned task with precision, reporting progress before/during/after. Produces the completed work product, never strategy. |
 
 ---
@@ -114,7 +111,7 @@
 | [`flow-nexus-user-tools`](../.claude/agents/flow-nexus/user-tools.md) ✓ | 🟢 haiku | User management and system utilities specialist. Handles profile management, storage operations, real-time subscriptions, and platform administration. |
 | [`flow-nexus-workflow`](../.claude/agents/flow-nexus/workflow.md) ✓ | 🔵 sonnet | Event-driven workflow automation specialist. Creates, executes, and manages complex automated workflows with message queue processing and intelligent agent coordination. |
 
-### Templates (9)
+### Templates (8)
 
 | Агент | Тир | Описание |
 |---|---|---|
@@ -126,7 +123,6 @@
 | [`sparc-coord`](../.claude/agents/templates/sparc-coordinator.md) 🎖 ✓ | 🔵 sonnet | SPARC methodology orchestrator for systematic development phase coordination |
 | [`swarm-init`](../.claude/agents/templates/coordinator-swarm-init.md) ✓ | 🟢 haiku | Swarm initialization and topology optimization specialist |
 | [`task-orchestrator`](../.claude/agents/templates/orchestrator-task.md) 🎖 ✓ | 🟢 haiku | Central coordination agent for task decomposition, execution planning, and result synthesis |
-| [`template-pr-manager`](../.claude/agents/templates/github-pr-manager.md) 🎖 ✓ | 🔵 sonnet | Template/scaffold for a PR-lifecycle agent. Canonical runtime agent is pr-manager (github/pr-manager.md). |
 
 ### Consensus / распределённые (7)
 
@@ -139,17 +135,6 @@
 | [`quorum-manager`](../.claude/agents/consensus/quorum-manager.md) 🎖 ✓ | 🔵 sonnet | Dynamic quorum & membership coordinator. Use when you want configurable read/write quorums to tune the consistency-vs-availability trade-off without committing to full Raft leadership. |
 | [`raft-manager`](../.claude/agents/consensus/raft-manager.md) 🎖 ✓ | 🔵 sonnet | Raft consensus coordinator. Use when nodes are trusted (crash-only faults) and you need a single authoritative leader with a linearizable replicated log. Tolerates f < n/2 crash faults. The hive-mind default. |
 | [`security-manager`](../.claude/agents/consensus/security-manager.md) 🎖 ✓ | 🔵 sonnet | Consensus security layer. Use to add cryptographic authentication, membership enforcement, and attack detection (Byzantine/Sybil/Eclipse/DoS) on top of a consensus strategy — not a standalone consensus. |
-
-### V3 (6)
-
-| Агент | Тир | Описание |
-|---|---|---|
-| [`test-architect`](../.claude/agents/v3/test-architect.md) ✓ | 🔵 sonnet | Test strategy and quality-assurance architect — designs the test approach (what to test, at which level), not just individual tests. Use to plan coverage, choose test levels, and close gaps. |
-| [`v3-integration-architect`](../.claude/agents/v3/v3-integration-architect.md) ✓ | 🟣 opus | V3 Integration Architect for deep agentic-flow@alpha integration. Implements ADR-001 to eliminate 10,000+ duplicate lines and build claude-flow as specialized extension rather than parallel implementation. |
-| [`v3-memory-specialist`](../.claude/agents/v3/v3-memory-specialist.md) ✓ | 🔵 sonnet | V3 Memory Specialist for unifying 6+ memory systems into AgentDB with HNSW indexing. Implements ADR-006 (Unified Memory Service) and ADR-009 (Hybrid Memory Backend) to achieve ~1.9x-4.7x (measured) search improvements. |
-| [`v3-performance-engineer`](../.claude/agents/v3/v3-performance-engineer.md) ✓ | 🔵 sonnet | V3 Performance Engineer for achieving aggressive performance targets. Responsible for unverified Flash Attention speedup, ~1.9x-4.7x (measured) search improvements, and comprehensive benchmarking suite. |
-| [`v3-queen-coordinator`](../.claude/agents/v3/v3-queen-coordinator.md) 🎖 ✓ | 🟣 opus | V3 Queen Coordinator for 15-agent concurrent swarm orchestration, GitHub issue management, and cross-agent coordination. Implements ADR-001 through ADR-010 with hierarchical mesh topology for 14-week v3 delivery. |
-| [`v3-security-architect`](../.claude/agents/v3/v3-security-architect.md) ✓ | 🟣 opus | V3 Security Architect responsible for complete security overhaul, threat modeling, and CVE remediation planning. Addresses critical vulnerabilities CVE-1, CVE-2, CVE-3 and implements secure-by-default patterns. |
 
 ### Development (5)
 
@@ -191,15 +176,15 @@
 | [`swarm-memory-manager`](../.claude/agents/hive-mind/swarm-memory-manager.md) 🎖 ✓ | 🟢 haiku | Hive memory/persistence layer (Tier 3). Use to manage distributed memory — consistency, persistence, fast retrieval, caching, and sync — the durable substrate every agent reads/writes. Mechanical and frequent. |
 | [`worker-specialist`](../.claude/agents/hive-mind/worker-specialist.md) 🎖 ✓ | 🔵 sonnet | Hive task-execution specialist (execution layer). Use to carry out a concrete assigned task with precision, reporting progress before/during/after. Produces the completed work product, never strategy. |
 
-### Sublinear (5)
+### V3 (5)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`consensus-coordinator`](../.claude/agents/sublinear/consensus-coordinator.md) 🎖 ✓ | 🔵 sonnet | Distributed consensus agent that uses sublinear solvers for fast agreement protocols in multi-agent systems. Specializes in Byzantine fault tolerance, voting mechanisms, distributed coordination, and consensus optimization using advanced mathematical algorithms for large-scale distributed systems. |
-| [`matrix-optimizer`](../.claude/agents/sublinear/matrix-optimizer.md) ✓ | 🔵 sonnet | Expert agent for matrix analysis and optimization using sublinear algorithms. Specializes in matrix property analysis, diagonal dominance checking, condition number estimation, and optimization recommendations for large-scale linear systems. Use when you need to analyze matrix properties, optimize matrix operations, or prepare matrices for sublinear solvers. |
-| [`pagerank-analyzer`](../.claude/agents/sublinear/pagerank-analyzer.md) ✓ | 🔵 sonnet | Expert agent for graph analysis and PageRank calculations using sublinear algorithms. Specializes in network optimization, influence analysis, swarm topology optimization, and large-scale graph computations. Use for social network analysis, web graph analysis, recommendation systems, and distributed system topology design. |
-| [`performance-optimizer`](../.claude/agents/sublinear/performance-optimizer.md) ✓ | 🔵 sonnet | System performance optimization agent that identifies bottlenecks and optimizes resource allocation using sublinear algorithms. Specializes in computational performance analysis, system optimization, resource management, and efficiency maximization across distributed systems and cloud infrastructure. |
-| [`trading-predictor`](../.claude/agents/sublinear/trading-predictor.md) ✓ | 🔵 sonnet | Advanced financial trading agent that leverages temporal advantage calculations to predict and execute trades before market data arrives. Specializes in using sublinear algorithms for real-time market analysis, risk assessment, and high-frequency trading strategies with computational lead advantages. |
+| [`test-architect`](../.claude/agents/v3/test-architect.md) ✓ | 🔵 sonnet | Test strategy and quality-assurance architect — designs the test approach (what to test, at which level), not just individual tests. Use to plan coverage, choose test levels, and close gaps. |
+| [`v3-integration-architect`](../.claude/agents/v3/v3-integration-architect.md) ✓ | 🟣 opus | V3 Integration Architect for deep agentic-flow@alpha integration. Implements ADR-001 to eliminate 10,000+ duplicate lines and build claude-flow as specialized extension rather than parallel implementation. |
+| [`v3-memory-specialist`](../.claude/agents/v3/v3-memory-specialist.md) ✓ | 🔵 sonnet | V3 Memory Specialist for unifying 6+ memory systems into AgentDB with HNSW indexing. Implements ADR-006 (Unified Memory Service) and ADR-009 (Hybrid Memory Backend) to achieve ~1.9x-4.7x (measured) search improvements. |
+| [`v3-performance-engineer`](../.claude/agents/v3/v3-performance-engineer.md) ✓ | 🔵 sonnet | V3 Performance Engineer for achieving aggressive performance targets. Responsible for unverified Flash Attention speedup, ~1.9x-4.7x (measured) search improvements, and comprehensive benchmarking suite. |
+| [`v3-security-architect`](../.claude/agents/v3/v3-security-architect.md) ✓ | 🟣 opus | V3 Security Architect responsible for complete security overhaul, threat modeling, and CVE remediation planning. Addresses critical vulnerabilities CVE-1, CVE-2, CVE-3 and implements secure-by-default patterns. |
 
 ### SPARC (4)
 
@@ -218,6 +203,15 @@
 | [`devops-engineer`](../.claude/agents/devops/devops-engineer.md) ✓ | 🔵 sonnet | DevOps / infrastructure specialist — IaC (Terraform/Pulumi), containers, Kubernetes, and deployment pipelines. Use to provision infra, write/review IaC, containerize, and design safe deploys. |
 | [`incident-responder`](../.claude/agents/devops/incident-responder.md) ✓ | 🔵 sonnet | SRE / incident-response specialist — triages production incidents, restores service fast, runs blameless postmortems, and writes runbooks. Use during or after an outage, or to harden on-call readiness. |
 | [`observability-engineer`](../.claude/agents/devops/observability-engineer.md) ✓ | 🔵 sonnet | Observability specialist — logging, distributed tracing, metrics, dashboards, and alerting. Use to instrument code, diagnose production issues from telemetry, or design SLO-based alerts. |
+
+### Sublinear (4)
+
+| Агент | Тир | Описание |
+|---|---|---|
+| [`matrix-optimizer`](../.claude/agents/sublinear/matrix-optimizer.md) ✓ | 🔵 sonnet | Expert agent for matrix analysis and optimization using sublinear algorithms. Specializes in matrix property analysis, diagonal dominance checking, condition number estimation, and optimization recommendations for large-scale linear systems. Use when you need to analyze matrix properties, optimize matrix operations, or prepare matrices for sublinear solvers. |
+| [`pagerank-analyzer`](../.claude/agents/sublinear/pagerank-analyzer.md) ✓ | 🔵 sonnet | Expert agent for graph analysis and PageRank calculations using sublinear algorithms. Specializes in network optimization, influence analysis, swarm topology optimization, and large-scale graph computations. Use for social network analysis, web graph analysis, recommendation systems, and distributed system topology design. |
+| [`performance-optimizer`](../.claude/agents/sublinear/performance-optimizer.md) ✓ | 🔵 sonnet | System performance optimization agent that identifies bottlenecks and optimizes resource allocation using sublinear algorithms. Specializes in computational performance analysis, system optimization, resource management, and efficiency maximization across distributed systems and cloud infrastructure. |
+| [`trading-predictor`](../.claude/agents/sublinear/trading-predictor.md) ✓ | 🔵 sonnet | Advanced financial trading agent that leverages temporal advantage calculations to predict and execute trades before market data arrives. Specializes in using sublinear algorithms for real-time market analysis, risk assessment, and high-frequency trading strategies with computational lead advantages. |
 
 ### Swarm (топологии) (3)
 
