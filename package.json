@@ -1,7 +1,7 @@
 {
   "name": "my_agents",
   "version": "3.10.31",
-  "description": "my_agents — reusable AI agent team for Claude Code: 123 agents, 41 skills, 33 plugins and MCP tools to plug into any project for development, analysis and testing. Fork of ruvnet/claude-flow (MIT).",
+  "description": "my_agents — reusable AI agent team for Claude Code: 104 agents, 41 skills, 33 plugins and MCP tools to plug into any project for development, analysis and testing. Fork of ruvnet/claude-flow (MIT).",
   "main": "bin/cli.js",
   "type": "module",
   "bin": {
@@ -43,7 +43,7 @@
     "test:cli": "cd v3/@claude-flow/cli && npm test",
     "test:coverage": "cd v3 && corepack pnpm test:coverage",
     "test:security": "cd v3/@claude-flow/security && npm test",
-    "lint": "eslint v3/@claude-flow/cli/src --ext .ts",
+    "lint": "cd v3 && corepack pnpm exec eslint @claude-flow/cli/src --ext .ts",
     "security:audit": "npm audit --audit-level high",
     "security:fix": "npm audit fix",
     "security:test": "npm run test:security",
