@@ -10,7 +10,8 @@
       "paths": [
         {
           "name": "child_process",
-          "message": "Use SafeExecutor from @claude-flow/security or execFileSync (no shell) instead. See ADR-078."
+          "importNames": ["exec", "execSync"],
+          "message": "exec/execSync ALWAYS run a shell — use execFileSync(file, argv) or SafeExecutor from @claude-flow/security instead. See ADR-078."
         }
       ]
     }],
@@ -18,7 +19,7 @@
       "paths": [
         {
           "name": "child_process",
-          "message": "Use SafeExecutor from @claude-flow/security or execFileSync (no shell) instead. See ADR-078."
+          "message": "Top-level require('child_process') makes shell-vs-no-shell invisible. Use named imports of execFileSync / execFile / spawn (no shell). See ADR-078."
         }
       ]
     }]
@@ -40,13 +41,8 @@
         "src/commands/analyze.ts",
         "src/commands/doctor.ts",
         "src/commands/hive-mind.ts",
-        "src/mcp-tools/auto-install.ts",
-        "src/plugins/manager.ts",
-        "src/services/claim-service.ts",
         "src/services/container-worker-pool.ts",
-        "src/services/headless-worker-executor.ts",
-        "src/transfer/storage/gcs.ts",
-        "src/update/executor.ts"
+        "src/services/headless-worker-executor.ts"
       ],
       "rules": {
         "no-restricted-imports": "off",

@@ -28,6 +28,14 @@ export default defineConfig({
     environment: 'node',
     include: ['__tests__/**/*.test.ts'],
     globals: true,
+    // Explicit pool: 'forks' (matches vitest v4 default) — pins isolation
+    // behavior in case a future default changes. Note: even with forks, vitest
+    // runs tests inside a fork via worker_threads, so `process.chdir()` still
+    // throws "not supported in workers" on Windows for files that depend on
+    // changing cwd (router-bandit, issue-2250-2251). Those tests pass on
+    // Linux CI and pass on Windows in isolation. A proper fix requires those
+    // tests to thread tmpDir as an explicit arg instead of cwd-switching.
+    pool: 'forks',
     coverage: {
       enabled: false,
     },
