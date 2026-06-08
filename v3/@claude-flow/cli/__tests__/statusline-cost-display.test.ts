@@ -111,6 +111,9 @@ describe('statusline cost display — committed artifact drift guard', () => {
       '../../../../.claude/helpers/statusline.cjs',
     );
     if (!existsSync(artifact)) return; // package tested in isolation; nothing to guard
-    expect(readFileSync(artifact, 'utf-8')).toBe(SCRIPT);
+    // Compare modulo line endings: git autocrlf checks the committed artifact
+    // out as CRLF on Windows while the generator emits LF.
+    const norm = (s: string) => s.replace(/\r\n/g, '\n');
+    expect(norm(readFileSync(artifact, 'utf-8'))).toBe(norm(SCRIPT));
   });
 });

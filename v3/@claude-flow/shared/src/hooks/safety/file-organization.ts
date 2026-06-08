@@ -259,7 +259,9 @@ export class FileOrganizationHook {
       blocked = true;
       blockReason = `Source files should not be written to root folder. Suggested: ${fileTypeInfo.directories[0]}`;
       suggestedDirectory = fileTypeInfo.directories[0];
-      suggestedPath = path.join(suggestedDirectory, fileName);
+      // POSIX join so the suggested path stays '/'-separated on Windows too
+      // (it's a user-facing hint, not a filesystem operation).
+      suggestedPath = path.posix.join(suggestedDirectory, fileName);
 
       issues.push({
         type: 'root-write',

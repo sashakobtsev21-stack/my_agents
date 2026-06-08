@@ -19,7 +19,9 @@ import {
 
 describe('PathValidator', () => {
   let validator: PathValidator;
-  const projectRoot = '/workspaces/project';
+  // Resolve to a platform-absolute root so the suite is cross-platform
+  // (on Windows '/workspaces/project' is not absolute -> resolves under a drive).
+  const projectRoot = path.resolve('/workspaces/project');
 
   beforeEach(() => {
     validator = new PathValidator({
@@ -41,7 +43,9 @@ describe('PathValidator', () => {
       });
 
       const prefixes = relativeValidator.getAllowedPrefixes();
-      expect(prefixes[0]).toMatch(/^\//);
+      // Cross-platform: assert it's absolute via path.isAbsolute rather than a
+      // POSIX-only '/^\//' (Windows absolute paths start with a drive letter).
+      expect(path.isAbsolute(prefixes[0])).toBe(true);
     });
   });
 
@@ -109,8 +113,8 @@ describe('PathValidator', () => {
     });
 
     it('should calculate relative path correctly', async () => {
-      const result = await validator.validate('/workspaces/project/src/deep/file.ts');
-      expect(result.relativePath).toBe('src/deep/file.ts');
+      const result = await validator.validate(path.join(projectRoot, 'src', 'deep', 'file.ts'));
+      expect(result.relativePath).toBe(['src', 'deep', 'file.ts'].join(path.sep));
     });
   });
 
@@ -219,8 +223,8 @@ describe('PathValidator', () => {
 
   describe('validateOrThrow', () => {
     it('should return path when valid', async () => {
-      const resolved = await validator.validateOrThrow('/workspaces/project/src/file.ts');
-      expect(resolved).toBe('/workspaces/project/src/file.ts');
+      const resolved = await validator.validateOrThrow(path.join(projectRoot, 'src', 'file.ts'));
+      expect(resolved).toBe(path.join(projectRoot, 'src', 'file.ts'));
     });
 
     it('should throw when invalid', async () => {
@@ -233,7 +237,7 @@ describe('PathValidator', () => {
   describe('securePath', () => {
     it('should join paths securely', async () => {
       const resolved = await validator.securePath(projectRoot, 'src', 'file.ts');
-      expect(resolved).toBe('/workspaces/project/src/file.ts');
+      expect(resolved).toBe(path.join(projectRoot, 'src', 'file.ts'));
     });
 
     it('should block traversal in segments', async () => {
@@ -245,7 +249,7 @@ describe('PathValidator', () => {
 
   describe('isWithinAllowed', () => {
     it('should return true for allowed paths', () => {
-      expect(validator.isWithinAllowed('/workspaces/project/src')).toBe(true);
+      expect(validator.isWithinAllowed(path.join(projectRoot, 'src'))).toBe(true);
     });
 
     it('should return false for disallowed paths', () => {
@@ -255,19 +259,19 @@ describe('PathValidator', () => {
 
   describe('Factory Functions', () => {
     it('should create project path validator', () => {
-      const projectValidator = createProjectPathValidator('/workspaces/project');
+      const projectValidator = createProjectPathValidator(projectRoot);
       const prefixes = projectValidator.getAllowedPrefixes();
 
-      expect(prefixes).toContain('/workspaces/project/src');
-      expect(prefixes).toContain('/workspaces/project/tests');
-      expect(prefixes).toContain('/workspaces/project/docs');
+      expect(prefixes).toContain(path.join(projectRoot, 'src'));
+      expect(prefixes).toContain(path.join(projectRoot, 'tests'));
+      expect(prefixes).toContain(path.join(projectRoot, 'docs'));
     });
 
     it('should create full project path validator', () => {
-      const fullValidator = createFullProjectPathValidator('/workspaces/project');
+      const fullValidator = createFullProjectPathValidator(projectRoot);
       const prefixes = fullValidator.getAllowedPrefixes();
 
-      expect(prefixes).toContain('/workspaces/project');
+      expect(prefixes).toContain(projectRoot);
     });
   });
 

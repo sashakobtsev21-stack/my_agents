@@ -455,13 +455,13 @@ function generateStatusline() {
   const domainsColor = domainsCompleted >= 3 ? c.brightGreen : domainsCompleted > 0 ? c.yellow : c.red;
   let perfIndicator;
   if (hasHnsw && vectorCount > 0) {
-    const speedup = vectorCount > 10000 ? '12500x' : vectorCount > 1000 ? '150x' : '10x';
+    const speedup = vectorCount > 10000 ? '~2x' : vectorCount > 1000 ? '~3x' : 'exact';
     perfIndicator = c.brightGreen + '⚡ HNSW ' + speedup + c.reset;
   } else if (patternsLearned > 0) {
     const pk = patternsLearned >= 1000 ? (patternsLearned / 1000).toFixed(1) + 'k' : String(patternsLearned);
     perfIndicator = c.brightYellow + '📚 ' + pk + ' patterns' + c.reset;
   } else {
-    perfIndicator = c.dim + '⚡ target: ~1.9x-4.7x (measured)' + c.reset;
+    perfIndicator = c.dim + '⚡ HNSW ANN search' + c.reset;
   }
   lines.push(
     c.brightCyan + '🏗️  DDD Domains' + c.reset + '    ' + progressBar(domainsCompleted, totalDomains) + '  ' +
