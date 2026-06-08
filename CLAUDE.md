@@ -1,7 +1,7 @@
 # Claude Code Configuration — my_agents (v3.10.31)
 
 > **my_agents** — reusable AI agent team for Claude Code. Fork of [ruvnet/claude-flow](https://github.com/ruvnet/claude-flow) (MIT).
-> Verified in this checkout: 121 agents, 41 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, ~313 MCP tools.
+> Verified in this checkout: 126 agents, 41 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, ~313 MCP tools.
 > Packages: `@claude-flow/cli@3.10.31`, root `my_agents@3.10.31`.
 
 ## Behavioral Rules (Always Enforced)
@@ -484,11 +484,11 @@ claude -p --resume "abc-123" --fork-session "Try approach B: CQRS pattern"
 | `--permission-mode <mode>` | acceptEdits, bypassPermissions, plan, etc. |
 | `--mcp-config <json>` | Load MCP servers from JSON |
 
-## Available Agents (121) — auto-generated catalog
+## Available Agents (126) — auto-generated catalog
 
 > The single source of truth for **all agents** is the auto-generated catalog — do **not** hand-maintain an agent list here (it drifts).
 >
-> - 🎯 **[`docs/CORE-AGENTS.md`](docs/CORE-AGENTS.md)** — **start here.** Curated ~20-agent core for most work + an honest overlap/consolidation map (quality over quantity). Nothing deleted; the full 121 stay available.
+> - 🎯 **[`docs/CORE-AGENTS.md`](docs/CORE-AGENTS.md)** — **start here.** Curated ~20-agent core for most work + an honest overlap/consolidation map (quality over quantity). Nothing deleted; the full 126 stay available.
 > - 📖 **[`docs/AGENT-CATALOG.md`](docs/AGENT-CATALOG.md)** — full roster by area + model tier, with 🎖 leads/orchestrators and "when to connect" (renders on GitHub).
 > - 🖥️ **[`docs/agent-catalog.html`](docs/agent-catalog.html)** — interactive (search, tier/role filters). **[`docs/agent-report.html`](docs/agent-report.html)** — composition + changes + how it works.
 > - Regenerate any time: `node scripts/gen-agent-catalog.mjs`.

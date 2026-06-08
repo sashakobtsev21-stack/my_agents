@@ -1,6 +1,6 @@
 # Core Agents — the curated entry point
 
-> **Quality over quantity.** The full roster is **121 agents** ([AGENT-CATALOG.md](AGENT-CATALOG.md)),
+> **Quality over quantity.** The full roster is **126 agents** ([AGENT-CATALOG.md](AGENT-CATALOG.md)),
 > but most work needs ~20. This page is the curated short list to reach for first,
 > plus an honest map of where the catalog overlaps and could be consolidated.
 >
@@ -64,6 +64,6 @@ Powerful but only relevant to their domain — keep them, surface them on demand
 ## Why this matters
 
 The toolkit's value is reliability, not headcount. A smaller, well-understood
-core is easier to route to correctly and less confusing than 121 thinly-distinct
+core is easier to route to correctly and less confusing than 126 thinly-distinct
 options. Treat this list as the default; drop into the long tail only when a core
 agent doesn't fit.

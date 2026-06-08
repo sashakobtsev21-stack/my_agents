@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **121** · направлений: **28** · руководителей: **28** · модернизировано: **121/121**.
+> Агентов: **126** · направлений: **28** · руководителей: **28** · модернизировано: **126/126**.
 
 ## Как выбрать агента
 
@@ -151,6 +151,16 @@
 | [`v3-queen-coordinator`](../.claude/agents/v3/v3-queen-coordinator.md) 🎖 ✓ | 🟣 opus | V3 Queen Coordinator for 15-agent concurrent swarm orchestration, GitHub issue management, and cross-agent coordination. Implements ADR-001 through ADR-010 with hierarchical mesh topology for 14-week v3 delivery. |
 | [`v3-security-architect`](../.claude/agents/v3/v3-security-architect.md) ✓ | 🟣 opus | V3 Security Architect responsible for complete security overhaul, threat modeling, and CVE remediation planning. Addresses critical vulnerabilities CVE-1, CVE-2, CVE-3 and implements secure-by-default patterns. |
 
+### Development (5)
+
+| Агент | Тир | Описание |
+|---|---|---|
+| [`accessibility-specialist`](../.claude/agents/development/accessibility-specialist.md) ✓ | 🔵 sonnet | Web accessibility (a11y) specialist — WCAG conformance, keyboard navigation, screen-reader support, focus management, color contrast, and semantic HTML/ARIA. Use to audit or build UI that everyone can use. |
+| [`backend-dev`](../.claude/agents/development/dev-backend-api.md) ✓ | 🔵 sonnet | Backend API developer (self-learning). Use to build/review REST or GraphQL APIs with the Controller-Service-Repository pattern, validation, authz, and tests. The canonical backend agent; persists successful patterns to ReasoningBank. |
+| [`backend-dev-basic`](../.claude/agents/development/backend/dev-backend-api.md) ✓ | 🔵 sonnet | Baseline backend API developer (REST/GraphQL). Leaner variant of backend-dev without ReasoningBank pattern persistence. Use when you want the baseline without self-learning overhead. |
+| [`debugger`](../.claude/agents/development/debugger.md) ✓ | 🔵 sonnet | Root-cause debugging specialist — reproduces, isolates, and explains failures (crashes, wrong output, flaky tests, regressions, perf cliffs) before a fix is written. Use when something is broken and the cause isn't obvious. |
+| [`migration-engineer`](../.claude/agents/development/migration-engineer.md) ✓ | 🔵 sonnet | Migration specialist — version upgrades, schema/data migrations, and breaking-change rollouts with safe, reversible, incremental steps. Use to plan/execute v2→v3-style migrations or risky cutovers. |
+
 ### Optimization / Performance (5)
 
 | Агент | Тир | Описание |
@@ -200,6 +210,15 @@
 | [`refinement`](../.claude/agents/sparc/refinement.md) ✓ | 🔵 sonnet | SPARC Refinement phase. Use after Architecture to turn the design into production-ready code via TDD, optimization, refactoring, and hardening. Produces tested, optimized implementation with green tests. |
 | [`specification`](../.claude/agents/sparc/specification.md) ✓ | 🔵 sonnet | SPARC Specification phase. Use first in a SPARC run to turn a goal into a complete, testable requirements spec (functional + non-functional, constraints, acceptance criteria). Produces docs/SPEC.md — the "what to build" contract. |
 
+### DevOps (4)
+
+| Агент | Тир | Описание |
+|---|---|---|
+| [`cicd-engineer`](../.claude/agents/devops/ci-cd/ops-cicd-github.md) ✓ | 🔵 sonnet | GitHub Actions CI/CD specialist. Use to create/optimize build-test-deploy pipelines as Actions YAML — job matrices, caching, scoped tokens, secrets, reusable actions. Produces workflow files. |
+| [`devops-engineer`](../.claude/agents/devops/devops-engineer.md) ✓ | 🔵 sonnet | DevOps / infrastructure specialist — IaC (Terraform/Pulumi), containers, Kubernetes, and deployment pipelines. Use to provision infra, write/review IaC, containerize, and design safe deploys. |
+| [`incident-responder`](../.claude/agents/devops/incident-responder.md) ✓ | 🔵 sonnet | SRE / incident-response specialist — triages production incidents, restores service fast, runs blameless postmortems, and writes runbooks. Use during or after an outage, or to harden on-call readiness. |
+| [`observability-engineer`](../.claude/agents/devops/observability-engineer.md) ✓ | 🔵 sonnet | Observability specialist — logging, distributed tracing, metrics, dashboards, and alerting. Use to instrument code, diagnose production issues from telemetry, or design SLO-based alerts. |
+
 ### Swarm (топологии) (3)
 
 | Агент | Тир | Описание |
@@ -208,21 +227,13 @@
 | [`hierarchical-coordinator`](../.claude/agents/swarm/hierarchical-coordinator.md) 🎖 ✓ | 🔵 sonnet | Hierarchical (queen-led) swarm coordinator. Use when a complex task needs central planning with one coordinator delegating to specialized workers — the anti-drift default for coding swarms. Produces a task tree, an agent-assignment map, and an integrated result. |
 | [`mesh-coordinator`](../.claude/agents/swarm/mesh-coordinator.md) 🎖 ✓ | 🔵 sonnet | Peer-to-peer mesh swarm coordinator. Use when agents must collaborate as equals with no single point of failure — fault-tolerant, partition-resilient, distributed decision-making. Produces peer assignments and consensus decisions. |
 
-### Development (3)
+### Analysis (3)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`backend-dev`](../.claude/agents/development/dev-backend-api.md) ✓ | 🔵 sonnet | Backend API developer (self-learning). Use to build/review REST or GraphQL APIs with the Controller-Service-Repository pattern, validation, authz, and tests. The canonical backend agent; persists successful patterns to ReasoningBank. |
-| [`backend-dev-basic`](../.claude/agents/development/backend/dev-backend-api.md) ✓ | 🔵 sonnet | Baseline backend API developer (REST/GraphQL). Leaner variant of backend-dev without ReasoningBank pattern persistence. Use when you want the baseline without self-learning overhead. |
-| [`migration-engineer`](../.claude/agents/development/migration-engineer.md) ✓ | 🔵 sonnet | Migration specialist — version upgrades, schema/data migrations, and breaking-change rollouts with safe, reversible, incremental steps. Use to plan/execute v2→v3-style migrations or risky cutovers. |
-
-### DevOps (3)
-
-| Агент | Тир | Описание |
-|---|---|---|
-| [`cicd-engineer`](../.claude/agents/devops/ci-cd/ops-cicd-github.md) ✓ | 🔵 sonnet | GitHub Actions CI/CD specialist. Use to create/optimize build-test-deploy pipelines as Actions YAML — job matrices, caching, scoped tokens, secrets, reusable actions. Produces workflow files. |
-| [`devops-engineer`](../.claude/agents/devops/devops-engineer.md) ✓ | 🔵 sonnet | DevOps / infrastructure specialist — IaC (Terraform/Pulumi), containers, Kubernetes, and deployment pipelines. Use to provision infra, write/review IaC, containerize, and design safe deploys. |
-| [`observability-engineer`](../.claude/agents/devops/observability-engineer.md) ✓ | 🔵 sonnet | Observability specialist — logging, distributed tracing, metrics, dashboards, and alerting. Use to instrument code, diagnose production issues from telemetry, or design SLO-based alerts. |
+| [`analyst`](../.claude/agents/analysis/code-analyzer.md) ✓ | 🔵 sonnet | Structural code analyst (heavier lane). Use for module dependency mapping, circular-dependency detection, architectural-consistency review, and quality-trend tracking over time. Produces structural analysis + actionable insights. |
+| [`code-analyzer`](../.claude/agents/analysis/analyze-code-quality.md) ✓ | 🔵 sonnet | Code quality reviewer (metrics lane). Use for readability, maintainability, complexity thresholds, coding-standard adherence, and surface smell detection. Produces a quality report — review feedback, not refactored code. |
+| [`data-analyst`](../.claude/agents/analysis/data-analyst.md) ✓ | 🔵 sonnet | Data analysis specialist — turns raw data into trustworthy answers: exploratory analysis, metrics/KPIs, SQL queries, cohort/funnel/A-B analysis, and clear visualizations. Use to answer "what is the data telling us?" (not to build pipelines). |
 
 ### Goal / GOAP (3)
 
@@ -240,12 +251,12 @@
 | [`codex-worker`](../.claude/agents/dual-mode/codex-worker.md) ✓ | 🔵 sonnet | Headless Codex background worker for parallel task execution with self-learning |
 | [`dual-orchestrator`](../.claude/agents/dual-mode/dual-orchestrator.md) 🎖 ✓ | 🟣 opus | Orchestrates Claude Code (interactive) + Codex (headless) for hybrid workflows |
 
-### Analysis (2)
+### Documentation (2)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`analyst`](../.claude/agents/analysis/code-analyzer.md) ✓ | 🔵 sonnet | Structural code analyst (heavier lane). Use for module dependency mapping, circular-dependency detection, architectural-consistency review, and quality-trend tracking over time. Produces structural analysis + actionable insights. |
-| [`code-analyzer`](../.claude/agents/analysis/analyze-code-quality.md) ✓ | 🔵 sonnet | Code quality reviewer (metrics lane). Use for readability, maintainability, complexity thresholds, coding-standard adherence, and surface smell detection. Produces a quality report — review feedback, not refactored code. |
+| [`api-docs`](../.claude/agents/documentation/api-docs/docs-api-openapi.md) ✓ | 🔵 sonnet | Expert agent for creating and maintaining OpenAPI/Swagger documentation |
+| [`technical-writer`](../.claude/agents/documentation/technical-writer.md) ✓ | 🔵 sonnet | User-facing documentation specialist — READMEs, guides, tutorials, onboarding docs, changelogs, and feature narratives that are accurate and easy to follow. Use to write or improve human-readable docs (not API reference schemas). |
 
 ### Data (2)
 
@@ -266,12 +277,6 @@
 | Агент | Тир | Описание |
 |---|---|---|
 | [`agentic-payments`](../.claude/agents/payments/agentic-payments.md) ✓ | 🔵 sonnet | Multi-agent payment authorization specialist for autonomous AI commerce with cryptographic verification and Byzantine consensus |
-
-### Documentation (1)
-
-| Агент | Тир | Описание |
-|---|---|---|
-| [`api-docs`](../.claude/agents/documentation/api-docs/docs-api-openapi.md) ✓ | 🔵 sonnet | Expert agent for creating and maintaining OpenAPI/Swagger documentation |
 
 ### Reasoning (1)
 

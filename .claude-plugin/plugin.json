@@ -1,7 +1,7 @@
 {
   "name": "my_agents",
   "version": "3.10.31",
-  "description": "my_agents — reusable AI agent team for Claude Code: 121 agents, 39 skills, 168 commands, SPARC methodology, swarm coordination, GitHub integration and neural training. Fork of ruvnet/claude-flow (MIT).",
+  "description": "my_agents — reusable AI agent team for Claude Code: 126 agents, 39 skills, 168 commands, SPARC methodology, swarm coordination, GitHub integration and neural training. Fork of ruvnet/claude-flow (MIT).",
   "author": {
     "name": "Aleksandr",
     "url": "https://github.com/sashakobtsev21-stack"
