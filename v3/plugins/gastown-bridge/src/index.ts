@@ -1068,8 +1068,14 @@ export class GasTownBridgePlugin extends EventEmitter implements IPlugin {
 
     // Initialize SyncBridge - requires an AgentDB service
     // We create a stub AgentDB service that will be replaced when
-    // the plugin context provides a real one
+    // the plugin context provides a real one. NOTE: this in-memory stub
+    // does NOT persist across process restarts — if the plugin context
+    // never supplies a real AgentDB, synced state is lost on exit.
     const stubAgentDB = this.createStubAgentDB();
+    this.logger.warn(
+      '[gastown] Using in-memory stub AgentDB (no persistence). ' +
+        'Provide a real AgentDB service via the plugin context to retain synced state across restarts.',
+    );
     this.syncBridge = createSyncBridge(stubAgentDB, {
       beadsBridge: this.config.bdBridge,
       agentdbNamespace: this.config.syncBridge?.namespace ?? 'gastown:beads',

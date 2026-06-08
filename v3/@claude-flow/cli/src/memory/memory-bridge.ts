@@ -21,6 +21,11 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import { createRequire } from 'node:module';
 
+/** Safely extract a message from an unknown thrown value (no `any`). */
+function errMsg(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
+
 // ===== Lazy singleton =====
 
 let registryPromise: Promise<any> | null = null;
@@ -2220,7 +2225,7 @@ export async function bridgeHierarchicalStore(params: { key: string; value: stri
     // Stub fallback
     hm.store(params.key, params.value, tier);
     return { success: true, key: params.key, tier };
-  } catch (e: any) { return { success: false, error: e.message }; }
+  } catch (e) { return { success: false, error: errMsg(e) }; }
 }
 
 /**
@@ -2259,7 +2264,7 @@ export async function bridgeHierarchicalRecall(params: { query: string; tier?: s
       ? results.filter((r: any) => r.tier === params.tier)
       : results;
     return { results: filtered, controller: 'hierarchicalMemory' };
-  } catch (e: any) { return { results: [], error: e.message }; }
+  } catch (e) { return { results: [], error: errMsg(e) }; }
 }
 
 /**
@@ -2279,7 +2284,7 @@ export async function bridgeConsolidate(params: { minAge?: number; maxEntries?: 
     if (!mc) return { success: false, error: 'MemoryConsolidation not available' };
     const result = await mc.consolidate();
     return { success: true, consolidated: result };
-  } catch (e: any) { return { success: false, error: e.message }; }
+  } catch (e) { return { success: false, error: errMsg(e) }; }
 }
 
 /**
@@ -2306,8 +2311,9 @@ export async function bridgeBatchOperation(params: { operation: string; entries:
         }));
         try {
           result = await batch.insertEpisodes(episodes);
-        } catch (insertErr: any) {
-          if (insertErr?.message?.includes('null') || insertErr?.message?.includes('embedBatch')) {
+        } catch (insertErr) {
+          const insertMsg = errMsg(insertErr);
+          if (insertMsg.includes('null') || insertMsg.includes('embedBatch')) {
             return { success: false, error: 'Embedder not initialized for batch insert. Use memory_store for individual entries or run embeddings_init first.' };
           }
           throw insertErr;
@@ -2334,7 +2340,7 @@ export async function bridgeBatchOperation(params: { operation: string; entries:
       default: return { success: false, error: `Unknown operation: ${params.operation}` };
     }
     return { success: true, operation: params.operation, count: params.entries.length, result };
-  } catch (e: any) { return { success: false, error: e.message }; }
+  } catch (e) { return { success: false, error: errMsg(e) }; }
 }
 
 /**
@@ -2371,7 +2377,7 @@ export async function bridgeContextSynthesize(params: { query: string; maxEntrie
     }
     const result = CS.synthesize(memories, { includeRecommendations: true });
     return { success: true, synthesis: result };
-  } catch (e: any) { return { success: false, error: e.message }; }
+  } catch (e) { return { success: false, error: errMsg(e) }; }
 }
 
 /**
@@ -2397,7 +2403,7 @@ export async function bridgeSemanticRoute(params: { input: string }): Promise<an
     }
     const result = await router.route(params.input);
     return { route: result, controller: 'semanticRouter' };
-  } catch (e: any) { return { route: null, error: e.message, controller: 'error' }; }
+  } catch (e) { return { route: null, error: errMsg(e), controller: 'error' }; }
 }
 
 // ===== RaBitQ data export =====
