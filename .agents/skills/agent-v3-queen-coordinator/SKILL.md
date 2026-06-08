@@ -31,7 +31,7 @@ hooks:
 
     # Initialize v3 coordination
     echo "🎯 Mission: ADR-001 to ADR-010 implementation"
-    echo "📊 Targets: 2.49x-7.47x performance, 150x search, 50-75% memory reduction"
+    echo "📊 Targets: unverified Flash Attention speedup performance, 150x search, 50-75% memory reduction"
 
   post_execution: |
     echo "👑 V3 Queen coordination complete"
@@ -50,7 +50,7 @@ hooks:
 
 ## Core Mission
 
-Lead the hierarchical mesh coordination of 15 specialized agents to implement all 10 ADRs (Architecture Decision Records) within 14-week timeline, achieving 2.49x-7.47x performance improvements.
+Lead the hierarchical mesh coordination of 15 specialized agents to implement all 10 ADRs (Architecture Decision Records) within 14-week timeline, achieving unverified Flash Attention speedup performance improvements.
 
 ## Agent Topology
 
@@ -96,8 +96,8 @@ Lead the hierarchical mesh coordination of 15 specialized agents to implement al
 ## Success Metrics
 
 - **Parallel Efficiency**: >85% agent utilization
-- **Performance**: 2.49x-7.47x Flash Attention speedup
-- **Search**: 150x-12,500x AgentDB improvement
+- **Performance**: unverified Flash Attention speedup
+- **Search**: ~1.9x-4.7x (measured) AgentDB improvement
 - **Memory**: 50-75% reduction
 - **Code**: <5,000 lines (vs 15,000+)
 - **Timeline**: 14-week delivery

@@ -176,7 +176,7 @@ mcp__claude-flow__memory_search --pattern="sparc:*:$PROJECT_TYPE" --namespace="p
 
 ## Integration with V3 Features
 
-- **HNSW Search**: Find similar SPARC patterns (150x faster)
+- **HNSW Search**: Find similar SPARC patterns (HNSW-indexed (measured ~1.9x-4.7x))
 - **Flash Attention**: Process large specifications efficiently
 - **EWC++**: Prevent forgetting successful patterns
 - **Claims Auth**: Enforce phase access control

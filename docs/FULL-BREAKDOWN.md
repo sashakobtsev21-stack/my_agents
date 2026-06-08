@@ -46,7 +46,7 @@
 | `agentdb-advanced` | Master advanced AgentDB features including QUIC synchronization, multi-database management, custom distance metrics, hybrid search, and distributed systems inte |
 | `agentdb-learning` | Create and train AI learning plugins with AgentDB's 9 reinforcement learning algorithms. Includes Decision Transformer, Q-Learning, SARSA, Actor-Critic, and mor |
 | `agentdb-memory-patterns` | Implement persistent memory patterns for AI agents using AgentDB. Includes session memory, long-term storage, pattern learning, and context management. Use when |
-| `agentdb-optimization` | Optimize AgentDB performance with quantization (4-32x memory reduction), HNSW indexing (150x faster search), caching, and batch operations. Use when optimizing  |
+| `agentdb-optimization` | Optimize AgentDB performance with quantization (4-32x memory reduction), HNSW indexing (HNSW-indexed search), caching, and batch operations. Use when optimizing |
 | `agentdb-vector-search` | Implement semantic vector search with AgentDB for intelligent document retrieval, similarity matching, and context-aware querying. Use when building RAG systems |
 | `agentic-jujutsu` | \| |
 | `browser` | Web browser automation with AI-optimized snapshots for claude-flow agents |
@@ -63,7 +63,7 @@
 | `hooks-automation` | Automated coordination, formatting, and learning from Claude Code operations using intelligent hooks with MCP integration. Includes pre/post task hooks, session |
 | `pair-programming` | AI-assisted pair programming with multiple modes (driver/navigator/switch), real-time verification, quality monitoring, and comprehensive testing. Supports TDD, |
 | `performance-analysis` | \| |
-| `reasoningbank-agentdb` | Implement ReasoningBank adaptive learning with AgentDB's 150x faster vector database. Includes trajectory tracking, verdict judgment, memory distillation, and p |
+| `reasoningbank-agentdb` | Implement ReasoningBank adaptive learning with AgentDB's HNSW-indexed (measured ~1.9x-4.7x) vector database. Includes trajectory tracking, verdict judgment, mem |
 | `reasoningbank-intelligence` | Implement adaptive learning with ReasoningBank for pattern recognition, strategy optimization, and continuous improvement. Use when building self-learning agent |
 | `skill-builder` | Create new Claude Code Skills with proper YAML frontmatter, progressive disclosure structure, and complete directory organization. Use when you need to build cu |
 | `sparc-methodology` | \| |
@@ -75,8 +75,8 @@
 | `v3-ddd-architecture` | Domain-Driven Design architecture for claude-flow v3. Implements modular, bounded context architecture with clean separation of concerns and microkernel pattern |
 | `v3-integration-deep` | Deep agentic-flow@alpha integration implementing ADR-001. Eliminates 10,000+ duplicate lines by building claude-flow as specialized extension rather than parall |
 | `v3-mcp-optimization` | MCP server optimization and transport layer enhancement for claude-flow v3. Implements connection pooling, load balancing, tool registry optimization, and perfo |
-| `v3-memory-unification` | Unify 6+ memory systems into AgentDB with HNSW indexing for 150x-12,500x search improvements. Implements ADR-006 (Unified Memory Service) and ADR-009 (Hybrid Me |
-| `v3-performance-optimization` | Achieve aggressive v3 performance targets: 2.49x-7.47x Flash Attention speedup, 150x-12,500x search improvements, 50-75% memory reduction. Comprehensive benchma |
+| `v3-memory-unification` | Unify 6+ memory systems into AgentDB with HNSW indexing for ~1.9x-4.7x (measured) search improvements. Implements ADR-006 (Unified Memory Service) and ADR-009 ( |
+| `v3-performance-optimization` | Achieve aggressive v3 performance targets: unverified Flash Attention speedup, ~1.9x-4.7x (measured) search improvements, 50-75% memory reduction. Comprehensive |
 | `v3-security-overhaul` | Complete security architecture overhaul for claude-flow v3. Addresses critical CVEs (CVE-1, CVE-2, CVE-3) and implements secure-by-default patterns. Use for sec |
 | `v3-swarm-coordination` | 15-agent hierarchical mesh coordination for v3 implementation. Orchestrates parallel execution across security, core, and integration domains following 10 ADRs  |
 | `verification-quality` | \| |

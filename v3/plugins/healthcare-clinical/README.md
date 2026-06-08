@@ -241,7 +241,7 @@ const rateLimits = {
 
 ## Dependencies
 
-- `micro-hnsw-wasm`: Fast similarity search (150x faster than traditional)
+- `micro-hnsw-wasm`: Fast similarity search (HNSW-indexed (measured ~1.9x-4.7x) than traditional)
 - `ruvector-gnn-wasm`: Graph neural networks for pathway analysis
 - `ruvector-hyperbolic-hnsw-wasm`: Hierarchical medical ontology embeddings
 - `ruvector-sparse-inference-wasm`: Efficient inference on sparse clinical features

@@ -56,7 +56,7 @@ Tests for `FlashAttentionOptimizer` class and related functions.
 #### Performance Validation (3 tests)
 - Speedup improvement demonstration
 - Operations per second tracking
-- V3 target validation (2.49x-7.47x)
+- V3 target validation (unverified Flash Attention speedup)
 
 #### Edge Cases (4 tests)
 - Small dimensions (32D)
@@ -186,7 +186,7 @@ npx vitest run __tests__/ --reporter=verbose
 
 The test suite validates against V3 performance targets:
 
-- **Flash Attention Speedup**: 2.49x - 7.47x (minimum 2.49x)
+- **Flash Attention Speedup**: unverified Flash Attention speedup (minimum 2.49x)
 - **Memory Efficiency**: Reduction tracking and validation
 - **Operations/Second**: Throughput measurement and comparison
 - **Execution Time**: <1s for optimization, reasonable benchmark times

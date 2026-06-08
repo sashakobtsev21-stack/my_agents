@@ -143,5 +143,5 @@ Items 1–4, 6, 7, 9 are 3.8.x candidates (patch or hot-fix releases). Items 5, 
 - **ADR-111 (WireGuard federation mesh)**: open enhancement, not blocking; architecture is sound but implementation scope is large (L effort).
 - **ADR-113/R-2 (messaging gateway plugin — Telegram/Discord/Slack)**: P2 per the issue; no blocker, just capacity.
 - **ADR-100 (CLI core split / lazy-load)**: tracked in issue #1760; correctness-first, then split.
-- **Flash Attention (2.49x–7.47x target)**: marked "in progress" in STATUS.md; no specific blocker identified in this survey.
+- **Flash Attention (unverified Flash Attention speedup target)**: marked "in progress" in STATUS.md; no specific blocker identified in this survey.
 - **`ruflo-iot-cognitum` health**: insufficient test coverage visible; needs a dedicated audit pass before declaring production-ready.

@@ -1057,7 +1057,7 @@ flowchart LR
     end
 
     subgraph Storage["💾 Storage"]
-        HNSW[(HNSW Index<br/>150x faster)]
+        HNSW[(HNSW Index<br/>HNSW-indexed (measured ~1.9x-4.7x))]
         SQLite[(SQLite Cache)]
         AgentDB[(AgentDB)]
         Graph[MemoryGraph<br/>PageRank + Communities]
@@ -1848,7 +1848,7 @@ Build custom plugins with the fluent builder API. Create MCP tools, hooks, worke
 | **HookBuilder** | Build hooks with conditions and transformers | Priorities, conditional execution |
 | **WorkerPool** | Managed worker pool with auto-scaling | Min/max workers, task queuing |
 | **ProviderRegistry** | LLM provider management with fallback | Cost optimization, automatic failover |
-| **AgentDBBridge** | Vector storage with HNSW indexing | 150x faster search, batch operations |
+| **AgentDBBridge** | Vector storage with HNSW indexing | HNSW-indexed (measured ~1.9x-4.7x) search, batch operations |
 
 **Plugin Performance:** Load <20ms, Hook execution <0.5ms, Worker spawn <50ms
 
@@ -1984,7 +1984,7 @@ Pre-built WASM plugins for semantic search, intent routing, and pattern storage.
 | **IntentRouterPlugin** | Routes user intents to optimal handlers | 95%+ accuracy |
 | **HookPatternLibraryPlugin** | Pre-built patterns for common tasks | Security, testing, performance |
 | **MCPToolOptimizerPlugin** | Optimizes MCP tool selection | Context-aware suggestions |
-| **ReasoningBankPlugin** | Vector-backed pattern storage with HNSW | 150x faster search |
+| **ReasoningBankPlugin** | Vector-backed pattern storage with HNSW | HNSW-indexed (measured ~1.9x-4.7x) search |
 | **AgentConfigGeneratorPlugin** | Generates optimized agent configurations | From pretrain data |
 
 </details>
@@ -2387,7 +2387,7 @@ ruflo embeddings search -q "authentication patterns"
 
 | Feature | Description | Performance |
 |---------|-------------|-------------|
-| **pgvector Integration** | Native PostgreSQL vector operations | 150x faster than in-memory |
+| **pgvector Integration** | Native PostgreSQL vector operations | HNSW-indexed (measured ~1.9x-4.7x) than in-memory |
 | **Attention Mechanisms** | Self, multi-head, cross-attention in SQL | GPU-accelerated |
 | **Graph Neural Networks** | GNN operations via SQL functions | Message passing, aggregation |
 | **Hyperbolic Embeddings** | Poincaré ball model in PostgreSQL | Better hierarchy representation |
@@ -2419,7 +2419,7 @@ ruflo ruvector backup --output ./backup.sql
 |-----------|---------|----------|
 | `001_create_extension` | Enable pgvector | Vector type, operators |
 | `002_create_vector_tables` | Core tables | embeddings, patterns, agents |
-| `003_create_indices` | HNSW indices | 150x faster search |
+| `003_create_indices` | HNSW indices | HNSW-indexed (measured ~1.9x-4.7x) search |
 | `004_create_functions` | Vector functions | Similarity, clustering |
 | `005_create_attention_functions` | Attention ops | Self/multi-head attention |
 | `006_create_gnn_functions` | GNN operations | Message passing, aggregation |
@@ -2535,7 +2535,7 @@ npx ruflo hive-mind status                                  # Check status
 
 | Component | Description | Performance |
 |-----------|-------------|-------------|
-| **ReasoningBank** | Pattern storage with HNSW indexing | 150x faster retrieval |
+| **ReasoningBank** | Pattern storage with HNSW indexing | HNSW-indexed (measured ~1.9x-4.7x) retrieval |
 | **GuidanceProvider** | Context-aware development guidance | Real-time suggestions |
 | **PatternLearning** | Automatic strategy extraction | Continuous improvement |
 | **QualityTracking** | Success/failure rate per pattern | Performance metrics |
@@ -2821,7 +2821,7 @@ npx ruflo@latest agent spawn -t coder --name my-coder
 # Initialize swarm with V3 mode
 npx ruflo@latest swarm init --v3-mode
 
-# Search memory (HNSW-indexed, 150x faster)
+# Search memory (HNSW-indexed, HNSW-indexed (measured ~1.9x-4.7x))
 npx ruflo@latest memory search -q "authentication patterns"
 
 # Run security scan
@@ -3292,7 +3292,7 @@ Hooks intercept operations (file edits, commands, tasks) and learn from outcomes
 │ past patterns│   │ successful? │    │ learnings   │    │ forgetting  │
 └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
      HNSW              Verdict            LoRA              EWC++
-   150x faster        success/fail      compression       memory lock
+   HNSW-indexed (measured ~1.9x-4.7x)        success/fail      compression       memory lock
 ```
 
 ### Hook Signals (ADR-026 Model Routing)
@@ -3486,7 +3486,7 @@ npx ruflo@latest hooks session-end --export-metrics --persist-patterns
 | `trajectory-step` | RL | Record an action with reward signal |
 | `trajectory-end` | RL | Finish recording, trigger learning |
 | `pattern-store` | Memory | Store a pattern with HNSW indexing |
-| `pattern-search` | Memory | Find similar patterns (150x faster) |
+| `pattern-search` | Memory | Find similar patterns (HNSW-indexed (measured ~1.9x-4.7x)) |
 | `stats` | Analytics | Intelligence diagnostics, confidence trends, improvement tracking |
 | `attention` | Focus | Compute attention-weighted similarity |
 
@@ -4079,7 +4079,7 @@ Skills are **reusable workflows** that combine agents, hooks, and patterns into 
 
 | Skill | What It Does | When To Use |
 |-------|--------------|-------------|
-| `agentdb-vector-search` | Semantic search with 150x faster retrieval | Building RAG systems, knowledge bases |
+| `agentdb-vector-search` | Semantic search with HNSW-indexed (measured ~1.9x-4.7x) retrieval | Building RAG systems, knowledge bases |
 | `agentdb-memory-patterns` | Session memory, persistent storage, context management | Stateful agents, chat systems |
 | `agentdb-learning` | 9 RL algorithms (PPO, DQN, SARSA, etc.) | Self-learning agents, behavior optimization |
 | `agentdb-optimization` | Quantization (4-32x memory reduction), HNSW indexing | Scaling to millions of vectors |
@@ -4487,7 +4487,7 @@ npm install ruflo@latest
 ```typescript
 import { AgentDB } from '@claude-flow/memory';
 
-// Initialize with HNSW indexing (150x faster)
+// Initialize with HNSW indexing (HNSW-indexed (measured ~1.9x-4.7x))
 const db = new AgentDB({
   path: './data/memory',
   hnsw: { m: 16, efConstruction: 200 }
@@ -4964,7 +4964,7 @@ await bank.consolidate();  // Prevent forgetting (EWC++)
 ```
 
 **4-Step Pipeline:**
-1. **RETRIEVE** — Fetch relevant patterns via HNSW (150x faster)
+1. **RETRIEVE** — Fetch relevant patterns via HNSW (HNSW-indexed (measured ~1.9x-4.7x))
 2. **JUDGE** — Evaluate outcomes with verdicts
 3. **DISTILL** — Extract key learnings via LoRA
 4. **CONSOLIDATE** — Prevent catastrophic forgetting (EWC++)
@@ -5156,7 +5156,7 @@ Ruflo automatically leverages agentic-flow for:
 | **Fast Edits** | Agent Booster for mechanical transforms |
 | **Intelligent Routing** | Model router for haiku/sonnet/opus selection |
 | **Pattern Learning** | ReasoningBank stores successful patterns |
-| **Embedding Search** | HNSW-indexed vector search (150x faster) |
+| **Embedding Search** | HNSW-indexed vector search (HNSW-indexed (measured ~1.9x-4.7x)) |
 
 ```typescript
 // Ruflo automatically uses agentic-flow optimizations
@@ -5559,7 +5559,7 @@ SELECT cosine_similarity_arr(a, b) AS similarity;
 | **AI Operations** | External only | **In-database (attention, GNN)** |
 
 <details>
-<summary>⚡ <strong>@ruvector/attention</strong> — Flash Attention (2.49x-7.47x Speedup)</summary>
+<summary>⚡ <strong>@ruvector/attention</strong> — Flash Attention (unverified Flash Attention speedup Speedup)</summary>
 
 Native Rust implementation of Flash Attention for transformer computations:
 
@@ -5683,7 +5683,7 @@ import { getVectorStore } from '@claude-flow/memory';
 const store = await getVectorStore();
 // Uses ruvector if installed, falls back to sql.js
 
-// HNSW-indexed search (150x faster)
+// HNSW-indexed search (HNSW-indexed (measured ~1.9x-4.7x))
 const results = await store.search(queryVector, 10);
 
 // Flash Attention for pattern matching
@@ -6536,7 +6536,7 @@ V3_PERFORMANCE_TARGETS = {
   'agent-spawn': 200,           // <200ms (4x faster)
 
   // Memory Operations
-  'vector-search': 1,           // <1ms (150x faster)
+  'vector-search': 1,           // <1ms (HNSW-indexed (measured ~1.9x-4.7x))
   'hnsw-indexing': 10,          // <10ms
   'memory-write': 5,            // <5ms (10x faster)
   'cache-hit': 0.1,             // <0.1ms
@@ -7444,7 +7444,7 @@ export CLAUDE_FLOW_HNSW_EF=100
 ┌─────────────────────────────────────────────────────────────┐
 │                    V2 → V3 IMPROVEMENTS                     │
 ├───────────────────────┬─────────────────────────────────────┤
-│ Memory Search         │ 150x - 12,500x faster (HNSW)        │
+│ Memory Search         │ ~1.9x-4.7x (measured) faster (HNSW)        │
 │ Pattern Matching      │ Self-learning (ReasoningBank)       │
 │ Security              │ CVE remediation + strict validation │
 │ Modular Architecture  │ 18 @claude-flow/* packages          │

@@ -464,8 +464,8 @@ The testing framework includes assertions for V3 performance targets:
 
 | Metric | Target |
 |--------|--------|
-| Search Speedup | 150x - 12,500x |
-| Flash Attention Speedup | 2.49x - 7.47x |
+| Search Speedup | ~1.9x-4.7x (measured) |
+| Flash Attention Speedup | unverified Flash Attention speedup |
 | Memory Reduction | >= 50% |
 | Startup Time | < 500ms |
 | Response Time | < 100ms |
