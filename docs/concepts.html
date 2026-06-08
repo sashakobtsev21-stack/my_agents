@@ -75,7 +75,7 @@ Tier 3 — узкие спецы  load-balancer · performance-monitor · swarm-
 <h2>📦 Что внутри проекта (полная составляющая)</h2>
 <table><thead><tr><th>Слой</th><th class="num">Кол-во</th><th>Что делает</th><th>Где</th></tr></thead><tbody>
 <tr><td>🤖 Агенты</td><td class="num">121</td><td>команда специалистов (кто работает)</td><td><code>.claude/agents/</code> → <a href="AGENT-CATALOG.md">реестр</a></td></tr>
-<tr><td>🧩 Скиллы</td><td class="num">39</td><td>рецепты процедур (как делать)</td><td><code>.claude/skills/</code></td></tr>
+<tr><td>🧩 Скиллы</td><td class="num">41</td><td>рецепты процедур (как делать)</td><td><code>.claude/skills/</code></td></tr>
 <tr><td>⌨️ Команды</td><td class="num">168</td><td>слэш-ярлыки (быстрый запуск)</td><td><code>.claude/commands/</code></td></tr>
 <tr><td>🔌 Плагины</td><td class="num">33</td><td>тематические бандлы</td><td><code>plugins/</code> · <code>marketplace.json</code></td></tr>
 <tr><td>🛠️ MCP-инструменты</td><td class="num">~313</td><td>реальные действия (память/swarm/github/нейро)</td><td><code>v3/@claude-flow/cli/src/mcp-tools/</code></td></tr>
@@ -83,6 +83,19 @@ Tier 3 — узкие спецы  load-balancer · performance-monitor · swarm-
 <tr><td>🪝 Хуки</td><td class="num">—</td><td>авто-действия на события (вкл. правило проверки агентов)</td><td><code>.claude/settings.json</code>, <code>.githooks/</code></td></tr>
 <tr><td>🏗️ Движок v3</td><td class="num">40+</td><td>CLI, MCP-сервер, память, swarm, безопасность</td><td><code>v3/@claude-flow/*</code></td></tr>
 </tbody></table>
+
+<h2>🖥️ Что за панель внизу терминала (и зачем она)</h2>
+<p>Когда работаешь в Claude Code, внизу видна <b class="k">статус-панель AlexKo</b> — «приборная доска» проекта. Её рисует маленький скрипт <code>.claude/helpers/statusline.cjs</code>, и она показывает <b>живое состояние</b> (обновляется само), а не статичную картинку.</p>
+<p><b>Зачем нужна:</b> с одного взгляда видно, что происходит — не «летишь вслепую». Какая модель, сколько занято контекста, идёт ли команда агентов, сколько хуков/тестов, есть ли уязвимости.</p>
+<p><b>Что значат строки (сверху вниз):</b></p>
+<ul>
+<li><b>Шапка</b> — <code>▊ AlexKo</code> версия · твоё git-имя · <b>модель</b> (Opus/Sonnet) · <b>⏱ время</b> сессии · <b>● N% ctx</b> — насколько заполнено «окно памяти» разговора (зелёный→жёлтый→красный; на 90% пора закругляться).</li>
+<li>🏗️ <b>DDD Domains</b> — прогресс 5 доменов проекта (<code>0/5</code>) + индикатор поиска по памяти.</li>
+<li>🤖 <b>Swarm</b> — активные агенты <code>[0/15]</code>, хуки <code>🪝</code>, уязвимости <code>CVE</code>, размер памяти <code>💾</code>, % обученности <code>🧠</code>.</li>
+<li>🔧 <b>Architecture</b> — ADR-решения, прогресс DDD, статус безопасности.</li>
+<li>📊 <b>AgentDB</b> — сколько векторов в памяти, размер БД, сколько тест-файлов, интеграции (MCP/БД).</li>
+</ul>
+<p class="mut">💲 <b>Стоимость скрыта</b> по умолчанию (это приблизительная клиентская оценка — на подписке вводит в заблуждение). Включить обратно: переменная <code>RUFLO_STATUSLINE_SHOW_COST=1</code>. Нижняя строка <code>⏵⏵ accept edits</code> — это режим самого Claude Code, не часть панели. Полная расшифровка — в <a href="../README.md">README</a>.</p>
 
 <h2>🔄 Как это всё работает вместе</h2>
 <ol>

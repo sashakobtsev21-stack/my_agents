@@ -65,8 +65,8 @@ function renderHeader(env: Record<string, string> = {}): string {
 describe('statusline cost display — generator contract', () => {
   it('reads both env vars and keeps "$" as the default', () => {
     expect(SCRIPT).toContain('RUFLO_STATUSLINE_COST_SYMBOL');
-    expect(SCRIPT).toContain('RUFLO_STATUSLINE_HIDE_COST');
-    // Default must be the dollar sign (?? '$') so existing setups are unchanged.
+    expect(SCRIPT).toContain('RUFLO_STATUSLINE_SHOW_COST');
+    // Symbol default stays the dollar sign (?? '$') for when cost is re-enabled.
     expect(SCRIPT).toContain("process.env.RUFLO_STATUSLINE_COST_SYMBOL ?? '$'");
   });
 
@@ -82,23 +82,22 @@ describe('statusline cost display — generator contract', () => {
 });
 
 describe('statusline cost display — runtime behavior', () => {
-  it('shows "$1.30" by default (backward compatible)', () => {
-    expect(renderHeader()).toContain('$1.30');
+  it('hides cost by default (misleading estimate on subscription plans)', () => {
+    expect(renderHeader()).not.toContain('1.30');
   });
 
-  it('replaces the symbol when RUFLO_STATUSLINE_COST_SYMBOL is set', () => {
-    const header = renderHeader({ RUFLO_STATUSLINE_COST_SYMBOL: '⚡' });
+  it('shows "$1.30" when RUFLO_STATUSLINE_SHOW_COST is enabled', () => {
+    expect(renderHeader({ RUFLO_STATUSLINE_SHOW_COST: '1' })).toContain('$1.30');
+  });
+
+  it('replaces the symbol when RUFLO_STATUSLINE_COST_SYMBOL is set (cost shown)', () => {
+    const header = renderHeader({ RUFLO_STATUSLINE_SHOW_COST: '1', RUFLO_STATUSLINE_COST_SYMBOL: '⚡' });
     expect(header).toContain('⚡1.30');
     expect(header).not.toContain('$1.30');
   });
 
-  it('omits the segment when RUFLO_STATUSLINE_HIDE_COST is truthy', () => {
-    const header = renderHeader({ RUFLO_STATUSLINE_HIDE_COST: '1' });
-    expect(header).not.toContain('1.30');
-  });
-
-  it('shows the number alone when the symbol is an empty string', () => {
-    const header = renderHeader({ RUFLO_STATUSLINE_COST_SYMBOL: '' });
+  it('shows the number alone when the symbol is an empty string (cost shown)', () => {
+    const header = renderHeader({ RUFLO_STATUSLINE_SHOW_COST: '1', RUFLO_STATUSLINE_COST_SYMBOL: '' });
     expect(header).toContain('1.30');
     expect(header).not.toContain('$1.30');
   });

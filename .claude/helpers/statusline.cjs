@@ -31,12 +31,12 @@ const CONFIG = {
   // Session-cost display. Claude Code's cost.total_cost_usd is a client-side
   // estimate that "may differ from your actual bill" and reads as misleading on
   // subscription plans, where token usage is not billed per dollar. These let
-  // each user pick what the segment means to them without changing the default.
+  // Cost is HIDDEN by default (it's a misleading estimate on subscription plans).
   //   RUFLO_STATUSLINE_COST_SYMBOL  override the leading '$' (e.g. ⚡, €, 🌱);
   //                                 set to an empty string for the number alone.
-  //   RUFLO_STATUSLINE_HIDE_COST    1/true/yes/on removes the segment entirely.
+  //   RUFLO_STATUSLINE_SHOW_COST    1/true/yes/on re-enables the cost segment.
   costSymbol: process.env.RUFLO_STATUSLINE_COST_SYMBOL ?? '$',
-  hideCost: /^(1|true|yes|on)$/i.test(process.env.RUFLO_STATUSLINE_HIDE_COST || ''),
+  hideCost: !/^(1|true|yes|on)$/i.test(process.env.RUFLO_STATUSLINE_SHOW_COST || ''),
 };
 
 const CWD = process.cwd();
