@@ -61,6 +61,22 @@ for (const f of walk(AGENTS)) {
 
 // Valid reference universe = agents ∪ plugins ∪ skills ∪ safe non-agent tokens
 const valid = new Set(Object.keys(agents));
+// Archived/advanced agents (moved out of the active set into agents-advanced/) stay
+// valid reference targets so active coordinators can still mention them, but they
+// are NOT loaded by Claude Code and NOT in the active catalog/count.
+try {
+  const walkAdv = (d) => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walkAdv(p);
+      else if (e.name.endsWith('.md')) {
+        const m = fs.readFileSync(p, 'utf8').match(/^name:\s*["']?(.+?)["']?\s*$/m);
+        if (m) valid.add(m[1]);
+      }
+    }
+  };
+  if (fs.existsSync('agents-advanced')) walkAdv('agents-advanced');
+} catch { /* optional */ }
 dirNames('plugins').forEach((n) => valid.add(n));                         // ruflo-*
 try {
   const mk = JSON.parse(fs.readFileSync('.claude-plugin/marketplace.json', 'utf8'));

@@ -1,6 +1,6 @@
 # Core Agents — the curated entry point
 
-> **Quality over quantity.** The full roster is **124 agents** ([AGENT-CATALOG.md](AGENT-CATALOG.md)),
+> **Quality over quantity.** The full roster is **104 agents** ([AGENT-CATALOG.md](AGENT-CATALOG.md)),
 > but most work needs ~20. This page is the curated short list to reach for first,
 > tailored to the projects in use, plus an honest map of where the catalog still overlaps.
 >
@@ -77,22 +77,26 @@ update every `` `agent-name` `` reference and pass `scripts/check-agents.mjs`):
 | Backend (2) | `backend-dev` | `backend-dev-basic` is the same minus ReasoningBank |
 | `v3-*` self-build agents | — | `v3-integration-architect`/`v3-memory-specialist`/`v3-performance-engineer`/`v3-security-architect` are for this repo's own build |
 
-## ⚙️ Advanced — available, but you'll rarely need these
+## ⚙️ Advanced — ARCHIVED (not loaded by Claude Code)
 
-Kept for completeness (and the occasional hive-mind run), but **not relevant to an
-Android game or a scraping service**. Ignore them day-to-day:
+20 niche agents were **moved out of the active set** into [`agents-advanced/`](../agents-advanced/)
+so Claude no longer loads them (cleaner routing for an Android game / scraping service).
+They still resolve as reference targets, and you can restore any group with one `git mv`
+(see [`agents-advanced/README.md`](../agents-advanced/README.md)):
 
-- **Consensus pack (7)** — `raft-manager`, `byzantine-coordinator`, `gossip-coordinator`,
-  `quorum-manager`, `crdt-synchronizer`, `security-manager` … distributed-systems
-  agreement. You don't need Byzantine fault tolerance to scrape websites.
-- **sublinear (4)** / **optimization tier** (`load-balancer`, `resource-allocator`,
-  `topology-optimizer`, `performance-monitor`) — swarm-internal math, not user-facing.
-- **flow-nexus (9)** — only if you use the Flow Nexus cloud platform.
-- **consensus/hive-mind coordinators** — surface only under an explicit hive-mind task.
+- **`consensus/` (9)** — `raft-manager`, `byzantine-coordinator`, `gossip-coordinator`,
+  `quorum-manager`, `crdt-synchronizer`, `security-manager`, `performance-benchmarker` …
+  distributed-systems agreement. You don't need Byzantine fault tolerance to scrape websites.
+- **`sublinear/` (4)** — `matrix-optimizer`, `pagerank-analyzer`, `performance-optimizer`,
+  `trading-predictor` — sublinear-algorithm / graph / HFT modeling.
+- **`flow-nexus/` (9)** — the Flow Nexus cloud platform.
+
+Still-active swarm internals (`load-balancer`, `resource-allocator`, `topology-optimizer`,
+`performance-monitor`) remain in the roster but are rarely user-facing.
 
 ## Why this matters
 
 The toolkit's value is reliability, not headcount. A smaller, well-understood core is
-easier to route to correctly and less confusing than 124 thinly-distinct options. Treat
+easier to route to correctly and less confusing than 104 thinly-distinct options. Treat
 the core + your tailored packs as the default; drop into the long tail only when nothing
 in the core fits.

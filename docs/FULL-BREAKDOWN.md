@@ -2,7 +2,7 @@
 
 > Авто-генерируется: `node scripts/gen-full-breakdown.mjs`. Новичкам сначала — [`CONCEPTS.md`](CONCEPTS.md).
 
-**Состав:** 124 агентов · 41 скиллов · 168 команд · 33 плагинов · ~313 MCP-инструментов · 23 v3-пакетов.
+**Состав:** 104 агентов · 41 скиллов · 168 команд · 33 плагинов · ~313 MCP-инструментов · 23 v3-пакетов.
 
 ## 🤖 Агенты (по направлениям)
 
@@ -11,9 +11,7 @@
 | game-dev | 15 |
 | github | 13 |
 | (root) | 9 |
-| flow-nexus | 9 |
 | templates | 8 |
-| consensus | 7 |
 | development | 6 |
 | core | 5 |
 | hive-mind | 5 |
@@ -21,7 +19,6 @@
 | v3 | 5 |
 | devops | 4 |
 | sparc | 4 |
-| sublinear | 4 |
 | analysis | 3 |
 | dual-mode | 3 |
 | goal | 3 |

@@ -6,7 +6,7 @@
 
 [![version](https://img.shields.io/badge/version-3.10.31-6366f1?style=for-the-badge)](package.json)
 [![license](https://img.shields.io/badge/license-MIT-yellow?style=for-the-badge)](LICENSE)
-[![agents](https://img.shields.io/badge/agents-124-10b981?style=for-the-badge)](.claude/agents/)
+[![agents](https://img.shields.io/badge/agents-104-10b981?style=for-the-badge)](.claude/agents/)
 [![plugins](https://img.shields.io/badge/plugins-33-8b5cf6?style=for-the-badge)](.claude-plugin/marketplace.json)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-3c873a?style=for-the-badge&logo=node.js&logoColor=white)](package.json)
 
@@ -111,7 +111,7 @@ AlexKo рисует внизу **лаконичную** панель (скрип
 
 ```
 my_agents/
-├── .claude/          # ядро команды: agents/ (124), skills/ (41), commands/ (168), helpers/
+├── .claude/          # ядро команды: agents/ (104), skills/ (41), commands/ (168), helpers/
 ├── .claude-plugin/   # marketplace.json (33 плагина) + хуки
 ├── plugins/          # 33 плагина ruflo-*
 ├── v3/               # монорепо v3 (CLI, MCP, память, swarm, security) — pnpm, 23 пакета
