@@ -36,9 +36,12 @@
   "scripts": {
     "build": "npm run build:ts",
     "build:ts": "cd v3/@claude-flow/cli && npm run build",
+    "build:all": "cd v3 && corepack pnpm -r build",
     "typecheck": "tsc --noEmit -p v3/@claude-flow/cli/tsconfig.json",
-    "test": "cd v3/@claude-flow/cli && npm test",
-    "test:coverage": "cd v3/@claude-flow/cli && npm test",
+    "typecheck:all": "cd v3 && corepack pnpm -r typecheck",
+    "test": "cd v3 && corepack pnpm test",
+    "test:cli": "cd v3/@claude-flow/cli && npm test",
+    "test:coverage": "cd v3 && corepack pnpm test:coverage",
     "test:security": "cd v3/@claude-flow/security && npm test",
     "lint": "eslint v3/@claude-flow/cli/src --ext .ts",
     "security:audit": "npm audit --audit-level high",
@@ -105,7 +108,7 @@
     "eslint": "^8.0.0",
     "tsx": "^4.21.0",
     "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": ">=20.0.0"

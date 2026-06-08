@@ -73,13 +73,13 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Run all tests
-        run: npm test || echo "⚠️ Some tests failed (Jest teardown issues - non-blocking)"
+      - name: Run CLI tests (npm-only legacy job; full monorepo suite runs in v3-ci.yml)
+        run: npm run test:cli || echo "⚠️ Some tests failed (native teardown - non-blocking)"
         continue-on-error: true
 
       - name: Generate coverage report
         if: matrix.os == 'ubuntu-latest'
-        run: npm run test:coverage || echo "⚠️ Coverage generation failed (non-blocking)"
+        run: npm run test:cli || echo "⚠️ Coverage generation failed (non-blocking)"
         continue-on-error: true
 
       - name: Upload test results
