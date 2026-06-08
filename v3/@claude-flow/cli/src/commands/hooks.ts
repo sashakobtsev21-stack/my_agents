@@ -15,17 +15,8 @@ import {
   classifyCoverageGap,
   suggestAgentsForFile,
 } from './hooks/coverage-reader.js';
+import { safeNum, formatIntelligenceStatus, formatWorkerStatus } from './hooks/helpers.js';
 
-/**
- * #1686 — `?? 0` only defaults null/undefined; NaN slips through and
- * surfaces as `"NaN"` (or earlier crashed `.toFixed`) in the metrics
- * dashboard and pretrain output. Coerce to a finite number, fall back
- * to `fallback` when the input is null/undefined/non-numeric/NaN/Infinity.
- */
-function safeNum(value: unknown, fallback = 0): number {
-  const n = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(n) ? n : fallback;
-}
 
 
 // Hook types
@@ -2326,22 +2317,6 @@ const intelligenceCommand: Command = {
   }
 };
 
-function formatIntelligenceStatus(status: string): string {
-  switch (status) {
-    case 'active':
-    case 'ready':
-      return output.success(status);
-    case 'training':
-      return output.highlight(status);
-    case 'idle':
-      return output.dim(status);
-    case 'disabled':
-    case 'error':
-      return output.error(status);
-    default:
-      return status;
-  }
-}
 
 // =============================================================================
 // Worker Commands (12 Background Workers)
@@ -2796,20 +2771,6 @@ const workerCancelCommand: Command = {
   }
 };
 
-function formatWorkerStatus(status: string): string {
-  switch (status) {
-    case 'running':
-      return output.highlight(status);
-    case 'completed':
-      return output.success(status);
-    case 'failed':
-      return output.error(status);
-    case 'pending':
-      return output.dim(status);
-    default:
-      return status;
-  }
-}
 
 // ============================================================================
 // Coverage-Aware Routing Commands
