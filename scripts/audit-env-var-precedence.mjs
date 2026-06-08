@@ -109,6 +109,25 @@ const KNOWN_ESCAPE_HATCHES = new Set([
   'NODE_ENV',
   'PROMPT',
   'TOOL_INPUT_command',
+
+  // ── Statusline display config (env-only by design) ───────────────────────────
+  // Read by the GENERATED helper .claude/helpers/statusline.cjs (and its
+  // generator), which Claude Code runs as a standalone subprocess — there is no
+  // CLI flag to override (the CLI never parses these). Cosmetic display toggles,
+  // not behaviour-affecting config. See statusline-generator.ts CONFIG block.
+  'RUFLO_STATUSLINE_COST_SYMBOL', // override/blank the leading '$' on the cost segment
+  'RUFLO_STATUSLINE_SHOW_COST',   // re-enable the cost segment (hidden by default)
+
+  // ── Internal / MCP env knobs (override path is a param or module-level, no CLI) ──
+  // CLAUDE_FLOW_MEMORY_SEARCH_NAMESPACES: read by the memory_search MCP tool as the
+  //   LOWEST-precedence fallback — the `namespace`/`namespaces` tool params win over
+  //   it (memory-tools.ts ~1090: `if (ns) … else if (nsList) … else if (env)`).
+  //   No CLI flag (it's an MCP tool); precedence is param > env > default.
+  'CLAUDE_FLOW_MEMORY_SEARCH_NAMESPACES',
+  // CLAUDE_FLOW_MAX_UNCERTAINTY: intentional env-only override (#2250) parsed once at
+  //   module load in model-router.ts; invalid/out-of-range falls through to the
+  //   default. Internal routing knob, no CLI surface.
+  'CLAUDE_FLOW_MAX_UNCERTAINTY',
 ]);
 
 // ── Source directories to scan ────────────────────────────────────────────────
