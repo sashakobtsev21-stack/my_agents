@@ -95,3 +95,6 @@ __pycache__/
 !.claude/
 !.claude-plugin/
 !v3/@claude-flow/
+
+# CVE audit snapshot — runtime state (regenerate: node scripts/update-cve-status.mjs)
+.claude-flow/security/audit-status.json

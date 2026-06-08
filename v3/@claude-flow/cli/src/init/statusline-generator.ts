@@ -110,6 +110,8 @@ function getStatuslineData() {
     const data = JSON.parse(raw.slice(jsonStart));
     // Overlay real ADR count from both local directories (fast, no network).
     data.adrs = getLocalADRCount();
+    const cve = getLocalCveStatus();
+    if (cve) data.security = cve;
     writeCache(data);
     return data;
   } catch { /* CLI unavailable or timed out */ }
@@ -142,6 +144,26 @@ function getLocalADRCount() {
   return { count: total, implemented: total, compliance: 0 };
 }
 
+// Real CVE status from a local npm-audit snapshot written by
+// scripts/update-cve-status.mjs into .claude-flow/security/audit-status.json.
+// Overlaid onto the statusline so the CVE segment reflects an ACTUAL audit run.
+function getLocalCveStatus() {
+  try {
+    const p = path.join(CWD, '.claude-flow', 'security', 'audit-status.json');
+    if (fs.existsSync(p)) {
+      const a = JSON.parse(fs.readFileSync(p, 'utf-8'));
+      if (a && typeof a.totalCves === 'number') {
+        return {
+          status: a.status || (a.totalCves === 0 ? 'CLEAN' : 'VULNERABLE'),
+          cvesFixed: a.cvesFixed || 0,
+          totalCves: a.totalCves,
+        };
+      }
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
 // Minimal local fallback when the CLI is not installed or times out.
 // Returns a structure that matches the CLI JSON schema so the renderer works.
 function buildLocalFallback() {
@@ -168,7 +190,7 @@ function buildLocalFallback() {
   return {
     user: { name: 'user', gitBranch: '', modelName: 'Claude Code' },
     v3Progress: { domainsCompleted: 0, totalDomains: 5, dddProgress: 0, patternsLearned: 0, sessionsCompleted: 0 },
-    security: { status: 'NONE', cvesFixed: 0, totalCves: 0 },
+    security: getLocalCveStatus() || { status: 'NONE', cvesFixed: 0, totalCves: 0 },
     swarm: { activeAgents: 0, maxAgents: CONFIG.maxAgents, coordinationActive: false },
     system: { memoryMB: memMB, contextPct: 0, intelligencePct: 0, subAgents: 0 },
     adrs,
