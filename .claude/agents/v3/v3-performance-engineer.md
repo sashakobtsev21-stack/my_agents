@@ -199,7 +199,7 @@ class AttentionBenchmarks {
         sequenceLength: sequence.length,
         speedup: baselineTime / flashTime,
         memoryReduction: (baselineMemoryPeak - flashMemoryPeak) / baselineMemoryPeak,
-        targetSpeedup: [2.49, 7.47],
+        targetSpeedup: null, // unverified — no benchmark has reproduced the old 2.49-7.47x Flash Attention figures
         targetMemoryReduction: [0.5, 0.75]
       });
     }
