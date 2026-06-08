@@ -488,6 +488,7 @@ claude -p --resume "abc-123" --fork-session "Try approach B: CQRS pattern"
 
 > The single source of truth for **all agents** is the auto-generated catalog — do **not** hand-maintain an agent list here (it drifts).
 >
+> - 🎯 **[`docs/CORE-AGENTS.md`](docs/CORE-AGENTS.md)** — **start here.** Curated ~20-agent core for most work + an honest overlap/consolidation map (quality over quantity). Nothing deleted; the full 121 stay available.
 > - 📖 **[`docs/AGENT-CATALOG.md`](docs/AGENT-CATALOG.md)** — full roster by area + model tier, with 🎖 leads/orchestrators and "when to connect" (renders on GitHub).
 > - 🖥️ **[`docs/agent-catalog.html`](docs/agent-catalog.html)** — interactive (search, tier/role filters). **[`docs/agent-report.html`](docs/agent-report.html)** — composition + changes + how it works.
 > - Regenerate any time: `node scripts/gen-agent-catalog.mjs`.
