@@ -313,7 +313,7 @@
           "cacheStrategy": "lru-with-embedding"
         },
         "metadata": {
-          "speedup": "150x",
+          "speedup": "~4.7x",
           "memoryReduction": "60%"
         }
       },

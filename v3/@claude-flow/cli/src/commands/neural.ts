@@ -21,7 +21,7 @@ const trainCommand: Command = {
     { name: 'batch-size', short: 'b', type: 'number', description: 'Batch size', default: '32' },
     { name: 'dim', type: 'number', description: 'Embedding dimension (max 256)', default: '256' },
     { name: 'wasm', short: 'w', type: 'boolean', description: 'Use RuVector WASM acceleration', default: 'true' },
-    { name: 'flash', type: 'boolean', description: 'Enable Flash Attention (2.49x-7.47x speedup)', default: 'true' },
+    { name: 'flash', type: 'boolean', description: 'Enable Flash Attention (Flash Attention (speedup unverified))', default: 'true' },
     { name: 'moe', type: 'boolean', description: 'Enable Mixture of Experts routing', default: 'false' },
     { name: 'hyperbolic', type: 'boolean', description: 'Enable hyperbolic attention for hierarchical patterns', default: 'false' },
     { name: 'contrastive', type: 'boolean', description: 'Use contrastive learning (InfoNCE)', default: 'true' },

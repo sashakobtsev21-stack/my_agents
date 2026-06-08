@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS claude_flow.graph_edges (
 );
 
 -- ============================================
--- PART 3: HNSW INDICES (150x-12,500x faster)
+-- PART 3: HNSW INDICES (~1.9x-4.7x (measured))
 -- ============================================
 
 -- HNSW index for embeddings (cosine distance)

@@ -3,7 +3,7 @@
  *
  * Provides optional ruvector WASM-accelerated vector operations for:
  * - Semantic similarity search
- * - HNSW indexing (150x faster)
+ * - HNSW indexing (HNSW-indexed)
  * - Embedding generation
  *
  * Gracefully degrades when ruvector is not installed.

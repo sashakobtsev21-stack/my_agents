@@ -157,7 +157,7 @@ const benchmarkCommand: Command = {
 
         const mean = searchTimes.reduce((a, b) => a + b, 0) / searchTimes.length;
         // Brute force baseline: ~0.5μs per vector comparison, 1000 vectors = 0.5ms
-        // HNSW should be O(log n) ~150x faster
+        // HNSW should be O(log n) ~HNSW-indexed
         const baselineBruteForce = hnswStatus.entryCount * 0.0005;
         const speedup = baselineBruteForce / (mean / 1000);
         results.push({
@@ -564,7 +564,7 @@ const optimizeCommand: Command = {
       data: [
         { priority: output.error('P0'), area: 'Memory', recommendation: 'Enable HNSW index quantization', impact: '+50% reduction' },
         { priority: output.warning('P1'), area: 'CPU', recommendation: 'Enable WASM SIMD acceleration', impact: '+4x speedup' },
-        { priority: output.warning('P1'), area: 'Latency', recommendation: 'Flash Attention WASM (in progress, currently JS reference)', impact: '+2.49x target' },
+        { priority: output.warning('P1'), area: 'Latency', recommendation: 'Flash Attention WASM (in progress, currently JS reference)', impact: 'unverified' },
         { priority: output.info('P2'), area: 'Cache', recommendation: 'Increase pattern cache size', impact: '+15% hit rate' },
         { priority: output.info('P2'), area: 'Network', recommendation: 'Enable request batching', impact: '-30% latency' },
       ],
@@ -642,8 +642,8 @@ export const performanceCommand: Command = {
     output.writeln();
     output.writeln('Performance Targets:');
     output.printList([
-      'HNSW Search: 150x-12,500x faster than brute force',
-      'Flash Attention: 2.49x-7.47x target (in progress; ships JS reference impl)',
+      'HNSW Search: ~1.9x-4.7x vs brute force (measured)',
+      'Flash Attention: unverified (ships JS reference impl)',
       'Memory: 50-75% reduction with quantization',
     ]);
     output.writeln();

@@ -632,7 +632,7 @@ const wizardCommand: Command = {
         message: 'Select memory backend:',
         options: [
           { value: 'hybrid', label: 'Hybrid', hint: 'SQLite + AgentDB (recommended)' },
-          { value: 'agentdb', label: 'AgentDB', hint: '150x faster vector search' },
+          { value: 'agentdb', label: 'AgentDB', hint: 'HNSW vector search' },
           { value: 'sqlite', label: 'SQLite', hint: 'Standard SQL storage' },
           { value: 'memory', label: 'In-Memory', hint: 'Fast but non-persistent' },
         ],

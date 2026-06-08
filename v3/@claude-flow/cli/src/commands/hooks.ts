@@ -1949,7 +1949,7 @@ const sessionRestoreCommand: Command = {
 // Intelligence subcommand (SONA, MoE, HNSW)
 const intelligenceCommand: Command = {
   name: 'intelligence',
-  description: 'RuVector intelligence system (SONA, MoE, HNSW 150x faster)',
+  description: 'RuVector intelligence system (SONA, MoE, HNSW-indexed)',
   options: [
     {
       name: 'mode',
@@ -1973,7 +1973,7 @@ const intelligenceCommand: Command = {
     },
     {
       name: 'enable-hnsw',
-      description: 'Enable HNSW 150x faster search',
+      description: 'Enable HNSW HNSW-indexed search',
       type: 'boolean',
       default: true
     },
@@ -2137,7 +2137,7 @@ const intelligenceCommand: Command = {
             enabled: enableHnsw,
             status: String(mcpHnsw?.status ?? (localStats.reasoningBankSize > 0 ? 'active' : 'idle')),
             indexSize: Math.max(localStats.reasoningBankSize, Number(mcpHnsw?.indexSize ?? 0)),
-            searchSpeedup: String(mcpHnsw?.searchSpeedup ?? (localStats.reasoningBankSize > 0 ? '150x' : 'N/A')),
+            searchSpeedup: String(mcpHnsw?.searchSpeedup ?? (localStats.reasoningBankSize > 0 ? 'HNSW' : 'N/A')),
             memoryUsage: String(mcpHnsw?.memoryUsage ?? (patternsFileSize > 0 ? `${(patternsFileSize / 1024).toFixed(1)} KB` : 'N/A')),
             dimension: Number(mcpHnsw?.dimension ?? 384),
           },
@@ -2156,7 +2156,7 @@ const intelligenceCommand: Command = {
         performance: mcpPerf ?? {
           flashAttention: 'N/A',
           memoryReduction: patternsFileSize > 0 ? `${(patternsFileSize / 1024).toFixed(1)} KB on disk` : 'N/A',
-          searchImprovement: localStats.reasoningBankSize > 0 ? '150x-12,500x' : 'N/A',
+          searchImprovement: localStats.reasoningBankSize > 0 ? '~1.9x-4.7x' : 'N/A',
           tokenReduction: 'N/A',
           sweBenchScore: 'N/A',
         },
@@ -2244,7 +2244,7 @@ const intelligenceCommand: Command = {
 
       // HNSW Component
       output.writeln();
-      output.writeln(output.bold('HNSW (150x Faster Search)'));
+      output.writeln(output.bold('HNSW (HNSW Search)'));
       const hnsw = result.components.hnsw;
       if (hnsw.enabled) {
         output.printTable({
@@ -4213,9 +4213,9 @@ const statuslineCommand: Command = {
 
     const domainsColor = progress.domainsCompleted >= 3 ? c.brightGreen : progress.domainsCompleted > 0 ? c.yellow : c.red;
     // Dynamic perf indicator based on patterns/HNSW
-    let perfIndicator = `${c.dim}⚡ target: 150x-12500x${c.reset}`;
+    let perfIndicator = `${c.dim}⚡ target: ~1.9x-4.7x${c.reset}`;
     if (agentdbStats.hasHnsw && agentdbStats.vectorCount > 0) {
-      const speedup = agentdbStats.vectorCount > 10000 ? '12500x' : agentdbStats.vectorCount > 1000 ? '150x' : '10x';
+      const speedup = agentdbStats.vectorCount > 1000 ? '~4.7x' : '~1.9x';
       perfIndicator = `${c.brightGreen}⚡ HNSW ${speedup}${c.reset}`;
     } else if (progress.patternsLearned > 0) {
       const patternsK = progress.patternsLearned >= 1000 ? `${(progress.patternsLearned / 1000).toFixed(1)}k` : String(progress.patternsLearned);
@@ -5095,8 +5095,8 @@ export const hooksCommand: Command = {
     output.writeln(output.bold('V3 Features:'));
     output.printList([
       '🧠 ReasoningBank adaptive learning',
-      '⚡ Flash Attention (2.49x-7.47x speedup)',
-      '🔍 AgentDB integration (150x faster search)',
+      '⚡ Flash Attention (Flash Attention (speedup unverified))',
+      '🔍 AgentDB integration (HNSW-indexed search)',
       '📊 84.8% SWE-Bench solve rate',
       '🎯 32.3% token reduction',
       '🚀 2.8-4.4x speed improvement',
