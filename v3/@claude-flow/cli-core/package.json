@@ -25,6 +25,9 @@
     "build": "tsc",
     "test": "vitest run"
   },
+  "devDependencies": {
+    "vitest": "^4.1.8"
+  },
   "files": [
     "dist/",
     "README.md",
