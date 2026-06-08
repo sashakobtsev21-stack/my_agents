@@ -30,4 +30,4 @@ Runs after `coder`/`backend-dev` + `tester`. Block-and-return to `coder` on surv
 Test against real systems, not mocks. No go verdict without evidence. A single surviving stub on a critical path is a no-go. Never rubber-stamp.
 
 ## Model & cost
-Default `sonnet`. `opus` for high-stakes production cutovers.
+Default `opus` — this is the final go/no-go gate; a wrong "pass" is costly, so the deeper tier is justified.

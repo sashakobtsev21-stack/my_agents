@@ -125,7 +125,7 @@ class HNSWIndexer {
 # Week 6: Performance optimization
 - SONA integration for learning patterns
 - Cross-agent memory sharing
-- Performance benchmarking (150x validation)
+- Performance benchmarking (HNSW vs brute force — measured ~1.9x–4.7x, not the debunked 150x)
 - Backward compatibility layer cleanup
 ```
 
