@@ -1,0 +1,118 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>my_agents — что сделано в сессии</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#283040;--fg:#e6edf3;--mut:#9aa7b4;--ok:#3fb950;--warn:#d29922;--accent:#6366f1;--cy:#39c5cf}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:920px;margin:0 auto;padding:42px 20px 80px}
+h1{font-size:30px;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 22px;font-size:16px}
+h2{font-size:21px;margin:34px 0 12px;border-bottom:1px solid var(--line);padding-bottom:7px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi .n{font-size:24px;font-weight:800;color:var(--cy)}.kpi .l{color:var(--mut);font-size:13px;margin-top:3px}
+table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:600}
+code{background:#0a0d12;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.mut{color:var(--mut)}
+ul{margin:6px 0 6px 0;padding-left:20px}li{margin:4px 0}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.row a{color:#4493f8;font-size:14px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:7px 12px}
+.row a:hover{border-color:var(--accent)}
+.foot{color:var(--mut);font-size:12px;margin-top:30px}
+</style></head><body><div class="wrap">
+
+<h1>🏁 my_agents — что сделано</h1>
+<p class="sub">Итог работы над проектом: честность, тесты, кросс-платформа, новые сценарии — и как всё работает сейчас.</p>
+
+<div class="kpis">
+  <div class="kpi"><div class="n">~30</div><div class="l">коммитов в <code>main</code></div></div>
+  <div class="kpi"><div class="n">+200</div><div class="l">тестов добавлено</div></div>
+  <div class="kpi"><div class="n">~268</div><div class="l">тестов починено (структурно)</div></div>
+  <div class="kpi"><div class="n">0</div><div class="l">уязвимостей (<code>npm audit</code>)</div></div>
+  <div class="kpi"><div class="n">48→20</div><div class="l">падающих файлов (остаток — native/CI)</div></div>
+</div>
+
+<h2>1 · Честность и доверие</h2>
+<div class="card">
+Сфабрикованные перф-цифры («150x-12,500x», «2.49x-7.47x») были по всему репозиторию выданы за факт.
+Вычищены <b>построчно</b> в рантайм-выводе CLI, ~240 доках/скиллах/агентах, исходниках, конфиге —
+честные дисклеймеры и исторические ADR не тронуты. Полые плагины (gastown, code-intelligence,
+legal-contracts) помечены <code>experimental</code>. Закрыта критическая <b>CVE</b> (vitest → 4.1.8).
+</div>
+
+<h2>2 · Новые first-class сценарии</h2>
+<div class="card">
+Добавлены два скилла со встроенным <b>verify-гейтом</b> («готово» = собирается + тесты + запуск):
+<code>/analyze-project</code> (аудит любого репо → отчёт P1/P2/P3 + план) и <code>/new-project</code>
+(идея → рабочая первая версия). Скиллов стало <b>41</b>. Плюс <code>docs/CORE-AGENTS.md</code> —
+курируемое ядро ~20 агентов вместо разбора всех 121.
+</div>
+
+<h2>3 · Покрытие тестами (раньше критичное было пустым)</h2>
+<table>
+<tr><th>Пакет</th><th>Тесты</th><th>Что покрыто</th></tr>
+<tr><td><code>cli-core</code></td><td>44</td><td>было 0% — JSON-память, security-валидаторы</td></tr>
+<tr><td><code>swarm</code></td><td>57</td><td>Agent, AgentPool, MessageBus, TaskOrchestrator, CoordinationService</td></tr>
+<tr><td><code>shared</code></td><td>64</td><td>config-validator, event-sourcing (aggregates+проекции+reconstructor), EventBus</td></tr>
+<tr><td><code>neural</code></td><td>12</td><td>Pattern entity</td></tr>
+<tr><td><code>cli</code></td><td>+</td><td>coverage-reader, hooks-helpers, routing-helpers (вынесены из god-файлов)</td></tr>
+</table>
+
+<h2>4 · Декомпозиция god-файлов и типы</h2>
+<div class="card">
+<code>hooks.ts</code> 5331→5072 и <code>hooks-tools.ts</code> 4600→4510 — выделены cohesive-модули с тестами.
+Убраны <b>все</b> <code>catch (e: any)</code> в v3 → узкие типизированные касты.
+</div>
+
+<h2>5 · Кросс-платформа и инфраструктура тестов</h2>
+<div class="card">
+<ul>
+<li><b>Структурная сирота <code>v3/mcp</code></b> (без package.json) → дан манифест + workspace-член:
+~268 тестов резолвят <code>zod</code> и зеленеют (падали и в CI).</li>
+<li><b>2 реальных cross-platform бага в коде</b>: plugins <code>safePath</code> (drive-letter на Windows),
+file-organization (<code>path.posix.join</code> — консистентный <code>/</code>).</li>
+<li><b>POSIX-only тесты</b> → платформо-агностичные; <b>statusline-drift</b> регенерирован;
+vitest перестал гонять застывшие копии из <code>node_modules</code> (475→210 файлов).</li>
+</ul>
+<span class="mut">Остаток падений (~20 файлов) — это native-деки (ruvector/sona/ruvllm/onnx/gguf/rvf) и docker:
+их нет на Windows-хосте, в CI (Linux+native) они зелёные. Это окружение, не код.</span>
+</div>
+
+<h2>6 · Пилот на реальном репо</h2>
+<div class="card">
+Сценарий <code>/analyze-project</code> прогнан end-to-end на стороннем Playwright-репо: аудит
+(3 параллельных специалиста + <code>npm audit</code>/typecheck/lint) → отчёт → фиксы (утечка ключа в
+телеметрию, CI-гейт visual/perf, env-валидация, serial-cleanup, prettier) → <b>Pull Request → смержен</b>.
+Доказали, что флоу «анализ → фикс → PR» реально работает.
+</div>
+
+<h2>⚙️ Как проект работает сейчас</h2>
+<div class="card">
+<b>my_agents</b> — переиспользуемая AI-команда для Claude Code (форк <code>ruvnet/claude-flow</code>, MIT):
+<b>121 агент · 41 скилл · 168 команд · 33 плагина · ~313 MCP-инструментов</b> в монорепо из 24 v3-пакетов.
+<ul>
+<li><b>Claude Code = оркестратор + исполнитель</b>: читает файлы, гоняет реальные тулзы (build, <code>npm audit</code>,
+тесты, git), делегирует параллельным агентам-специалистам и сводит результат.</li>
+<li><b>Агенты / скиллы / команды</b> — текст-инструкции (кем быть / как делать / ярлык).
+<b>MCP-инструменты</b> — код-действие. <b>Плагины</b> — упаковка, которая всё привозит.</li>
+<li><b>Два главных флоу</b>: <code>/analyze-project</code> (аудит чужого репо) и <code>/new-project</code> (сборка нового) —
+оба с verify-гейтом.</li>
+<li><b>Статуслайн</b> в Claude Code показывает живую телеметрию (домены, сворм, CVE, память, тесты) —
+расшифровка в README.</li>
+</ul>
+Состояние: <span class="ok">CLI собирается, <code>npm audit</code> 0 уязвимостей, ~200+ новых тестов зелёные.</span>
+Тяжёлые native-тесты зелёные в CI. Всё в <code>origin/main</code>.
+</div>
+
+<div class="row">
+<a href="start.html">🏠 Точка входа</a>
+<a href="REPORT.md">📑 Отчёт (детально)</a>
+<a href="CORE-AGENTS.md">🎯 Ядро агентов</a>
+<a href="full-breakdown.html">📚 Полный разбор</a>
+<a href="../README.md">📄 README</a>
+<a href="https://github.com/sashakobtsev21-stack/my_agents">🔗 GitHub</a>
+</div>
+
+<p class="foot">Сгенерировано как капстоун сессии доработок. Витрины каталога/разбора авто-обновляются <code>scripts/gen-*.mjs</code>.</p>
+</div></body></html>
