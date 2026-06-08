@@ -1,5 +1,10 @@
 # @claude-flow/plugin-gastown-bridge
 
+> ⚠️ **Experimental / work-in-progress.** The Gas Town sync bridge (pull/push/sync)
+> only logs a warning, formula execution throws `not implemented in bridge layer`,
+> and the fallback AgentDB is an in-memory stub that does **not** persist across
+> restarts. Treat this as a preview integration, not production-ready.
+
 > **WASM-Accelerated Bridge to Steve Yegge's Gas Town Multi-Agent Orchestrator**
 
 [![npm version](https://img.shields.io/npm/v/@claude-flow/plugin-gastown-bridge.svg)](https://www.npmjs.com/package/@claude-flow/plugin-gastown-bridge)

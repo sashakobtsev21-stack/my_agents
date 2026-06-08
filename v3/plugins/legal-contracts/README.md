@@ -1,5 +1,9 @@
 # @claude-flow/plugin-legal-contracts
 
+> ⚠️ **Experimental.** The WASM-accelerated bridges (DAG, attention) are not yet
+> implemented and **throw `WASM module loading not implemented` at runtime**.
+> Only the non-WASM paths are functional today; advertised acceleration is aspirational.
+
 [![npm version](https://img.shields.io/npm/v/@claude-flow/plugin-legal-contracts.svg)](https://www.npmjs.com/package/@claude-flow/plugin-legal-contracts)
 [![npm downloads](https://img.shields.io/npm/dm/@claude-flow/plugin-legal-contracts.svg)](https://www.npmjs.com/package/@claude-flow/plugin-legal-contracts)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

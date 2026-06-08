@@ -1103,9 +1103,9 @@ npx claude-flow@v3alpha plugins disable @claude-flow/plugin-name
 |--------|---------|-------------|
 | `@claude-flow/plugin-agentic-qe` | 3.0.0-alpha.4 | Agentic quality engineering integration |
 | `@claude-flow/plugin-prime-radiant` | 0.1.5 | Prime Radiant intelligence integration |
-| `@claude-flow/plugin-gastown-bridge` | 3.0.0-alpha.1 | Gastown bridge protocol integration |
+| `@claude-flow/plugin-gastown-bridge` | 3.0.0-alpha.1 | Gastown bridge protocol integration ⚠️ experimental (sync/formula are stubs) |
 | `@claude-flow/teammate-plugin` | 1.0.0-alpha.1 | Multi-agent teammate coordination |
-| `@claude-flow/plugin-code-intelligence` | 0.1.0 | Advanced code analysis and intelligence |
+| `@claude-flow/plugin-code-intelligence` | 0.1.0 | Advanced code analysis and intelligence ⚠️ experimental (WASM bridges throw) |
 | `@claude-flow/plugin-test-intelligence` | 0.1.0 | Intelligent test generation and gap analysis |
 | `@claude-flow/plugin-perf-optimizer` | 0.1.0 | Performance optimization automation |
 | `@claude-flow/plugin-neural-coordinator` | 0.1.0 | Neural network coordination across agents |
@@ -1119,7 +1119,7 @@ npx claude-flow@v3alpha plugins disable @claude-flow/plugin-name
 |--------|---------|-------------|
 | `@claude-flow/plugin-healthcare-clinical` | 0.1.0 | Healthcare clinical workflow automation |
 | `@claude-flow/plugin-financial-risk` | 0.1.0 | Financial risk assessment and modeling |
-| `@claude-flow/plugin-legal-contracts` | 0.1.0 | Legal contract analysis and generation |
+| `@claude-flow/plugin-legal-contracts` | 0.1.0 | Legal contract analysis and generation ⚠️ experimental (WASM bridges throw) |
 
 ### Plugin Development
 

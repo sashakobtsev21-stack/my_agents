@@ -1,5 +1,9 @@
 # @claude-flow/plugin-code-intelligence
 
+> ⚠️ **Experimental.** The WASM-accelerated analysis bridges (GNN, min-cut) are not
+> yet implemented and **throw `WASM module loading not implemented` at runtime**.
+> Only the non-WASM paths are functional today; advertised acceleration is aspirational.
+
 [![npm version](https://img.shields.io/npm/v/@claude-flow/plugin-code-intelligence.svg)](https://www.npmjs.com/package/@claude-flow/plugin-code-intelligence)
 [![npm downloads](https://img.shields.io/npm/dm/@claude-flow/plugin-code-intelligence.svg)](https://www.npmjs.com/package/@claude-flow/plugin-code-intelligence)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
