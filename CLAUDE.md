@@ -905,10 +905,11 @@ memory_search_unified({ query: "authentication security", limit: 5 })
 
 ### Publishing Rules
 
-- MUST publish ALL THREE packages when publishing CLI changes: `@claude-flow/cli`, `claude-flow`, AND `ruflo`
-- MUST update ALL dist-tags for ALL THREE packages after publishing (latest + alpha + v3alpha all point to the same version)
-- Publish order: `@claude-flow/cli` first, then `claude-flow` (umbrella), then `ruflo` (alias umbrella)
-- MUST run verification for ALL THREE before telling user publishing is complete
+- MUST publish ALL FOUR packages when publishing CLI changes: `@claude-flow/cli`, `claude-flow`, `ruflo`, AND `alexko`
+- MUST update ALL dist-tags for ALL FOUR packages after publishing (latest + alpha + v3alpha all point to the same version)
+- Publish order: `@claude-flow/cli` first, then `claude-flow` (umbrella), then `ruflo` (alias umbrella), then `alexko` (brand alias umbrella)
+- `alexko` is the **brand alias** of `ruflo` — same thin wrapper around `@claude-flow/cli`. Publish it with the SAME steps as `ruflo` (STEP 3 below, swapping `ruflo`→`alexko`), and keep `alexko/package.json` `overrides` in sync with `ruflo/package.json` (root overrides do NOT propagate to either published wrapper). `npx ruflo` and `npx alexko` run the identical CLI.
+- MUST run verification for ALL FOUR before telling user publishing is complete
 
 ```bash
 # Replace 3.7.1 below with your chosen stable version (patch/minor/major per the rules above)
