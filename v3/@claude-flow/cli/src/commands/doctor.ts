@@ -11,7 +11,7 @@ import { existsSync, readFileSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createHash } from 'crypto';
-import { execSync, exec } from 'child_process';
+import { execFileSync, exec } from 'child_process';
 import { promisify } from 'util';
 import { decodeKey, isEncryptionEnabled } from '../encryption/vault.js';
 import { isEncryptedBlob } from '../encryption/vault.js';
@@ -574,9 +574,12 @@ async function installClaudeCode(): Promise<boolean> {
   try {
     output.writeln();
     output.writeln(output.bold('Installing Claude Code CLI...'));
-    execSync('npm install -g @anthropic-ai/claude-code', {
+    // ADR-078: execFileSync (no shell). Argv array — no string interpolation
+    // possible. .cmd shim needed on Windows where bare `npm` is a batch script.
+    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+    execFileSync(npmCmd, ['install', '-g', '@anthropic-ai/claude-code'], {
       encoding: 'utf8',
-      stdio: 'inherit'
+      stdio: 'inherit',
     });
     output.writeln(output.success('Claude Code CLI installed successfully!'));
     return true;

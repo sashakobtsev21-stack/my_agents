@@ -16,6 +16,9 @@ import {
   suggestAgentsForFile,
 } from './hooks/coverage-reader.js';
 import { safeNum, formatIntelligenceStatus, formatWorkerStatus } from './hooks/helpers.js';
+// Pilot extraction (issue #7) — notifyCommand was inline at L4921-L4960; now
+// in its own 50-line file. Replicate this pattern for the other 37 commands.
+import { notifyCommand } from './hooks/notify.js';
 
 
 
@@ -4918,46 +4921,7 @@ const taskCompletedCommand: Command = {
 };
 
 // Notify subcommand
-const notifyCommand: Command = {
-  name: 'notify',
-  description: 'Send a notification message (logged to session)',
-  options: [
-    { name: 'message', short: 'm', type: 'string', description: 'Notification message', required: true },
-    { name: 'level', short: 'l', type: 'string', description: 'Level: info, warn, error', default: 'info' },
-    { name: 'channel', short: 'c', type: 'string', description: 'Notification channel', default: 'console' },
-  ],
-  examples: [
-    { command: 'claude-flow hooks notify -m "Build complete"', description: 'Send info notification' },
-    { command: 'claude-flow hooks notify -m "Test failed" -l error', description: 'Send error notification' },
-  ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
-    const message = (ctx.flags.message as string) || ctx.args[0];
-    const level = (ctx.flags.level as string) || 'info';
-
-    if (!message) {
-      output.printError('Message is required: --message "your message"');
-      return { success: false, exitCode: 1 };
-    }
-
-    const timestamp = new Date().toISOString();
-
-    if (level === 'error') {
-      output.printError(`[${timestamp}] ${message}`);
-    } else if (level === 'warn') {
-      output.writeln(output.warning(`[${timestamp}] ${message}`));
-    } else {
-      output.printInfo(`[${timestamp}] ${message}`);
-    }
-
-    // Store notification in memory if available
-    try {
-      const { storeEntry } = await import('../memory/memory-initializer.js');
-      await storeEntry({ key: `notify-${Date.now()}`, value: `[${level}] ${message}`, namespace: 'notifications' });
-    } catch { /* memory not available */ }
-
-    return { success: true, data: { timestamp, level, message } };
-  }
-};
+// notifyCommand moved to ./hooks/notify.ts (issue #7 pilot — see import).
 
 // Main hooks command
 export const hooksCommand: Command = {

@@ -38,11 +38,8 @@
     },
     {
       "files": [
-        "src/commands/analyze.ts",
         "src/commands/doctor.ts",
-        "src/commands/hive-mind.ts",
-        "src/services/container-worker-pool.ts",
-        "src/services/headless-worker-executor.ts"
+        "src/services/container-worker-pool.ts"
       ],
       "rules": {
         "no-restricted-imports": "off",

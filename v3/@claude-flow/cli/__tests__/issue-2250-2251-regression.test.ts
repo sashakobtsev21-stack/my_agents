@@ -26,17 +26,15 @@ import { join } from 'node:path';
 import { ModelRouter } from '../src/ruvector/model-router.js';
 import { WorkerDaemon } from '../src/services/worker-daemon.js';
 
-let cwdRestore: string;
 let tmpDir: string;
+let statePath: string;
 
 beforeEach(() => {
-  cwdRestore = process.cwd();
   tmpDir = mkdtempSync(join(tmpdir(), 'issue-2250-2251-'));
-  process.chdir(tmpDir);
+  statePath = join(tmpDir, '.swarm', 'model-router-state.json');
 });
 
 afterEach(() => {
-  process.chdir(cwdRestore);
   rmSync(tmpDir, { recursive: true, force: true });
 });
 
@@ -57,9 +55,9 @@ describe('#2250 — escalation does not override learned opus suppression', () =
         high: { haiku: { alpha: 1, beta: 1 }, sonnet: { alpha: 1, beta: 1 }, opus: { alpha: 1, beta: 1 }, inherit: { alpha: 1, beta: 1 } },
       },
     };
-    writeFileSync(join(tmpDir, '.swarm/model-router-state.json'), JSON.stringify(state));
+    writeFileSync(statePath, JSON.stringify(state));
 
-    const router = new ModelRouter();
+    const router = new ModelRouter({ statePath });
     const N = 50;
     const counts: Record<string, number> = { haiku: 0, sonnet: 0, opus: 0 };
     for (let i = 0; i < N; i++) {
@@ -79,7 +77,7 @@ describe('#2250 — escalation does not override learned opus suppression', () =
     // (target mean ≈ selected mean), so the prior router behavior is preserved
     // for unlearned routers. We just assert the route succeeds without crashing
     // and returns one of the three valid models.
-    const router = new ModelRouter();
+    const router = new ModelRouter({ statePath });
     const r = await router.route('Refactor the entire authentication subsystem');
     expect(['haiku', 'sonnet', 'opus']).toContain(r.model);
   }, 10_000);
@@ -93,7 +91,7 @@ describe('#2250 — escalation does not override learned opus suppression', () =
       // The env is read at module load via `envMaxUncertainty()` in
       // DEFAULT_CONFIG. Pass it through config explicitly so the test
       // doesn't depend on module reload order.
-      const router = new ModelRouter({ maxUncertainty: 0.99 });
+      const router = new ModelRouter({ maxUncertainty: 0.99, statePath });
       const r = await router.route('simple low-complexity task');
       expect(['haiku', 'sonnet', 'opus']).toContain(r.model);
     } finally {

@@ -20,18 +20,23 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ModelRouter } from '../src/ruvector/model-router.js';
 
-let cwdRestore: string;
 let tmpDir: string;
+let statePath: string;
 
-function setupTempCwd(): void {
-  cwdRestore = process.cwd();
+function setupTmpDir(): void {
   tmpDir = mkdtempSync(join(tmpdir(), 'router-bandit-'));
-  process.chdir(tmpDir);
+  statePath = join(tmpDir, '.swarm', 'model-router-state.json');
 }
 
-function cleanupTempCwd(): void {
-  process.chdir(cwdRestore);
+function cleanupTmpDir(): void {
   rmSync(tmpDir, { recursive: true, force: true });
+}
+
+/** Construct a ModelRouter with state pinned to the per-test tmpDir — no
+ * process.chdir needed, so vitest's worker_thread isolation (which forbids
+ * chdir) is happy on Windows too. */
+function mkRouter(extra: Partial<{ maxUncertainty: number }> = {}): ModelRouter {
+  return new ModelRouter({ statePath, ...extra });
 }
 
 /** The complexity bucket a task maps to — mirrors model-router's bands so the
@@ -67,11 +72,11 @@ function syntheticOutcome(
 }
 
 describe('ModelRouter — Thompson sampling bandit (#1772, ADR-142 bucketed)', () => {
-  beforeEach(setupTempCwd);
-  afterEach(cleanupTempCwd);
+  beforeEach(setupTmpDir);
+  afterEach(cleanupTmpDir);
 
   it('starts with uniform Beta(1,1) priors in every bucket', () => {
-    const router = new ModelRouter();
+    const router = mkRouter();
     const b = router.getBucketedPriors();
     for (const bucket of ['low', 'med', 'high'] as const) {
       expect(b[bucket].haiku).toEqual({ alpha: 1, beta: 1 });
@@ -81,7 +86,7 @@ describe('ModelRouter — Thompson sampling bandit (#1772, ADR-142 bucketed)', (
   });
 
   it('updates priors via cost-adjusted Bernoulli on recordOutcome (within one bucket)', () => {
-    const router = new ModelRouter();
+    const router = mkRouter();
     const task = 'simple task'; // all updates land in this task's bucket
     router.recordOutcome(task, 'haiku', 'success'); // reward 1.0 → α += 1
     router.recordOutcome(task, 'opus', 'success');  // reward 0.4 → α += 0.4
@@ -94,7 +99,7 @@ describe('ModelRouter — Thompson sampling bandit (#1772, ADR-142 bucketed)', (
   });
 
   it('escalation gives partial credit to Sonnet, zero to Haiku/Opus', () => {
-    const router = new ModelRouter();
+    const router = mkRouter();
     router.recordOutcome('t', 'sonnet', 'escalated'); // reward 0.1
     router.recordOutcome('t', 'haiku', 'escalated');  // reward 0.0
     const p = router.getBanditPriors(bucketOf(router, 't'));
@@ -105,19 +110,19 @@ describe('ModelRouter — Thompson sampling bandit (#1772, ADR-142 bucketed)', (
   });
 
   it('persists and reloads priors across router instances', () => {
-    const router1 = new ModelRouter();
+    const router1 = mkRouter();
     for (let i = 0; i < 10; i++) router1.recordOutcome('t', 'haiku', 'success');
     const bucket = bucketOf(router1, 't');
     expect(router1.getBanditPriors(bucket).haiku.alpha).toBeCloseTo(11, 5);
 
-    const router2 = new ModelRouter(); // reads from same .swarm/model-router-state.json
+    const router2 = mkRouter(); // reads from same .swarm/model-router-state.json
     const after = router2.getBanditPriors(bucket);
     expect(after.haiku.alpha).toBeCloseTo(11, 5);
     expect(after.haiku.beta).toBeCloseTo(1, 5);
   });
 
   it('ADR-142: per-bucket isolation — failures on one task type do not move another bucket', () => {
-    const router = new ModelRouter();
+    const router = mkRouter();
     const easy = 'fix a typo';            // low bucket
     const hard = 'architect a distributed byzantine consensus system with sharding'; // high bucket
     const easyB = bucketOf(router, easy);
@@ -139,13 +144,13 @@ describe('ModelRouter — Thompson sampling bandit (#1772, ADR-142 bucketed)', (
         opus: { alpha: 1, beta: 1 }, inherit: { alpha: 1, beta: 1 },
       },
     }));
-    const router = new ModelRouter();
+    const router = mkRouter();
     expect(router.getBanditPriors('low').haiku).toEqual({ alpha: 9, beta: 2 });
     expect(router.getBanditPriors('high').haiku).toEqual({ alpha: 9, beta: 2 }); // seeded
   });
 
   it('converges toward Haiku on a low-complexity workload (~50 trials)', async () => {
-    const router = new ModelRouter();
+    const router = mkRouter();
     let seed = 0x1234567;
     const rng = () => {
       seed |= 0;
@@ -176,7 +181,7 @@ describe('ModelRouter — Thompson sampling bandit (#1772, ADR-142 bucketed)', (
   }, 30_000);
 
   it('does not lock in early — recovers from a bad initial draw', async () => {
-    const router = new ModelRouter();
+    const router = mkRouter();
     for (let i = 0; i < 100; i++) {
       const r = await router.route(`task ${i}`);
       const outcome = r.model === 'haiku' ? 'success' : 'escalated';

@@ -258,6 +258,11 @@ on:
 env:
   NODE_VERSION: '20'
   PNPM_VERSION: '8'
+  # Opt into Node 24 runtime for JavaScript actions (actions/checkout@v4,
+  # actions/setup-node@v4 etc.) ahead of the Sept 2026 forced cutover.
+  # Node 20 actions runtime is deprecated; this silences the warning and
+  # makes the migration explicit. App code still uses NODE_VERSION above.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   test:

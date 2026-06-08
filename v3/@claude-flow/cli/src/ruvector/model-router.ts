@@ -20,7 +20,7 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { dirname, isAbsolute, join } from 'path';
 
 // ============================================================================
 // Types & Constants
@@ -786,7 +786,7 @@ export class ModelRouter {
     };
 
     try {
-      const fullPath = join(process.cwd(), this.config.statePath);
+      const fullPath = this.resolveStatePath();
       if (existsSync(fullPath)) {
         const data = readFileSync(fullPath, 'utf-8');
         const loaded = JSON.parse(data) as Partial<RouterState> & { priors?: unknown };
@@ -803,12 +803,20 @@ export class ModelRouter {
     return defaultState;
   }
 
+  /** Resolve config.statePath: absolute paths pass through (tests want this);
+   * relative paths anchor against cwd (CLI default). path.join() would corrupt
+   * an absolute statePath on Windows (C:/cwd + C:/abs => C:\cwd\C:\abs). */
+  private resolveStatePath(): string {
+    const p = this.config.statePath;
+    return isAbsolute(p) ? p : join(process.cwd(), p);
+  }
+
   /**
    * Save state to disk
    */
   private saveState(): void {
     try {
-      const fullPath = join(process.cwd(), this.config.statePath);
+      const fullPath = this.resolveStatePath();
       const dir = dirname(fullPath);
       if (!existsSync(dir)) {
         mkdirSync(dir, { recursive: true });

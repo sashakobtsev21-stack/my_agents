@@ -10,7 +10,7 @@ import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
 import { select, confirm, input } from '../prompt.js';
 import { callMCPTool, MCPClientError } from '../mcp-client.js';
-import { spawn as childSpawn, execSync } from 'child_process';
+import { spawn as childSpawn, execFileSync } from 'child_process';
 import { mkdir, writeFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
@@ -232,10 +232,12 @@ async function spawnClaudeCodeInstance(
     output.writeln();
     output.printSuccess(`Hive Mind prompt saved to: ${promptFile}`);
 
-    // Check if claude command exists
+    // Check if claude command exists (ADR-078: execFileSync, no shell).
+    // `which` is POSIX; on Windows use `where`. Both return non-zero if not found.
     let claudeAvailable = false;
     try {
-      execSync('which claude', { stdio: 'ignore' });
+      const probe = process.platform === 'win32' ? 'where' : 'which';
+      execFileSync(probe, ['claude'], { stdio: 'ignore' });
       claudeAvailable = true;
     } catch {
       output.writeln();

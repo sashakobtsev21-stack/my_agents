@@ -19,7 +19,7 @@
  * - Event emission for monitoring
  */
 
-import { spawn, execSync, type ChildProcess } from 'child_process';
+import { spawn, execFileSync, type ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import { existsSync, readFileSync, readdirSync, mkdirSync, writeFileSync } from 'fs';
 import { join, relative } from 'path';
@@ -653,11 +653,14 @@ export class HeadlessWorkerExecutor extends EventEmitter {
 
     const timeoutMs = Number.parseInt(process.env.CLAUDE_CODE_AVAILABILITY_TIMEOUT_MS || '', 10) || 5000;
     try {
-      const output = execSync('claude --version', {
+      // ADR-078: execFileSync (no shell, no user input in argv). On Windows the
+      // npm shim is `claude.cmd`; bare `claude` would 404 without shell:true.
+      const claudeBin = process.platform === 'win32' ? 'claude.cmd' : 'claude';
+      const output = execFileSync(claudeBin, ['--version'], {
         encoding: 'utf-8',
         stdio: 'pipe',
         timeout: timeoutMs,
-        windowsHide: true, // Prevent phantom console windows on Windows
+        windowsHide: true,
       });
       this.claudeCodeAvailable = true;
       this.claudeCodeVersion = output.trim();

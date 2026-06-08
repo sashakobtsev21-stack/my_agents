@@ -49,7 +49,7 @@ User --> Ruflo (CLI/MCP) --> Router --> Swarm --> Agents --> Memory --> LLM Prov
 
 ---
 
-![Ruflo Plugins](./ruflo-plugins.gif)
+![Ruflo Plugins](./ruflo-plugins.webp)
 
 ## Quick Start
 
