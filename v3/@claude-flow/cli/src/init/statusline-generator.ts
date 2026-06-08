@@ -14,13 +14,10 @@ import type { InitOptions } from './types.js';
 
 /**
  * Generate optimized statusline script
- * Output format:
- * ▊ AlexKo V3.6 ● user  │  ⎇ branch  │  Opus 4.7
- * ─────────────────────────────────────────────────────
- * 🏗️  DDD Domains    [●●○○○]  2/5    ⚡ HNSW
- * 🤖 Swarm  ◉ [ 5/15]  👥 2    🪝 10/17    🟢 CVE 3/3    💾 4MB    🧠  63%
- * 🔧 Architecture    ADRs ●71%  │  DDD ● 13%  │  Security ●CLEAN
- * 📊 AgentDB    Vectors ●3104⚡  │  Size 216KB  │  Tests ●6 (~24 cases)  │  MCP ●1/1
+ * Output format (lean — only the day-to-day useful signals):
+ * ▊ AlexKo V3.6 ● user  │  ⎇ branch  │  Opus 4.8  │  ⏱ 6m  │  ● 34% ctx
+ * ────────────────────────────────────────
+ * 🤖 Swarm ○ [ 0/15]    🟢 CVE 0/0    🧪 Tests 74
  */
 export function generateStatuslineScript(options: InitOptions): string {
   const maxAgents = options.runtime.maxAgents;
@@ -476,77 +473,20 @@ function generateStatusline() {
   lines.push(header);
 
   // Separator
-  lines.push(c.dim + '─'.repeat(53) + c.reset);
+  lines.push(c.dim + '─'.repeat(40) + c.reset);
 
-  // Line 1: DDD Domains
-  const domainsColor = domainsCompleted >= 3 ? c.brightGreen : domainsCompleted > 0 ? c.yellow : c.red;
-  let perfIndicator;
-  if (hasHnsw && vectorCount > 0) {
-    const speedup = vectorCount > 10000 ? '~2x' : vectorCount > 1000 ? '~3x' : 'exact';
-    perfIndicator = c.brightGreen + '⚡ HNSW ' + speedup + c.reset;
-  } else if (patternsLearned > 0) {
-    const pk = patternsLearned >= 1000 ? (patternsLearned / 1000).toFixed(1) + 'k' : String(patternsLearned);
-    perfIndicator = c.brightYellow + '📚 ' + pk + ' patterns' + c.reset;
-  } else {
-    perfIndicator = c.dim + '⚡ HNSW ANN search' + c.reset;
-  }
-  lines.push(
-    c.brightCyan + '🏗️  DDD Domains' + c.reset + '    ' + progressBar(domainsCompleted, totalDomains) + '  ' +
-    domainsColor + domainsCompleted + c.reset + '/' + c.brightWhite + totalDomains + c.reset + '    ' + perfIndicator
-  );
-
-  // Line 2: Swarm + Hooks + CVE + Memory + Intelligence
+  // Single status line — only the day-to-day useful signals:
+  //   Swarm (is parallel agent work running?) · CVE/Security · Tests (coverage at a glance).
   const swarmInd = coordinationActive ? c.brightGreen + '◉' + c.reset : c.dim + '○' + c.reset;
-  const agentsColor = activeAgents > 0 ? c.brightGreen : c.red;
+  const agentsColor = activeAgents > 0 ? c.brightGreen : c.dim;
   const secIcon = secStatus === 'CLEAN' ? '🟢' : (secStatus === 'IN_PROGRESS' || secStatus === 'STALE') ? '🟡' : (secStatus === 'NONE' ? '⚪' : '🔴');
   const secColor = secStatus === 'CLEAN' ? c.brightGreen : (secStatus === 'IN_PROGRESS' || secStatus === 'STALE') ? c.brightYellow : (secStatus === 'NONE' ? c.dim : c.brightRed);
-  const hooksColor = hooksEnabled > 0 ? c.brightGreen : c.dim;
-  const intellColor = intelligencePct >= 80 ? c.brightGreen : intelligencePct >= 40 ? c.brightYellow : c.dim;
-
-  lines.push(
-    c.brightYellow + '🤖 Swarm' + c.reset + '  ' + swarmInd + ' [' + agentsColor + String(activeAgents).padStart(2) + c.reset + '/' + c.brightWhite + maxAgents + c.reset + ']  ' +
-    c.brightPurple + '👥 ' + subAgents + c.reset + '    ' +
-    c.brightBlue + '🪝 ' + hooksColor + hooksEnabled + c.reset + '/' + c.brightWhite + hooksTotal + c.reset + '    ' +
-    secIcon + ' ' + secColor + 'CVE ' + cvesFixed + c.reset + '/' + c.brightWhite + totalCves + c.reset + '    ' +
-    c.brightCyan + '💾 ' + memoryMB + 'MB' + c.reset + '    ' +
-    intellColor + '🧠 ' + String(intelligencePct).padStart(3) + '%' + c.reset
-  );
-
-  // Line 3: Architecture
-  const dddColor = dddProgress >= 50 ? c.brightGreen : dddProgress > 0 ? c.yellow : c.red;
-  const adrColor = adrCount > 0 ? (adrImpl === adrCount ? c.brightGreen : c.yellow) : c.dim;
-  const adrDisplay = adrColor + '●' + adrImpl + '/' + adrCount + c.reset;
-
-  lines.push(
-    c.brightPurple + '🔧 Architecture' + c.reset + '    ' +
-    c.cyan + 'ADRs' + c.reset + ' ' + adrDisplay + '  ' + c.dim + '│' + c.reset + '  ' +
-    c.cyan + 'DDD' + c.reset + ' ' + dddColor + '●' + String(dddProgress).padStart(3) + '%' + c.reset + '  ' + c.dim + '│' + c.reset + '  ' +
-    c.cyan + 'Security' + c.reset + ' ' + secColor + '●' + secStatus + c.reset
-  );
-
-  // Line 4: AgentDB, Tests, Integration
-  const hnswInd = hasHnsw ? c.brightGreen + '⚡' + c.reset : '';
-  const sizeDisp = dbSizeKB >= 1024 ? (dbSizeKB / 1024).toFixed(1) + 'MB' : dbSizeKB + 'KB';
-  const vectorColor = vectorCount > 0 ? c.brightGreen : c.dim;
   const testColor = testFiles > 0 ? c.brightGreen : c.dim;
 
-  // MCP / DB integration from data
-  const integration = d.integration || {};
-  const mcpServers = (integration.mcpServers) || {};
-  let integStr = '';
-  if (mcpServers.total > 0) {
-    const mcpCol = mcpServers.enabled === mcpServers.total ? c.brightGreen : mcpServers.enabled > 0 ? c.brightYellow : c.red;
-    integStr += c.cyan + 'MCP' + c.reset + ' ' + mcpCol + '●' + mcpServers.enabled + '/' + mcpServers.total + c.reset;
-  }
-  if (integration.hasDatabase) integStr += (integStr ? '  ' : '') + c.brightGreen + '◆' + c.reset + 'DB';
-  if (!integStr) integStr = c.dim + '● none' + c.reset;
-
   lines.push(
-    c.brightCyan + '📊 AgentDB' + c.reset + '    ' +
-    c.cyan + 'Vectors' + c.reset + ' ' + vectorColor + '●' + vectorCount + hnswInd + c.reset + '  ' + c.dim + '│' + c.reset + '  ' +
-    c.cyan + 'Size' + c.reset + ' ' + c.brightWhite + sizeDisp + c.reset + '  ' + c.dim + '│' + c.reset + '  ' +
-    c.cyan + 'Tests' + c.reset + ' ' + testColor + '●' + testFiles + c.reset + ' ' + c.dim + '(~' + testCases + ' cases)' + c.reset + '  ' + c.dim + '│' + c.reset + '  ' +
-    integStr
+    c.brightYellow + '🤖 Swarm' + c.reset + ' ' + swarmInd + ' [' + agentsColor + String(activeAgents).padStart(2) + c.reset + '/' + c.brightWhite + maxAgents + c.reset + ']    ' +
+    secIcon + ' ' + secColor + 'CVE ' + cvesFixed + c.reset + '/' + c.brightWhite + totalCves + c.reset + '    ' +
+    '🧪 ' + c.cyan + 'Tests' + c.reset + ' ' + testColor + testFiles + c.reset
   );
 
   return lines.join('\\n');
