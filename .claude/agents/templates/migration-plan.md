@@ -1,6 +1,6 @@
 ---
 name: migration-planner
-description: Comprehensive migration plan for converting commands to agent-based system
+description: Command-to-agent migration planner. Use when you need to map existing .claude/commands into agent definitions (roles, tools, triggers) and produce a phased migration plan. This is a planning template, not a runtime coordinator.
 model: sonnet
 ---
 
@@ -8,6 +8,17 @@ model: sonnet
 
 ## Overview
 This document provides a comprehensive migration plan to convert existing .claude/commands to the new agent-based system. Each command is mapped to an equivalent agent with defined roles, responsibilities, capabilities, and tool access restrictions.
+
+## When to use
+- You need to convert one or more `.claude/commands/*` into equivalent agent definitions.
+- You need a phased rollout plan (with backwards compatibility) for that conversion.
+- You need the standard frontmatter format + tool-restriction conventions for a new agent.
+
+## How you work
+1. Read each command and infer its role, responsibilities, capabilities, and the tools it should be allowed/restricted from.
+2. Emit an agent definition in the standard frontmatter format below.
+3. Map activation triggers (patterns/keywords) so the agent fires on natural-language requests.
+4. Sequence the migration in phases with fallbacks, then define success/validation metrics.
 
 ## Agent Definition Format
 Each agent uses YAML frontmatter with the following structure:
@@ -69,73 +80,9 @@ triggers:
 ---
 ```
 
-#### Agent Spawner
-**Command**: `.claude/commands/coordination/spawn.md`
-```yaml
----
-role: coordinator
-name: Agent Spawner
-responsibilities:
-  - Create specialized cognitive patterns for task execution
-  - Assign capabilities to agents based on requirements
-  - Manage agent lifecycle and resource allocation
-capabilities:
-  - agent-creation
-  - capability-assignment
-  - resource-management
-  - pattern-recognition
-tools:
-  allowed:
-    - mcp__claude-flow__agent_spawn
-    - mcp__claude-flow__daa_agent_create
-    - mcp__claude-flow__agent_list
-    - mcp__claude-flow__memory_usage
-  restricted:
-    - Bash
-    - Write
-    - Edit
-triggers:
-  - pattern: "spawn.*agent|create.*agent|add.*agent"
-    priority: high
-  - keyword: "agent-spawn"
----
-```
-
-#### Task Orchestrator
-**Command**: `.claude/commands/coordination/orchestrate.md`
-```yaml
----
-role: orchestrator
-name: Task Orchestrator
-responsibilities:
-  - Decompose complex tasks into manageable subtasks
-  - Coordinate parallel and sequential execution strategies
-  - Monitor task progress and dependencies
-  - Synthesize results from multiple agents
-capabilities:
-  - task-decomposition
-  - execution-planning
-  - dependency-management
-  - result-aggregation
-  - progress-tracking
-tools:
-  allowed:
-    - mcp__claude-flow__task_orchestrate
-    - mcp__claude-flow__task_status
-    - mcp__claude-flow__task_results
-    - mcp__claude-flow__parallel_execute
-    - TodoWrite
-    - TodoRead
-  restricted:
-    - Bash
-    - Write
-    - Edit
-triggers:
-  - pattern: "orchestrate|coordinate.*task|manage.*workflow"
-    priority: high
-  - keyword: "orchestrate"
----
-```
+> The block above is the **canonical example** of the target format. The remaining commands follow the
+> same pattern; one more cross-domain example (PR Manager) is shown, then the rest are summarized in the
+> mapping table to keep this template lean. Apply the same frontmatter shape to every command you migrate.
 
 ### 2. GitHub Integration Agents
 
@@ -175,509 +122,33 @@ triggers:
 ---
 ```
 
-#### Code Review Swarm Agent
-**Command**: `.claude/commands/github/code-review-swarm.md`
-```yaml
----
-role: reviewer
-name: Code Review Coordinator
-responsibilities:
-  - Orchestrate multi-agent code reviews
-  - Ensure code quality and standards compliance
-  - Coordinate security and performance reviews
-  - Generate comprehensive review reports
-capabilities:
-  - code-analysis
-  - quality-assessment
-  - security-scanning
-  - performance-review
-  - report-generation
-tools:
-  allowed:
-    - Bash  # For gh CLI
-    - Read
-    - Grep
-    - mcp__claude-flow__swarm_init
-    - mcp__claude-flow__agent_spawn
-    - mcp__claude-flow__github_code_review
-    - mcp__claude-flow__memory_usage
-  restricted:
-    - Write
-    - Edit
-triggers:
-  - pattern: "review.*code|code.*review|check.*pr"
-    priority: high
-  - keyword: "code-review"
----
-```
+### Remaining command → agent mappings
 
-#### Release Manager Agent
-**Command**: `.claude/commands/github/release-manager.md`
-```yaml
----
-role: release-coordinator
-name: Release Manager
-responsibilities:
-  - Coordinate release preparation and deployment
-  - Manage version tagging and changelog generation
-  - Orchestrate multi-repository releases
-  - Handle rollback procedures
-capabilities:
-  - release-planning
-  - version-management
-  - changelog-generation
-  - deployment-coordination
-  - rollback-execution
-tools:
-  allowed:
-    - Bash
-    - Read
-    - mcp__claude-flow__github_release_coord
-    - mcp__claude-flow__swarm_init
-    - mcp__claude-flow__task_orchestrate
-    - TodoWrite
-  restricted:
-    - Write  # Use version control for releases
-    - Edit
-triggers:
-  - pattern: "release|deploy|tag.*version|create.*release"
-    priority: high
-  - keyword: "release-manager"
----
-```
+The remaining commands follow the same two-example pattern above (role, responsibilities, capabilities,
+allowed/restricted tools, triggers). Summary of the mapping by category:
 
-### 3. SPARC Methodology Agents
+| Category | Command | Target role / name | Notable tool restrictions | Trigger keyword |
+|----------|---------|--------------------|---------------------------|-----------------|
+| Coordination | `coordination/spawn.md` | coordinator / Agent Spawner | no Bash/Write/Edit | agent-spawn |
+| Coordination | `coordination/orchestrate.md` | orchestrator / Task Orchestrator | no Bash/Write/Edit | `orchestrate` |
+| GitHub | `github/code-review-swarm.md` | reviewer / Code Review Coordinator | Bash (gh) ok; no Write/Edit | code-review |
+| GitHub | `github/release-manager.md` | release-coordinator / Release Manager | use VCS, not Write/Edit | `release-manager` |
+| SPARC | `sparc/orchestrator.md` | sparc-coordinator / SPARC Orchestrator | no Bash/Write/Edit | sparc-orchestrator |
+| SPARC | `sparc/coder.md` | implementer / SPARC Coder | full edit tools; no swarm_init | `sparc-coder` |
+| SPARC | `sparc/tester.md` | quality-assurance / SPARC Tester | no swarm_init | sparc-tester |
+| Analysis | `analysis/performance-bottlenecks.md` | analyst / Performance Analyzer | read-only (no Write/Edit/Bash) | performance-analyzer |
+| Analysis | `analysis/token-efficiency.md` | analyst / Token Efficiency Analyzer | read-only | token-analyzer |
+| Memory | `memory/usage.md` | memory-manager / Memory Coordinator | no Write/Edit/Bash | memory-manager |
+| Memory | `memory/neural.md` | ai-specialist / Neural Pattern Coordinator | no Write/Edit/Bash | neural-patterns |
+| Automation | `automation/smart-agents.md` | automation-specialist / Smart Agent Coordinator | no Write/Edit/Bash | smart-agents |
+| Automation | `automation/self-healing.md` | reliability-engineer / Self-Healing Coordinator | Bash ok; no Write/Edit | self-healing |
+| Optimization | `optimization/parallel-execution.md` | optimizer / Parallel Execution Optimizer | no Write/Edit | `performance-optimizer` |
+| Optimization | `optimization/auto-topology.md` | optimizer / Topology Optimization Specialist | read-only | `topology-optimizer` |
+| Monitoring | `monitoring/status.md` | monitor / Swarm Status Monitor | read-only | `performance-monitor` |
 
-#### SPARC Orchestrator Agent
-**Command**: `.claude/commands/sparc/orchestrator.md`
-```yaml
----
-role: sparc-coordinator
-name: SPARC Orchestrator
-responsibilities:
-  - Coordinate SPARC methodology phases
-  - Manage task decomposition and agent allocation
-  - Track progress across all SPARC phases
-  - Synthesize results from specialized agents
-capabilities:
-  - sparc-coordination
-  - phase-management
-  - task-planning
-  - resource-allocation
-  - result-synthesis
-tools:
-  allowed:
-    - mcp__claude-flow__sparc_mode
-    - mcp__claude-flow__swarm_init
-    - mcp__claude-flow__agent_spawn
-    - mcp__claude-flow__task_orchestrate
-    - TodoWrite
-    - TodoRead
-    - mcp__claude-flow__memory_usage
-  restricted:
-    - Bash
-    - Write
-    - Edit
-triggers:
-  - pattern: "sparc.*orchestrat|coordinate.*sparc"
-    priority: high
-  - keyword: "sparc-orchestrator"
----
-```
-
-#### SPARC Coder Agent
-**Command**: `.claude/commands/sparc/coder.md`
-```yaml
----
-role: implementer
-name: SPARC Implementation Specialist
-responsibilities:
-  - Transform specifications into working code
-  - Implement TDD practices with parallel test creation
-  - Ensure code quality and standards compliance
-  - Optimize implementation for performance
-capabilities:
-  - code-generation
-  - test-implementation
-  - refactoring
-  - optimization
-  - documentation
-tools:
-  allowed:
-    - Read
-    - Write
-    - Edit
-    - MultiEdit
-    - Bash
-    - mcp__claude-flow__sparc_mode
-    - TodoWrite
-  restricted:
-    - mcp__claude-flow__swarm_init  # Focus on implementation
-triggers:
-  - pattern: "implement|code|develop|build.*feature"
-    priority: high
-  - keyword: "sparc-coder"
----
-```
-
-#### SPARC Tester Agent
-**Command**: `.claude/commands/sparc/tester.md`
-```yaml
----
-role: quality-assurance
-name: SPARC Testing Specialist
-responsibilities:
-  - Design comprehensive test strategies
-  - Implement parallel test execution
-  - Ensure coverage requirements are met
-  - Coordinate testing across different levels
-capabilities:
-  - test-design
-  - test-implementation
-  - coverage-analysis
-  - performance-testing
-  - security-testing
-tools:
-  allowed:
-    - Read
-    - Write
-    - Edit
-    - Bash
-    - mcp__claude-flow__sparc_mode
-    - TodoWrite
-    - mcp__claude-flow__parallel_execute
-  restricted:
-    - mcp__claude-flow__swarm_init
-triggers:
-  - pattern: "test|verify|validate|check.*quality"
-    priority: high
-  - keyword: "sparc-tester"
----
-```
-
-### 4. Analysis Agents
-
-#### Performance Analyzer Agent
-**Command**: `.claude/commands/analysis/performance-bottlenecks.md`
-```yaml
----
-role: analyst
-name: Performance Bottleneck Analyzer
-responsibilities:
-  - Identify performance bottlenecks in workflows
-  - Analyze execution patterns and resource usage
-  - Recommend optimization strategies
-  - Monitor improvement metrics
-capabilities:
-  - performance-analysis
-  - bottleneck-detection
-  - metric-collection
-  - pattern-recognition
-  - optimization-planning
-tools:
-  allowed:
-    - mcp__claude-flow__bottleneck_analyze
-    - mcp__claude-flow__performance_report
-    - mcp__claude-flow__metrics_collect
-    - mcp__claude-flow__trend_analysis
-    - Read
-    - Grep
-  restricted:
-    - Write
-    - Edit
-    - Bash
-triggers:
-  - pattern: "analyze.*performance|bottleneck|slow.*execution"
-    priority: high
-  - keyword: "performance-analyzer"
----
-```
-
-#### Token Efficiency Analyst Agent
-**Command**: `.claude/commands/analysis/token-efficiency.md`
-```yaml
----
-role: analyst
-name: Token Efficiency Analyzer
-responsibilities:
-  - Monitor token consumption across operations
-  - Identify inefficient token usage patterns
-  - Recommend optimization strategies
-  - Track cost implications
-capabilities:
-  - token-analysis
-  - cost-optimization
-  - usage-tracking
-  - pattern-detection
-  - report-generation
-tools:
-  allowed:
-    - mcp__claude-flow__token_usage
-    - mcp__claude-flow__cost_analysis
-    - mcp__claude-flow__usage_stats
-    - mcp__claude-flow__memory_analytics
-    - Read
-  restricted:
-    - Write
-    - Edit
-    - Bash
-triggers:
-  - pattern: "token.*usage|analyze.*cost|efficiency.*report"
-    priority: medium
-  - keyword: "token-analyzer"
----
-```
-
-### 5. Memory Management Agents
-
-#### Memory Coordinator Agent
-**Command**: `.claude/commands/memory/usage.md`
-```yaml
----
-role: memory-manager
-name: Memory Coordination Specialist
-responsibilities:
-  - Manage persistent memory across sessions
-  - Coordinate memory namespaces and TTL
-  - Optimize memory usage and compression
-  - Facilitate cross-agent memory sharing
-capabilities:
-  - memory-management
-  - namespace-coordination
-  - data-persistence
-  - compression-optimization
-  - synchronization
-tools:
-  allowed:
-    - mcp__claude-flow__memory_usage
-    - mcp__claude-flow__memory_search
-    - mcp__claude-flow__memory_namespace
-    - mcp__claude-flow__memory_compress
-    - mcp__claude-flow__memory_sync
-  restricted:
-    - Write
-    - Edit
-    - Bash
-triggers:
-  - pattern: "memory|remember|store.*context|retrieve.*data"
-    priority: high
-  - keyword: "memory-manager"
----
-```
-
-#### Neural Pattern Agent
-**Command**: `.claude/commands/memory/neural.md`
-```yaml
----
-role: ai-specialist
-name: Neural Pattern Coordinator
-responsibilities:
-  - Train and manage neural patterns
-  - Coordinate cognitive behavior analysis
-  - Implement adaptive learning strategies
-  - Optimize AI model performance
-capabilities:
-  - neural-training
-  - pattern-recognition
-  - cognitive-analysis
-  - model-optimization
-  - transfer-learning
-tools:
-  allowed:
-    - mcp__claude-flow__neural_train
-    - mcp__claude-flow__neural_patterns
-    - mcp__claude-flow__neural_predict
-    - mcp__claude-flow__cognitive_analyze
-    - mcp__claude-flow__learning_adapt
-  restricted:
-    - Write
-    - Edit
-    - Bash
-triggers:
-  - pattern: "neural|ai.*pattern|cognitive|machine.*learning"
-    priority: high
-  - keyword: "neural-patterns"
----
-```
-
-### 6. Automation Agents
-
-#### Smart Agent Coordinator
-**Command**: `.claude/commands/automation/smart-agents.md`
-```yaml
----
-role: automation-specialist
-name: Smart Agent Coordinator
-responsibilities:
-  - Automate agent spawning based on task requirements
-  - Implement intelligent capability matching
-  - Manage dynamic agent allocation
-  - Optimize resource utilization
-capabilities:
-  - intelligent-spawning
-  - capability-matching
-  - resource-optimization
-  - pattern-learning
-  - auto-scaling
-tools:
-  allowed:
-    - mcp__claude-flow__daa_agent_create
-    - mcp__claude-flow__daa_capability_match
-    - mcp__claude-flow__daa_resource_alloc
-    - mcp__claude-flow__swarm_scale
-    - mcp__claude-flow__agent_metrics
-  restricted:
-    - Write
-    - Edit
-    - Bash
-triggers:
-  - pattern: "smart.*agent|auto.*spawn|intelligent.*coordination"
-    priority: high
-  - keyword: "smart-agents"
----
-```
-
-#### Self-Healing Coordinator Agent
-**Command**: `.claude/commands/automation/self-healing.md`
-```yaml
----
-role: reliability-engineer
-name: Self-Healing System Coordinator
-responsibilities:
-  - Detect and recover from system failures
-  - Implement fault tolerance strategies
-  - Coordinate automatic recovery procedures
-  - Monitor system health continuously
-capabilities:
-  - fault-detection
-  - automatic-recovery
-  - health-monitoring
-  - resilience-planning
-  - error-analysis
-tools:
-  allowed:
-    - mcp__claude-flow__daa_fault_tolerance
-    - mcp__claude-flow__health_check
-    - mcp__claude-flow__error_analysis
-    - mcp__claude-flow__diagnostic_run
-    - Bash  # For system commands
-  restricted:
-    - Write  # Prevent accidental file modifications during recovery
-    - Edit
-triggers:
-  - pattern: "self.*heal|auto.*recover|fault.*toleran|system.*health"
-    priority: high
-  - keyword: "self-healing"
----
-```
-
-### 7. Optimization Agents
-
-#### Parallel Execution Optimizer Agent
-**Command**: `.claude/commands/optimization/parallel-execution.md`
-```yaml
----
-role: optimizer
-name: Parallel Execution Optimizer
-responsibilities:
-  - Optimize task execution for parallelism
-  - Identify parallelization opportunities
-  - Coordinate concurrent operations
-  - Monitor parallel execution efficiency
-capabilities:
-  - parallelization-analysis
-  - execution-optimization
-  - load-balancing
-  - performance-monitoring
-  - bottleneck-removal
-tools:
-  allowed:
-    - mcp__claude-flow__parallel_execute
-    - mcp__claude-flow__load_balance
-    - mcp__claude-flow__batch_process
-    - mcp__claude-flow__performance_report
-    - TodoWrite
-  restricted:
-    - Write
-    - Edit
-triggers:
-  - pattern: "parallel|concurrent|simultaneous|batch.*execution"
-    priority: high
-  - keyword: "parallel-optimizer"
----
-```
-
-#### Auto-Topology Optimizer Agent
-**Command**: `.claude/commands/optimization/auto-topology.md`
-```yaml
----
-role: optimizer
-name: Topology Optimization Specialist
-responsibilities:
-  - Analyze and optimize swarm topology
-  - Adapt topology based on workload
-  - Balance communication overhead
-  - Ensure optimal agent distribution
-capabilities:
-  - topology-analysis
-  - graph-optimization
-  - network-design
-  - load-distribution
-  - adaptive-configuration
-tools:
-  allowed:
-    - mcp__claude-flow__topology_optimize
-    - mcp__claude-flow__swarm_monitor
-    - mcp__claude-flow__coordination_sync
-    - mcp__claude-flow__swarm_status
-    - mcp__claude-flow__metrics_collect
-  restricted:
-    - Write
-    - Edit
-    - Bash
-triggers:
-  - pattern: "topology|optimize.*swarm|network.*structure"
-    priority: medium
-  - keyword: "topology-optimizer"
----
-```
-
-### 8. Monitoring Agents
-
-#### Swarm Monitor Agent
-**Command**: `.claude/commands/monitoring/status.md`
-```yaml
----
-role: monitor
-name: Swarm Status Monitor
-responsibilities:
-  - Monitor swarm health and performance
-  - Track agent status and utilization
-  - Generate real-time status reports
-  - Alert on anomalies or failures
-capabilities:
-  - health-monitoring
-  - performance-tracking
-  - status-reporting
-  - anomaly-detection
-  - alert-generation
-tools:
-  allowed:
-    - mcp__claude-flow__swarm_status
-    - mcp__claude-flow__swarm_monitor
-    - mcp__claude-flow__agent_metrics
-    - mcp__claude-flow__health_check
-    - mcp__claude-flow__performance_report
-  restricted:
-    - Write
-    - Edit
-    - Bash
-triggers:
-  - pattern: "monitor|status|health.*check|swarm.*status"
-    priority: medium
-  - keyword: "swarm-monitor"
----
-```
+Common restriction rules: analysis/memory/monitoring agents are read-only (no `Write`/`Edit`/`Bash`);
+implementers (SPARC Coder) keep full edit tools; GitHub agents prefer `Bash` + `gh` CLI over direct
+`Write`/`Edit` for repo operations.
 
 ## Implementation Guidelines
 
@@ -731,6 +202,9 @@ A complete command-to-agent migration plan: each `.claude/commands/*` mapped to 
 ## Scope
 
 This is a template/scaffold variant; it is a planning document rather than a runtime agent. The individual agent definitions it specifies (PR manager, SPARC orchestrator/coder, performance analyzer, memory coordinator, smart agent, etc.) are the canonical agents under `templates/*`, `github/*`, and `sparc/*` — this file describes how to derive them and should not be treated as an executable coordinator.
+
+## Coordination
+Tier 3 planning template. Hand the produced agent definitions to whoever scaffolds the files (e.g. `base-template-generator`), and route the phased-rollout work through a coordinator such as `sparc-coord`. This file plans the migration; it does not execute it.
 
 ## Model & cost
 Default `sonnet`.

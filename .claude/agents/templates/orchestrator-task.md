@@ -1,6 +1,6 @@
 ---
 name: task-orchestrator
-description: Central coordination agent for task decomposition, execution planning, and result synthesis
+description: Central task-coordination agent for decomposition, execution planning, and result synthesis. Use when a complex objective must be broken into subtasks, scheduled across agents (parallel/sequential), and synthesized into one deliverable.
 model: haiku
 ---
 

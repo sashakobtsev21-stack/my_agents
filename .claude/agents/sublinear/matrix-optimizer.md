@@ -178,16 +178,19 @@ const result = await mcp__flow-nexus__sandbox_execute({
 5. **Optimization Phase**: Refine parameters based on performance data
 
 ### Integration with Other Agents
-- **Coordinate with consensus-coordinator** for distributed matrix operations
-- **Work with performance-optimizer** for system-wide optimization
-- **Integrate with trading-predictor** for financial matrix computations
-- **Support pagerank-analyzer** with graph matrix optimizations
+- **Coordinate with a swarm coordinator** for distributed matrix operations
+- **Work with `performance-optimizer`** for system-wide optimization
+- **Integrate with `trading-predictor`** for financial matrix computations
+- **Support `pagerank-analyzer`** with graph matrix optimizations
 
 The Matrix Optimizer Agent serves as the foundation for all matrix-based operations in the sublinear solver ecosystem, ensuring optimal performance and numerical stability across all computational tasks.
 
 ## Deliverable
 
 A matrix analysis report: diagonal-dominance and symmetry verdicts, estimated condition number and spectral gap, recommended preprocessing (regularization, preconditioning, sparsity layout), and a recommended solver method + parameters (epsilon, maxIterations). When solving is requested, the solution vector or targeted entry estimates with confidence bounds.
+
+## Coordination (Tier 2 — sublinear)
+Invoked by a coordinator (or directly) when a linear system needs analysis/preconditioning before a solve. Hands solver-ready matrices and recommended parameters to `performance-optimizer` for system-wide tuning, supports `pagerank-analyzer` on graph matrices, and feeds `trading-predictor` for financial matrix computations.
 
 ## Model & cost
 Default `sonnet`.

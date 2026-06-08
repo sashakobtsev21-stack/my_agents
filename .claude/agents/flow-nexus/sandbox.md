@@ -1,7 +1,7 @@
 ---
 name: flow-nexus-sandbox
 description: |
-  E2B sandbox deployment and management specialist. Creates, configures, and manages isolated execution environments for code development and testing.
+  E2B sandbox deployment and management specialist. Use when you need to create, configure, run code in, or tear down an isolated E2B execution environment for development or testing. Manages sandbox lifecycle, files, env vars, and resource usage.
 model: sonnet
 ---
 

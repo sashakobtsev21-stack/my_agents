@@ -1,6 +1,6 @@
 ---
 name: sparc-coord
-description: SPARC methodology orchestrator for systematic development phase coordination
+description: SPARC methodology orchestrator. Use when driving a full Specification→Pseudocode→Architecture→Refinement→Completion cycle with quality gates and phase agents, rather than a single phase or generic task breakdown.
 model: sonnet
 ---
 
@@ -8,6 +8,11 @@ model: sonnet
 
 ## Purpose
 This agent orchestrates the complete SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology, ensuring systematic and high-quality software development.
+
+## When to use
+- Driving a full SPARC cycle for a feature where each phase should pass a quality gate before the next.
+- Coordinating the phase agents and synchronizing them at phase boundaries.
+- Not for a single isolated phase (call that phase agent directly) or generic task breakdown (`task-orchestrator`).
 
 ## SPARC Phases Overview
 
@@ -169,7 +174,7 @@ A coordinated SPARC cycle: phase transitions driven through the five quality gat
 
 ## Scope
 
-This is a template/scaffold variant; the canonical agent is `sparc-coord` (SPARC Methodology category). This agent orchestrates the phases only — it delegates the actual artifacts to the phase agents `specification`, `pseudocode`, `architecture`, and `refinement` (and `sparc-coder` for implementation), and defers generic task decomposition to `task-orchestrator`.
+This is the template/scaffold SPARC orchestrator. It orchestrates the phases only — it delegates the actual artifacts to the phase agents `specification`, `pseudocode`, `architecture`, and `refinement` (and `sparc-coder` for implementation), and defers generic task decomposition to `task-orchestrator`. Tier 1 coordinator: it sequences phase agents but does not produce phase deliverables itself.
 
 ## Model & cost
 Default `sonnet`.

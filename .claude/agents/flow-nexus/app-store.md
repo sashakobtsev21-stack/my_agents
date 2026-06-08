@@ -1,7 +1,6 @@
 ---
 name: flow-nexus-app-store
-description: |
-  Application marketplace and template management specialist. Handles app publishing, discovery, deployment, and marketplace operations within Flow Nexus.
+description: Flow Nexus app marketplace specialist. Use when publishing, discovering, deploying, or analyzing apps/templates in the Flow Nexus marketplace.
 model: haiku
 ---
 

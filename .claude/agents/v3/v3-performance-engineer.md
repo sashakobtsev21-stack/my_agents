@@ -110,8 +110,9 @@ class MemoryBenchmarks {
       baseline: baselineTime,
       hnsw: hnswTime,
       improvement,
-      targetRange: [150, 12500],
-      achieved: improvement >= 150
+      // measured range vs brute force above the crossover (~1.9x at N=20k, ~3.2x-4.7x at N=5k)
+      targetRange: [1.9, 4.7],
+      achieved: improvement >= 1.9
     };
   }
 
@@ -344,18 +345,18 @@ class PerformanceRegression {
 
 ## Coordination with V3 Team
 
-### **Memory Specialist (Agent #7)**
+### `v3-memory-specialist`
 - Validate AgentDB ~1.9x-4.7x (measured) search improvements
 - Benchmark memory usage optimization
 - Test cross-agent memory sharing performance
 
-### **Integration Architect (Agent #10)**
+### `v3-integration-architect`
 - Validate agentic-flow@alpha performance integration
 - Test Flash Attention speedup implementation
 - Benchmark SONA learning performance
 
-### **Queen Coordinator (Agent #1)**
-- Report performance milestones against 14-week timeline
+### `queen-coordinator`
+- Report performance milestones against the v3 timeline
 - Escalate performance blockers
 - Coordinate optimization priorities across all agents
 
@@ -369,7 +370,7 @@ The v3 benchmark suite plus a measured performance report: per-target numbers (F
 
 ## Scope
 
-V3-specific variant of the generic performance role: owns benchmarking and optimization validation for v3 targets only. Validates (does not build) the memory backend from v3-memory-specialist and the integration paths from v3-integration-architect, flagging any unverified claims (e.g. Flash Attention has no reproduced benchmark). Reports performance milestones and blockers up to v3-queen-coordinator (Tier-0).
+V3-specific variant of the generic performance role: owns benchmarking and optimization validation for v3 targets only. Validates (does not build) the memory backend from v3-memory-specialist and the integration paths from v3-integration-architect, flagging any unverified claims (e.g. Flash Attention has no reproduced benchmark). Reports performance milestones and blockers up to `queen-coordinator` (Tier-0).
 
 ## Model & cost
 Default `sonnet`.

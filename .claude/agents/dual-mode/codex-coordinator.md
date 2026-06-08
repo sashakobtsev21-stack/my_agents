@@ -1,6 +1,6 @@
 ---
 name: codex-coordinator
-description: Coordinates multiple headless Codex workers for parallel execution
+description: Codex parallel coordinator — decomposes a task and spawns/aggregates headless `codex exec` workers. Use when you need multiple Codex workers running in parallel under one coordinator.
 model: sonnet
 ---
 
@@ -71,140 +71,19 @@ wait
 npx ruflo@latest memory list --namespace results
 ```
 
-## Coordination Patterns
+## Coordination patterns
+- **Parallel fan-out**: spawn all independent workers at once with `&`, then `wait`; aggregate from the `results` namespace.
+- **Sequential pipeline**: spawn an architect, `wait` for its output in memory, then spawn coders that depend on it, then a tester — gate each stage on the prior stage's memory key.
+- Track shared coordination state via the `swarm_init` and `memory_*` MCP tools (or the `npx ruflo` memory CLI); always pass `upsert=true` when storing a worker result.
 
-### Parallel Workers Pattern
-```yaml
-description: Spawn multiple workers for parallel execution
-steps:
-  - swarm_init: { topology: hierarchical, maxAgents: 8 }
-  - spawn_workers:
-      - { type: coder, count: 2 }
-      - { type: tester, count: 1 }
-      - { type: reviewer, count: 1 }
-  - wait_for_completion
-  - aggregate_results
-```
+## Best practices
+1. **Size workers appropriately** — each worker should complete in < 5 minutes.
+2. **Use meaningful IDs** — result keys should identify the worker's purpose (`result-<worker-id>`).
+3. **Share context first** — store shared context in memory before spawning.
+4. **Pick a sandbox** — `workspace-write` for code changes, `read-only` for audits/reviews.
+5. **Handle partial failures** — check for missing/failed results when aggregating.
 
-### Sequential Pipeline Pattern
-```yaml
-description: Chain workers in sequence
-steps:
-  - spawn: architect
-  - wait_for: architecture
-  - spawn: [coder-1, coder-2]
-  - wait_for: implementation
-  - spawn: tester
-  - wait_for: tests
-  - aggregate_results
-```
-
-## Prompt Templates
-
-### Coordinate Parallel Work
-```javascript
-// Template for coordinating parallel workers
-const workers = [
-  { id: "coder-1", task: "Implement user service" },
-  { id: "coder-2", task: "Implement API endpoints" },
-  { id: "tester", task: "Write integration tests" },
-  { id: "docs", task: "Document the API" }
-];
-
-// Spawn all workers
-workers.forEach(w => {
-  console.log(`codex exec --sandbox workspace-write --skip-git-repo-check "${w.task}. Store result as result-${w.id}." &`);
-});
-```
-
-### Worker Spawn Template
-```bash
-codex exec --sandbox workspace-write --skip-git-repo-check "
-You are {{worker_name}} ({{worker_id}}).
-
-TASK: {{worker_task}}
-
-1. Search memory: memory_search(query='{{task_keywords}}')
-2. Execute your task
-3. Store results: memory_store(key='result-{{worker_id}}', namespace='results', upsert=true)
-" &
-```
-
-## MCP Tool Integration
-
-### Initialize Coordination
-```javascript
-// Initialize swarm tracking
-mcp__ruflo__swarm_init {
-  topology: "hierarchical",
-  maxAgents: 8,
-  strategy: "specialized"
-}
-```
-
-### Track Worker Status
-```javascript
-// Store coordination state
-mcp__ruflo__memory_store {
-  key: "coordination/parallel-task",
-  value: JSON.stringify({
-    workers: ["worker-1", "worker-2", "worker-3"],
-    started: new Date().toISOString(),
-    status: "running"
-  }),
-  namespace: "coordination"
-}
-```
-
-### Aggregate Results
-```javascript
-// Collect all worker results
-mcp__ruflo__memory_list {
-  namespace: "results"
-}
-```
-
-## Example: Feature Implementation Swarm
-
-```bash
-#!/bin/bash
-FEATURE="user-auth"
-
-# Initialize
-npx ruflo@latest swarm init --topology hierarchical --max-agents 4
-
-# Spawn workers in parallel
-codex exec --sandbox workspace-write --skip-git-repo-check "Architect: Design $FEATURE. Store result as result-${FEATURE}-arch." &
-codex exec --sandbox workspace-write --skip-git-repo-check "Coder: Implement $FEATURE. Store result as result-${FEATURE}-code." &
-codex exec --sandbox workspace-write --skip-git-repo-check "Tester: Test $FEATURE. Store result as result-${FEATURE}-test." &
-codex exec --sandbox workspace-write --skip-git-repo-check "Docs: Document $FEATURE. Store result as result-${FEATURE}-docs." &
-
-# Wait for all
-wait
-
-# Collect results
-npx ruflo@latest memory list --namespace results
-```
-
-## Best Practices
-
-1. **Size Workers Appropriately**: Each worker should complete in < 5 minutes
-2. **Use Meaningful IDs**: result keys should identify the worker's purpose
-3. **Share Context**: Store shared context in memory before spawning
-4. **Pick a Sandbox**: `workspace-write` for code changes, `read-only` for audits/reviews
-5. **Error Handling**: Check for partial failures when collecting results
-
-## Worker Types Reference
-
-| Type | Purpose | Spawn Command |
-|------|---------|---------------|
-| `coder` | Implement code | `codex exec --sandbox workspace-write --skip-git-repo-check "Implement [feature]"` |
-| `tester` | Write tests | `codex exec --sandbox workspace-write --skip-git-repo-check "Write tests for [module]"` |
-| `reviewer` | Review code | `codex exec --sandbox read-only --skip-git-repo-check "Review [files]"` |
-| `docs` | Documentation | `codex exec --sandbox workspace-write --skip-git-repo-check "Document [component]"` |
-| `architect` | Design | `codex exec --sandbox read-only --skip-git-repo-check "Design [system]"` |
-
-Remember: You coordinate, workers execute. Use memory for all communication between processes.
+Remember: you coordinate, workers execute. Use memory for all communication between processes.
 
 ## Deliverable
 

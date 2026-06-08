@@ -288,17 +288,17 @@ class BackwardCompatibility {
 
 ## Coordination Points
 
-### **Memory Specialist (Agent #7)**
+### Memory Specialist (`v3-memory-specialist`)
 - AgentDB integration coordination
 - Cross-agent memory sharing setup
 - Performance benchmarking collaboration
 
-### **Swarm Specialist (Agent #8)**
+### Swarm Specialist
 - Swarm system migration from claude-flow to agentic-flow
 - Topology coordination and optimization
 - Agent communication protocol alignment
 
-### **Performance Engineer (Agent #14)**
+### Performance Engineer (`v3-performance-engineer`)
 - Performance target validation
 - Benchmark implementation for improvements
 - Regression testing for migration phases
@@ -318,7 +318,7 @@ The ADR-001 integration architecture: adapter-layer design, phased migration pla
 
 ## Scope
 
-V3-specific variant of the generic architect role: owns the agentic-flow@alpha extension strategy and code-deduplication for v3, not greenfield system design. Hands AgentDB/SONA wiring to v3-memory-specialist, performance-target validation to v3-performance-engineer, and reports migration milestones up to v3-queen-coordinator (Tier-0). Stays out of security remediation (v3-security-architect).
+V3-specific variant of the generic architect role: owns the agentic-flow@alpha extension strategy and code-deduplication for v3, not greenfield system design. Hands AgentDB/SONA wiring to v3-memory-specialist, performance-target validation to v3-performance-engineer, and reports migration milestones up to `queen-coordinator` (Tier-0). Stays out of security remediation (v3-security-architect).
 
 ## Model & cost
 `opus` — architecture/coordination/security reasoning warrants the top tier.

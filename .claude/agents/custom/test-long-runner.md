@@ -1,6 +1,6 @@
 ---
 name: test-long-runner
-description: Test agent that can run for 30+ minutes on complex tasks
+description: Long-running test fixture agent. Use when you need a test/fixture worker that sustains a single long task (30+ minutes) — soak tests, long-run harness checks, or extended analysis runs.
 model: haiku
 ---
 
@@ -45,6 +45,9 @@ Remember: You have plenty of time to do thorough, high-quality work!
 
 ## Deliverable
 A long-form, well-structured deliverable for the assigned task (analysis, research report, architecture document, implementation guide, or audit) with clear section headers, examples, text diagrams, references, and explicit next steps. As a test/fixture agent, its primary output is sustained, structured progress over an extended run rather than a single fixed artifact type.
+
+## Coordination
+Tier 2 (test fixture). Spawned by the lead or a coordinator to exercise long-run behavior; reports its progress and final deliverable back to whoever invoked it. Not part of any production pipeline — it has no downstream handoff.
 
 ## Model & cost
 `haiku` — fast, mechanical work; cheap by design.

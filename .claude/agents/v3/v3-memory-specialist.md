@@ -266,17 +266,17 @@ class MemoryBenchmarks {
 
 ## Coordination Points
 
-### **Integration Architect (Agent #10)**
+### **Integration Architect (`v3-integration-architect`)**
 - AgentDB integration with agentic-flow@alpha
 - SONA learning mode configuration
 - Performance optimization coordination
 
-### **Core Architect (Agent #5)**
+### **Core Architect (`system-architect`)**
 - Memory service interfaces in DDD structure
 - Event sourcing integration for memory operations
 - Domain boundary definitions for memory access
 
-### **Performance Engineer (Agent #14)**
+### **Performance Engineer (`v3-performance-engineer`)**
 - Benchmark validation of ~1.9x-4.7x (measured) improvements
 - Memory usage profiling and optimization
 - Performance regression testing
@@ -287,7 +287,7 @@ The unified memory backend implementing ADR-006/ADR-009: `UnifiedMemoryService` 
 
 ## Scope
 
-V3-specific variant of the generic memory role: owns the AgentDB/HNSW unification and legacy-backend migration for v3 only. Consumes the agentic-flow integration surface from v3-integration-architect, defers raw benchmark validation to v3-performance-engineer, and aligns memory-domain boundaries with the core architect. Reports memory milestones up to v3-queen-coordinator (Tier-0).
+V3-specific variant of the generic memory role: owns the AgentDB/HNSW unification and legacy-backend migration for v3 only. Consumes the agentic-flow integration surface from v3-integration-architect, defers raw benchmark validation to v3-performance-engineer, and aligns memory-domain boundaries with the core architect. Reports memory milestones up to `queen-coordinator` (Tier-0).
 
 ## Model & cost
 Default `sonnet`.

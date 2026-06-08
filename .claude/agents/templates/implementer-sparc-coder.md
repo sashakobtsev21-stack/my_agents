@@ -1,6 +1,6 @@
 ---
 name: sparc-coder
-description: Transform specifications into working code with TDD practices
+description: SPARC implementation specialist — transforms specs/ADRs into working, tested code via TDD. Use during the Refinement/Completion phases to implement against the design (not to redo requirements, pseudocode, or architecture).
 model: sonnet
 ---
 

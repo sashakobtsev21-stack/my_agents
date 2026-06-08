@@ -19,13 +19,13 @@
 | [`collective-intelligence-coordinator`](../.claude/agents/hive-mind/collective-intelligence-coordinator.md) | 🟣 opus | Hive-Mind | Collective-intelligence nexus (Tier 0). Use to orchestrate distributed cognition across the hive — aggregate decisions, synchronize shared knowledge, and balance cognitive load. Produces a coherent collective decision + synchronized knowledge graph. |
 | [`project-coordinator`](../.claude/agents/project-coordinator.md) | 🔵 sonnet | Прочие | Coordinates multi-agent workflows — decomposes the goal, assigns named agents, sequences handoffs via SendMessage, and synthesizes results. Use as the lead for multi-step, multi-agent tasks. |
 | [`dual-orchestrator`](../.claude/agents/dual-mode/dual-orchestrator.md) | 🟣 opus | Dual-Mode (Claude + Codex) | Orchestrates Claude Code (interactive) + Codex (headless) for hybrid workflows |
-| [`task-orchestrator`](../.claude/agents/templates/orchestrator-task.md) | 🟢 haiku | Templates | Central coordination agent for task decomposition, execution planning, and result synthesis |
-| [`sparc-coord`](../.claude/agents/templates/sparc-coordinator.md) | 🔵 sonnet | Templates | SPARC methodology orchestrator for systematic development phase coordination |
+| [`task-orchestrator`](../.claude/agents/templates/orchestrator-task.md) | 🟢 haiku | Templates | Central task-coordination agent for decomposition, execution planning, and result synthesis. Use when a complex objective must be broken into subtasks, scheduled across agents (parallel/sequential), and synthesized into one deliverable. |
+| [`sparc-coord`](../.claude/agents/templates/sparc-coordinator.md) | 🔵 sonnet | Templates | SPARC methodology orchestrator. Use when driving a full Specification→Pseudocode→Architecture→Refinement→Completion cycle with quality gates and phase agents, rather than a single phase or generic task breakdown. |
 | [`adaptive-coordinator`](../.claude/agents/swarm/adaptive-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Adaptive topology coordinator. Use when the best swarm shape isn't known up front and should switch on live metrics — picks hierarchical/mesh/ring/hybrid, monitors performance, and migrates safely with rollback. Produces the active topology plus a migration plan. |
 | [`hierarchical-coordinator`](../.claude/agents/swarm/hierarchical-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Hierarchical (queen-led) swarm coordinator. Use when a complex task needs central planning with one coordinator delegating to specialized workers — the anti-drift default for coding swarms. Produces a task tree, an agent-assignment map, and an integrated result. |
 | [`mesh-coordinator`](../.claude/agents/swarm/mesh-coordinator.md) | 🔵 sonnet | Swarm (топологии) | Peer-to-peer mesh swarm coordinator. Use when agents must collaborate as equals with no single point of failure — fault-tolerant, partition-resilient, distributed decision-making. Produces peer assignments and consensus decisions. |
 | [`byzantine-coordinator`](../.claude/agents/consensus/byzantine-coordinator.md) | 🔵 sonnet | Consensus / распределённые | Byzantine fault-tolerant consensus coordinator. Use when nodes may be adversarial/compromised and you need agreement despite arbitrary faults (tolerates f < n/3). Produces a PBFT-committed value + malicious-actor report. |
-| [`codex-coordinator`](../.claude/agents/dual-mode/codex-coordinator.md) | 🔵 sonnet | Dual-Mode (Claude + Codex) | Coordinates multiple headless Codex workers for parallel execution |
+| [`codex-coordinator`](../.claude/agents/dual-mode/codex-coordinator.md) | 🔵 sonnet | Dual-Mode (Claude + Codex) | Codex parallel coordinator — decomposes a task and spawns/aggregates headless `codex exec` workers. Use when you need multiple Codex workers running in parallel under one coordinator. |
 | [`crdt-synchronizer`](../.claude/agents/consensus/crdt-synchronizer.md) | 🔵 sonnet | Consensus / распределённые | CRDT state-synchronization coordinator. Use when multiple writers (incl. offline) concurrently mutate shared state and it must converge automatically with no coordination. Produces a merged, conflict-free state. |
 | [`game-director`](../.claude/agents/game-dev/game-director.md) | 🟣 opus | Game Dev (Unity / 3D mobile) | Creative & technical director for the game — owns the vision, pillars, and Game Design Document, and keeps every discipline coherent. Use as the Tier-0 lead for the whole game project. |
 | [`gossip-coordinator`](../.claude/agents/consensus/gossip-coordinator.md) | 🔵 sonnet | Consensus / распределённые | Gossip/epidemic consensus coordinator. Use for large-scale, highly-available dissemination where eventual consistency beats strong agreement. Scales to many nodes with probabilistic guarantees. |
@@ -101,12 +101,12 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`flow-nexus-app-store`](../.claude/agents/flow-nexus/app-store.md) ✓ | 🟢 haiku | Application marketplace and template management specialist. Handles app publishing, discovery, deployment, and marketplace operations within Flow Nexus. |
+| [`flow-nexus-app-store`](../.claude/agents/flow-nexus/app-store.md) ✓ | 🟢 haiku | Flow Nexus app marketplace specialist. Use when publishing, discovering, deploying, or analyzing apps/templates in the Flow Nexus marketplace. |
 | [`flow-nexus-auth`](../.claude/agents/flow-nexus/authentication.md) ✓ | 🔵 sonnet | Flow Nexus authentication and user management specialist. Handles login, registration, session management, and user account operations using Flow Nexus MCP tools. |
 | [`flow-nexus-challenges`](../.claude/agents/flow-nexus/challenges.md) ✓ | 🟢 haiku | Coding challenges and gamification specialist. Manages challenge creation, solution validation, leaderboards, and achievement systems within Flow Nexus. |
-| [`flow-nexus-neural`](../.claude/agents/flow-nexus/neural-network.md) ✓ | 🔵 sonnet | Neural network training and deployment specialist. Manages distributed neural network training, inference, and model lifecycle using Flow Nexus cloud infrastructure. |
+| [`flow-nexus-neural`](../.claude/agents/flow-nexus/neural-network.md) ✓ | 🔵 sonnet | Flow Nexus neural-network specialist. Use when you need to train, deploy, or run inference on neural networks across Flow Nexus cloud sandboxes, or manage model lifecycle/versioning at scale. |
 | [`flow-nexus-payments`](../.claude/agents/flow-nexus/payments.md) ✓ | 🔵 sonnet | Credit management and billing specialist. Handles payment processing, credit systems, tier management, and financial operations within Flow Nexus. |
-| [`flow-nexus-sandbox`](../.claude/agents/flow-nexus/sandbox.md) ✓ | 🔵 sonnet | E2B sandbox deployment and management specialist. Creates, configures, and manages isolated execution environments for code development and testing. |
+| [`flow-nexus-sandbox`](../.claude/agents/flow-nexus/sandbox.md) ✓ | 🔵 sonnet | E2B sandbox deployment and management specialist. Use when you need to create, configure, run code in, or tear down an isolated E2B execution environment for development or testing. Manages sandbox lifecycle, files, env vars, and resource usage. |
 | [`flow-nexus-swarm`](../.claude/agents/flow-nexus/swarm.md) ✓ | 🔵 sonnet | AI swarm orchestration and management specialist. Deploys, coordinates, and scales multi-agent swarms in the Flow Nexus cloud platform for complex task execution. |
 | [`flow-nexus-user-tools`](../.claude/agents/flow-nexus/user-tools.md) ✓ | 🟢 haiku | User management and system utilities specialist. Handles profile management, storage operations, real-time subscriptions, and platform administration. |
 | [`flow-nexus-workflow`](../.claude/agents/flow-nexus/workflow.md) ✓ | 🔵 sonnet | Event-driven workflow automation specialist. Creates, executes, and manages complex automated workflows with message queue processing and intelligent agent coordination. |
@@ -116,13 +116,13 @@
 | Агент | Тир | Описание |
 |---|---|---|
 | [`memory-coordinator`](../.claude/agents/templates/memory-coordinator.md) 🎖 ✓ | 🟢 haiku | Manage persistent memory across sessions and facilitate cross-agent memory sharing |
-| [`migration-planner`](../.claude/agents/templates/migration-plan.md) ✓ | 🔵 sonnet | Comprehensive migration plan for converting commands to agent-based system |
+| [`migration-planner`](../.claude/agents/templates/migration-plan.md) ✓ | 🔵 sonnet | Command-to-agent migration planner. Use when you need to map existing .claude/commands into agent definitions (roles, tools, triggers) and produce a phased migration plan. This is a planning template, not a runtime coordinator. |
 | [`perf-analyzer`](../.claude/agents/templates/performance-analyzer.md) ✓ | 🔵 sonnet | Performance bottleneck analyzer for identifying and resolving workflow inefficiencies |
 | [`smart-agent`](../.claude/agents/templates/automation-smart-agent.md) ✓ | 🔵 sonnet | Intelligent agent coordination and dynamic spawning specialist |
-| [`sparc-coder`](../.claude/agents/templates/implementer-sparc-coder.md) ✓ | 🔵 sonnet | Transform specifications into working code with TDD practices |
-| [`sparc-coord`](../.claude/agents/templates/sparc-coordinator.md) 🎖 ✓ | 🔵 sonnet | SPARC methodology orchestrator for systematic development phase coordination |
+| [`sparc-coder`](../.claude/agents/templates/implementer-sparc-coder.md) ✓ | 🔵 sonnet | SPARC implementation specialist — transforms specs/ADRs into working, tested code via TDD. Use during the Refinement/Completion phases to implement against the design (not to redo requirements, pseudocode, or architecture). |
+| [`sparc-coord`](../.claude/agents/templates/sparc-coordinator.md) 🎖 ✓ | 🔵 sonnet | SPARC methodology orchestrator. Use when driving a full Specification→Pseudocode→Architecture→Refinement→Completion cycle with quality gates and phase agents, rather than a single phase or generic task breakdown. |
 | [`swarm-init`](../.claude/agents/templates/coordinator-swarm-init.md) ✓ | 🟢 haiku | Swarm initialization and topology optimization specialist |
-| [`task-orchestrator`](../.claude/agents/templates/orchestrator-task.md) 🎖 ✓ | 🟢 haiku | Central coordination agent for task decomposition, execution planning, and result synthesis |
+| [`task-orchestrator`](../.claude/agents/templates/orchestrator-task.md) 🎖 ✓ | 🟢 haiku | Central task-coordination agent for decomposition, execution planning, and result synthesis. Use when a complex objective must be broken into subtasks, scheduled across agents (parallel/sequential), and synthesized into one deliverable. |
 
 ### Consensus / распределённые (7)
 
@@ -210,9 +210,9 @@
 | Агент | Тир | Описание |
 |---|---|---|
 | [`matrix-optimizer`](../.claude/agents/sublinear/matrix-optimizer.md) ✓ | 🔵 sonnet | Expert agent for matrix analysis and optimization using sublinear algorithms. Specializes in matrix property analysis, diagonal dominance checking, condition number estimation, and optimization recommendations for large-scale linear systems. Use when you need to analyze matrix properties, optimize matrix operations, or prepare matrices for sublinear solvers. |
-| [`pagerank-analyzer`](../.claude/agents/sublinear/pagerank-analyzer.md) ✓ | 🔵 sonnet | Expert agent for graph analysis and PageRank calculations using sublinear algorithms. Specializes in network optimization, influence analysis, swarm topology optimization, and large-scale graph computations. Use for social network analysis, web graph analysis, recommendation systems, and distributed system topology design. |
-| [`performance-optimizer`](../.claude/agents/sublinear/performance-optimizer.md) ✓ | 🔵 sonnet | System performance optimization agent that identifies bottlenecks and optimizes resource allocation using sublinear algorithms. Specializes in computational performance analysis, system optimization, resource management, and efficiency maximization across distributed systems and cloud infrastructure. |
-| [`trading-predictor`](../.claude/agents/sublinear/trading-predictor.md) ✓ | 🔵 sonnet | Advanced financial trading agent that leverages temporal advantage calculations to predict and execute trades before market data arrives. Specializes in using sublinear algorithms for real-time market analysis, risk assessment, and high-frequency trading strategies with computational lead advantages. |
+| [`pagerank-analyzer`](../.claude/agents/sublinear/pagerank-analyzer.md) ✓ | 🔵 sonnet | Graph analysis and PageRank specialist using sublinear-time algorithms. Use when you need influence ranking, community detection, swarm/network topology optimization, or large-scale graph computation — social-network/web-graph analysis, recommendation systems, and distributed-system topology design. |
+| [`performance-optimizer`](../.claude/agents/sublinear/performance-optimizer.md) ✓ | 🔵 sonnet | Sublinear-algorithm performance optimizer. Use when bottleneck/resource-allocation analysis can be framed as a solvable linear system (matrix-based optimization) rather than empirical profiling. Identifies bottlenecks and optimizes resource allocation across distributed systems and cloud infrastructure using sublinear-time solvers. |
+| [`trading-predictor`](../.claude/agents/sublinear/trading-predictor.md) ✓ | 🔵 sonnet | Financial trading/HFT modeling specialist. Use when you need sublinear-algorithm market analysis — latency-arbitrage modeling between distant venues, real-time risk assessment (VaR), and portfolio optimization. Models computational-lead vs network-latency trade-offs; it does not predict the future. |
 
 ### Swarm (топологии) (3)
 
@@ -242,15 +242,15 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`codex-coordinator`](../.claude/agents/dual-mode/codex-coordinator.md) 🎖 ✓ | 🔵 sonnet | Coordinates multiple headless Codex workers for parallel execution |
-| [`codex-worker`](../.claude/agents/dual-mode/codex-worker.md) ✓ | 🔵 sonnet | Headless Codex background worker for parallel task execution with self-learning |
+| [`codex-coordinator`](../.claude/agents/dual-mode/codex-coordinator.md) 🎖 ✓ | 🔵 sonnet | Codex parallel coordinator — decomposes a task and spawns/aggregates headless `codex exec` workers. Use when you need multiple Codex workers running in parallel under one coordinator. |
+| [`codex-worker`](../.claude/agents/dual-mode/codex-worker.md) ✓ | 🔵 sonnet | Headless Codex background worker for parallel task execution with self-learning. Use when the dual-mode orchestrator needs a Codex worker to run a focused coding/test/doc/review task via `codex exec` and report results through shared memory. |
 | [`dual-orchestrator`](../.claude/agents/dual-mode/dual-orchestrator.md) 🎖 ✓ | 🟣 opus | Orchestrates Claude Code (interactive) + Codex (headless) for hybrid workflows |
 
 ### Documentation (2)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`api-docs`](../.claude/agents/documentation/api-docs/docs-api-openapi.md) ✓ | 🔵 sonnet | Expert agent for creating and maintaining OpenAPI/Swagger documentation |
+| [`api-docs`](../.claude/agents/documentation/api-docs/docs-api-openapi.md) ✓ | 🔵 sonnet | OpenAPI/Swagger documentation specialist. Use when you need to author or update an OpenAPI 3.0 spec — document endpoints, request/response schemas, examples, error responses, and security schemes. |
 | [`technical-writer`](../.claude/agents/documentation/technical-writer.md) ✓ | 🔵 sonnet | User-facing documentation specialist — READMEs, guides, tutorials, onboarding docs, changelogs, and feature narratives that are accurate and easy to follow. Use to write or improve human-readable docs (not API reference schemas). |
 
 ### Data (2)
@@ -283,31 +283,31 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`mobile-dev`](../.claude/agents/specialized/mobile/spec-mobile-react-native.md) ✓ | 🔵 sonnet | Expert agent for React Native mobile application development across iOS and Android |
+| [`mobile-dev`](../.claude/agents/specialized/mobile/spec-mobile-react-native.md) ✓ | 🔵 sonnet | React Native mobile-dev specialist. Use when building or modifying cross-platform iOS/Android app UI — components, screens, navigation, state, native-module integration, and mobile performance. |
 
 ### Neural (1)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`safla-neural`](../.claude/agents/neural/safla-neural.md) ✓ | 🔵 sonnet | Self-Aware Feedback Loop Algorithm (SAFLA) neural specialist that creates intelligent, memory-persistent AI systems with self-learning capabilities. Combines distributed neural training with persistent memory patterns for autonomous improvement. Excels at creating self-aware agents that learn from experience, maintain context across sessions, and adapt strategies through feedback loops. |
+| [`safla-neural`](../.claude/agents/neural/safla-neural.md) ✓ | 🔵 sonnet | SAFLA (Self-Aware Feedback Loop Algorithm) neural specialist. Use when you need a memory-persistent, self-learning neural pattern — multi-tier memory, feedback-loop adaptation, and cross-session learning for autonomous agent improvement. |
 
 ### SONA (1)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`sona-learning-optimizer`](../.claude/agents/sona/sona-learning-optimizer.md) ✓ | 🔵 sonnet | SONA-powered self-optimizing agent with LoRA fine-tuning and EWC++ memory preservation |
+| [`sona-learning-optimizer`](../.claude/agents/sona/sona-learning-optimizer.md) ✓ | 🔵 sonnet | SONA-powered self-optimizing agent with LoRA fine-tuning and EWC++ memory preservation. Use when you want an agent that learns from each task execution and applies retrieved patterns to improve quality without catastrophic forgetting. |
 
 ### Architecture (1)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`system-architect`](../.claude/agents/architecture/system-design/arch-system-design.md) ✓ | 🟣 opus | Expert agent for system architecture design, patterns, and high-level technical decisions |
+| [`system-architect`](../.claude/agents/architecture/system-design/arch-system-design.md) ✓ | 🟣 opus | System architecture specialist — high-level design, patterns, and technology trade-offs. Use when a feature or system needs an architecture, ADRs, or a build-vs-buy/technology decision before implementation starts. |
 
 ### Custom (1)
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`test-long-runner`](../.claude/agents/custom/test-long-runner.md) ✓ | 🟢 haiku | Test agent that can run for 30+ minutes on complex tasks |
+| [`test-long-runner`](../.claude/agents/custom/test-long-runner.md) ✓ | 🟢 haiku | Long-running test fixture agent. Use when you need a test/fixture worker that sustains a single long task (30+ minutes) — soak tests, long-run harness checks, or extended analysis runs. |
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: codex-worker
-description: Headless Codex background worker for parallel task execution with self-learning
+description: Headless Codex background worker for parallel task execution with self-learning. Use when the dual-mode orchestrator needs a Codex worker to run a focused coding/test/doc/review task via `codex exec` and report results through shared memory.
 model: sonnet
 ---
 
