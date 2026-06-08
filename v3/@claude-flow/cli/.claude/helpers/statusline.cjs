@@ -437,8 +437,7 @@ function generateStatusline() {
     if (git.behind > 0) header += ' ' + c.brightRed + '↓' + git.behind + c.reset;
   }
   header += '  ' + c.dim + '│' + c.reset + '  ' + c.purple + modelName + c.reset;
-  const duration = costInfo ? costInfo.duration : '';
-  if (duration) header += '  ' + c.dim + '│' + c.reset + '  ' + c.cyan + '⏱ ' + duration + c.reset;
+  // Session time (⏱) intentionally omitted — not actionable in the panel.
   if (ctxInfo && ctxInfo.usedPct > 0) {
     const ctxColor = ctxInfo.usedPct >= 90 ? c.brightRed : ctxInfo.usedPct >= 70 ? c.brightYellow : c.brightGreen;
     header += '  ' + c.dim + '│' + c.reset + '  ' + ctxColor + '● ' + ctxInfo.usedPct + '% ctx' + c.reset;
