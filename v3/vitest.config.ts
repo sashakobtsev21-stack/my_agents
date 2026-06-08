@@ -27,10 +27,13 @@ export default defineConfig({
       'mcp/__tests__/**/*.spec.ts',
     ],
 
-    // Exclude patterns
+    // Exclude patterns. Use '**/node_modules/**' (not bare 'node_modules') so
+    // the include glob '@claude-flow/**/__tests__/**' doesn't pick up the
+    // frozen test snapshots that pnpm links into each package's nested
+    // node_modules/.pnpm store — those are stale duplicates of the live source.
     exclude: [
-      'node_modules',
-      'dist',
+      '**/node_modules/**',
+      '**/dist/**',
       '.git',
     ],
 
