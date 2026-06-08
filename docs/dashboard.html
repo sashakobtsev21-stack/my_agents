@@ -1,0 +1,132 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>my_agents — дашборд</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--line:#283040;--fg:#e6edf3;--mut:#9aa7b4;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--accent:#6366f1;--cy:#39c5cf;--pu:#a371f7;--gold:#e3b341}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:34px 20px 80px}
+h1{font-size:30px;margin:0 0 2px}.sub{color:var(--mut);margin:0 0 6px;font-size:16px}
+h2{font-size:18px;margin:30px 0 12px;display:flex;align-items:center;gap:8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:18px 0}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 14px;text-align:center}
+.kpi .n{font-size:26px;font-weight:800;color:var(--cy);line-height:1.1}
+.kpi .l{color:var(--mut);font-size:12px;margin-top:3px}
+.health{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:14px 0}
+.hc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.hc .t{font-size:13px;color:var(--mut)}.hc .v{font-size:17px;font-weight:700;margin-top:2px}
+.bar{height:7px;background:#0a0d12;border-radius:5px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+.card .h{font-weight:700;margin-bottom:5px}.card .d{color:var(--mut);font-size:13.5px;line-height:1.5}
+.flow{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:6px 0 2px}
+.chip{background:#0a0d12;border:1px solid var(--line);border-radius:20px;padding:4px 12px;font-size:13px;white-space:nowrap}
+.chip.lead{border-color:var(--gold);color:var(--gold)}
+.arrow{color:var(--mut)}
+.pill{display:inline-block;font-size:11px;border-radius:20px;padding:2px 9px;border:1px solid var(--line);color:var(--mut)}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.mut{color:var(--mut)}.cy{color:var(--cy)}.pu{color:var(--pu)}.gold{color:var(--gold)}
+code{background:#0a0d12;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px;color:#cdd9e5}
+pre{background:#0a0d12;border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow:auto;font-size:12.5px;line-height:1.5;white-space:pre;color:#cdd9e5}
+table{width:100%;border-collapse:collapse;font-size:13.5px}td{padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+.links{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
+.links a{color:#4493f8;text-decoration:none;border:1px solid var(--line);border-radius:9px;padding:8px 13px;font-size:14px;background:var(--panel)}
+.links a:hover{border-color:var(--accent)}
+.foot{color:var(--mut);font-size:12px;margin-top:30px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:680px){.two{grid-template-columns:1fr}}
+b.k{color:var(--gold)}
+</style></head><body><div class="wrap">
+
+<h1>🧑‍💻 my_agents <span class="pill">v3.10.31 · бренд AlexKo</span></h1>
+<p class="sub">Готовая AI-команда для Claude Code — дашборд: что это, как работает, в каком состоянии.</p>
+
+<!-- KPI -->
+<div class="kpis">
+  <div class="kpi"><div class="n">104</div><div class="l">агентов (активных)</div></div>
+  <div class="kpi"><div class="n">41</div><div class="l">скиллов</div></div>
+  <div class="kpi"><div class="n">168</div><div class="l">команд</div></div>
+  <div class="kpi"><div class="n">33</div><div class="l">плагина</div></div>
+  <div class="kpi"><div class="n">~313</div><div class="l">MCP-инструментов</div></div>
+  <div class="kpi"><div class="n">23</div><div class="l">v3-пакета</div></div>
+</div>
+
+<!-- HEALTH -->
+<h2>🩺 Здоровье и качество <span class="pill">измерено</span></h2>
+<div class="health">
+  <div class="hc"><div class="t">Сборка v3</div><div class="v ok">✅ 23/23 пакета</div><div class="bar"><i style="width:100%;background:var(--ok)"></i></div></div>
+  <div class="hc"><div class="t">Уязвимости (npm audit)</div><div class="v ok">✅ 0</div><div class="bar"><i style="width:100%;background:var(--ok)"></i></div></div>
+  <div class="hc"><div class="t">Качество промптов (аудит)</div><div class="v cy">4.48 / 5</div><div class="bar"><i style="width:90%;background:var(--cy)"></i></div><div class="t" style="margin-top:4px">было 4.01 · провальных 25→<b class="ok">0</b></div></div>
+  <div class="hc"><div class="t">Тесты добавлено</div><div class="v">~200+ <span class="mut">(22 файла)</span></div><div class="bar"><i style="width:80%;background:var(--pu)"></i></div></div>
+  <div class="hc"><div class="t">Tier-покрытие</div><div class="v ok">104 / 104</div><div class="bar"><i style="width:100%;background:var(--ok)"></i></div></div>
+  <div class="hc"><div class="t">Честность метрик</div><div class="v ok">✅ фейк-цифры вычищены</div><div class="t" style="margin-top:4px">только измеренное / unverified</div></div>
+</div>
+
+<!-- WHAT -->
+<h2>🎯 Что это</h2>
+<div class="card">«Коробка с готовой IT-командой» для Claude Code. Подключаешь к проекту — и у Claude появляются <b>роли</b> (агенты), <b>сценарии</b> (скиллы/команды) и <b>реальные действия</b> (MCP-инструменты). Claude перестаёт быть «одним помощником» и становится <b class="k">оркестратором команды</b>. Форк <code>ruvnet/claude-flow</code> (MIT).</div>
+
+<!-- HOW -->
+<h2>🔄 Как работает (главный принцип)</h2>
+<div class="card">
+<b class="k">«Команда координирует — Claude Code создаёт».</b> На сложной задаче Claude поднимает параллельных агентов-специалистов (Task-tool), они общаются напрямую и передают работу по конвейеру, Claude сводит результат:
+<div class="flow" style="margin-top:10px">
+<span class="chip">🔍 researcher</span><span class="arrow">→</span><span class="chip">🏗️ architect</span><span class="arrow">→</span><span class="chip">💻 coder</span><span class="arrow">→</span><span class="chip">🧪 tester</span><span class="arrow">→</span><span class="chip">👀 reviewer</span>
+</div>
+<span class="mut">Маршрутизация: regex по ключевым словам + моё суждение. Анти-дрейф: иерархия, 6–8 агентов, чёткие роли. Tier 0 боссы → 1 топологии → 2 консенсус → 3 исполнители.</span>
+</div>
+
+<!-- BLOCKS -->
+<h2>🧩 Строительные блоки</h2>
+<div class="grid">
+<div class="card"><div class="h">🤖 Агент</div><div class="d"><b>кто</b> делает — роль-специалист. <span class="mut">текст-инструкция</span></div></div>
+<div class="card"><div class="h">🧩 Скилл</div><div class="d"><b>как</b> делать — пошаговый рецепт. <span class="mut">текст-инструкция</span></div></div>
+<div class="card"><div class="h">⌨️ Команда</div><div class="d"><b>ярлык</b> <code>/...</code> — быстрый запуск. <span class="mut">текст-инструкция</span></div></div>
+<div class="card"><div class="h">🛠️ MCP-инструмент</div><div class="d"><b>действие</b> — реально сделать (память, swarm, PR). <span class="pu">код-действие</span></div></div>
+<div class="card"><div class="h">🔌 Плагин</div><div class="d"><b>упаковка</b> — привозит всё пачкой. <span class="mut">бандл</span></div></div>
+</div>
+
+<!-- PROFILES -->
+<h2>🧭 Под твои проекты <span class="pill">авто-детект</span></h2>
+<div class="two">
+<div class="card"><div class="h">🎮 Android / Unity игра</div><div class="d"><code>game-director</code> · <code>unity-engine-architect</code> · <code>gameplay-programmer</code> · <code>physics-programmer</code> · <code>rendering-engineer</code> · <code>mobile-performance-engineer</code> · <code>build-release-engineer</code> · <code>game-qa-engineer</code></div></div>
+<div class="card"><div class="h">🕷️ Веб-скрапинг / краулер</div><div class="d"><code>web-scraping-specialist</code> + плагин <code>ruflo-browser</code> (Playwright) · <code>backend-dev</code> · <code>data-engineer</code> · <code>database-specialist</code> · <code>debugger</code> · <code>incident-responder</code></div></div>
+</div>
+<p class="mut" style="font-size:13px;margin-top:8px">Детектор: <code>node scripts/detect-profile.mjs &lt;путь&gt;</code>. 20 нишевых агентов (консенсус/sublinear/Flow-Nexus) вынесены в <code>agents-advanced/</code> — Claude их не грузит (обратимо).</p>
+
+<!-- FLOWS -->
+<h2>⚡ Два главных сценария</h2>
+<div class="two">
+<div class="card"><div class="h">🔍 /analyze-project</div><div class="d">Аудит существующего репо (или git-URL → клон): уязвимости, сборка, тесты, узкие места → отчёт <b>P1/P2/P3</b> + план.</div></div>
+<div class="card"><div class="h">🆕 /new-project</div><div class="d">Сборка нового с нуля: идея → спека → архитектура → код → тесты.</div></div>
+</div>
+<p class="mut" style="font-size:13px;margin-top:8px"><b class="ok">Verify-гейт:</b> «готово» = собирается + тесты проходят + реально запускается. Проверено вживую: PR <b>#9</b> и <b>#10</b> на реальном Playwright-репо — смержены.</p>
+
+<!-- STATUSLINE -->
+<h2>🖥️ Статуслайн (нижняя панель в Claude Code)</h2>
+<div class="card">
+<pre>▊ AlexKo V3.6  ● user  │  Opus 4.8  │  ● 34% ctx
+────────────────────────────────────────
+🤖 Swarm ○ [ 0/15]    🟢 CVE 0/0    🧪 Tests 74</pre>
+<table>
+<tr><td><b>● N% ctx</b></td><td>заполнение окна контекста (≥90% красный → пора сохраняться). Самое полезное.</td></tr>
+<tr><td><b>🤖 Swarm</b></td><td>сколько агентов работает сейчас / максимум (○ нет · ◉ идёт).</td></tr>
+<tr><td><b>🟢 CVE</b></td><td>безопасность из <b>реального</b> <code>npm audit</code>: ⚪ не сканировали · 🟢 чисто · 🔴 N уязвимостей.</td></tr>
+<tr><td><b>🧪 Tests</b></td><td>сколько тест-файлов в проекте.</td></tr>
+</table>
+<span class="mut" style="font-size:13px">Стоимость и время убраны как шум. Лишнее (DDD/ADR/векторы) скрыто — оживает только при активной работе со свормом.</span>
+</div>
+
+<!-- DRILLDOWN -->
+<h2>📚 Подробнее</h2>
+<div class="links">
+<a href="start.html">🏠 Точка входа</a>
+<a href="how-it-works.html">⚙️ Как устроено</a>
+<a href="concepts.html">🧠 Для чайников</a>
+<a href="agent-catalog.html">🧭 Реестр агентов (рус)</a>
+<a href="full-breakdown.html">📖 Полный разбор</a>
+<a href="session-summary.html">🏁 Что сделано</a>
+<a href="CORE-AGENTS.md">🎯 Ядро агентов</a>
+<a href="AGENT-PROMPT-AUDIT-2.md">📊 Аудит промптов</a>
+<a href="../README.md">📄 README</a>
+<a href="https://github.com/sashakobtsev21-stack/my_agents">🔗 GitHub</a>
+</div>
+
+<p class="foot">Дашборд — статичная витрина. Живые цифры (контекст/CVE/тесты) видны в статуслайне Claude Code. Реестр/разбор авто-генерируются <code>scripts/gen-*.mjs</code>; счётчики авто-синхронизируются хуком.</p>
+</div></body></html>
