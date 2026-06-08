@@ -18,6 +18,9 @@ dir first. If neither is given, ask once for the target and the depth
 ## Pipeline (run real tools — evidence over assertion)
 
 1. **Recon** — map structure, stack, entry points, size (`git ls-files`, globs).
+   Detect the project type first: `node scripts/detect-profile.mjs <path>` → use the
+   matching agent pack from `docs/CORE-AGENTS.md`, ignore the Advanced agents
+   (consensus/sublinear/flow-nexus). Don't audit a game like a backend.
    Spawn `Explore` agents in parallel for breadth when the repo is large.
 2. **Build & runtime health** — install + build (`npm/pnpm build`, `tsc`),
    `lint`, and a smoke run. Record exact pass/fail + output. Agents: `analyst`,

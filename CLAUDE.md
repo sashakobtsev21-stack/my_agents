@@ -1,7 +1,7 @@
 # Claude Code Configuration — my_agents (v3.10.31)
 
 > **my_agents** — reusable AI agent team for Claude Code. Fork of [ruvnet/claude-flow](https://github.com/ruvnet/claude-flow) (MIT).
-> Verified in this checkout: 123 agents, 41 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, ~313 MCP tools.
+> Verified in this checkout: 124 agents, 41 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, ~313 MCP tools.
 > Packages: `@claude-flow/cli@3.10.31`, root `my_agents@3.10.31`.
 
 ## Behavioral Rules (Always Enforced)
@@ -44,6 +44,31 @@
 | `@claude-flow/hooks` | `v3/@claude-flow/hooks/` | 17 hooks + 12 workers |
 | `@claude-flow/memory` | `v3/@claude-flow/memory/` | AgentDB + HNSW search |
 | `@claude-flow/security` | `v3/@claude-flow/security/` | Input validation, CVE remediation |
+
+## Project Profiles — detect the project, don't be universal
+
+Before building or analyzing a project, FIRST detect **what kind** it is and use the
+matching agent pack — never treat every project the same.
+
+```bash
+node scripts/detect-profile.mjs <path>          # prints profile + recommended agents/plugins
+node scripts/detect-profile.mjs <path> --json   # machine-readable
+```
+
+| Profile | Reach for these | Plugins |
+|---------|-----------------|---------|
+| 🎮 Android / Unity game | `game-director`, `unity-engine-architect`, `gameplay-programmer`, `physics-programmer`, `rendering-engineer`, `mobile-performance-engineer`, `build-release-engineer`, `game-qa-engineer` | — |
+| 🕷️ Web scraping / crawler | `web-scraping-specialist`, `backend-dev`, `data-engineer`, `database-specialist`, `debugger`, `incident-responder` | `ruflo-browser` |
+| 🔌 Web backend / API | `backend-dev`, `database-specialist`, `security-auditor`, `devops-engineer`, `cicd-engineer` | — |
+| 🖥️ Web frontend / SPA | `frontend-specialist`, `accessibility-specialist`, `ui-ux-designer`, `perf-analyzer` | — |
+| 📱 Mobile app | `mobile-dev`, `mobile-performance-engineer` | — |
+| 📊 Data / ML | `ml-developer`, `data-engineer`, `data-analyst`, `python-specialist` | — |
+
+Rules:
+- Run the detector (or read `package.json` + file markers) and pick the matching pack; always include the core (`coder`/`reviewer`/`tester`/`planner`/`researcher`/`debugger`/`security-auditor`).
+- **Ignore the Advanced agents** (consensus / sublinear / flow-nexus) unless the task explicitly needs them.
+- If there's no strong signal, **ASK** the user what kind of project it is before picking a pack.
+- Full human map: [`docs/CORE-AGENTS.md`](docs/CORE-AGENTS.md) → "Tailored to your projects".
 
 ## Concurrency: 1 MESSAGE = ALL RELATED OPERATIONS
 
@@ -484,7 +509,7 @@ claude -p --resume "abc-123" --fork-session "Try approach B: CQRS pattern"
 | `--permission-mode <mode>` | acceptEdits, bypassPermissions, plan, etc. |
 | `--mcp-config <json>` | Load MCP servers from JSON |
 
-## Available Agents (123) — auto-generated catalog
+## Available Agents (124) — auto-generated catalog
 
 > The single source of truth for **all agents** is the auto-generated catalog — do **not** hand-maintain an agent list here (it drifts).
 >

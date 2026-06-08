@@ -14,6 +14,9 @@ product owner — not a black box.
 Before scaffolding, confirm three things (ask only what's missing):
 1. **What** — the project and its single most important feature.
 2. **Stack** — language/framework, or "propose one" (then recommend + proceed).
+   From the stated type/stack, pick the matching agent pack in `docs/CORE-AGENTS.md`
+   (game → game-dev pack; scraper → `web-scraping-specialist` + `ruflo-browser`; API →
+   `backend-dev` …). Don't pull in unrelated specialists or the Advanced agents.
 3. **Where** — a new folder next to the repo, or a new GitHub repo
    (`gh repo create`). Default: a new sibling folder with `git init`.
 

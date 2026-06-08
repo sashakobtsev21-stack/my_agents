@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **123** · направлений: **28** · руководителей: **25** · модернизировано: **123/123**.
+> Агентов: **124** · направлений: **28** · руководителей: **25** · модернизировано: **124/124**.
 
 ## Как выбрать агента
 
@@ -136,7 +136,7 @@
 | [`raft-manager`](../.claude/agents/consensus/raft-manager.md) 🎖 ✓ | 🔵 sonnet | Raft consensus coordinator. Use when nodes are trusted (crash-only faults) and you need a single authoritative leader with a linearizable replicated log. Tolerates f < n/2 crash faults. The hive-mind default. |
 | [`security-manager`](../.claude/agents/consensus/security-manager.md) 🎖 ✓ | 🔵 sonnet | Consensus security layer. Use to add cryptographic authentication, membership enforcement, and attack detection (Byzantine/Sybil/Eclipse/DoS) on top of a consensus strategy — not a standalone consensus. |
 
-### Development (5)
+### Development (6)
 
 | Агент | Тир | Описание |
 |---|---|---|
@@ -145,6 +145,7 @@
 | [`backend-dev-basic`](../.claude/agents/development/backend/dev-backend-api.md) ✓ | 🔵 sonnet | Baseline backend API developer (REST/GraphQL). Leaner variant of backend-dev without ReasoningBank pattern persistence. Use when you want the baseline without self-learning overhead. |
 | [`debugger`](../.claude/agents/development/debugger.md) ✓ | 🔵 sonnet | Root-cause debugging specialist — reproduces, isolates, and explains failures (crashes, wrong output, flaky tests, regressions, perf cliffs) before a fix is written. Use when something is broken and the cause isn't obvious. |
 | [`migration-engineer`](../.claude/agents/development/migration-engineer.md) ✓ | 🔵 sonnet | Migration specialist — version upgrades, schema/data migrations, and breaking-change rollouts with safe, reversible, incremental steps. Use to plan/execute v2→v3-style migrations or risky cutovers. |
+| [`web-scraping-specialist`](../.claude/agents/development/web-scraping-specialist.md) ✓ | 🔵 sonnet | Web scraping & crawling specialist — resilient extraction at scale: selector/DOM strategy, pagination, rate-limiting, proxy rotation, anti-bot handling, and legal/ToS hygiene. Use to build or fix a scraper or a scraping service. |
 
 ### Optimization / Performance (5)
 

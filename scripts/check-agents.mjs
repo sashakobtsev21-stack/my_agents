@@ -101,6 +101,44 @@ for (const gen of ['gen-agent-catalog.mjs', 'gen-agent-report.mjs', 'gen-full-br
   catch (e) { errors.push(`generator failed: ${gen} — ${String(e.message).split('\n')[0]}`); }
 }
 
+// Keep the hand-maintained agent/skill counts in README/CLAUDE/docs in sync with
+// reality. Anchored patterns only (never a bare "\d+ агент") so unrelated numbers
+// like "6–8 агентов" are never touched. Runs on every agent/skill change via the hook.
+function syncCounts(nAgents, nSkills) {
+  const A = String(nAgents), S = String(nSkills);
+  const agentSubs = [
+    [/(agents-)\d+(-)/g, `$1${A}$2`],                                   // README badge
+    [/(Available Agents \()\d+(\))/g, `$1${A}$2`],                      // CLAUDE.md heading
+    [/(checkout: )\d+( agents)/g, `$1${A}$2`],                          // CLAUDE.md header line
+    [/(roster is \*\*)\d+( agents\*\*)/g, `$1${A}$2`],                  // CORE-AGENTS intro
+    [/(than )\d+( thinly-distinct)/g, `$1${A}$2`],                      // CORE-AGENTS outro
+    [/(\*\*)\d+(\s*агент(?:а|ов)?)/g, `$1${A}$2`],                      // bold "**N агент(а/ов)**"
+    [/(Агенты \()\d+(,)/g, `$1${A}$2`],                                 // README "### Агенты (N,"
+    [/(agents\/ \()\d+(\))/g, `$1${A}$2`],                              // README tree "agents/ (N)"
+    [/(🤖 Агенты<\/td><td class="num">)\d+/g, `$1${A}`],                // concepts.html table cell
+    [/(Из )\d+(\s*агент)/g, `$1${A}$2`],                               // concepts org-chart prose
+    [/(class="stats">)\d+(\s*агент)/g, `$1${A}$2`],                    // start/how-it-works stats line
+    [/(reviewer…\)\.\s*)\d+(\s*шт\.)/g, `$1${A}$2`],                   // how-it-works "N шт."
+  ];
+  const skillSubs = [
+    [/(\*\*)\d+(\s*скилл(?:а|ов)?\*\*)/g, `$1${S}$2`],                  // bold "**N скилл**"
+    [/(агент,\s*)\d+(\s*скилл)/g, `$1${S}$2`],                          // README "N агент, M скиллов"
+    [/(Скиллы \()\d+(\))/g, `$1${S}$2`],                               // README "### Скиллы (N)"
+    [/(все )\d+(\s*скилл)/g, `$1${S}$2`],                              // README "все N скиллов"
+    [/( agents, )\d+( skills)/g, `$1${S}$2`],                          // CLAUDE checkout line
+    [/(🧩 Скиллы<\/td><td class="num">)\d+/g, `$1${S}`],                // concepts.html table cell
+    [/(·\s*)\d+(\s*скилл)/g, `$1${S}$2`],                              // stats line "· N скилл"
+  ];
+  for (const f of ['README.md', 'CLAUDE.md', 'docs/CORE-AGENTS.md', 'docs/concepts.html', 'docs/how-it-works.html', 'docs/start.html']) {
+    let s; try { s = fs.readFileSync(f, 'utf8'); } catch { continue; }
+    const before = s;
+    for (const [re, rep] of agentSubs) s = s.replace(re, rep);
+    for (const [re, rep] of skillSubs) s = s.replace(re, rep);
+    if (s !== before) fs.writeFileSync(f, s);
+  }
+}
+syncCounts(Object.keys(agents).length, skillCount);
+
 console.log(`check-agents: ${Object.keys(agents).length} agents · ${skillCount} skills · ${errors.length} error(s) · ${warnings.length} warning(s)`);
 warnings.forEach((w) => console.log('  ⚠ ' + w));
 errors.forEach((e) => console.error('  ✗ ' + e));

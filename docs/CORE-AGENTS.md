@@ -1,6 +1,6 @@
 # Core Agents — the curated entry point
 
-> **Quality over quantity.** The full roster is **123 agents** ([AGENT-CATALOG.md](AGENT-CATALOG.md)),
+> **Quality over quantity.** The full roster is **124 agents** ([AGENT-CATALOG.md](AGENT-CATALOG.md)),
 > but most work needs ~20. This page is the curated short list to reach for first,
 > tailored to the projects in use, plus an honest map of where the catalog still overlaps.
 >
@@ -53,20 +53,17 @@ already orchestrate the right specialists with a verify gate.
 | Art & feel | `3d-artist` · `character-animator` · `rendering-engineer` · `vfx-artist` · `technical-artist` · `audio-designer` |
 | Ship & QA | `mobile-performance-engineer` (frame/battery on real Android) · `build-release-engineer` (Gradle/AAB/Play Console) · `game-qa-engineer` |
 
-**🕷️ Web scraping service** — there's no single "scraper" agent; compose these:
+**🕷️ Web scraping service** — lead with the dedicated `web-scraping-specialist`:
 
 | Role | Agent / tool |
 |------|--------------|
+| **Extraction (lead)** | **`web-scraping-specialist`** *(new)* — selectors, rate-limit, proxy rotation, anti-bot, robots.txt/ToS hygiene |
+| Actual browser work | the **`ruflo-browser`** plugin (Playwright — headless browser, page automation) |
 | The service/API | `backend-dev` (canonical) |
-| Actual scraping | the **`ruflo-browser`** plugin (Playwright — headless browser, page automation) |
 | Store & shape data | `database-specialist` · `data-engineer` (ETL) · `data-analyst` (read it back) |
 | Reliability (scrapers are flaky) | `debugger` · `incident-responder` · `observability-engineer` |
 | Dashboard (if any) | `frontend-specialist` · `accessibility-specialist` |
 | Deploy | `devops-engineer` · `cicd-engineer` |
-
-> 💡 Gap worth noting: a dedicated **`web-scraping-specialist`** (rate-limiting, proxy
-> rotation, anti-bot, selector resilience, robots.txt/ToS hygiene) doesn't exist yet —
-> say the word and I'll add it the same way I added the other 5.
 
 ## Where the catalog still overlaps (consolidation candidates)
 
@@ -96,6 +93,6 @@ Android game or a scraping service**. Ignore them day-to-day:
 ## Why this matters
 
 The toolkit's value is reliability, not headcount. A smaller, well-understood core is
-easier to route to correctly and less confusing than 123 thinly-distinct options. Treat
+easier to route to correctly and less confusing than 124 thinly-distinct options. Treat
 the core + your tailored packs as the default; drop into the long tail only when nothing
 in the core fits.

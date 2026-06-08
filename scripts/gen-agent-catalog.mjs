@@ -120,12 +120,17 @@ fs.mkdirSync(path.dirname(OUT_MD), { recursive: true });
 fs.writeFileSync(OUT_MD, M.join('\n'));
 
 // ---------- HTML ----------
+// Russian descriptions for the HTML view (the page is lang="ru"). Falls back to
+// the English frontmatter description when a translation is missing. Source:
+// docs/i18n/agent-descriptions.ru.json (regenerate translations when agents change).
+const RU = (() => { try { return JSON.parse(fs.readFileSync('docs/i18n/agent-descriptions.ru.json', 'utf8')); } catch { return {}; } })();
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const tierBadge = (m) => `<span class="tier ${m}">${esc(m)}</span>`;
 function agentRow(r) {
-  return `<tr class="agent" data-name="${esc(r.name.toLowerCase())}" data-desc="${esc(r.desc.toLowerCase())}" data-cat="${esc((CAT_TITLES[r.cat] || r.cat).toLowerCase())}" data-tier="${esc(r.model)}" data-lead="${r.isLead ? 1 : 0}" data-modern="${r.modernized ? 1 : 0}">`
+  const d = RU[r.name] || r.desc;
+  return `<tr class="agent" data-name="${esc(r.name.toLowerCase())}" data-desc="${esc(d.toLowerCase())}" data-cat="${esc((CAT_TITLES[r.cat] || r.cat).toLowerCase())}" data-tier="${esc(r.model)}" data-lead="${r.isLead ? 1 : 0}" data-modern="${r.modernized ? 1 : 0}">`
     + `<td class="nm"><code>${esc(r.name)}</code>${r.isLead ? ' <span title="руководитель">🎖</span>' : ''}${r.modernized ? ' <span class="ok" title="модернизирован">✓</span>' : ''}</td>`
-    + `<td>${tierBadge(r.model)}</td><td class="area">${esc(CAT_TITLES[r.cat] || r.cat)}</td><td class="desc">${esc(r.desc)}</td></tr>`;
+    + `<td>${tierBadge(r.model)}</td><td class="area">${esc(CAT_TITLES[r.cat] || r.cat)}</td><td class="desc">${esc(d)}</td></tr>`;
 }
 const leadRows = leads.map(agentRow).join('\n');
 let allGroups = '';

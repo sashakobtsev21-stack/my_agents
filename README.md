@@ -6,7 +6,7 @@
 
 [![version](https://img.shields.io/badge/version-3.10.31-6366f1?style=for-the-badge)](package.json)
 [![license](https://img.shields.io/badge/license-MIT-yellow?style=for-the-badge)](LICENSE)
-[![agents](https://img.shields.io/badge/agents-123-10b981?style=for-the-badge)](.claude/agents/)
+[![agents](https://img.shields.io/badge/agents-124-10b981?style=for-the-badge)](.claude/agents/)
 [![plugins](https://img.shields.io/badge/plugins-33-8b5cf6?style=for-the-badge)](.claude-plugin/marketplace.json)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-3c873a?style=for-the-badge&logo=node.js&logoColor=white)](package.json)
 
@@ -14,7 +14,7 @@
 
 ---
 
-**my_agents** — это моя AI-команда для Claude Code. Вместо того чтобы в каждом проекте заново описывать роли и сценарии, я держу их здесь, в одном месте, и подключаю к нужному проекту одной командой. После подключения за разработку, ревью, тестирование, безопасность и автоматизацию берётся не одна модель, а целая команда специализированных агентов: **123 агент, 41 скиллов, 168 команд и 33 плагина** — собраны, выверены и готовы к работе.
+**my_agents** — это моя AI-команда для Claude Code. Вместо того чтобы в каждом проекте заново описывать роли и сценарии, я держу их здесь, в одном месте, и подключаю к нужному проекту одной командой. После подключения за разработку, ревью, тестирование, безопасность и автоматизацию берётся не одна модель, а целая команда специализированных агентов: **124 агент, 41 скиллов, 168 команд и 33 плагина** — собраны, выверены и готовы к работе.
 
 ## 📑 Оглавление
 
@@ -42,7 +42,7 @@
 
 | | Состав | Где лежит |
 |---|---|---|
-| 🤖 **123 агент** | определения ролей с инструкциями и инструментами | [`.claude/agents/`](.claude/agents/) |
+| 🤖 **124 агент** | определения ролей с инструкциями и инструментами | [`.claude/agents/`](.claude/agents/) |
 | 🧩 **41 скиллов** | пошаговые рецепты под конкретные задачи | [`.claude/skills/`](.claude/skills/) |
 | ⌨️ **168 команд** | slash-команды для частых операций | [`.claude/commands/`](.claude/commands/) |
 | 🔌 **33 плагина** | модули marketplace, каждый со своими агентами/скиллами/командами | [`plugins/`](plugins/) · [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) |
@@ -57,9 +57,9 @@
 > 📖 **Полный реестр всех агентов** (с разделением на **руководителей**/оркестраторов и исполнителей — сразу видно кого подключать к задаче):
 > [`docs/AGENT-CATALOG.md`](docs/AGENT-CATALOG.md) (Markdown, рендерится на GitHub) · [`docs/agent-catalog.html`](docs/agent-catalog.html) (интерактивный: поиск, фильтры по тиру/роли) · [`docs/agent-report.html`](docs/agent-report.html) (что изменено + состав + как работает).
 >
-> Все **123 агента** приведены к единому стандарту промпта: триггерный `description`, *When to use* (+ кому передать), контракт вывода, координация (иерархия Tier 0/1/2/3), anti-drift, выверенный тир модели. Реестр авто-генерируется: `node scripts/gen-agent-catalog.mjs`.
+> Все **124 агента** приведены к единому стандарту промпта: триггерный `description`, *When to use* (+ кому передать), контракт вывода, координация (иерархия Tier 0/1/2/3), anti-drift, выверенный тир модели. Реестр авто-генерируется: `node scripts/gen-agent-catalog.mjs`.
 
-### Агенты (123, по направлениям)
+### Агенты (124, по направлениям)
 
 | Направление | Кол-во | Примеры ролей |
 |---|---:|---|
@@ -76,7 +76,7 @@
 
 Полный список — в [`.claude/agents/`](.claude/agents/). Каждый агент — это `.md` с описанием роли, зоны ответственности и доступных инструментов.
 
-### Скиллы (39)
+### Скиллы (41)
 
 `agentdb-*` (5: память/RL/оптимизация/поиск) · `reasoningbank-*` (2) · `flow-nexus-*` (3) · `github-*` (5: ревью, релизы, проекты, мульти-репо, workflow) · `swarm-*` (3) · `sparc-methodology` · `hooks-automation` · `pair-programming` · `stream-chain` · `skill-builder` · `verification-quality` · `browser` · `dual-mode` · `performance-analysis` · `hive-mind-advanced` · `agentic-jujutsu` · `v3-*` (9: модернизация/архитектура/память/безопасность) · и др. Полный список — в [`.claude/skills/`](.claude/skills/).
 
@@ -202,7 +202,7 @@ Slash-командой можно вызвать конкретный сцена
 
 ```
 my_agents/
-├── .claude/              # ← ядро «команды»: agents/ (123), skills/ (41), commands/ (168)
+├── .claude/              # ← ядро «команды»: agents/ (124), skills/ (41), commands/ (168)
 ├── .claude-plugin/       # marketplace.json (33 плагина) + хуки
 ├── plugins/              # 33 плагина ruflo-* (агенты/скиллы/команды каждого)
 ├── v3/                   # монорепозиторий v3 (CLI, MCP, память, swarm) — pnpm
