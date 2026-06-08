@@ -15,6 +15,30 @@
 - ALWAYS read a file before editing it
 - NEVER commit secrets, credentials, or .env files
 
+## External Project Policy (when the user opens THEIR other projects here)
+
+The user opens their own projects in this toolkit by giving a **git URL** (or path).
+When I make changes to such a project, I MUST do all of the following **automatically,
+without being reminded** (this is a standing instruction):
+
+1. **Commit + push to the default branch** (master/main) — no asking, same as the
+   commit-push-to-main policy for this repo. Use the repo's commit convention
+   (Conventional Commits if commitlint/husky is present — e.g. `fix:`/`feat:`/`ci:`).
+   Guardrails still apply: only push work I actually verified; never commit
+   secrets/`.env`; confirm before destructive history ops (force-push, rewrite).
+2. **Rewrite the README** so it stays accurate after the changes.
+3. **Verify the LICENSE** — it must exist and name **Alexandr Kobtsev** as the
+   copyright holder. If missing or wrong, add/fix a `LICENSE` (MIT unless the repo
+   already uses another license) — `Copyright (c) <year> Alexandr Kobtsev`.
+4. **Run the test suite** — and report pass/fail honestly (never claim green I
+   didn't observe; say so if a test couldn't run).
+5. **Run security checks** — dependency audit (`npm`/`pnpm audit` or the ecosystem
+   equivalent) + a secret scan; surface any findings.
+
+The `/analyze-project` skill already does recon/build/test/security; this rule makes
+the **commit + README + license + tests + security** steps mandatory after any edit
+to an external project, every time.
+
 ## File Organization
 
 - NEVER save to root folder — use the directories below
