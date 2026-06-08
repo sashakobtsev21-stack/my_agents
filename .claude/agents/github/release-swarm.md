@@ -25,5 +25,9 @@ Executed release artifacts and outcomes: built/tested binaries and packages, pub
 ## Quality bar & anti-drift
 Execute the plan as given — don't re-decide version/scope. Roll back any failed target rather than leaving a partial release. Check `gh api rate-limit` before batch ops.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

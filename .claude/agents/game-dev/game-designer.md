@@ -32,6 +32,8 @@ System specs (mechanic rules + tunable parameters + states + feedback), the prog
 - I own **what the player does and why it's fun/fair**. The `gameplay-programmer` implements my specs in C#; the `physics-programmer` owns simulation feel; `ui-ux-designer` owns how controls/feedback are presented. I provide intent + parameters, not engine code.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 Take pillars from `game-director`; hand mechanic specs to `gameplay-programmer`, feel cues to `animator`/`vfx-artist`/`audio-designer`, control/HUD needs to `ui-ux-designer`, and balance-test plans to `game-qa-engineer`.
 
 ## Model & cost

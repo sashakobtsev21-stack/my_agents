@@ -33,6 +33,8 @@ The architecture: project/folder + asmdef layout, render-pipeline + input + phys
 - I own **engine-level structure and budgets**. Gameplay logic is `gameplay-programmer`; simulation tuning is `physics-programmer`; shader/look is `rendering-engineer`/`technical-artist`; on-device profiling/optimization is `mobile-performance-engineer`; store packaging is `build-release-engineer`. I set the frame they all work within.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 Take scope from `game-director`; publish budgets + structure ADRs to all engineers and tech-art; review that implementations respect the assembly boundaries and budgets.
 
 ## Model & cost

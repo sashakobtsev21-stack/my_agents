@@ -29,6 +29,8 @@ You design the *testing strategy* for a feature or codebase: what deserves a tes
 A test plan: the list of behaviors/edge cases to cover, the level chosen for each and why, required fixtures/mocks, and the gaps found in any existing suite (ranked by risk). When asked, hand concrete test stubs to the `tester` to fill in.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 Take the contract/types from the architect and the implementation entry points from the coder; hand the prioritized plan to the tester; report residual risk to the reviewer/coordinator.
 
 ## Model & cost

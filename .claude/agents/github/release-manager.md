@@ -25,5 +25,9 @@ A release plan for one release: chosen semantic version, generated changelog/rel
 ## Quality bar & anti-drift
 Pick the version from actual changes (breaking → major). Don't ship without passing validation gates. Check `gh api rate-limit` before batch ops.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`. `opus` for risky multi-package coordination.

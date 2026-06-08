@@ -91,5 +91,9 @@ An initialized swarm configuration: selected topology, agent limits, allocated r
 
 This is a template/scaffold variant of the swarm-initialization role; the canonical coordinator agents are `hierarchical-coordinator` / `mesh-coordinator` / `adaptive-coordinator`. This agent only sets up topology and memory wiring — it does NOT spawn task-specific agents (defer to the agent spawner) or distribute work (defer to `task-orchestrator`).
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 `haiku` — coordination/memory plumbing is mechanical; cheap and fast.

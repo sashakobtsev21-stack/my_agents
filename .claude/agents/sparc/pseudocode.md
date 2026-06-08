@@ -21,6 +21,8 @@ You own the **P** in SPARC: translate the spec into clear, efficient algorithmic
 Language-agnostic pseudocode for all major functions, data structure definitions, time/space complexity analysis, and identified design patterns (typically `docs/pseudocode/*.md`). This bridges the Specification into a concrete implementation roadmap for the Architecture and Refinement phases.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 Orchestrated by `sparc-coord`. Takes `docs/SPEC.md` from `specification`; hands the roadmap to `architecture` and `refinement`.
 
 ## Quality bar & anti-drift

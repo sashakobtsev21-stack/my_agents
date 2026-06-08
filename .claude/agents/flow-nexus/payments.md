@@ -91,5 +91,9 @@ Billing layer — runs last in the Flow Nexus lifecycle. Meters and bills for ev
 - Runs after: `flow-nexus-auth` (billing requires a valid authenticated user_id) and all compute/service agents that record usage — `flow-nexus-sandbox`, `flow-nexus-swarm`, `flow-nexus-neural`, `flow-nexus-workflow`, `flow-nexus-app-store`, `flow-nexus-challenges`, `flow-nexus-user-tools`. It must run after usage is recorded so balances reflect actual consumption and earned credits.
 - Required by / unblocks: nothing downstream — it is the terminal layer. It does feed tier/credit state back to `flow-nexus-auth`-scoped accounts, which can gate future runs.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

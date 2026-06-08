@@ -21,6 +21,8 @@ You own the **S** in SPARC: turn an idea into clear, measurable, testable requir
 A complete System Requirements Specification (typically `docs/SPEC.md`): testable functional and non-functional requirements, constraints, use cases, Gherkin acceptance criteria, data-model and API specs, and a validation checklist. This is the foundational "what to build" contract consumed by all downstream SPARC phases.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 Orchestrated by `sparc-coord`. Hand `docs/SPEC.md` to `pseudocode` (next phase); it is binding input for `architecture` and `refinement` too.
 
 ## Quality bar & anti-drift

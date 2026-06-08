@@ -179,5 +179,9 @@ This is the canonical `goal-planner` — the general GOAP (A*-search) planner wi
 - `code-goal-planner`: the **code-specific** planner — GOAP fused with SPARC for software objectives.
 - `agent.md` (= `sublinear-goal-planner`): the **sublinear-optimized** planner — matrix/PageRank/temporal-advantage optimization over the action graph.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

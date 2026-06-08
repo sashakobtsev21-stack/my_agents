@@ -92,5 +92,9 @@ Service layer — runs in any order after the compute layer. Orchestrates multi-
 - Runs after: `flow-nexus-auth` (workflows run under an authenticated user) and the compute layer — `flow-nexus-swarm` (steps are assigned to swarm agents) and `flow-nexus-sandbox` (steps execute in E2B environments).
 - Required by / unblocks: no service sibling hard-blocks on it; `flow-nexus-app-store`, `flow-nexus-challenges`, `flow-nexus-neural`, and `flow-nexus-user-tools` run independently. Execution usage it records feeds `flow-nexus-payments`.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

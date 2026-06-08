@@ -31,6 +31,8 @@ You review changes to protect correctness, security, and maintainability — imp
 Every issue cites `file:line` and a concrete fix. Separate must-fix from nice-to-have.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 **SendMessage** the verdict to the lead/coordinator. If you requested changes, message `coder` the prioritized action items, then **re-review after fixes** — never assume they were applied.
 
 ## Quality bar & anti-drift

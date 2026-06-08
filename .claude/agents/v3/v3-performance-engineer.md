@@ -142,6 +142,8 @@ class MemoryBenchmarks {
 ```
 
 ### **Swarm Coordination Benchmarks**
+
+This agent operates at **Tier 3** (execution specialist).
 ```typescript
 class SwarmBenchmarks {
   async benchmark15AgentCoordination(): Promise<SwarmBenchmark> {

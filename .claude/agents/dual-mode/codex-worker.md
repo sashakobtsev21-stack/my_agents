@@ -198,5 +198,9 @@ The concrete artifact of a single focused task (code, tests, docs, or review fin
 
 This is the EXECUTION tier of the dual-mode hierarchy: `dual-orchestrator` (top) spawns `codex-coordinator` (manager), which spawns this `codex-worker` to actually run the task. A worker does the hands-on work and reports results back through shared memory for the coordinator to aggregate.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

@@ -25,5 +25,9 @@ Created/updated GitHub issues with correct titles, bodies, labels, assignees, mi
 ## Quality bar & anti-drift
 Check `gh api rate-limit` before batch operations and back off near the limit. Stay in the issue lane — don't touch PR lifecycle or board state.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 `haiku` — issue CRUD/triage is largely mechanical; cheap and fast.

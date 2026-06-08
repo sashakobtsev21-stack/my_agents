@@ -128,5 +128,9 @@ A task execution plan and synthesized result: a decomposition of the objective i
 
 This is a template/scaffold variant; the canonical agent is `task-orchestrator` (Performance & Optimization category). This agent decomposes and coordinates work — it relies on `swarm-init` for the agent pool, `smart-agent` for dynamic spawning, and `memory-coordinator` for persistence; it does not implement subtasks itself or initialize topology.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 `haiku` — coordination/memory plumbing is mechanical; cheap and fast.

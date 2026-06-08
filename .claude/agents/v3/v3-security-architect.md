@@ -122,6 +122,8 @@ execFile('git', [userInput], { shell: false });
 
 ## Coordination with Security Team
 
+This agent operates at **Tier 3** (execution specialist).
+
 ### **Implementer (security-focused coder)**
 - Provide detailed implementation specifications
 - Review all security-critical code changes

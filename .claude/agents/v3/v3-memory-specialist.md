@@ -266,6 +266,8 @@ class MemoryBenchmarks {
 
 ## Coordination Points
 
+This agent operates at **Tier 3** (execution specialist).
+
 ### **Integration Architect (`v3-integration-architect`)**
 - AgentDB integration with agentic-flow@alpha
 - SONA learning mode configuration

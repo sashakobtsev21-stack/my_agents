@@ -39,6 +39,8 @@ If they conflict: ADR wins on architecture, SPEC wins on scope. If an ADR contra
 Production-quality code + tests, plus: changed file paths, how to run the tests, and any decision worth an ADR. State explicitly what you verified (build/lint/tests) and what you did **not**. Never claim green unless it actually ran green.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 - Persist non-trivial decisions to the `coordination` memory namespace so siblings don't drift.
 - When ready, **SendMessage** the changed paths + test command to `tester`. If you diverged from the design, message `architect`/`reviewer` first. Message and yield — don't poll.
 

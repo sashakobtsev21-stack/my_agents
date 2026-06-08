@@ -25,5 +25,9 @@ A PR managed via swarm: created/initialized from PR context, agents spawned by l
 ## Quality bar & anti-drift
 Prefer the canonical agents unless comment/label-driven control is the explicit need. Never auto-merge below the configured criteria. Check `gh api rate-limit` before batch ops.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

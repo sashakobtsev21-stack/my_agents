@@ -77,5 +77,9 @@ Init layer — runs first in the Flow Nexus lifecycle. This is the foundational 
 - Runs after: nothing (entry point of the flow).
 - Required by / unblocks: every other agent. The compute layer (`flow-nexus-sandbox`, `flow-nexus-swarm`) and the billing layer (`flow-nexus-payments`) all depend on a valid authenticated user_id, as do all service-layer agents.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

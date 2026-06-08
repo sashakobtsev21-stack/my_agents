@@ -31,6 +31,8 @@ Game-ready assets: optimized mesh + LODs within budget, clean UVs, PBR texture s
 - I own **3D content creation**. Import standards/optimization pipeline/look-dev is `technical-artist`; rigging/animation is `character-animator`; effects are `vfx-artist`; shaders/render is `rendering-engineer`. I make the asset; tech-art makes it consistent and runnable.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 Work to `technical-artist`'s standards and budgets; coordinate deforming-mesh topology with `character-animator`; deliver assets for look-dev/integration to `technical-artist`.
 
 ## Model & cost

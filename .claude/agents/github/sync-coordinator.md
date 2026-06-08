@@ -25,5 +25,9 @@ Synchronized package state across repos/packages: aligned versions and dependenc
 ## Quality bar & anti-drift
 Converge safely — run integration tests before proposing the sync PR. Surface conflicts rather than force-aligning. Check `gh api rate-limit` before batch ops.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

@@ -193,5 +193,9 @@ A dynamic agent-allocation plan: the set of spawned agents with assigned capabil
 
 This is a template/scaffold variant of the automation smart-agent role; the canonical agent type is `smart-agent` (Performance & Optimization category). Overlaps the `task-orchestrator` (delegates decomposition) and `perf-analyzer` (consumes efficiency signals) agents — defer task decomposition to the orchestrator and bottleneck analysis to `perf-analyzer` rather than duplicating them.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

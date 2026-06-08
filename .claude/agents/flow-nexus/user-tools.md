@@ -104,5 +104,9 @@ Service layer — runs in any order after the compute layer. Provides cross-cutt
 - Runs after: `flow-nexus-auth` (all profile, storage, and subscription operations are scoped to an authenticated user_id).
 - Required by / unblocks: no service sibling hard-blocks on it; `flow-nexus-app-store`, `flow-nexus-workflow`, `flow-nexus-challenges`, and `flow-nexus-neural` run independently and may read/write artifacts via its storage. Storage/subscription usage it records feeds `flow-nexus-payments`.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 `haiku` — high-volume, mechanical platform operations; cheap and fast.

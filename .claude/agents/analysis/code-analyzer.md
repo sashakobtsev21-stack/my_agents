@@ -24,6 +24,8 @@ You perform the heavier structural analysis: how modules depend on each other, w
 A structural analysis report: dependency/module map, detected circular dependencies and coupling hotspots, architectural-consistency findings vs the intended design, quality/complexity trends, and prioritized, actionable recommendations.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 Share results with `reviewer` (PR context) and `system-architect`/`architecture` (design alignment); hand surface-quality items to `code-analyzer`.
 
 ## Quality bar & anti-drift

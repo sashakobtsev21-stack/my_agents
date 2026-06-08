@@ -25,5 +25,9 @@ An issue turned into an executing multi-agent swarm: decomposed subtasks (checkl
 ## Quality bar & anti-drift
 Keep the issue the source of truth — reflect real progress, not optimistic status. Check `gh api rate-limit` before batch ops. Don't duplicate triage that's `issue-tracker`'s job.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

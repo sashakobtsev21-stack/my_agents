@@ -95,5 +95,9 @@ Service layer — runs in any order after the compute layer. Publishes and deplo
 - Runs after: `flow-nexus-auth` (publishing and deployment are scoped to an authenticated user) and, for deployments, `flow-nexus-sandbox` (templates deploy into E2B environments).
 - Required by / unblocks: nothing downstream is hard-blocked; sibling service agents (`flow-nexus-workflow`, `flow-nexus-challenges`, `flow-nexus-neural`, `flow-nexus-user-tools`) run independently. Revenue and usage it records feed `flow-nexus-payments` in the billing layer.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 `haiku` — high-volume, mechanical platform operations; cheap and fast.

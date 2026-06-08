@@ -33,6 +33,8 @@ research_findings:
 Cite concrete evidence; mark unknowns as unknown — don't fill gaps with plausible guesses.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 Store findings in the `coordination` namespace and **SendMessage** them to the consumer (`planner`/`architect`). Surface what you couldn't determine explicitly.
 
 ## Quality bar & anti-drift

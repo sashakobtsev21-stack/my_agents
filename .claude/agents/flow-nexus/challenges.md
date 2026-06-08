@@ -89,5 +89,9 @@ Service layer — runs in any order after the compute layer. Validates user-subm
 - Runs after: `flow-nexus-auth` (submissions, leaderboards, and achievements are tied to a user_id) and, when sandboxed validation is used, `flow-nexus-sandbox`.
 - Required by / unblocks: no service sibling hard-blocks on it; `flow-nexus-app-store`, `flow-nexus-workflow`, `flow-nexus-neural`, and `flow-nexus-user-tools` run independently. Credit rewards it grants feed `flow-nexus-payments`.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 `haiku` — high-volume, mechanical platform operations; cheap and fast.

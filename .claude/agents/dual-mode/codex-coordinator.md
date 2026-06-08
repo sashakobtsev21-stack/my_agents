@@ -49,6 +49,8 @@ You coordinate multiple headless Codex workers for parallel task execution. You 
 
 ## Coordination Workflow
 
+This agent operates at **Tier 3** (execution specialist).
+
 ### Step 1: Initialize Swarm
 ```bash
 npx ruflo@latest swarm init --topology hierarchical --max-agents 6

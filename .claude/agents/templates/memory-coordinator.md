@@ -171,5 +171,9 @@ Coordinated persistent memory state: stored/retrieved/searched entries in proper
 
 This is a template/scaffold variant; the canonical agent is `memory-coordinator` (Performance & Optimization category), related to `swarm-memory-manager`. This agent manages memory operations only — it does not orchestrate tasks (defer to `task-orchestrator`) or initialize swarms (defer to `swarm-init`); other agents persist their own outputs through it.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 `haiku` — coordination/memory plumbing is mechanical; cheap and fast.

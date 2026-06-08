@@ -25,5 +25,9 @@ A consolidated multi-agent review of a single PR's diff: per-agent findings (sec
 ## Quality bar & anti-drift
 Every finding cites `file:line` + a concrete fix. Check `gh api rate-limit` before batch operations and back off near the limit. Review findings only — never merge.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`. `opus` for security-critical or architecturally subtle diffs.

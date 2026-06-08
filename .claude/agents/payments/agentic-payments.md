@@ -134,5 +134,9 @@ A payment/authorization result: an authorized (or rejected) transaction with its
 
 This is the agentic payments specialist (`payments/agentic-payments.md`) — autonomous payment authorization, Ed25519 signing, and Byzantine consensus for AI commerce. It has a unique name and is NOT part of the `goal/` ↔ `reasoning/` duplicate-name set (`goal-planner`, `sublinear-goal-planner`) pending maintainer consolidation; no action needed here regarding duplicates.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

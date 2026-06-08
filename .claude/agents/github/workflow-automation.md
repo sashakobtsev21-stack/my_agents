@@ -25,5 +25,9 @@ Authored/updated GitHub Actions workflow files (`.github/workflows/*.yml`): CI/C
 ## Quality bar & anti-drift
 Pin actions to versions; least-privilege `GITHUB_TOKEN`; never embed secrets in YAML. Don't mask failures with blanket `|| true`. Check `gh api rate-limit` for API-driven steps.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

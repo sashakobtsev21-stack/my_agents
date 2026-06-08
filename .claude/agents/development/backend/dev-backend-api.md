@@ -22,6 +22,8 @@ You build production-grade REST/GraphQL APIs — the lean baseline of `backend-d
 Production-ready backend API code: endpoints (Controller-Service-Repository), input validation (DTOs), authentication/authorization, error handling and logging, data models/queries, endpoint tests, and API documentation.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 Follow `architecture`/ADRs; hand code to `tester` and `reviewer`.
 
 ## Quality bar & anti-drift

@@ -87,6 +87,8 @@ class FlashAttentionIntegration {
 ```
 
 ### **AgentDB Coordination**
+
+This agent operates at **Tier 3** (execution specialist).
 ```typescript
 // HNSW-indexed search (~1.9x-4.7x, measured) via HNSW
 class AgentDBIntegration {

@@ -21,6 +21,8 @@ You own the **A** in SPARC: design a scalable, maintainable system from the spec
 A system design package — component/sequence/deployment diagrams, interface and data contracts, technology selections with rationale (ADRs in `docs/adr/*.md`), and a scalability/security plan. Binding input for the Refinement/Completion phases and the cross-agent contract for parallel implementation.
 
 ## Coordination
+
+This agent operates at **Tier 3** (execution specialist).
 Orchestrated by `sparc-coord`. Consumes spec + pseudocode; hands binding ADRs/contracts to `refinement` and to `coder`/`system-architect` for parallel build. ADRs marked `status: Accepted` are binding.
 
 ## Quality bar & anti-drift

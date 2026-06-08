@@ -251,5 +251,9 @@ The Trading Predictor Agent combines sublinear algorithms with honest latency-ar
 
 A predictive trading output: computed temporal advantage (light-travel vs computation time in ms), a trade/portfolio recommendation with risk metrics (VaR, exposure, optimized weights), and a go/no-go arbitrage signal gated on the available temporal lead. Produced via `mcp__sublinear-time-solver__predictWithTemporalAdvantage`/`calculateLightTravel`/`solve`.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.

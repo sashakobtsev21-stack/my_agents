@@ -187,5 +187,9 @@ A performance analysis report: identified bottlenecks ranked by impact, root-cau
 
 This is the `perf-analyzer` template — a diagnose-and-recommend agent, distinct from `performance-benchmarker` (which runs the measurements). This agent diagnoses and recommends only: it hands actual optimization work to optimization agents and validates results, and feeds execution-strategy feedback to `task-orchestrator` rather than re-planning tasks itself.
 
+## Coordination
+
+This agent operates at **Tier 3** (execution specialist). It takes its assignment from the requesting lead/coordinator and hands its finished output back to that lead (or the next agent in the pipeline).
+
 ## Model & cost
 Default `sonnet`.
