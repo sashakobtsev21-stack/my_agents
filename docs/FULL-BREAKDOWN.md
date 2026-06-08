@@ -2,7 +2,7 @@
 
 > Авто-генерируется: `node scripts/gen-full-breakdown.mjs`. Новичкам сначала — [`CONCEPTS.md`](CONCEPTS.md).
 
-**Состав:** 121 агентов · 39 скиллов · 168 команд · 33 плагинов · ~313 MCP-инструментов · 23 v3-пакетов.
+**Состав:** 121 агентов · 41 скиллов · 168 команд · 33 плагинов · ~313 MCP-инструментов · 23 v3-пакетов.
 
 ## 🤖 Агенты (по направлениям)
 
@@ -39,7 +39,7 @@
 
 Полный реестр с ролями и тирами → [`AGENT-CATALOG.md`](AGENT-CATALOG.md).
 
-## 🧩 Скиллы (39)
+## 🧩 Скиллы (41)
 
 | Скилл | Что делает |
 |---|---|
@@ -49,6 +49,7 @@
 | `agentdb-optimization` | Optimize AgentDB performance with quantization (4-32x memory reduction), HNSW indexing (HNSW-indexed search), caching, and batch operations. Use when optimizing |
 | `agentdb-vector-search` | Implement semantic vector search with AgentDB for intelligent document retrieval, similarity matching, and context-aware querying. Use when building RAG systems |
 | `agentic-jujutsu` | \| |
+| `analyze-project` | Run a full, evidence-based audit of any codebase — vulnerabilities, build/runtime health, bottlenecks, tests, and git — and produce a prioritized report + impro |
 | `browser` | Web browser automation with AI-optimized snapshots for claude-flow agents |
 | `dual-mode` | Run Claude Code and OpenAI Codex workers in parallel with shared-memory coordination and cross-validation. Use when you want two AI platforms to collaborate on  |
 | `flow-nexus-neural` | Train and deploy neural networks in distributed E2B sandboxes with Flow Nexus |
@@ -61,6 +62,7 @@
 | `github-workflow-automation` | \| |
 | `hive-mind-advanced` | \| |
 | `hooks-automation` | Automated coordination, formatting, and learning from Claude Code operations using intelligent hooks with MCP integration. Includes pre/post task hooks, session |
+| `new-project` | Build a brand-new project from an idea to a working, tested first version using a planned multi-agent pipeline with a verify gate. Use when the user wants to cr |
 | `pair-programming` | AI-assisted pair programming with multiple modes (driver/navigator/switch), real-time verification, quality monitoring, and comprehensive testing. Supports TDD, |
 | `performance-analysis` | \| |
 | `reasoningbank-agentdb` | Implement ReasoningBank adaptive learning with AgentDB's HNSW-indexed (measured ~1.9x-4.7x) vector database. Includes trajectory tracking, verdict judgment, mem |
