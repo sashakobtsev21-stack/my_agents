@@ -99,25 +99,25 @@ const INVARIANTS = [
   {
     issue: '#1951',
     file: 'v3/@claude-flow/cli/.claude/helpers/statusline.cjs',
-    substring: 'RUFLO_VERSION',
-    why: 'Startup version-probe variable in the deployed statusline — without it the header reverts to a hard-coded `AlexKo V3.5`.',
+    substring: 'pkg.version',
+    why: 'Startup version-probe in the deployed statusline (refactored from the RUFLO_VERSION var to a package.json read in #2195) — without it the header reverts to a hard-coded version.',
   },
   {
     issue: '#1951',
     file: 'v3/@claude-flow/cli/.claude/helpers/statusline.cjs',
-    substring: '.claude/plugins/marketplaces/ruflo',
+    substring: "marketplaces', 'ruflo",
     why: 'Plugin-install candidate path probed first — without it, plugin users always fall through to the hardcoded default.',
   },
   {
     issue: '#1951',
     file: '.claude/helpers/statusline.cjs',
-    substring: '.claude/plugins/marketplaces/ruflo',
+    substring: "marketplaces', 'ruflo",
     why: 'Same plugin-install candidate in the root statusline copy.',
   },
   {
     issue: '#1951',
     file: 'v3/@claude-flow/cli/src/init/statusline-generator.ts',
-    substring: '.claude/plugins/marketplaces/ruflo',
+    substring: "marketplaces', 'ruflo",
     why: 'Same plugin-install candidate in the init template that generates project-local statuslines.',
   },
 
@@ -143,21 +143,13 @@ const INVARIANTS = [
     why: 'Daemon launcher forwards --headless — same family as the --workers gap.',
   },
 
-  // #1989 — statusline guards SQLite header read against RFE1-encrypted
-  // memory.db (the bug rendered 3.3B `patterns` and cascaded into fake
-  // DDD 5/5 / 100% / 🧠 100%).
-  {
-    issue: '#1989',
-    file: 'v3/@claude-flow/cli/src/init/statusline-generator.ts',
-    substring: "Buffer.from('SQLite format 3",
-    why: 'Magic-bytes check before reading SQLite page count. Without it, encrypted RFE1 memory.db files produce bogus uint32 pattern counts.',
-  },
-  {
-    issue: '#1989',
-    file: 'v3/@claude-flow/cli/src/init/statusline-generator.ts',
-    regex: /pageCount > 1_000_000/,
-    why: 'Sanity clamp rejecting >1M-page DBs (~4GB). Defense-in-depth even on plaintext SQLite.',
-  },
+  // #1989 — RETIRED (not weakened). The guard protected a SQLite memory.db read in
+  // the statusline (encrypted RFE1 DBs produced bogus ~3.3B pattern counts that
+  // cascaded into fake DDD 5/5 / 100% / 🧠 100% segments). The statusline
+  // simplification + honesty cleanup (#2195 and the slim-panel commits) removed the
+  // DB-reading segment entirely — the panel no longer reads memory.db at all, so the
+  // #1989 regression is impossible by construction. There is no SQLite read left to
+  // guard, so the two invariants were removed rather than repointed.
 
   // #1987 — memory stats uses persistent HNSW count from MCP tool, not
   // the in-process JS state (which is always 0 from a fresh CLI invocation).

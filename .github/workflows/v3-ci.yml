@@ -2521,7 +2521,7 @@ jobs:
 
           # Run init --force (non-interactive); ignore non-zero exit from
           # optional components that need extra deps (skills, helpers, etc.)
-          HOME="$TMP" node "$GITHUB_WORKSPACE/v3/@claude-flow/cli/dist/cli.js" \
+          HOME="$TMP" node "$GITHUB_WORKSPACE/v3/@claude-flow/cli/bin/cli.js" \
             init --force 2>&1 || true
 
           echo "--- .mcp.json contents ---"
@@ -2575,7 +2575,7 @@ jobs:
           # Run init WITHOUT --force; use a custom HOME with no ~/.claude.json
           # so the real user's global config doesn't interfere
           FAKE_HOME=$(mktemp -d)
-          OUT=$(HOME="$FAKE_HOME" node "$GITHUB_WORKSPACE/v3/@claude-flow/cli/dist/cli.js" \
+          OUT=$(HOME="$FAKE_HOME" node "$GITHUB_WORKSPACE/v3/@claude-flow/cli/bin/cli.js" \
             init 2>&1 || true)
 
           echo "--- init output ---"

@@ -603,10 +603,10 @@
       },
       {
         "id": "#1609",
-        "desc": "vitest bumped to ^4.0.16 (drops 4 moderate esbuild CVEs)",
+        "desc": "vitest bumped to ^4.1.8 (drops 4 moderate esbuild CVEs)",
         "file": "v3/@claude-flow/aidefence/package.json",
         "sha256": "0a9d315b4c1c74b2f86befd070c73a5651d9d1fcdd0b81c38aa2663976952483",
-        "marker": "\"vitest\": \"^4.0.16\"",
+        "marker": "\"vitest\": \"^4.1.8\"",
         "markerVerified": true
       },
       {
@@ -902,7 +902,7 @@
         "desc": "scripts/ruflo-hook.sh — resilient invoker shipped in each plugin (.claude-plugin/, plugin/, plugins/ruflo-core/): prefers a local `ruflo`/`claude-flow` binary, else `npx --prefer-offline --yes ruflo@alpha`, always `exit 0`. stdin (hook event JSON) passes through unchanged. Companion to #1921.",
         "file": "plugins/ruflo-core/scripts/ruflo-hook.sh",
         "sha256": "08d576ea4938dbb7ac6c5072b2463ddf3299802801cf1d0110a1244ebe0868ea",
-        "marker": "npx --prefer-offline --yes ruflo@alpha hooks",
+        "marker": "npx --prefer-offline --yes ruflo@latest hooks",
         "markerVerified": true
       },
       {
