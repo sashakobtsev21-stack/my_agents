@@ -94,7 +94,7 @@
 | [`project-coordinator`](../.claude/agents/project-coordinator.md) 🎖 ✓ | 🔵 sonnet | Coordinates multi-agent workflows — decomposes the goal, assigns named agents, sequences handoffs via SendMessage, and synthesizes results. Use as the lead for multi-step, multi-agent tasks. |
 | [`prompt-engineer`](../.claude/agents/prompt-engineer.md) ✓ | 🔵 sonnet | Prompt & agent-definition specialist — writes and optimizes agent prompts, tool descriptions, and instructions for clarity, correct routing, and cost. Use to improve this repo's agent/skill definitions or any LLM prompt. |
 | [`python-specialist`](../.claude/agents/python-specialist.md) ✓ | 🔵 sonnet | Python development specialist — idiomatic, typed, tested Python. Use for writing/reviewing Python services, scripts, and packaging, with async, typing, and performance awareness. |
-| [`security-auditor`](../.claude/agents/security-auditor.md) ✓ | 🔵 sonnet | Security audit and hardening specialist — finds and remediates vulnerabilities, validates inputs, reviews auth/crypto. Use for security reviews, threat modeling, and CVE triage. |
+| [`security-auditor`](../.claude/agents/security-auditor.md) ✓ | 🟣 opus | Security audit and hardening specialist — finds and remediates vulnerabilities, validates inputs, reviews auth/crypto. Use for security reviews, threat modeling, and CVE triage. |
 | [`typescript-specialist`](../.claude/agents/typescript-specialist.md) ✓ | 🔵 sonnet | TypeScript development specialist — strict typing, sound domain models, modern ESM. Use for writing/reviewing TS, fixing type errors, and designing type-safe APIs. |
 
 ### Flow-Nexus (облако) (9)
@@ -264,7 +264,7 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`production-validator`](../.claude/agents/testing/production-validator.md) ✓ | 🔵 sonnet | Pre-production readiness gate. Use last, before deploy, to verify a built system is REAL and deployment-ready — no surviving mocks/stubs, integration tests against real services, performance under load. Produces a go/no-go verdict. |
+| [`production-validator`](../.claude/agents/testing/production-validator.md) ✓ | 🟣 opus | Pre-production readiness gate. Use last, before deploy, to verify a built system is REAL and deployment-ready — no surviving mocks/stubs, integration tests against real services, performance under load. Produces a go/no-go verdict. |
 | [`tdd-london-swarm`](../.claude/agents/testing/tdd-london-swarm.md) ✓ | 🔵 sonnet | TDD London-School (mockist) specialist. Use up front to drive NEW code's design outside-in via mock expectations and collaborator contracts, within a swarm. Produces failing-then-passing tests + contracts, not production code. |
 
 ### Payments (1)

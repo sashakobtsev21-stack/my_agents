@@ -1,7 +1,7 @@
 ---
 name: production-validator
 description: Pre-production readiness gate. Use last, before deploy, to verify a built system is REAL and deployment-ready — no surviving mocks/stubs, integration tests against real services, performance under load. Produces a go/no-go verdict.
-model: sonnet
+model: opus
 ---
 
 # Production Validator

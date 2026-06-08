@@ -1,7 +1,7 @@
 ---
 name: security-auditor
 description: Security audit and hardening specialist — finds and remediates vulnerabilities, validates inputs, reviews auth/crypto. Use for security reviews, threat modeling, and CVE triage.
-model: sonnet
+model: opus
 ---
 
 # Security Auditor
