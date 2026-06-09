@@ -1,7 +1,7 @@
 # Claude Code Configuration — my_agents (v3.10.31)
 
 > **my_agents** — reusable AI agent team for Claude Code. Fork of [ruvnet/claude-flow](https://github.com/ruvnet/claude-flow) (MIT).
-> Verified in this checkout: 104 agents, 41 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, ~325 MCP tools.
+> Verified in this checkout: 104 agents, 41 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, ~305 MCP tools.
 > Packages: `@claude-flow/cli@3.10.31`, root `my_agents@3.10.31`.
 
 ## Behavioral Rules (Always Enforced)
@@ -775,7 +775,7 @@ npx claude-flow@v3alpha hooks worker status
 V3 includes the RuVector Intelligence System (measured numbers: see [audit](docs/reviews/intelligence-system-audit-2026-05-29.md) + [`scripts/benchmark-intelligence.mjs`](scripts/benchmark-intelligence.mjs)):
 - **SONA**: Self-Optimizing Neural Architecture (measured 0.0043ms/adapt, target <0.05ms met)
 - **MoE**: Mixture of Experts for specialized routing (gate converges — confidence 0.13→0.88 after rewards)
-- **HNSW**: measured ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force (recall@10 ~0.99); ANN wins above the crossover, ruvector NAPI backend (WASM not active on test host)
+- **HNSW**: measured ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force; ANN wins above the crossover, ruvector NAPI backend (WASM not active on test host). Recall@10 depends on host & build params — measured on the audit host (darwin-arm64): see [`docs/reviews/intelligence-system-audit-2026-05-29.md`](docs/reviews/intelligence-system-audit-2026-05-29.md); re-running `scripts/benchmark-intelligence.mjs` on a fresh Windows host with defaults reproduces only **recall@10 ≈ 0.59** (not 0.99). Either parameters need tuning or the 0.99 figure is host-specific.
 - **EWC++**: Elastic Weight Consolidation (prevents forgetting)
 - **Flash Attention**: unverified — no benchmark exists for this claim
 
@@ -816,7 +816,7 @@ Features:
 
 | Metric | Measured / Target | Status |
 |--------|-------------------|--------|
-| HNSW Search | ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force (recall@10 ~0.99); ties/loses below crossover | **Measured** (ruvector NAPI; 150x-12,500x NOT reproduced — was brute-force fallback) |
+| HNSW Search | ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force; ties/loses below crossover. Recall@10 host-dependent (audit host: 0.99; fresh Windows host with defaults reproduces 0.59 — re-run on your machine via `scripts/benchmark-intelligence.mjs`). | **Measured** (ruvector NAPI; 150x-12,500x NOT reproduced) |
 | Int8 Quantization | 3.84x compression, reconstruction cosine 0.99999 | **Measured** |
 | RaBitQ Quantization | 32x compression, 0.60ms/query (14,760-vec index) | **Measured** |
 | SONA Adaptation | 0.0043ms/adapt (target <0.05ms met) | **Measured** |

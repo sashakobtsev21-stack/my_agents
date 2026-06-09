@@ -11,74 +11,12 @@ import { existsSync, readFileSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createHash } from 'crypto';
-import { execFileSync, execFile } from 'child_process';
-import { promisify } from 'util';
+import { execFileSync } from 'child_process';
 import { decodeKey, isEncryptionEnabled } from '../encryption/vault.js';
 import { isEncryptedBlob } from '../encryption/vault.js';
-
-// ADR-078: execFile (no shell) — argv-based, no string interpolation possible.
-const execFileAsync = promisify(execFile);
-
-/**
- * Resolve a platform-correct binary name. npm/npx/tsc on Windows are .cmd
- * shims that can't be exec'd directly without `shell:true`; we suffix .cmd
- * so execFile finds them without dropping into a shell.
- */
-function cmd(bin: string): string {
-  return process.platform === 'win32' && /^(npm|npx|yarn|pnpm)$/.test(bin) ? `${bin}.cmd` : bin;
-}
-
-/**
- * Execute a command asynchronously via execFile (no shell). Caller passes
- * the binary and an argv array — no shell metacharacters can be injected.
- * Critical for Windows where PATH may not be inherited properly.
- */
-async function runCommand(file: string, args: string[], timeoutMs: number = 5000): Promise<string> {
-  const { stdout } = await execFileAsync(cmd(file), args, {
-    encoding: 'utf8' as BufferEncoding,
-    timeout: timeoutMs,
-    env: { ...process.env }, // Explicitly inherit full environment
-    windowsHide: true, // Hide window on Windows
-  });
-  return (stdout as string).trim();
-}
-
-interface HealthCheck {
-  name: string;
-  status: 'pass' | 'warn' | 'fail';
-  message: string;
-  fix?: string;
-}
-
-// Check Node.js version
-async function checkNodeVersion(): Promise<HealthCheck> {
-  const requiredMajor = 20;
-  const version = process.version;
-  const major = parseInt(version.slice(1).split('.')[0], 10);
-
-  if (major >= requiredMajor) {
-    return { name: 'Node.js Version', status: 'pass', message: `${version} (>= ${requiredMajor} required)` };
-  } else if (major >= 18) {
-    return { name: 'Node.js Version', status: 'warn', message: `${version} (>= ${requiredMajor} recommended)`, fix: 'nvm install 20 && nvm use 20' };
-  } else {
-    return { name: 'Node.js Version', status: 'fail', message: `${version} (>= ${requiredMajor} required)`, fix: 'nvm install 20 && nvm use 20' };
-  }
-}
-
-// Check npm version (async with proper env inheritance)
-async function checkNpmVersion(): Promise<HealthCheck> {
-  try {
-    const version = await runCommand('npm', ['--version']);
-    const major = parseInt(version.split('.')[0], 10);
-    if (major >= 9) {
-      return { name: 'npm Version', status: 'pass', message: `v${version}` };
-    } else {
-      return { name: 'npm Version', status: 'warn', message: `v${version} (>= 9 recommended)`, fix: 'npm install -g npm@latest' };
-    }
-  } catch {
-    return { name: 'npm Version', status: 'fail', message: 'npm not found', fix: 'Install Node.js from https://nodejs.org' };
-  }
-}
+// Shared utilities + pilot extractions live under ./doctor/ (issue #7).
+import { runCommand, type HealthCheck } from './doctor/utils.js';
+import { checkNodeVersion, checkNpmVersion } from './doctor/checks/node.js';
 
 // Check config file
 async function checkConfigFile(): Promise<HealthCheck> {

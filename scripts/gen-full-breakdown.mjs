@@ -77,7 +77,13 @@ const mcpModules = dirs('v3/@claude-flow/cli/src/mcp-tools').length
 const mcpToolFiles = (fs.existsSync('v3/@claude-flow/cli/src/mcp-tools') ? fs.readdirSync('v3/@claude-flow/cli/src/mcp-tools') : [])
   .filter((f) => f.endsWith('-tools.ts')).map((f) => f.replace(/-tools\.ts$/, ''));
 const inv = readJSON('verification/inventory.json', {});
-const mcpTotal = (inv.mcp && (inv.mcp.total || inv.mcp.count || (Array.isArray(inv.mcp.tools) && inv.mcp.tools.length))) || '~313';
+// `inv.mcp` is the array of {name, description, sourceFile} extracted by
+// scripts/inventory-capabilities.mjs. Older code paths supported {total} or
+// {tools:[]} object shapes; we keep those for back-compat, then prefer the
+// real array length over the stale '~313' fallback.
+const mcpTotal = (Array.isArray(inv.mcp) ? `~${inv.mcp.length}` : null)
+  ?? (inv.mcp && (inv.mcp.total || inv.mcp.count || (Array.isArray(inv.mcp.tools) && `~${inv.mcp.tools.length}`)))
+  ?? '~313';
 
 // ---- V3 packages ----
 const v3pkgs = dirs('v3/@claude-flow').sort().map((n) => ({ name: '@claude-flow/' + n, desc: (readJSON(path.join('v3/@claude-flow', n, 'package.json')).description || '').trim() }))

@@ -484,7 +484,7 @@ npx @claude-flow/cli@latest migrate validate
 V3 includes the RuVector Intelligence System (measured numbers: see [audit](../../../docs/reviews/intelligence-system-audit-2026-05-29.md) + [`scripts/benchmark-intelligence.mjs`](../../../scripts/benchmark-intelligence.mjs)):
 - **SONA**: Self-Optimizing Neural Architecture (measured 0.0043ms/adapt, target <0.05ms met)
 - **MoE**: Mixture of Experts for specialized routing (gate converges — confidence 0.13→0.88 after rewards)
-- **HNSW**: measured ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force (recall@10 ~0.99); ANN wins above the crossover, ruvector NAPI backend (WASM not active on test host)
+- **HNSW**: measured ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force; ANN wins above the crossover. Recall@10 host-dependent (audit host: 0.99; fresh Windows default: 0.59 — see W6 audit and `scripts/benchmark-intelligence.mjs`).
 - **EWC++**: Elastic Weight Consolidation (prevents forgetting)
 - **Flash Attention**: unverified — no benchmark exists for this claim
 
@@ -525,7 +525,7 @@ Features:
 
 | Metric | Measured / Target | Status |
 |--------|-------------------|--------|
-| HNSW Search | ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force (recall@10 ~0.99) | **Measured** (ruvector NAPI; 150x-12,500x NOT reproduced) |
+| HNSW Search | ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force; recall@10 host-dependent (0.99 audit / 0.59 fresh-Win — see W6 audit) | **Measured** (ruvector NAPI; 150x-12,500x NOT reproduced) |
 | Int8 Quantization | 3.84x compression, reconstruction cosine 0.99999 | **Measured** |
 | RaBitQ Quantization | 32x compression, 0.60ms/query | **Measured** |
 | SONA Adaptation | 0.0043ms/adapt (target <0.05ms met) | **Measured** |

@@ -11,9 +11,12 @@ export default defineConfig({
     // which exceed 15s in CI without warm cache.
     testTimeout: 30000,
     hookTimeout: 30000,
-    // Disable coverage for hooks package (uses vitest v2)
+    // Coverage opt-in via `--coverage`; defaulted off so plain `vitest run`
+    // is fast. Previous `enabled: false` would have ignored the CLI flag.
     coverage: {
-      enabled: false,
+      provider: 'v8',
+      reporter: ['text', 'json-summary'],
+      exclude: ['__tests__/**', 'src/__tests__/**', 'dist/**', '**/*.d.ts'],
     },
   },
 });

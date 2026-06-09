@@ -36,8 +36,20 @@ export default defineConfig({
     // Linux CI and pass on Windows in isolation. A proper fix requires those
     // tests to thread tmpDir as an explicit arg instead of cwd-switching.
     pool: 'forks',
+    // Coverage is OFF by default and turned on by `--coverage` (or the
+    // `test:coverage` script). Previously `enabled: false` was hard-pinned
+    // which silently dropped the CLI flag — `pnpm test:coverage` produced
+    // no coverage block. Provider/reporter live here so the flag actually
+    // does the right thing without extra args.
     coverage: {
-      enabled: false,
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html'],
+      exclude: [
+        '__tests__/**',
+        'dist/**',
+        '**/*.d.ts',
+        '**/*.config.ts',
+      ],
     },
   },
 });
