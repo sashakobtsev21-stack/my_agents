@@ -16,7 +16,7 @@
  */
 
 import { HeadlessWorkerExecutor, HEADLESS_WORKER_TYPES, type HeadlessWorkerType } from '../services/headless-worker-executor.js';
-import { WorkerDaemon, getDaemon, startDaemon, stopDaemon } from '../services/worker-daemon.js';
+import { getDaemon, startDaemon, stopDaemon } from '../services/worker-daemon.js';
 import {
   initializeIntelligence,
   benchmarkAdaptation,
@@ -167,8 +167,10 @@ async function runWorker(workerType: HeadlessWorkerType, timeout: number): Promi
 async function runDaemon(): Promise<void> {
   console.log('[Headless] Starting daemon mode...');
 
-  // Start the daemon
-  const daemon = await startDaemon(process.cwd());
+  // Start the daemon — the daemon handle is held by the module-level
+  // singleton inside worker-daemon.js; SIGINT below tears it down via
+  // stopDaemon(), so the return value is intentionally unused here.
+  await startDaemon(process.cwd());
 
   console.log('[Headless] Daemon started');
   console.log('[Headless] Press Ctrl+C to stop');

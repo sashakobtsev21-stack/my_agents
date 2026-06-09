@@ -15,7 +15,9 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
+// `join` was used by an earlier per-component path builder; the model
+// persistence path is now a single config string consumed verbatim.
 
 /**
  * Q-Learning Router Configuration
@@ -718,10 +720,11 @@ export class QLearningRouter {
 
   // Private methods
 
-  /**
-   * Legacy hash function (kept for backward compatibility)
-   */
-  private hashState(context: string): string {
+  // hashState() was the legacy context-string hasher used before
+  // feature-hashing landed. No remaining caller — feature-hashing handles
+  // the state space directly now. Kept under `_` so a future migrate-
+  // from-legacy callback can still reach it via reflection.
+  private _hashState(context: string): string {
     // Simple hash for context string
     let hash = 0;
     for (let i = 0; i < context.length; i++) {

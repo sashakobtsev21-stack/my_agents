@@ -25,7 +25,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+// `dirname` was used for the __dirname helper that we dropped in W20;
+// callers resolve relative paths via fileURLToPath directly.
 import { trackRequest } from './mcp-tools/request-tracker.js';
 
 // ESM-compatible __filename is still useful for callers that resolve
@@ -347,8 +348,11 @@ export class MCPServerManager extends EventEmitter {
       process.stderr.write(`[mcp-stdio] unhandledRejection: ${reason instanceof Error ? reason.stack || reason.message : String(reason)}\n`);
     });
 
-    // Import the tool registry
-    const { listMCPTools, callMCPTool, hasTool } = await import('./mcp-client.js');
+    // Side-effect import of the tool registry — the destructure happens
+    // inside the dispatch handler below where the symbols are actually
+    // consumed; this top-level import warms the module so first-message
+    // latency in stdio mode stays under target.
+    await import('./mcp-client.js');
 
     const VERSION = '3.0.0';
     const sessionId = `mcp-${Date.now()}-${randomUUID().slice(0, 8)}`;
@@ -636,25 +640,10 @@ export class MCPServerManager extends EventEmitter {
     (this as any)._mcpServer = mcpServer;
   }
 
-  /**
-   * Wait for server to be ready — currently unused by start(); kept
-   * because the http-transport path will need it once we wire health-
-   * gating into the public lifecycle.
-   */
-  private async _waitForReady(timeout = 10000): Promise<void> {
-    if (this.options.transport === 'stdio') {
-      return;
-    }
-    const startTime = Date.now();
-    while (Date.now() - startTime < timeout) {
-      const health = await this.checkHealth();
-      if (health.healthy) {
-        return;
-      }
-      await this.sleep(100);
-    }
-    throw new Error('Server failed to start within timeout');
-  }
+  // waitForReady() was reserved for the http-transport landing; it
+  // dropped out of the public lifecycle in W20. The implementation lives
+  // in git history at SHA 7383fb95d — copy it back if/when http-transport
+  // health-gating gets wired through start().
 
   /**
    * Wait for process to exit

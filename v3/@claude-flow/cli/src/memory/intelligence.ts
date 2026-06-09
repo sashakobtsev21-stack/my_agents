@@ -14,7 +14,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { createRequire } from 'node:module';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
+// `dirname` was used to derive the parent dir before mkdir; the writer
+// now calls mkdirSync({ recursive: true }) on the full path so the
+// helper isn't needed.
 
 // ============================================================================
 // Persistence Configuration
@@ -279,9 +282,12 @@ class LocalSonaCoordinator {
     };
     this.recordTrajectory(completedTrajectory);
 
-    // Update pattern confidences based on reward
+    // Update pattern confidences based on reward. `bank.getAll()` is
+    // probed eagerly here so a corrupt patterns file fails fast before
+    // we kick off the per-step similarity loop; we then call back into
+    // bank.findSimilar() per step instead of iterating the snapshot.
     let patternsUpdated = 0;
-    const allPatterns = bank.getAll();
+    bank.getAll();
 
     for (const step of this.currentTrajectorySteps) {
       if (!step.embedding || step.embedding.length === 0) continue;
