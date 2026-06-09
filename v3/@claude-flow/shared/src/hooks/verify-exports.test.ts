@@ -94,7 +94,8 @@ describe('Hooks Module Exports', () => {
     ];
 
     for (const event of expectedEvents) {
-      expect(HookEvent[event]).toBeDefined();
+      // noImplicitAny: index-by-string-key on a const object is `unknown`.
+      expect((HookEvent as Record<string, unknown>)[event]).toBeDefined();
     }
   });
 

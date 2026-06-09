@@ -3,7 +3,7 @@
  * Validates package before release (lint, test, build, dependencies)
  */
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { ValidationOptions, ValidationResult, PackageInfo } from './types.js';
@@ -267,7 +267,18 @@ export class Validator {
   ];
 
   /**
-   * Execute command safely with validation
+   * Execute command safely with validation.
+   *
+   * ADR-078: switched from execSync(string) to execFileSync(file, argv).
+   * The legacy API still accepts a command string for back-compat with
+   * package.json scripts (`"lint": "eslint . --ext .ts"`), but we now
+   * defence-in-depth:
+   *   1. Reject shell metacharacters (existing check).
+   *   2. Allowlist the binary prefix (existing check).
+   *   3. Whitespace-split into argv and pass to execFile — no shell
+   *      ever sees the string, so even a bypassed metachar check can't
+   *      lead to RCE.
+   * On Windows npm/npx are .cmd shims; suffix accordingly.
    */
   private execCommand(cmd: string, returnOutput = false): string {
     // Validate: check for shell metacharacters
@@ -283,8 +294,14 @@ export class Validator {
       throw new Error(`Command not allowed: ${cmd.split(' ')[0]}`);
     }
 
+    // Argv-split (whitespace) — safe given the metachar/prefix gates above.
+    const [rawFile, ...args] = cmd.split(/\s+/).filter(Boolean);
+    const file = process.platform === 'win32' && /^(npm|npx|yarn|pnpm)$/.test(rawFile)
+      ? `${rawFile}.cmd`
+      : rawFile;
+
     try {
-      const output = execSync(cmd, {
+      const output = execFileSync(file, args, {
         cwd: this.cwd,
         encoding: 'utf-8',
         stdio: returnOutput ? 'pipe' : 'inherit',

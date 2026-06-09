@@ -1279,7 +1279,13 @@ export function createADRWorker(projectRoot: string): WorkerHandler {
       // ADR-001: agentic-flow integration
       fs.readFile(path.join(v3Path, 'package.json'), 'utf-8')
         .then(content => {
-          const pkg = safeJsonParse<Record<string, unknown>>(content);
+          // noImplicitAny: safeJsonParse returns Record<string,unknown>, so
+          // .dependencies / .devDependencies are `unknown`. Narrow to the
+          // {name->version} shape long enough to look up agentic-flow.
+          const pkg = safeJsonParse<{
+            dependencies?: Record<string, string>;
+            devDependencies?: Record<string, string>;
+          }>(content);
           return {
             compliant: pkg.dependencies?.['agentic-flow'] !== undefined ||
                        pkg.devDependencies?.['agentic-flow'] !== undefined,
