@@ -25,7 +25,7 @@ import {
   CriticVerdictType,
 } from './gaia-critic.js';
 import { GaiaQuestion } from './gaia-loader.js';
-import { GaiaAgentResult } from './gaia-agent.js';
+// GaiaAgentResult was consumed by the dropped makeAgentResult helper.
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -58,18 +58,9 @@ const FIXTURE_QUESTION: GaiaQuestion = {
   file_path: null,
 };
 
-/** Minimal GaiaAgentResult with a given finalAnswer. */
-function makeAgentResult(finalAnswer: string | null, turns = 2): GaiaAgentResult {
-  return {
-    questionId: FIXTURE_QUESTION.task_id,
-    finalAnswer,
-    turns,
-    toolCallsByName: { web_search: 1 },
-    totalInputTokens: 100,
-    totalOutputTokens: 50,
-    wallMs: 1200,
-  };
-}
+// makeAgentResult() was a result-builder fixture used by an earlier
+// vote-then-grade path in this smoke test; the rewritten flow drives
+// the critic with raw fetch mocks, so the helper is parked.
 
 // ---------------------------------------------------------------------------
 // Mock infrastructure

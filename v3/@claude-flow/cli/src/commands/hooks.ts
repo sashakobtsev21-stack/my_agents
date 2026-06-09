@@ -32,23 +32,10 @@ import { modelRouteCommand, modelOutcomeCommand, modelStatsCommand } from './hoo
 
 
 
-// Hook types
-const HOOK_TYPES = [
-  { value: 'pre-edit', label: 'Pre-Edit', hint: 'Get context before editing files' },
-  { value: 'post-edit', label: 'Post-Edit', hint: 'Record editing outcomes' },
-  { value: 'pre-command', label: 'Pre-Command', hint: 'Assess risk before commands' },
-  { value: 'post-command', label: 'Post-Command', hint: 'Record command outcomes' },
-  { value: 'route', label: 'Route', hint: 'Route tasks to optimal agents' },
-  { value: 'explain', label: 'Explain', hint: 'Explain routing decisions' }
-];
-
-// Agent routing options
-const AGENT_TYPES = [
-  'coder', 'researcher', 'tester', 'reviewer', 'architect',
-  'security-architect', 'security-auditor', 'memory-specialist',
-  'swarm-specialist', 'performance-engineer', 'core-architect',
-  'test-architect', 'coordinator', 'analyst', 'optimizer'
-];
+// HOOK_TYPES and AGENT_TYPES used to feed the interactive prompt() picker
+// that ran before the split — each subcommand now owns its own option
+// list. The constants are documentary and could be revived for a future
+// `hooks pick` interactive flow; parked.
 
 // Pre-edit subcommand
 

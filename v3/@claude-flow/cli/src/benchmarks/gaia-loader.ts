@@ -172,7 +172,8 @@ export const SMOKE_FIXTURE: GaiaQuestion[] = [
 // ---------------------------------------------------------------------------
 
 const HF_DATASET_REPO = 'gaia-benchmark/GAIA';
-const HF_API_BASE = 'https://huggingface.co';
+// HF_API_BASE kept documentary — the loader uses the datasets-server
+// endpoint for the streaming reads and never touches the api base.
 const HF_DATASETS_API = 'https://datasets-server.huggingface.co';
 
 /**

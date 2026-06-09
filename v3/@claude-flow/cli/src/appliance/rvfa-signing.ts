@@ -13,7 +13,8 @@ import {
   type KeyObject,
 } from 'node:crypto';
 import { readFile, writeFile, stat, chmod, mkdir } from 'node:fs/promises';
-import { dirname } from 'node:path';
+// `dirname` used to derive a private-key parent dir for chmod; the safer
+// writer now chmods the file itself directly. Parked.
 
 // ── Constants ────────────────────────────────────────────────
 
@@ -352,12 +353,15 @@ export class RvfaSigner {
  */
 export class RvfaVerifier {
   private readonly keyObj: KeyObject;
-  private readonly fingerprint: string;
+  // The verifier doesn't expose a fingerprint accessor (the signer side
+  // does — it embeds publicKeyFingerprint into the witness payload).
+  // Kept the computation as a constructor-time sanity check that the
+  // PEM parses; the value itself is intentionally discarded.
 
   constructor(publicKey: Buffer | string) {
     this.keyObj = toPublicKeyObject(publicKey);
     const pem = Buffer.isBuffer(publicKey) ? publicKey.toString('utf-8') : publicKey;
-    this.fingerprint = computeFingerprint(pem);
+    computeFingerprint(pem);
   }
 
   /**

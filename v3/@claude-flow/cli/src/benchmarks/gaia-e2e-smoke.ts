@@ -56,9 +56,8 @@ const MIN_PASS_RATE = 3 / 5;
 const HAIKU_IN = 0.25;
 const HAIKU_OUT = 1.25;
 
-// Sonnet pricing ($/M tokens)
-const SONNET_IN = 3.0;
-const SONNET_OUT = 15.0;
+// Sonnet pricing ($/M tokens) — kept documentary; the smoke uses Haiku
+// pricing for the cost projection table.
 
 // ---------------------------------------------------------------------------
 // Result row

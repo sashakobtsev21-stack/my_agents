@@ -26,7 +26,6 @@ import {
   extractFinalAnswerFromText,
   extractFromPriorMessages,
   TOKEN_OVERFLOW_THRESHOLD,
-  LOOP_REPEAT_THRESHOLD,
   LOOP_WINDOW_SIZE,
 } from './gaia-convergence.js';
 import type { ConvergenceState } from './gaia-convergence.js';

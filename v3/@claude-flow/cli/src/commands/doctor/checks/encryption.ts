@@ -8,7 +8,6 @@ import { existsSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
 import type { HealthCheck } from '../utils.js';
-import { output } from '../../../output.js';
 import { decodeKey, isEncryptionEnabled, isEncryptedBlob } from '../../../encryption/vault.js';
 
 export async function checkEncryptionAtRest(): Promise<HealthCheck> {
@@ -82,12 +81,7 @@ export async function checkEncryptionAtRest(): Promise<HealthCheck> {
   };
 }
 
-// Format health check result
-function formatCheck(check: HealthCheck): string {
-  const icon = check.status === 'pass' ? output.success('✓') :
-               check.status === 'warn' ? output.warning('⚠') :
-               output.error('✗');
-  return `${icon} ${check.name}: ${check.message}`;
-}
+// formatCheck() was duplicated here during the W10 split — the caller
+// in doctor.ts already owns its own copy. Dropped.
 
 // Main doctor command

@@ -61,10 +61,8 @@ function spawnAsync(
 const fail = (stderr: string): RunResult => ({ exitCode: 1, stdout: '', stderr, duration: 0 });
 const cleanup = (dir: string) => rm(dir, { recursive: true, force: true }).catch(() => {});
 
-/** Check whether the reader has a section with the given id. */
-function hasSection(reader: RvfaReader, id: string): boolean {
-  return reader.getSections().some((s) => s.id === id);
-}
+// hasSection() was a tiny helper used by an earlier section-gating path
+// in run(); the current dispatcher iterates getSections() inline. Parked.
 
 /** Safely extract a section, returning null if absent. */
 function tryExtract(reader: RvfaReader, id: string): Buffer | null {

@@ -33,8 +33,6 @@
 import {
   runGaiaAgent,
   type GaiaAgentResult,
-  type GaiaAgentOptions,
-  resolveAnthropicApiKey,
 } from './gaia-agent.js';
 import type { GaiaQuestion } from './gaia-loader.js';
 import { createDefaultToolCatalogue } from './gaia-tools/index.js';

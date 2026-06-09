@@ -336,8 +336,10 @@ export async function benchmarkEmbeddingGeneration(config: BenchmarkConfig): Pro
 // ============================================================================
 
 export async function benchmarkMoERouting(config: BenchmarkConfig): Promise<BenchmarkResult> {
-  // Simulate MoE routing
-  const experts = ['coder', 'tester', 'reviewer', 'architect', 'security'];
+  // The MoE routing benchmark drives the keyword map below directly;
+  // the bare experts list (coder/tester/reviewer/architect/security)
+  // is documentary so future renderers can surface "which experts
+  // the benchmark exercises".
 
   const route = async (task: string) => {
     // Simple keyword-based routing simulation

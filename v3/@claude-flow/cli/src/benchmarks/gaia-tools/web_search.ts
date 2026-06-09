@@ -17,14 +17,17 @@
  */
 
 import * as https from 'node:https';
-import * as http from 'node:http';
+// http (plain) was used for an earlier dev-mode fallback; production
+// path is https-only.
 import { GaiaTool, ToolDefinition } from './types.js';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const DDG_HTML_URL = 'https://html.duckduckgo.com/html/';
+// DDG_HTML_URL kept documentary — the lite endpoint (next const) is
+// what the search call actually fetches; the html surface returns the
+// same data shape but with more markup overhead.
 const DEFAULT_MAX_RESULTS = 5;
 const REQUEST_TIMEOUT_MS = 20_000;
 

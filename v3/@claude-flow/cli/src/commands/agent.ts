@@ -493,7 +493,11 @@ const metricsCommand: Command = {
     }
   ],
   action: async (ctx: CommandContext): Promise<CommandResult> => {
-    const agentId = ctx.args[0];
+    // The metrics renderer below reads from .swarm state directly; the
+    // positional `<agent-id>` is documented but currently unused
+    // (we surface project-wide metrics until per-agent persistence
+    // lands).
+    void ctx.args[0];
     const period = ctx.flags.period as string;
 
     // Collect real metrics from .swarm/ state

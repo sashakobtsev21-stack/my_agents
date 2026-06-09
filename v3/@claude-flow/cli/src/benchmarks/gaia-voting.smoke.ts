@@ -17,7 +17,7 @@
  */
 
 import assert from 'node:assert/strict';
-import { normalizeAnswer, runGaiaAgentWithVoting } from './gaia-voting.js';
+import { normalizeAnswer } from './gaia-voting.js';
 import type { GaiaAgentResult } from './gaia-agent.js';
 import type { GaiaQuestion } from './gaia-loader.js';
 

@@ -71,7 +71,8 @@ export const doctorCommand: Command = {
     const showFix = ctx.flags.fix as boolean;
     const autoInstall = ctx.flags.install as boolean;
     const component = ctx.flags.component as string;
-    const verbose = ctx.flags.verbose as boolean;
+    // --verbose documented but each check emits its own structured row;
+    // no per-step trace is wired through yet.
 
     output.writeln();
     output.writeln(output.bold('AlexKo Doctor'));

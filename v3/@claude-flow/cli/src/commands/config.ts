@@ -5,7 +5,8 @@
 
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
-import { select, input } from '../prompt.js';
+// select/input previously drove an interactive `config wizard` action
+// that was retired in favour of the per-command-flag surface.
 import { configManager, parseConfigValue } from '../services/config-file-manager.js';
 import * as path from 'path';
 
