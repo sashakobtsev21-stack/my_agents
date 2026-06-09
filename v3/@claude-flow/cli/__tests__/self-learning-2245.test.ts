@@ -22,20 +22,19 @@ import { join } from 'node:path';
 // IMPORTANT: do NOT process.chdir() at module load — vitest shares the
 // process across files in a worker, so changing CWD here would break every
 // other test that relies on the repo CWD (memory commands, bug-cluster,
-// router-bandit, etc.). Scope CWD changes to before/after this file only.
+// router-bandit, etc.). Use the basePath override (issue #7 N5) instead of
+// process.chdir() — vitest's worker_threads forbid chdir on Windows.
 const SCRATCH = mkdtempSync(join(tmpdir(), 'learn-2245-'));
-let originalCwd: string;
 
 beforeAll(async () => {
-  originalCwd = process.cwd();
-  process.chdir(SCRATCH);
   const intel = await import('../src/memory/intelligence.js');
+  intel.setIntelligenceBasePath(SCRATCH);
   intel.clearIntelligence();
 });
 
-afterAll(() => {
-  // Restore the original CWD so other test files aren't affected.
-  try { process.chdir(originalCwd); } catch { /* best-effort */ }
+afterAll(async () => {
+  const intel = await import('../src/memory/intelligence.js');
+  intel.setIntelligenceBasePath(null);
   try { rmSync(SCRATCH, { recursive: true, force: true }); } catch { /* best-effort */ }
 });
 

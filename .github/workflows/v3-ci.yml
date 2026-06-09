@@ -376,11 +376,14 @@ jobs:
         working-directory: v3
         run: |
           pnpm install --frozen-lockfile
-          # `...@claude-flow/cli` builds every workspace dep first (cli-core,
-          # shared, swarm, ...) so the bench's dynamic dist imports resolve.
-          # Just --filter @claude-flow/cli would leave cli-core/dist missing
-          # and tsc would fail on the `export *` re-exports in mcp-tools/.
-          pnpm --filter ...@claude-flow/cli run build
+          # `@claude-flow/cli...` (the `...` AFTER the name) builds every
+          # workspace dep first (cli-core, shared, swarm, …) so the bench's
+          # dynamic dist imports resolve. Just `--filter @claude-flow/cli`
+          # would leave cli-core/dist missing and tsc would fail on the
+          # `export *` re-exports in mcp-tools/. Note: `...@claude-flow/cli`
+          # with `...` BEFORE means "cli + descendants", which is the wrong
+          # direction — that's what W11 had and why CI was still broken.
+          pnpm --filter "@claude-flow/cli..." run build
       - name: Run benchmark (small + medium sizes, capture JSON)
         # Smaller sizes than the local default — Linux runners are 7 GB so
         # N=50k+ is fine, but we keep it fast (~2 min total).

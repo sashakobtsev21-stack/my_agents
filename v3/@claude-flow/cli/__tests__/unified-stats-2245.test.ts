@@ -10,18 +10,19 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+// basePath override (issue #7 N5): no process.chdir(), so vitest's worker
+// thread isolation on Windows can't crash.
 const SCRATCH = mkdtempSync(join(tmpdir(), 'unified-2245-'));
-let originalCwd: string;
 
 beforeAll(async () => {
-  originalCwd = process.cwd();
-  process.chdir(SCRATCH);
   const intel = await import('../src/memory/intelligence.js');
+  intel.setIntelligenceBasePath(SCRATCH);
   intel.clearIntelligence();
 });
 
-afterAll(() => {
-  try { process.chdir(originalCwd); } catch { /* */ }
+afterAll(async () => {
+  const intel = await import('../src/memory/intelligence.js');
+  intel.setIntelligenceBasePath(null);
   try { rmSync(SCRATCH, { recursive: true, force: true }); } catch { /* */ }
 });
 
