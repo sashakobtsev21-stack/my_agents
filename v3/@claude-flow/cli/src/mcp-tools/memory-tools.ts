@@ -38,23 +38,14 @@ const LEGACY_MEMORY_FILE = 'store.json';
 const LEGACY_MEMORY_DIR = '.claude-flow/memory';
 const MIGRATION_MARKER = '.migrated-to-sqlite';
 
-function getMemoryDir(): string {
-  return resolve(MEMORY_DIR);
-}
-
-function getLegacyPath(): string {
-  return resolve(join(MEMORY_DIR, LEGACY_MEMORY_FILE));
-}
+// getLegacyPath() / getMemoryDir() / ensureMemoryDir() were used by the
+// SQLite migration path that lives in memory-initializer.ts now — the
+// MCP tool surface just reads the migration marker.
+// path that lives in memory-initializer.ts now — the MCP tool surface
+// just reads the migration marker.
 
 function getMigrationMarkerPath(): string {
   return resolve(join(MEMORY_DIR, MIGRATION_MARKER));
-}
-
-function ensureMemoryDir(): void {
-  const dir = getMemoryDir();
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
 }
 
 // D-2: Input bounds for memory parameters

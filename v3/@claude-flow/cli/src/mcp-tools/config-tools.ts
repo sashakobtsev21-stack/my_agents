@@ -73,18 +73,11 @@ function saveConfigStore(store: ConfigStore): void {
   writeFileSync(getConfigPath(), JSON.stringify(store, null, 2), 'utf-8');
 }
 
-function getNestedValue(obj: Record<string, unknown>, key: string): unknown {
-  const parts = key.split('.');
-  let current: unknown = obj;
-  for (const part of parts) {
-    if (current && typeof current === 'object' && part in (current as Record<string, unknown>)) {
-      current = (current as Record<string, unknown>)[part];
-    } else {
-      return undefined;
-    }
-  }
-  return current;
-}
+// get/setNestedValue were originally used for `config_get`/`config_set`
+// MCP tools' dotted-path arguments. The current tool surface accepts only
+// top-level keys, so the dotted-path helpers are parked. Keeping the
+// DANGEROUS_KEYS allowlist + filter — it's used by config_set even on
+// flat keys to block __proto__/constructor/prototype pollution.
 
 const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
@@ -96,28 +89,6 @@ function filterDangerousKeys(obj: Record<string, unknown>): Record<string, unkno
     }
   }
   return filtered;
-}
-
-function setNestedValue(obj: Record<string, unknown>, key: string, value: unknown): void {
-  const MAX_NESTING_DEPTH = 10;
-  const parts = key.split('.');
-  if (parts.length > MAX_NESTING_DEPTH) {
-    throw new Error(`Key exceeds maximum nesting depth of ${MAX_NESTING_DEPTH}`);
-  }
-  for (const part of parts) {
-    if (DANGEROUS_KEYS.has(part)) {
-      throw new Error(`Dangerous key segment rejected: ${part}`);
-    }
-  }
-  let current = obj;
-  for (let i = 0; i < parts.length - 1; i++) {
-    const part = parts[i];
-    if (!(part in current) || typeof current[part] !== 'object') {
-      current[part] = {};
-    }
-    current = current[part] as Record<string, unknown>;
-  }
-  current[parts[parts.length - 1]] = value;
 }
 
 export const configTools: MCPTool[] = [

@@ -280,8 +280,10 @@ export interface UpgradeResult {
  */
 function mergeSettingsForUpgrade(existing: Record<string, unknown>): Record<string, unknown> {
   const merged = { ...existing };
-  const platform = detectPlatform();
-  const isWindows = platform.os === 'windows';
+  // `isWindows` used to branch the command-wrapper template here, but
+  // platform shaping moved into the helper-generator. Probe kept so
+  // detectPlatform()'s lazy init still warms before the merge below.
+  detectPlatform();
 
   // Platform-specific command wrappers
   // Windows: Use PowerShell-compatible commands

@@ -22,7 +22,9 @@ import * as os from 'node:os';
 const STORAGE_DIR = '.claude-flow';
 const PERF_DIR = 'performance';
 const METRICS_FILE = 'metrics.json';
-const BENCHMARKS_FILE = 'benchmarks.json';
+// BENCHMARKS_FILE used to land here from the perf_benchmark MCP tool;
+// the bench data now persists through verify-bench-result.json under
+// .claude-flow/data, so the legacy benchmarks.json constant is unused.
 
 interface PerfMetrics {
   timestamp: string;
@@ -101,9 +103,12 @@ export const performanceTools: MCPTool[] = [
       const store = loadPerfStore();
       const format = (input.format as string) || 'summary';
 
-      // Get REAL system metrics via Node.js APIs
+      // Get REAL system metrics via Node.js APIs. cpuUsage() is sampled
+      // here so the diff in metrics_get() / profile() below shares a
+      // monotonic baseline; the renderer below reads load average and
+      // cpus.length, not the cpuUsage delta.
       const memUsage = process.memoryUsage();
-      const cpuUsage = process.cpuUsage();
+      process.cpuUsage();
       const loadAvg = os.loadavg();
       const cpus = os.cpus();
       const totalMem = os.totalmem();
