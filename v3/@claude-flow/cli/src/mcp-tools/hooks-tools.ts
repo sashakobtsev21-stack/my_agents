@@ -7,6 +7,24 @@ import { mkdirSync, writeFileSync, existsSync, readFileSync, statSync, unlinkSyn
 import * as nodeFs from 'fs';
 import { dirname, join, resolve } from 'path';
 import { type MCPTool, getProjectCwd } from './types.js';
+
+// ── basePath override (issue #7 N5 follow-up) ─────────────────────────
+// Lets tests pin every cwd-relative path in this module to a tmp dir
+// without process.chdir() (forbidden in vitest worker_threads on Windows).
+// All callsites below use cwd() / projectRoot() instead of process.cwd()
+// or getProjectCwd() directly, so a single setHooksToolsBasePath() call
+// reroutes the whole module.
+let basePathOverride: string | null = null;
+
+/** Pin every cwd-relative path resolved by hooks-tools to `p`. `null` resets. */
+export function setHooksToolsBasePath(p: string | null): void {
+  basePathOverride = p;
+}
+
+/** Resolve the project root: override -> getProjectCwd() (the env / cwd chain). */
+function projectRoot(): string {
+  return basePathOverride ?? getProjectCwd();
+}
 import { validateIdentifier, validateText, validatePath } from './validate-input.js';
 import { checkCommandLoop, recordCommandOutcome } from './tool-loop-guardrail.js';
 import { AGENT_PATTERNS, KEYWORD_PATTERNS, getFileExtension, suggestAgentsForFile, assessCommandRisk } from './hooks-tools/routing-helpers.js';
@@ -186,7 +204,13 @@ function generateSimpleEmbedding(text: string, dimension: number = 384): Float32
 // ── Runtime routing outcome persistence ──────────────────────────────
 // Closes the learning loop: post-task records outcomes → route loads them.
 
-const ROUTING_OUTCOMES_PATH = join(resolve('.'), '.claude-flow/routing-outcomes.json');
+// Was: `const ROUTING_OUTCOMES_PATH = join(resolve('.'), ...)` (module-load
+// resolution of cwd). Now a lazy getter so basePath overrides work after
+// module load (the only way it can work — tests import hooks-tools AFTER
+// they set the override).
+function routingOutcomesPath(): string {
+  return join(projectRoot(), '.claude-flow/routing-outcomes.json');
+}
 
 const ROUTING_STOPWORDS = new Set([
   'the','a','an','is','are','was','were','be','been','being','have','has','had',
@@ -218,8 +242,8 @@ function extractKeywords(text: string): string[] {
 
 function loadRoutingOutcomes(): RoutingOutcome[] {
   try {
-    if (existsSync(ROUTING_OUTCOMES_PATH)) {
-      const data = JSON.parse(readFileSync(ROUTING_OUTCOMES_PATH, 'utf-8'));
+    if (existsSync(routingOutcomesPath())) {
+      const data = JSON.parse(readFileSync(routingOutcomesPath(), 'utf-8'));
       return data.outcomes || [];
     }
   } catch { /* corrupt file, start fresh */ }
@@ -228,11 +252,11 @@ function loadRoutingOutcomes(): RoutingOutcome[] {
 
 function saveRoutingOutcomes(outcomes: RoutingOutcome[]): void {
   try {
-    const dir = dirname(ROUTING_OUTCOMES_PATH);
+    const dir = dirname(routingOutcomesPath());
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
     // Cap at 500 entries to bound file size
     const capped = outcomes.slice(-500);
-    writeFileSync(ROUTING_OUTCOMES_PATH, JSON.stringify({ outcomes: capped }, null, 2));
+    writeFileSync(routingOutcomesPath(), JSON.stringify({ outcomes: capped }, null, 2));
   } catch { /* non-critical */ }
 }
 
@@ -485,7 +509,7 @@ const MEMORY_DIR = '.claude-flow/memory';
 const MEMORY_FILE = 'store.json';
 
 function getMemoryPath(): string {
-  return resolve(join(MEMORY_DIR, MEMORY_FILE));
+  return join(projectRoot(), MEMORY_DIR, MEMORY_FILE);
 }
 
 function loadMemoryStore(): MemoryStore {
@@ -1391,7 +1415,7 @@ export const hooksPostTask: MCPTool = {
 
     // Persist to auto-memory-store for statusline visibility
     try {
-      const dataDir = join(getProjectCwd(), '.claude-flow', 'data');
+      const dataDir = join(projectRoot(), '.claude-flow', 'data');
       if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
       const storePath = join(dataDir, 'auto-memory-store.json');
       let store: Array<Record<string, unknown>> = [];
@@ -1864,7 +1888,7 @@ export const hooksSessionStart: MCPTool = {
     // Auto-regenerate statusline if outdated (fixes older installs)
     // Checks for the old fake heuristic: "Math.floor(sizeKB / 2)"
     try {
-      const statuslinePath = join(getProjectCwd(), '.claude', 'helpers', 'statusline.cjs');
+      const statuslinePath = join(projectRoot(), '.claude', 'helpers', 'statusline.cjs');
       if (existsSync(statuslinePath)) {
         const content = readFileSync(statuslinePath, 'utf-8');
         if (content.includes('Math.floor(sizeKB / 2)') || content.includes('Maturity fallback')) {
@@ -1886,7 +1910,7 @@ export const hooksSessionStart: MCPTool = {
       try {
         // Dynamic import to avoid circular dependencies
         const { startDaemon } = await import('../services/worker-daemon.js');
-        const daemon = await startDaemon(getProjectCwd());
+        const daemon = await startDaemon(projectRoot());
         const status = daemon.getStatus();
         daemonStatus = {
           started: true,
@@ -1930,7 +1954,7 @@ export const hooksSessionStart: MCPTool = {
 
     // Persist session record to auto-memory-store for statusline visibility
     try {
-      const dataDir = join(getProjectCwd(), '.claude-flow', 'data');
+      const dataDir = join(projectRoot(), '.claude-flow', 'data');
       if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
       const storePath = join(dataDir, 'auto-memory-store.json');
       let store: Array<Record<string, unknown>> = [];
@@ -2331,7 +2355,7 @@ export const hooksIntelligenceReset: MCPTool = {
     properties: {},
   },
   handler: async () => {
-    const cwd = getProjectCwd();
+    const cwd = projectRoot();
     const cleared = {
       trajectories: 0,
       patterns: 0,
@@ -3762,7 +3786,7 @@ export const hooksWorkerDispatch: MCPTool = {
     // ADR-093 F2: stop returning status:"completed" for a worker that
     // never ran (#1700 item 1). Detect daemon presence via PID file and
     // surface honest verdicts (`no-daemon` / `queued` / `synthetic`).
-    const cwd = getProjectCwd();
+    const cwd = projectRoot();
     const pidFile = join(cwd, '.claude-flow', 'daemon.pid');
     let daemonPid: number | null = null;
     let daemonAlive = false;
@@ -4166,7 +4190,7 @@ export const hooksCodemod: MCPTool = {
       };
     }
 
-    const cwd = getProjectCwd();
+    const cwd = projectRoot();
 
     // Resolve the target file set (single / array / glob), with path containment.
     const resolveTargets = (): { abs: string[]; truncated: boolean; error?: string } => {
