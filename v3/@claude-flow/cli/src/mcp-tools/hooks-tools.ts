@@ -3,7 +3,7 @@
  * Provides intelligent hooks functionality via MCP protocol
  */
 
-import { mkdirSync, writeFileSync, existsSync, readFileSync, statSync, unlinkSync, readdirSync, rmSync } from 'fs';
+import { mkdirSync, writeFileSync, existsSync, readFileSync, statSync, unlinkSync, readdirSync } from 'fs';
 import * as nodeFs from 'fs';
 import { dirname, join, resolve } from 'path';
 import { type MCPTool, getProjectCwd } from './types.js';
@@ -27,7 +27,7 @@ function projectRoot(): string {
 }
 import { validateIdentifier, validateText, validatePath } from './validate-input.js';
 import { checkCommandLoop, recordCommandOutcome } from './tool-loop-guardrail.js';
-import { AGENT_PATTERNS, KEYWORD_PATTERNS, getFileExtension, suggestAgentsForFile, assessCommandRisk } from './hooks-tools/routing-helpers.js';
+import { KEYWORD_PATTERNS, getFileExtension, suggestAgentsForFile, assessCommandRisk } from './hooks-tools/routing-helpers.js';
 
 // Real vector search functions - lazy loaded to avoid circular imports
 let searchEntriesFn: ((options: {
@@ -426,19 +426,10 @@ async function getSemanticRouter() {
   return { router: semanticRouter, backend: routerBackend, native: nativeVectorDb };
 }
 
-/**
- * Get router backend info for status display.
- */
-function getRouterBackendInfo(): { backend: string; speed: string } {
-  switch (routerBackend) {
-    case 'native':
-      return { backend: 'native VectorDb (HNSW)', speed: '16k+ routes/s' };
-    case 'pure-js':
-      return { backend: 'pure JS (cosine)', speed: '47k routes/s' };
-    default:
-      return { backend: 'none', speed: 'N/A' };
-  }
-}
+// getRouterBackendInfo() was a status-display helper that hasn't had a
+// caller since the route status payload format flattened. Kept the doc
+// strings in the constants below (routerBackend enum) so the same info
+// is reachable directly. Dropped to silence noUnusedLocals.
 
 // Flash Attention - lazy loaded
 // #1773 item 4 — flash-attention migrated to @claude-flow/neural
@@ -1924,12 +1915,13 @@ export const hooksSessionStart: MCPTool = {
       }
     }
 
-    // Initialize intelligence module (SONA + local ReasoningBank)
-    let intelligenceStatus: { sonaEnabled: boolean; reasoningBankEnabled: boolean } = { sonaEnabled: false, reasoningBankEnabled: false };
+    // Initialize intelligence module (SONA + local ReasoningBank).
+    // The init status is intentionally not surfaced in the session-start
+    // response — it's eagerly probed here just to warm the module so the
+    // first hook call after session-start hits a fast path.
     try {
       const intelligence = await import('../memory/intelligence.js');
-      const initResult = await intelligence.initializeIntelligence();
-      intelligenceStatus = { sonaEnabled: initResult.sonaEnabled, reasoningBankEnabled: initResult.reasoningBankEnabled };
+      await intelligence.initializeIntelligence();
     } catch {
       // Intelligence module not available — non-fatal
     }
@@ -2579,9 +2571,10 @@ export const hooksTrajectoryEnd: MCPTool = {
       const storeFn = await getRealStoreFunction();
       if (storeFn) {
         try {
-          // Create trajectory summary for embedding
-          const summary = `Task: ${trajectory.task} | Agent: ${trajectory.agent} | Steps: ${trajectory.steps.length} | Success: ${success}${feedback ? ` | Feedback: ${feedback}` : ''}`;
-
+          // Was: build a human-readable `summary` string for the embedding
+          // generator. The downstream store uses generateEmbeddingFlag: true
+          // and embeds the persisted JSON directly, so the summary was
+          // never reaching the embedder. Dropped to silence noUnusedLocals.
           persistResult = await storeFn({
             key: `trajectory-${trajectoryId}`,
             value: JSON.stringify({

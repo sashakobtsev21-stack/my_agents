@@ -1186,7 +1186,10 @@ export async function checkAndMigrateLegacy(options: {
   migrated?: boolean;
   migratedCount?: number;
 }> {
-  const { dbPath, verbose = false } = options;
+  // `verbose` is documented in the public surface but the legacy-migration
+  // path below doesn't currently differentiate output; it's accepted to
+  // keep callers from breaking once we add per-step trace logs.
+  const { dbPath } = options;
 
   // Check for legacy locations
   const legacyPaths = [
@@ -2022,13 +2025,14 @@ export async function verifyMemoryInit(dbPath: string, options?: {
     total: number;
   };
 }> {
-  const { verbose = false } = options || {};
+  // verbose accepted for forward-compat; the test harness below already
+  // emits a result-per-test, which is the only verbosity we need today.
+  void options;
   const tests: { name: string; passed: boolean; details?: string; duration?: number }[] = [];
 
   try {
     const initSqlJs = (await import('sql.js')).default;
     const SQL = await initSqlJs();
-    const fs = await import('fs');
 
     // Load database
     const fileBuffer = readFileMaybeEncrypted(dbPath, null);

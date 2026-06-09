@@ -7,13 +7,10 @@ import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
 import {
   checkForUpdates,
-  checkSinglePackage,
   getInstalledVersion,
   DEFAULT_CONFIG,
 } from '../update/checker.js';
-import type { UpdateCheckResult } from '../update/checker.js';
 import {
-  executeUpdate,
   executeMultipleUpdates,
   rollbackUpdate,
   getUpdateHistory,

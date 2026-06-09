@@ -5,7 +5,7 @@
 
 import type { Command, CommandContext, CommandResult } from '../../types.js';
 import { output } from '../../output.js';
-import { confirm, input, select } from '../../prompt.js';
+import { confirm, input } from '../../prompt.js';
 import { validateSchemaName } from './pg-utils.js';
 
 /**
@@ -163,7 +163,6 @@ const backupSubcommand: Command = {
     try {
       // Import dependencies
       const fs = await import('fs');
-      const path = await import('path');
       const { promisify } = await import('util');
 
       let pg: typeof import('pg') | null = null;
@@ -493,7 +492,6 @@ const restoreSubcommand: Command = {
 
     try {
       const fs = await import('fs');
-      const path = await import('path');
       const { promisify } = await import('util');
 
       // Check file exists
