@@ -42,12 +42,18 @@
  * Created for the ruflo intelligence stack. Co-Authored-By: AlexKo <ruv@ruv.net>
  */
 
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(REPO_ROOT, 'v3', '@claude-flow', 'cli', 'dist', 'src');
+
+// On Windows, `await import('C:\\...')` throws ERR_UNSUPPORTED_ESM_URL_SCHEME
+// because ESM dynamic import requires a `file://` URL. distUrl wraps every dist
+// import path so Linux + Windows take the same path. (Same bug class fixed in
+// scripts/gif-to-webp.mjs during audit round W6.)
+const distUrl = (...segments) => pathToFileURL(path.join(DIST, ...segments)).href;
 
 // ----------------------------------------------------------------------------
 // CLI args
@@ -140,7 +146,7 @@ async function benchHnsw() {
   const out = { unit: 'ms/query', backend: null, byN: {}, note: '' };
   let createVectorDB, getStatus, loadRuVector;
   try {
-    ({ createVectorDB, getStatus, loadRuVector } = await import(path.join(DIST, 'ruvector', 'vector-db.js')));
+    ({ createVectorDB, getStatus, loadRuVector } = await import(distUrl('ruvector', 'vector-db.js')));
     await loadRuVector();
     out.backend = getStatus();
   } catch (e) {
@@ -239,7 +245,7 @@ async function benchInt8() {
   const out = {};
   let encodeEmbedding, decodeEmbedding, encodedByteSize;
   try {
-    ({ encodeEmbedding, decodeEmbedding, encodedByteSize } = await import(path.join(DIST, 'memory', 'embedding-quantization.js')));
+    ({ encodeEmbedding, decodeEmbedding, encodedByteSize } = await import(distUrl('memory', 'embedding-quantization.js')));
   } catch (e) {
     return { error: `failed to load embedding-quantization: ${e.message}` };
   }
@@ -286,7 +292,7 @@ async function benchRabitq() {
   const out = {};
   let buildRabitqIndex, getRabitqStatus, searchRabitq;
   try {
-    ({ buildRabitqIndex, getRabitqStatus, searchRabitq } = await import(path.join(DIST, 'memory', 'rabitq-index.js')));
+    ({ buildRabitqIndex, getRabitqStatus, searchRabitq } = await import(distUrl('memory', 'rabitq-index.js')));
   } catch (e) {
     return { error: `failed to load rabitq-index: ${e.message}` };
   }
@@ -342,7 +348,7 @@ async function benchSona() {
   const out = {};
   let isRuvllmWasmAvailable, initRuvllmWasm, createSonaInstant;
   try {
-    ({ isRuvllmWasmAvailable, initRuvllmWasm, createSonaInstant } = await import(path.join(DIST, 'ruvector', 'ruvllm-wasm.js')));
+    ({ isRuvllmWasmAvailable, initRuvllmWasm, createSonaInstant } = await import(distUrl('ruvector', 'ruvllm-wasm.js')));
   } catch (e) {
     return { error: `failed to load ruvllm-wasm: ${e.message}` };
   }
@@ -380,7 +386,7 @@ async function benchMoeGate() {
   const out = {};
   let createQLearningRouter;
   try {
-    ({ createQLearningRouter } = await import(path.join(DIST, 'ruvector', 'q-learning-router.js')));
+    ({ createQLearningRouter } = await import(distUrl('ruvector', 'q-learning-router.js')));
   } catch (e) {
     return { error: `failed to load q-learning-router: ${e.message}` };
   }
@@ -461,7 +467,7 @@ async function benchEmbeddingBackend() {
   const out = {};
   let generateEmbedding;
   try {
-    ({ generateEmbedding } = await import(path.join(DIST, 'memory', 'memory-initializer.js')));
+    ({ generateEmbedding } = await import(distUrl('memory', 'memory-initializer.js')));
   } catch (e) {
     return { error: `failed to load memory-initializer: ${e.message}` };
   }

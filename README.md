@@ -24,7 +24,7 @@
 | 🧩 **Скиллы** | 41 | пошаговые рецепты (`как` делать) — [`.claude/skills/`](.claude/skills/) |
 | ⌨️ **Команды** | 168 | slash-ярлыки (быстрый запуск) — [`.claude/commands/`](.claude/commands/) |
 | 🔌 **Плагины** | 33 | тематические бандлы — [`marketplace.json`](.claude-plugin/marketplace.json) |
-| 🛠️ **MCP-инструменты** | ~313 | реальные действия (память/swarm/git/нейро) |
+| 🛠️ **MCP-инструменты** | ~325 | реальные действия (память/swarm/git/нейро) |
 
 > 🚀 **Витрины:** [`docs/start.html`](docs/start.html) — точка входа · [`docs/concepts.html`](docs/concepts.html) «для чайников» · [`docs/how-it-works.html`](docs/how-it-works.html) как устроено · [`docs/agent-catalog.html`](docs/agent-catalog.html) реестр (описания на русском).
 
