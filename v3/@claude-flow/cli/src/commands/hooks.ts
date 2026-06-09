@@ -7,7 +7,7 @@ import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
 import { select, confirm, input } from '../prompt.js';
 import { callMCPTool, MCPClientError } from '../mcp-client.js';
-import { storeCommand } from './transfer-store.js';
+// storeCommand is now imported transitively via ./hooks/transfer.ts.
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
@@ -16,9 +16,11 @@ import {
   suggestAgentsForFile,
 } from './hooks/coverage-reader.js';
 import { safeNum, formatIntelligenceStatus, formatWorkerStatus } from './hooks/helpers.js';
-// Pilot extraction (issue #7) — notifyCommand was inline at L4921-L4960; now
-// in its own 50-line file. Replicate this pattern for the other 37 commands.
+// Pilot extractions (issue #7) — each command was inline in this file before.
+// Replicate the pattern for the other 36 commands.
 import { notifyCommand } from './hooks/notify.js';
+import { progressHookCommand } from './hooks/progress.js';
+import { transferCommand } from './hooks/transfer.js';
 
 
 
@@ -1260,168 +1262,6 @@ const metricsCommand: Command = {
   }
 };
 
-// Pattern Store command (imported from transfer-store.ts)
-// storeCommand is imported at the top
-
-// Transfer from project subcommand
-const transferFromProjectCommand: Command = {
-  name: 'from-project',
-  aliases: ['project'],
-  description: 'Transfer patterns from another project',
-  options: [
-    {
-      name: 'source',
-      short: 's',
-      description: 'Source project path',
-      type: 'string',
-      required: true
-    },
-    {
-      name: 'filter',
-      short: 'f',
-      description: 'Filter patterns by type',
-      type: 'string'
-    },
-    {
-      name: 'min-confidence',
-      short: 'm',
-      description: 'Minimum confidence threshold (0-1)',
-      type: 'number',
-      default: 0.7
-    }
-  ],
-  examples: [
-    { command: 'claude-flow hooks transfer from-project -s ../old-project', description: 'Transfer all patterns' },
-    { command: 'claude-flow hooks transfer from-project -s ../prod --filter security -m 0.9', description: 'Transfer high-confidence security patterns' }
-  ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
-    const sourcePath = (ctx.flags.source as string) || ctx.args[0];
-    const minConfidence = ctx.flags.minConfidence as number || 0.7;
-
-    if (!sourcePath) {
-      output.printError('Source project path is required. Use --source or -s flag.');
-      return { success: false, exitCode: 1 };
-    }
-
-    output.printInfo(`Transferring patterns from: ${output.highlight(sourcePath)}`);
-
-    const spinner = output.createSpinner({ text: 'Analyzing source patterns...', spinner: 'dots' });
-
-    try {
-      spinner.start();
-
-      // Call MCP tool for transfer
-      const result = await callMCPTool<{
-        sourcePath: string;
-        transferred: {
-          total: number;
-          byType: Record<string, number>;
-        };
-        skipped: {
-          lowConfidence: number;
-          duplicates: number;
-          conflicts: number;
-        };
-        stats: {
-          avgConfidence: number;
-          avgAge: string;
-        };
-      }>('hooks_transfer', {
-        sourcePath,
-        filter: ctx.flags.filter,
-        minConfidence,
-        mergeStrategy: 'keep-highest-confidence',
-      });
-
-      spinner.succeed(`Transferred ${result.transferred.total} patterns`);
-
-      if (ctx.flags.format === 'json') {
-        output.printJson(result);
-        return { success: true, data: result };
-      }
-
-      output.writeln();
-      output.writeln(output.bold('Transfer Summary'));
-      output.printTable({
-        columns: [
-          { key: 'category', header: 'Category', width: 25 },
-          { key: 'count', header: 'Count', width: 15, align: 'right' }
-        ],
-        data: [
-          { category: 'Total Transferred', count: output.success(String(result.transferred.total)) },
-          { category: 'Skipped (Low Confidence)', count: result.skipped.lowConfidence },
-          { category: 'Skipped (Duplicates)', count: result.skipped.duplicates },
-          { category: 'Skipped (Conflicts)', count: result.skipped.conflicts }
-        ]
-      });
-
-      if (Object.keys(result.transferred.byType).length > 0) {
-        output.writeln();
-        output.writeln(output.bold('By Pattern Type'));
-        output.printTable({
-          columns: [
-            { key: 'type', header: 'Type', width: 20 },
-            { key: 'count', header: 'Count', width: 15, align: 'right' }
-          ],
-          data: Object.entries(result.transferred.byType).map(([type, count]) => ({ type, count }))
-        });
-      }
-
-      output.writeln();
-      output.printList([
-        `Avg Confidence: ${(result.stats.avgConfidence * 100).toFixed(1)}%`,
-        `Avg Age: ${result.stats.avgAge}`
-      ]);
-
-      return { success: true, data: result };
-    } catch (error) {
-      spinner.fail('Transfer failed');
-      if (error instanceof MCPClientError) {
-        output.printError(`Transfer error: ${error.message}`);
-      } else {
-        output.printError(`Unexpected error: ${String(error)}`);
-      }
-      return { success: false, exitCode: 1 };
-    }
-  }
-};
-
-// Parent transfer command combining all transfer methods
-const transferCommand: Command = {
-  name: 'transfer',
-  description: 'Transfer patterns and plugins via IPFS-based decentralized registry',
-  subcommands: [storeCommand, transferFromProjectCommand],
-  examples: [
-    { command: 'claude-flow hooks transfer store list', description: 'List patterns from registry' },
-    { command: 'claude-flow hooks transfer store search -q routing', description: 'Search patterns' },
-    { command: 'claude-flow hooks transfer store download -p seraphine-genesis', description: 'Download pattern' },
-    { command: 'claude-flow hooks transfer store publish', description: 'Publish pattern to registry' },
-    { command: 'claude-flow hooks transfer from-project -s ../other-project', description: 'Transfer from project' },
-  ],
-  action: async (): Promise<CommandResult> => {
-    output.writeln();
-    output.writeln(output.bold('Pattern Transfer System'));
-    output.writeln(output.dim('Decentralized pattern sharing via IPFS'));
-    output.writeln();
-    output.writeln('Subcommands:');
-    output.printList([
-      `${output.highlight('store')}        - Pattern marketplace (list, search, download, publish)`,
-      `${output.highlight('from-project')} - Transfer patterns from another project`,
-    ]);
-    output.writeln();
-    output.writeln(output.bold('IPFS-Based Features:'));
-    output.printList([
-      'Decentralized registry via IPNS for discoverability',
-      'Content-addressed storage for integrity',
-      'Ed25519 signatures for verification',
-      'Anonymization levels: minimal, standard, strict, paranoid',
-      'Trust levels: unverified, community, verified, official',
-    ]);
-    output.writeln();
-    output.writeln('Run "claude-flow hooks transfer <subcommand> --help" for details');
-    return { success: true };
-  }
-};
 
 // List subcommand
 const listCommand: Command = {
@@ -3544,152 +3384,7 @@ const coverageGapsCommand: Command = {
   }
 };
 
-// Progress hook command
-const progressHookCommand: Command = {
-  name: 'progress',
-  description: 'Check V3 implementation progress via hooks',
-  options: [
-    {
-      name: 'detailed',
-      short: 'd',
-      description: 'Show detailed breakdown by category',
-      type: 'boolean',
-      default: false
-    },
-    {
-      name: 'sync',
-      short: 's',
-      description: 'Sync and persist progress to file',
-      type: 'boolean',
-      default: false
-    },
-    {
-      name: 'summary',
-      description: 'Show human-readable summary',
-      type: 'boolean',
-      default: false
-    }
-  ],
-  examples: [
-    { command: 'claude-flow hooks progress', description: 'Check current progress' },
-    { command: 'claude-flow hooks progress -d', description: 'Detailed breakdown' },
-    { command: 'claude-flow hooks progress --sync', description: 'Sync progress to file' },
-    { command: 'claude-flow hooks progress --summary', description: 'Human-readable summary' }
-  ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
-    const detailed = ctx.flags.detailed as boolean;
-    const sync = ctx.flags.sync as boolean;
-    const summary = ctx.flags.summary as boolean;
-
-    try {
-      if (summary) {
-        const spinner = output.createSpinner({ text: 'Getting progress summary...' });
-        spinner.start();
-        const result = await callMCPTool<{ summary: string }>('progress_summary', {});
-        spinner.stop();
-
-        if (ctx.flags.format === 'json') {
-          output.printJson(result);
-          return { success: true, data: result };
-        }
-
-        output.writeln();
-        output.writeln(result.summary);
-        return { success: true, data: result };
-      }
-
-      if (sync) {
-        const spinner = output.createSpinner({ text: 'Syncing progress...' });
-        spinner.start();
-        const result = await callMCPTool<{
-          progress: number;
-          message: string;
-          persisted: boolean;
-          lastUpdated: string;
-        }>('progress_sync', {});
-        spinner.stop();
-
-        if (ctx.flags.format === 'json') {
-          output.printJson(result);
-          return { success: true, data: result };
-        }
-
-        output.writeln();
-        output.printSuccess(`Progress synced: ${result.progress}%`);
-        output.writeln(output.dim(`  Persisted to .claude-flow/metrics/v3-progress.json`));
-        output.writeln(output.dim(`  Last updated: ${result.lastUpdated}`));
-        return { success: true, data: result };
-      }
-
-      // Default: check progress
-      const spinner = output.createSpinner({ text: 'Checking V3 progress...' });
-      spinner.start();
-      const result = await callMCPTool<{
-        progress?: number;
-        overall?: number;
-        summary?: string;
-        breakdown?: Record<string, string>;
-        cli?: { progress: number; commands: number; target: number };
-        mcp?: { progress: number; tools: number; target: number };
-        hooks?: { progress: number; subcommands: number; target: number };
-        packages?: { progress: number; total: number; target: number; withDDD: number };
-        ddd?: { progress: number };
-        codebase?: { totalFiles: number; totalLines: number };
-        lastUpdated?: string;
-      }>('progress_check', { detailed });
-      spinner.stop();
-
-      if (ctx.flags.format === 'json') {
-        output.printJson(result);
-        return { success: true, data: result };
-      }
-
-      output.writeln();
-      const progressValue = result.overall ?? result.progress ?? 0;
-
-      // Create progress bar
-      const barWidth = 30;
-      const filled = Math.round((progressValue / 100) * barWidth);
-      const empty = barWidth - filled;
-      const bar = output.success('█'.repeat(filled)) + output.dim('░'.repeat(empty));
-
-      output.writeln(output.bold('V3 Implementation Progress'));
-      output.writeln();
-      output.writeln(`[${bar}] ${progressValue}%`);
-      output.writeln();
-
-      if (detailed && result.cli) {
-        output.writeln(output.highlight('CLI Commands:') + `     ${result.cli.progress}% (${result.cli.commands}/${result.cli.target})`);
-        output.writeln(output.highlight('MCP Tools:') + `        ${result.mcp?.progress ?? 0}% (${result.mcp?.tools ?? 0}/${result.mcp?.target ?? 0})`);
-        output.writeln(output.highlight('Hooks:') + `            ${result.hooks?.progress ?? 0}% (${result.hooks?.subcommands ?? 0}/${result.hooks?.target ?? 0})`);
-        output.writeln(output.highlight('Packages:') + `         ${result.packages?.progress ?? 0}% (${result.packages?.total ?? 0}/${result.packages?.target ?? 0})`);
-        output.writeln(output.highlight('DDD Structure:') + `    ${result.ddd?.progress ?? 0}% (${result.packages?.withDDD ?? 0}/${result.packages?.total ?? 0})`);
-        output.writeln();
-        if (result.codebase) {
-          output.writeln(output.dim(`Codebase: ${result.codebase.totalFiles} files, ${result.codebase.totalLines.toLocaleString()} lines`));
-        }
-      } else if (result.breakdown) {
-        output.writeln('Breakdown:');
-        for (const [category, value] of Object.entries(result.breakdown)) {
-          output.writeln(`  ${output.highlight(category)}: ${value}`);
-        }
-      }
-
-      if (result.lastUpdated) {
-        output.writeln(output.dim(`Last updated: ${result.lastUpdated}`));
-      }
-
-      return { success: true, data: result };
-    } catch (error) {
-      if (error instanceof MCPClientError) {
-        output.printError(`Progress check failed: ${error.message}`);
-      } else {
-        output.printError(`Progress check failed: ${String(error)}`);
-      }
-      return { success: false, exitCode: 1 };
-    }
-  }
-};
+// progressHookCommand moved to ./hooks/progress.ts (issue #7 pilot). See top-of-file import.
 
 // Worker parent command
 const workerCommand: Command = {

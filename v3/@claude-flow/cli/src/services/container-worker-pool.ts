@@ -17,13 +17,19 @@
  */
 
 import { EventEmitter } from 'events';
-import { spawn, exec, type ChildProcess } from 'child_process';
+import { spawn, execFile, type ChildProcess } from 'child_process';
 import { promisify } from 'util';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import type { HeadlessWorkerType, HeadlessExecutionResult, SandboxMode } from './headless-worker-executor.js';
 
-const execAsync = promisify(exec);
+// ADR-078: execFile (no shell) — argv-based, no template interpolation
+// reaches a shell. All callsites below pass docker subcommands as argv.
+const dockerExec = promisify(execFile);
+async function docker(args: string[], timeoutMs: number): Promise<{ stdout: string; stderr: string }> {
+  const r = await dockerExec('docker', args, { timeout: timeoutMs, encoding: 'utf8' });
+  return { stdout: String(r.stdout), stderr: String(r.stderr) };
+}
 
 // ============================================
 // Type Definitions
@@ -361,8 +367,8 @@ export class ContainerWorkerPool extends EventEmitter {
    */
   private async checkDockerAvailable(): Promise<boolean> {
     try {
-      await execAsync('docker --version', { timeout: 5000 });
-      await execAsync('docker info', { timeout: 10000 });
+      await docker(['--version'], 5000);
+      await docker(['info'], 10000);
       return true;
     } catch {
       return false;
@@ -374,12 +380,12 @@ export class ContainerWorkerPool extends EventEmitter {
    */
   private async ensureImage(): Promise<void> {
     try {
-      await execAsync(`docker image inspect ${this.config.image}`, { timeout: 10000 });
+      await docker(['image', 'inspect', this.config.image], 10000);
     } catch {
       // Image not found, try to pull
       this.emit('imagePull', { image: this.config.image });
       try {
-        await execAsync(`docker pull ${this.config.image}`, { timeout: 300000 });
+        await docker(['pull', this.config.image], 300000);
       } catch (error) {
         this.emit('warning', { message: `Failed to pull image: ${error}` });
         // Continue anyway - might work with local image
@@ -441,7 +447,7 @@ export class ContainerWorkerPool extends EventEmitter {
       args.push(this.config.image, 'tail', '-f', '/dev/null');
 
       // Create the container (async)
-      const { stdout } = await execAsync(`docker ${args.join(' ')}`, { timeout: 60000 });
+      const { stdout } = await docker(args, 60000);
       const containerId = stdout.trim();
 
       containerInfo.state = 'ready';
@@ -465,7 +471,7 @@ export class ContainerWorkerPool extends EventEmitter {
     container.state = 'terminated';
 
     try {
-      await execAsync(`docker rm -f ${container.name}`, { timeout: 30000 });
+      await docker(['rm', '-f', container.name], 30000);
     } catch {
       // Ignore removal errors
     }
@@ -683,9 +689,11 @@ export class ContainerWorkerPool extends EventEmitter {
 
       try {
         // Check if container is running (async)
-        const { stdout } = await execAsync(
-          `docker inspect -f '{{.State.Running}}' ${container.name}`,
-          { timeout: 10000 }
+        // Note: single-quoted '{{.State.Running}}' was for shell quoting; with
+        // execFile (no shell) the docker process gets the raw template string.
+        const { stdout } = await docker(
+          ['inspect', '-f', '{{.State.Running}}', container.name],
+          10000,
         );
         const output = stdout.trim();
 
