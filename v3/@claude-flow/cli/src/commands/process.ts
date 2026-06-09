@@ -639,12 +639,8 @@ const logsCommand: Command = {
     const logsDir = resolve('.claude-flow/logs');
     let logEntries: string[] = [];
 
-    const levelIcons: Record<string, string> = {
-      debug: '🔍',
-      info: 'ℹ️ ',
-      warn: '⚠️ ',
-      error: '❌',
-    };
+    // levelIcons map was used by an earlier emoji-prefix log renderer;
+    // the current renderer prints the level as plain text. Parked.
     const levels = ['debug', 'info', 'warn', 'error'];
     const minLevelIdx = levels.indexOf(level);
 

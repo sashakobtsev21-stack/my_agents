@@ -765,19 +765,7 @@ function formatMigrationStatus(status: string): string {
   return status;
 }
 
-function getMigrationSteps(target: string): Array<{ name: string; description: string; source: string; dest: string }> {
-  const allSteps = [
-    { name: 'Configuration Files', description: 'Migrate config schema to V3 format', source: './claude-flow.json', dest: './claude-flow.config.json' },
-    { name: 'Memory Backend', description: 'Upgrade to hybrid backend with AgentDB', source: './.claude-flow/memory', dest: './data/memory' },
-    { name: 'Agent Definitions', description: 'Convert agent configs to V3 format', source: './.claude-flow/agents', dest: './v3/agents' },
-    { name: 'Hook Registry', description: 'Migrate hooks to V3 hook system', source: './src/hooks', dest: './v3/hooks' },
-    { name: 'Workflow Definitions', description: 'Convert workflows to event-sourced format', source: './.claude-flow/workflows', dest: './data/workflows' },
-    { name: 'Embeddings System', description: 'Migrate to ONNX with hyperbolic (Poincaré ball)', source: 'OpenAI/TF.js embeddings', dest: '.claude-flow/embeddings.json' }
-  ];
-
-  if (target === 'all') return allSteps;
-
-  return allSteps.filter(s => s.name.toLowerCase().includes(target.toLowerCase()));
-}
+// getMigrationSteps() returned a plan for the dry-run renderer; the
+// renderer now derives steps from the live status payload instead.
 
 export default migrateCommand;

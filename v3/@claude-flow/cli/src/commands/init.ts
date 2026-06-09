@@ -704,8 +704,9 @@ const wizardCommand: Command = {
 
       spinner.succeed('Setup complete!');
 
-      // Initialize embeddings if enabled
-      let embeddingsInitialized = false;
+      // Initialize embeddings if enabled. The flag below tracks the
+      // outcome for a renderer that was dropped; the printSuccess line
+      // inside the try block is the user-visible signal now.
       if (enableEmbeddings) {
         output.writeln();
         output.printInfo('Initializing ONNX embedding subsystem...');
@@ -727,7 +728,6 @@ const wizardCommand: Command = {
             timeout: 30000,
           });
           output.writeln(output.success('  ✓ Embeddings configured'));
-          embeddingsInitialized = true;
         } catch {
           output.writeln(output.dim('  Embeddings will be configured on first use'));
         }

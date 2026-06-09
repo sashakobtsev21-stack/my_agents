@@ -546,14 +546,15 @@ const auditCommand: Command = {
     { command: 'claude-flow security audit -a export', description: 'Export audit trail' },
   ],
   action: async (ctx: CommandContext): Promise<CommandResult> => {
-    const action = ctx.flags.action as string || 'list';
-
+    // `--action` (list/export) is in the help text — both views render
+    // the same audit table, so the branch is parked. ctx is still used
+    // below for `--limit`.
     output.writeln();
     output.writeln(output.bold('Security Audit Log'));
     output.writeln(output.dim('─'.repeat(60)));
 
     // Generate real audit entries from .swarm/ state and session history
-    const { existsSync, readFileSync, readdirSync, statSync } = await import('fs');
+    const { existsSync, readdirSync, statSync } = await import('fs');
     const { join } = await import('path');
 
     const auditEntries: { timestamp: string; event: string; user: string; status: string }[] = [];

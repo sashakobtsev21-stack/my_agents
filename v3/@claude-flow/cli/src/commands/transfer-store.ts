@@ -6,7 +6,6 @@
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
 import {
-  createPatternStore,
   createDiscoveryService,
   createDownloader,
   createPublisher,

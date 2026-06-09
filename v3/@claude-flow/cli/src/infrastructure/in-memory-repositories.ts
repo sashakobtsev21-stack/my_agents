@@ -24,15 +24,16 @@ import {
  */
 export class InMemoryAgentRepository implements IAgentRepository {
   private agents: Map<string, Agent> = new Map();
-  private initialized = false;
+  // initialized flag was set but no consumer ever asserted on it.
+  // initialize() is still part of the IRepository contract; kept as a
+  // no-op for shape compatibility.
 
   async initialize(): Promise<void> {
-    this.initialized = true;
+    // no-op
   }
 
   async shutdown(): Promise<void> {
     this.agents.clear();
-    this.initialized = false;
   }
 
   async clear(): Promise<void> {
@@ -156,15 +157,14 @@ export class InMemoryAgentRepository implements IAgentRepository {
  */
 export class InMemoryTaskRepository implements ITaskRepository {
   private tasks: Map<string, Task> = new Map();
-  private initialized = false;
 
   async initialize(): Promise<void> {
-    this.initialized = true;
+    // no-op (see InMemoryAgentRepository for the unused-initialized
+    // explanation)
   }
 
   async shutdown(): Promise<void> {
     this.tasks.clear();
-    this.initialized = false;
   }
 
   async clear(): Promise<void> {

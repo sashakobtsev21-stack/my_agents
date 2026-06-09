@@ -5,8 +5,9 @@
  *
  * Pilot extraction (issue #7).
  */
-import { existsSync, readFileSync, statSync } from 'fs';
-import { join } from 'path';
+// The action body does dynamic await import('fs')/('path')/('child_process')
+// so it can fail soft on environments where these aren't available. The
+// top-level static imports were vestigial from the pre-split monolith.
 import type { Command, CommandContext, CommandResult } from '../../types.js';
 import { output } from '../../output.js';
 

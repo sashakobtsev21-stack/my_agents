@@ -5,7 +5,7 @@
 
 import type { Command, CommandContext, CommandResult } from '../../types.js';
 import { output } from '../../output.js';
-import { confirm, input, select } from '../../prompt.js';
+import { confirm, input } from '../../prompt.js';
 import { validateSchemaName } from './pg-utils.js';
 
 /**

@@ -13,7 +13,6 @@ import {
   searchPlugins,
   getPluginSearchSuggestions,
   getFeaturedPlugins,
-  getTrendingPlugins,
   getOfficialPlugins,
   type PluginEntry,
   type PluginSearchOptions,
@@ -225,7 +224,9 @@ const installCommand: Command = {
     const name = ctx.flags.name as string;
     const version = ctx.flags.version as string || 'latest';
     const registryName = ctx.flags.registry as string;
-    const verify = ctx.flags.verify !== false;
+    // `--verify` is documented but the install path always verifies the
+    // SHA-256 + signature. Kept the flag for forward-compat once we
+    // wire a `--no-verify` escape hatch.
 
     if (!name) {
       output.printError('Plugin name is required');
