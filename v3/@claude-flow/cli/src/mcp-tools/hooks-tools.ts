@@ -85,26 +85,13 @@ import { getSemanticRouter, generateSimpleEmbedding } from './hooks-tools/semant
 // flashAttention + loraAdapter lazy loaders moved to
 // ./hooks-tools/neural-loaders.ts (W33, P3.2 cut #3).
 
-// Trajectory storage for SONA learning
-interface TrajectoryStep {
-  action: string;
-  result: string;
-  quality: number;
-  timestamp: string;
-}
-
-interface TrajectoryData {
-  id: string;
-  task: string;
-  agent: string;
-  steps: TrajectoryStep[];
-  startedAt: string;
-  success?: boolean;
-  endedAt?: string;
-}
-
-// In-memory trajectory tracking (persisted on end)
-const activeTrajectories = new Map<string, TrajectoryData>();
+// Trajectory state (TrajectoryStep / TrajectoryData interfaces +
+// activeTrajectories Map) moved to ./hooks-tools/trajectory-state.ts
+// (W36, P3.2 cut #6).
+import {
+  type TrajectoryData,
+  activeTrajectories,
+} from './hooks-tools/trajectory-state.js';
 
 // Memory store types and helpers
 
