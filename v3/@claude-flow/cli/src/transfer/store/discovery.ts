@@ -3,8 +3,6 @@
  * Secure discovery mechanism for finding patterns in decentralized environment
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
 import * as crypto from 'crypto';
 import type {
   PatternRegistry,
@@ -12,11 +10,7 @@ import type {
   KnownRegistry,
   StoreConfig,
 } from './types.js';
-import {
-  BOOTSTRAP_REGISTRIES,
-  DEFAULT_STORE_CONFIG,
-  deserializeRegistry,
-} from './registry.js';
+import { DEFAULT_STORE_CONFIG } from './registry.js';
 
 /**
  * Discovery result

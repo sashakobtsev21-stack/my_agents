@@ -18,8 +18,8 @@
  */
 
 import { EventEmitter } from 'events';
-import { spawn, ChildProcess, execFileSync } from 'child_process';
-import { createServer, Server, request as httpRequestFn } from 'http';
+import { ChildProcess, execFileSync } from 'child_process';
+import { Server, request as httpRequestFn } from 'http';
 import { randomUUID } from 'crypto';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -28,9 +28,11 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { trackRequest } from './mcp-tools/request-tracker.js';
 
-// ESM-compatible __dirname
+// ESM-compatible __filename is still useful for callers that resolve
+// relative bin paths (the original __dirname helper was dropped — no
+// remaining call sites used it directly).
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+void __filename;
 
 /**
  * MCP Server configuration
@@ -635,16 +637,15 @@ export class MCPServerManager extends EventEmitter {
   }
 
   /**
-   * Wait for server to be ready
+   * Wait for server to be ready — currently unused by start(); kept
+   * because the http-transport path will need it once we wire health-
+   * gating into the public lifecycle.
    */
-  private async waitForReady(timeout = 10000): Promise<void> {
-    // For stdio transport, we're ready immediately (in-process)
+  private async _waitForReady(timeout = 10000): Promise<void> {
     if (this.options.transport === 'stdio') {
       return;
     }
-
     const startTime = Date.now();
-
     while (Date.now() - startTime < timeout) {
       const health = await this.checkHealth();
       if (health.healthy) {
@@ -652,7 +653,6 @@ export class MCPServerManager extends EventEmitter {
       }
       await this.sleep(100);
     }
-
     throw new Error('Server failed to start within timeout');
   }
 
