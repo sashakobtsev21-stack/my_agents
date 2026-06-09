@@ -21,12 +21,30 @@ import { dirname, join } from 'node:path';
 // ============================================================================
 
 /**
- * Get the data directory for neural pattern persistence
- * Uses .claude-flow/neural in the current working directory,
- * falling back to home directory
+ * Test-side override for the cwd used to resolve `.claude-flow/neural/`.
+ * `null` (the default) means use `process.cwd()` as before. Tests can call
+ * setIntelligenceBasePath(tmpDir) to pin persistence to a per-test scratch
+ * dir without having to do `process.chdir()` — vitest's worker_threads
+ * forbid `chdir` on Windows, which is why the chdir tests were flaky there.
+ *
+ * Issue #7 follow-up — this is the basePath pilot. Replicate the same
+ * pattern in hooks-tools.ts and the other 4 production modules that the
+ * 4 chdir-using tests reach through.
+ */
+let basePathOverride: string | null = null;
+
+/** Pin the intelligence persistence base to `p`. Pass `null` to reset. */
+export function setIntelligenceBasePath(p: string | null): void {
+  basePathOverride = p;
+}
+
+/**
+ * Get the data directory for neural pattern persistence.
+ * Uses .claude-flow/neural in basePathOverride (if set) or process.cwd(),
+ * falling back to the home directory.
  */
 function getDataDir(): string {
-  const cwd = process.cwd();
+  const cwd = basePathOverride ?? process.cwd();
   const localDir = join(cwd, '.claude-flow', 'neural');
   const homeDir = join(homedir(), '.claude-flow', 'neural');
 

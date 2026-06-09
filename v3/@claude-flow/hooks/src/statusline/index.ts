@@ -16,7 +16,23 @@ import type {
   StatuslineData,
   StatuslineConfig,
 } from '../types.js';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
+
+/**
+ * Run a binary and return stdout, suppressing errors. Replaces the
+ * `<cmd> 2>/dev/null || echo ""` shell idiom we used to need execSync for.
+ * (ADR-078: argv-only, no shell.)
+ */
+function safeRun(file: string, args: string[]): string {
+  try {
+    return execFileSync(file, args, {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }) as string;
+  } catch {
+    return '';
+  }
+}
 import { existsSync, readFileSync, statSync, readdirSync } from 'fs';
 import { join } from 'path';
 
@@ -462,8 +478,9 @@ export class StatuslineGenerator {
     let activeAgents = 0;
     let coordinationActive = false;
 
-    try {
-      const ps = execSync('ps aux 2>/dev/null || echo ""', { encoding: 'utf-8' });
+    {
+      // POSIX-only; safeRun returns '' on Windows where `ps` is absent.
+      const ps = safeRun('ps', ['aux']);
       const agenticCount = (ps.match(/agentic-flow/g) || []).length;
       const mcpCount = (ps.match(/mcp.*start/g) || []).length;
 
@@ -471,8 +488,6 @@ export class StatuslineGenerator {
         coordinationActive = true;
         activeAgents = Math.max(1, Math.floor(agenticCount / 2));
       }
-    } catch {
-      // Fall through to defaults
     }
 
     // Also check swarm activity file
@@ -539,13 +554,25 @@ export class StatuslineGenerator {
     let subAgents = 0;
 
     try {
-      // Get Node.js memory usage
-      const ps = execSync('ps aux 2>/dev/null | grep -E "(node|agentic|claude)" | grep -v grep | awk \'{sum += $6} END {print int(sum/1024)}\'', { encoding: 'utf-8' });
-      memoryMB = parseInt(ps.trim()) || 0;
+      // Replaces `ps aux | grep -E "..." | grep -v grep | awk '{sum+=$6} END
+      // {print int(sum/1024)}'` — same shape in JS: filter the relevant
+      // process lines and sum the RSS column. column 6 of `ps aux` is RSS in KB.
+      const ps = safeRun('ps', ['aux']);
+      if (ps) {
+        const memLines = ps.split('\n').filter((l) =>
+          /(node|agentic|claude)/.test(l) && !l.includes('grep'));
+        const totalKb = memLines.reduce((sum, line) => {
+          const cols = line.trim().split(/\s+/);
+          // ps aux columns: USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND
+          const rss = Number.parseInt(cols[5] ?? '', 10);
+          return sum + (Number.isFinite(rss) ? rss : 0);
+        }, 0);
+        memoryMB = Math.floor(totalKb / 1024);
 
-      // Count sub-agents
-      const agents = execSync('ps aux 2>/dev/null | grep -E "Task|subagent|agent_spawn" | grep -v grep | wc -l', { encoding: 'utf-8' });
-      subAgents = parseInt(agents.trim()) || 0;
+        // Subcount: lines that mention Task/subagent/agent_spawn, again sans grep.
+        subAgents = ps.split('\n').filter((l) =>
+          /(Task|subagent|agent_spawn)/.test(l) && !l.includes('grep')).length;
+      }
     } catch {
       // Use fallback: count v3 lines as proxy for progress
       try {
@@ -605,22 +632,13 @@ export class StatuslineGenerator {
     let gitBranch = '';
     let modelName = '';
 
-    try {
-      // Try gh CLI first
-      name = execSync('gh api user --jq \'.login\' 2>/dev/null || git config user.name 2>/dev/null || echo "user"', { encoding: 'utf-8' }).trim();
-    } catch {
-      try {
-        name = execSync('git config user.name 2>/dev/null || echo "user"', { encoding: 'utf-8' }).trim();
-      } catch {
-        name = 'user';
-      }
-    }
+    // Replaces `gh api user --jq '.login' || git config user.name || echo
+    // "user"` — JS-side fallback chain.
+    name = safeRun('gh', ['api', 'user', '--jq', '.login']).trim();
+    if (!name) name = safeRun('git', ['config', 'user.name']).trim();
+    if (!name) name = 'user';
 
-    try {
-      gitBranch = execSync('git branch --show-current 2>/dev/null || echo ""', { encoding: 'utf-8' }).trim();
-    } catch {
-      gitBranch = '';
-    }
+    gitBranch = safeRun('git', ['branch', '--show-current']).trim();
 
     // Model name would come from Claude Code input
     // For now, leave empty unless provided via data source

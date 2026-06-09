@@ -33,15 +33,6 @@
         "no-restricted-imports": "off",
         "no-restricted-modules": "off"
       }
-    },
-    {
-      "files": [
-        "@claude-flow/hooks/src/statusline/index.ts"
-      ],
-      "rules": {
-        "no-restricted-imports": "off",
-        "no-restricted-modules": "off"
-      }
     }
   ]
 }

@@ -8,17 +8,19 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const SCRATCH = mkdtempSync(join(tmpdir(), 'round-b-'));
-let originalCwd: string;
 
 beforeAll(async () => {
-  originalCwd = process.cwd();
-  process.chdir(SCRATCH);
+  // Was: process.chdir(SCRATCH). vitest's worker_threads forbid chdir on
+  // Windows. Use the basePath override added in #7 instead — same effect,
+  // no cwd mutation.
   const intel = await import('../src/memory/intelligence.js');
+  intel.setIntelligenceBasePath(SCRATCH);
   intel.clearIntelligence();
 });
 
-afterAll(() => {
-  try { process.chdir(originalCwd); } catch { /* */ }
+afterAll(async () => {
+  const intel = await import('../src/memory/intelligence.js');
+  intel.setIntelligenceBasePath(null);
   try { rmSync(SCRATCH, { recursive: true, force: true }); } catch { /* */ }
 });
 
