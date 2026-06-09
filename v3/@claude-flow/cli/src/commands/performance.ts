@@ -536,7 +536,7 @@ const optimizeCommand: Command = {
     { command: 'claude-flow performance optimize -t memory', description: 'Optimize memory usage' },
     { command: 'claude-flow performance optimize --apply', description: 'Apply all optimizations' },
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     // `--target` is documented for forward-compat; optimize() runs the
     // full pipeline regardless.
     output.writeln();
@@ -584,7 +584,7 @@ const bottleneckCommand: Command = {
     { command: 'claude-flow performance bottleneck', description: 'Find bottlenecks' },
     { command: 'claude-flow performance bottleneck -d full', description: 'Full analysis' },
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     output.writeln();
     output.writeln(output.bold('Bottleneck Analysis'));
     output.writeln(output.dim('─'.repeat(50)));

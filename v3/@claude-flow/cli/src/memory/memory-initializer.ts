@@ -828,9 +828,11 @@ export function dequantizeInt8(
  * Faster than dequantizing first
  */
 export function quantizedCosineSim(
-  a: Int8Array, aScale: number,
-  b: Int8Array, bScale: number
+  a: Int8Array, _aScale: number,
+  b: Int8Array, _bScale: number
 ): number {
+  // Scale factors are documented for caller-side dequantize math but
+  // aren't needed for cosine — the dot product is scale-invariant.
   if (a.length !== b.length) return 0;
 
   let dot = 0, normA = 0, normB = 0;

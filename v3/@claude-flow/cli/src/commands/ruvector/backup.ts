@@ -608,7 +608,7 @@ const restoreSubcommand: Command = {
           // Create table if needed (assuming schema matches)
           for (const row of table.rows) {
             const columns = Object.keys(row);
-            const values = columns.map((col, idx) => `$${idx + 1}`);
+            const values = columns.map((_col, idx) => `$${idx + 1}`);
             const params = columns.map(col => {
               const val = row[col];
               return typeof val === 'object' ? JSON.stringify(val) : val;
@@ -770,7 +770,7 @@ export const backupCommand: Command = {
     { command: 'claude-flow ruvector backup create -o backup.sql', description: 'Create backup' },
     { command: 'claude-flow ruvector backup restore -i backup.sql', description: 'Restore backup' },
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     output.writeln();
     output.writeln(output.bold('RuVector Backup'));
     output.writeln(output.dim('=' .repeat(60)));

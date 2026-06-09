@@ -467,7 +467,7 @@ Register-ArgumentCompleter -Native -CommandName claude-flow -ScriptBlock {
 const bashCommand: Command = {
   name: 'bash',
   description: 'Generate bash completion script',
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     const script = generateBashCompletion();
     output.writeln(script);
     return { success: true };
@@ -478,7 +478,7 @@ const bashCommand: Command = {
 const zshCommand: Command = {
   name: 'zsh',
   description: 'Generate zsh completion script',
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     const script = generateZshCompletion();
     output.writeln(script);
     return { success: true };
@@ -489,7 +489,7 @@ const zshCommand: Command = {
 const fishCommand: Command = {
   name: 'fish',
   description: 'Generate fish completion script',
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     const script = generateFishCompletion();
     output.writeln(script);
     return { success: true };
@@ -501,7 +501,7 @@ const powershellCommand: Command = {
   name: 'powershell',
   aliases: ['pwsh'],
   description: 'Generate PowerShell completion script',
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     const script = generatePowerShellCompletion();
     output.writeln(script);
     return { success: true };

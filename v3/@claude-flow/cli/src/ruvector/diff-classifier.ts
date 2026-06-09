@@ -209,7 +209,10 @@ export class DiffClassifier {
     return ratio > 0.7 && ratio < 1.4 && totalAdds > 5;
   }
 
-  private determineSecondaryClassifications(path: string, hunks: DiffHunk[], primary: DiffClassification['primary']): string[] {
+  private determineSecondaryClassifications(path: string, _hunks: DiffHunk[], primary: DiffClassification['primary']): string[] {
+    // hunks reserved for hunk-content-aware secondary classification
+    // (e.g. "imports-only changes" vs "logic changes"); current pass
+    // works off path patterns + primary classification.
     const secondary: string[] = [];
     for (const [type, patterns] of Object.entries(CLASSIFICATION_PATTERNS)) {
       if (type === primary) continue;
@@ -602,7 +605,9 @@ export function assessFileRisk(file: DiffFile): FileRisk {
 /**
  * Assess overall risk from files and file risks
  */
-export function assessOverallRisk(files: DiffFile[], fileRisks: FileRisk[]): OverallRisk {
+export function assessOverallRisk(_files: DiffFile[], fileRisks: FileRisk[]): OverallRisk {
+  // files in the signature so future weighted-risk passes (per-file
+  // size, modification frequency) can plug in without an API break.
   const breakdown = { low: 0, medium: 0, high: 0, critical: 0 };
   let totalScore = 0;
 

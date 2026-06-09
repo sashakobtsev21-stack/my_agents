@@ -270,7 +270,10 @@ export class ASTAnalyzer {
     return imports;
   }
 
-  private extractExports(code: string, language: string): string[] {
+  private extractExports(code: string, _language: string): string[] {
+    // language reserved for future language-specific export-pattern
+    // dispatch (Python `from X import ...`, Go `package X.Y`, etc.);
+    // current regex set is JS/TS-only.
     const exports: string[] = [];
     const lines = code.split('\n');
     for (const line of lines) {
@@ -285,7 +288,9 @@ export class ASTAnalyzer {
     return exports;
   }
 
-  private calculateComplexity(code: string, root: ASTNode): ASTAnalysis['complexity'] {
+  private calculateComplexity(code: string, _root: ASTNode): ASTAnalysis['complexity'] {
+    // root is in the signature for the future tree-walking complexity
+    // calculator; the regex-based approach below is the current path.
     const lines = code.split('\n');
     const nonEmptyLines = lines.filter(l => l.trim().length > 0);
     const commentLines = lines.filter(l => /^\s*(\/\/|\/\*|\*|#)/.test(l));
