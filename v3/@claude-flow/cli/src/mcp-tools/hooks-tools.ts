@@ -25,6 +25,16 @@ import {
   TASK_PATTERNS,
 } from './hooks-tools/routing-patterns.js';
 
+// Neural lazy loaders (SONA / EWC++ / MoE / FlashAttention / LoRA)
+// extracted to ./hooks-tools/neural-loaders.ts (W33, P3.2 cut #3).
+import {
+  getSONAOptimizer,
+  getEWCConsolidator,
+  getMoERouter,
+  getFlashAttention,
+  getLoRAAdapter,
+} from './hooks-tools/neural-loaders.js';
+
 // Memory store helpers + intelligence stats + agent suggester
 // extracted to ./hooks-tools/memory-store.ts (W32, P3.2 cut #2).
 import {
@@ -117,48 +127,9 @@ async function getRealStoreFunction() {
 // Neural Module Lazy Loaders (SONA, EWC++, MoE, LoRA, Flash Attention)
 // =============================================================================
 
-// SONA Optimizer - lazy loaded
-let sonaOptimizer: Awaited<ReturnType<typeof import('../memory/sona-optimizer.js').getSONAOptimizer>> | null = null;
-async function getSONAOptimizer() {
-  if (!sonaOptimizer) {
-    try {
-      const { getSONAOptimizer: getSona } = await import('../memory/sona-optimizer.js');
-      sonaOptimizer = await getSona();
-    } catch {
-      sonaOptimizer = null;
-    }
-  }
-  return sonaOptimizer;
-}
-
-// EWC++ Consolidator - lazy loaded
-let ewcConsolidator: Awaited<ReturnType<typeof import('../memory/ewc-consolidation.js').getEWCConsolidator>> | null = null;
-async function getEWCConsolidator() {
-  if (!ewcConsolidator) {
-    try {
-      const { getEWCConsolidator: getEWC } = await import('../memory/ewc-consolidation.js');
-      ewcConsolidator = await getEWC();
-    } catch {
-      ewcConsolidator = null;
-    }
-  }
-  return ewcConsolidator;
-}
-
-// MoE Router - lazy loaded
-// #1773 item 4 — moe-router migrated to @claude-flow/neural
-let moeRouter: Awaited<ReturnType<typeof import('@claude-flow/neural').getMoERouter>> | null = null;
-async function getMoERouter() {
-  if (!moeRouter) {
-    try {
-      const { getMoERouter: getMoE } = await import('@claude-flow/neural');
-      moeRouter = await getMoE();
-    } catch {
-      moeRouter = null;
-    }
-  }
-  return moeRouter;
-}
+// SONA / EWC++ / MoE lazy loaders moved to ./hooks-tools/neural-loaders.ts
+// (W33, P3.2 cut #3). Same pattern as flashAttention + loraAdapter
+// below — also moved to that file.
 
 // Semantic Router - lazy loaded
 // Tries native VectorDb first (16k+ routes/s HNSW), falls back to pure JS (47k routes/s cosine)
@@ -298,34 +269,8 @@ async function getSemanticRouter() {
 // strings in the constants below (routerBackend enum) so the same info
 // is reachable directly. Dropped to silence noUnusedLocals.
 
-// Flash Attention - lazy loaded
-// #1773 item 4 — flash-attention migrated to @claude-flow/neural
-let flashAttention: Awaited<ReturnType<typeof import('@claude-flow/neural').getFlashAttention>> | null = null;
-async function getFlashAttention() {
-  if (!flashAttention) {
-    try {
-      const { getFlashAttention: getFlash } = await import('@claude-flow/neural');
-      flashAttention = await getFlash();
-    } catch {
-      flashAttention = null;
-    }
-  }
-  return flashAttention;
-}
-
-// LoRA Adapter - lazy loaded
-let loraAdapter: Awaited<ReturnType<typeof import('../ruvector/lora-adapter.js').getLoRAAdapter>> | null = null;
-async function getLoRAAdapter() {
-  if (!loraAdapter) {
-    try {
-      const { getLoRAAdapter: getLora } = await import('../ruvector/lora-adapter.js');
-      loraAdapter = await getLora();
-    } catch {
-      loraAdapter = null;
-    }
-  }
-  return loraAdapter;
-}
+// flashAttention + loraAdapter lazy loaders moved to
+// ./hooks-tools/neural-loaders.ts (W33, P3.2 cut #3).
 
 // Trajectory storage for SONA learning
 interface TrajectoryStep {
