@@ -3,7 +3,9 @@
  * Wraps agent-browser CLI for programmatic access
  */
 
-import { spawn, execSync, execFileSync } from 'child_process';
+// ADR-078: only execFileSync (no shell, argv-based) — spawn and execSync
+// were imported but never used in this file.
+import { execFileSync } from 'child_process';
 import type {
   ActionResult,
   Snapshot,

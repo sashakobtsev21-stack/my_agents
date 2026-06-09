@@ -774,7 +774,7 @@ const initCommand: Command = {
         const embeddings = await getEmbeddings();
 
         if (embeddings) {
-          await embeddings.downloadEmbeddingModel(model, modelDir, (p) => {
+          await embeddings.downloadEmbeddingModel(model, modelDir, (p: { percent: number }) => {
             spinner.setText(`Downloading ${model}... ${p.percent.toFixed(0)}%`);
           });
         } else {
@@ -941,7 +941,7 @@ const chunkCommand: Command = {
         { key: 'tokens', header: 'Tokens', width: 8 },
         { key: 'preview', header: 'Preview', width: 45 },
       ],
-      data: result.chunks.map((c, i) => ({
+      data: result.chunks.map((c: { length: number; tokenCount: number; text: string }, i: number) => ({
         idx: String(i + 1),
         length: String(c.length),
         tokens: String(c.tokenCount),
@@ -1300,7 +1300,7 @@ const modelsCommand: Command = {
 
       if (embeddings) {
         try {
-          await embeddings.downloadEmbeddingModel(download, '.models', (p) => {
+          await embeddings.downloadEmbeddingModel(download, '.models', (p: { percent: number }) => {
             spinner.setText(`Downloading ${download}... ${p.percent.toFixed(1)}%`);
           });
           spinner.succeed(`Downloaded ${download}`);

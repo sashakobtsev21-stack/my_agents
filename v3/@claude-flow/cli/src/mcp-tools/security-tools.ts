@@ -188,7 +188,7 @@ const aidefenceScanTool: MCPTool = {
           type: 'text',
           text: JSON.stringify({
             safe: result.safe,
-            threats: result.threats.map(t => ({
+            threats: result.threats.map((t: { type: string; severity: string; confidence: number; description: string }) => ({
               type: t.type,
               severity: t.severity,
               confidence: t.confidence,
@@ -272,7 +272,7 @@ const aidefenceAnalyzeTool: MCPTool = {
       // Search similar patterns
       if (searchSimilar) {
         const similar = await defender.searchSimilarThreats(input, { k });
-        analysis.similarPatterns = similar.map(p => ({
+        analysis.similarPatterns = similar.map((p: { pattern: string; type: string; effectiveness: number }) => ({
           pattern: p.pattern,
           type: p.type,
           effectiveness: p.effectiveness,

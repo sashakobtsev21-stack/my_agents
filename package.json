@@ -43,7 +43,7 @@
     "test:cli": "cd v3/@claude-flow/cli && npm test",
     "test:coverage": "cd v3 && corepack pnpm test:coverage",
     "test:security": "cd v3/@claude-flow/security && npm test",
-    "lint": "cd v3 && corepack pnpm exec eslint @claude-flow/cli/src --ext .ts",
+    "lint": "cd v3 && corepack pnpm exec eslint @claude-flow/cli/src @claude-flow/browser/src @claude-flow/deployment/src @claude-flow/hooks/src @claude-flow/codex/src @claude-flow/security/src @claude-flow/shared/src plugins/teammate-plugin/src plugins/gastown-bridge/src --ext .ts",
     "security:audit": "npm audit --audit-level high",
     "security:fix": "npm audit fix",
     "security:test": "npm run test:security",

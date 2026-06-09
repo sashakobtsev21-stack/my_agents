@@ -314,7 +314,7 @@ export const optimizeCommand: Command = {
       spinner.setText('Analyzing vector index configuration...'); spinner.start();
 
       const vectorIndexes = indexStatsResult.rows.filter(
-        r => r.index_type === 'hnsw' || r.index_type === 'ivfflat'
+        (r: { index_type: string }) => r.index_type === 'hnsw' || r.index_type === 'ivfflat'
       );
 
       for (const idx of vectorIndexes) {

@@ -542,11 +542,11 @@ const abTestCommand: Command = {
           classDeltas: report.classDeltas,
           categoryShift: report.categoryShift,
           taskResults: {
-            configA: report.configA.taskResults.map(r => ({
+            configA: report.configA.taskResults.map((r: { taskId: string; taskClass: string; passed: boolean; violations: unknown[]; toolCalls: number }) => ({
               taskId: r.taskId, taskClass: r.taskClass, passed: r.passed,
               violations: r.violations.length, toolCalls: r.toolCalls,
             })),
-            configB: report.configB.taskResults.map(r => ({
+            configB: report.configB.taskResults.map((r: { taskId: string; taskClass: string; passed: boolean; violations: unknown[]; toolCalls: number }) => ({
               taskId: r.taskId, taskClass: r.taskClass, passed: r.passed,
               violations: r.violations.length, toolCalls: r.toolCalls,
             })),

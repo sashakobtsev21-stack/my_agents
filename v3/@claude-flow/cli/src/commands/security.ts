@@ -889,12 +889,12 @@ const defendCommand: Command = {
         output.writeln();
 
         for (const threat of result.threats) {
-          const severityColor = {
+          const severityColor = ({
             critical: output.error,
             high: output.warning,
             medium: output.info,
             low: output.dim,
-          }[threat.severity] || output.dim;
+          } as Record<string, (text: string) => string>)[threat.severity] || output.dim;
 
           output.writeln(`  ${severityColor(`[${threat.severity.toUpperCase()}]`)} ${threat.type}`);
           output.writeln(`    ${output.dim(threat.description)}`);
@@ -903,7 +903,7 @@ const defendCommand: Command = {
         }
 
         // Show mitigation recommendations
-        const criticalThreats = result.threats.filter(t => t.severity === 'critical');
+        const criticalThreats = result.threats.filter((t: { severity: string }) => t.severity === 'critical');
         if (criticalThreats.length > 0 && enableLearning) {
           output.writeln(output.bold('Recommended Mitigations:'));
           for (const threat of criticalThreats) {

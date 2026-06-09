@@ -1,0 +1,52 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "no-restricted-imports": ["error", {
+      "paths": [
+        {
+          "name": "child_process",
+          "importNames": ["exec", "execSync"],
+          "message": "exec/execSync ALWAYS run a shell — use execFileSync(file, argv) or SafeExecutor from @claude-flow/security instead. See ADR-078."
+        }
+      ]
+    }],
+    "no-restricted-modules": ["error", {
+      "paths": [
+        {
+          "name": "child_process",
+          "message": "Top-level require('child_process') makes shell-vs-no-shell invisible. Use named imports of execFileSync / execFile / spawn (no shell). See ADR-078."
+        }
+      ]
+    }]
+  },
+  "overrides": [
+    {
+      "files": [
+        "@claude-flow/security/src/safe-executor.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": "off",
+        "no-restricted-modules": "off"
+      }
+    },
+    {
+      "files": [
+        "@claude-flow/deployment/src/publisher.ts",
+        "@claude-flow/deployment/src/release-manager.ts",
+        "@claude-flow/deployment/src/validator.ts",
+        "@claude-flow/hooks/src/statusline/index.ts",
+        "plugins/teammate-plugin/src/teammate-bridge.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": "off",
+        "no-restricted-modules": "off"
+      }
+    }
+  ]
+}
+

@@ -341,7 +341,7 @@ export const migrateCommand: Command = {
         ORDER BY version ASC
       `);
 
-      const appliedVersions = new Set(appliedResult.rows.map(r => r.version));
+      const appliedVersions = new Set(appliedResult.rows.map((r: { version: string }) => r.version));
       spinner.succeed(`Found ${appliedVersions.size} applied migrations`);
 
       // Determine migrations to run
@@ -403,7 +403,7 @@ export const migrateCommand: Command = {
             { key: 'name', header: 'Name', width: 35 },
             { key: 'applied', header: 'Applied At', width: 22 },
           ],
-          data: appliedResult.rows.map(r => ({
+          data: appliedResult.rows.map((r: { version: string; name: string; applied_at: string }) => ({
             version: r.version,
             name: r.name,
             applied: new Date(r.applied_at).toISOString().replace('T', ' ').substring(0, 19),

@@ -331,7 +331,7 @@ export const statusCommand: Command = {
           ORDER BY t.relname, i.relname
         `, [config.schema]);
 
-        statusData.indexes = indexResult.rows.map(row => ({
+        statusData.indexes = indexResult.rows.map((row: { index_name: string; table_name: string; index_type: string; index_size: string; is_valid: boolean; is_unique: boolean }) => ({
           name: row.index_name,
           table: row.table_name,
           type: row.index_type,
@@ -353,7 +353,7 @@ export const statusCommand: Command = {
           ORDER BY version ASC
         `);
 
-        statusData.migrations = migrationsResult.rows.map(row => ({
+        statusData.migrations = migrationsResult.rows.map((row: { version: string; name: string; applied_at: string }) => ({
           version: row.version,
           name: row.name,
           appliedAt: row.applied_at,

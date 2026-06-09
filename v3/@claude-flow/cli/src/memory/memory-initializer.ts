@@ -1106,7 +1106,7 @@ export async function ensureSchemaColumns(dbPath: string): Promise<{
     // Get current columns in memory_entries
     const tableInfo = db.exec("PRAGMA table_info(memory_entries)");
     const existingColumns = new Set(
-      tableInfo[0]?.values?.map(row => row[1] as string) || []
+      tableInfo[0]?.values?.map((row: unknown[]) => row[1] as string) || []
     );
 
     // Required columns that may be missing in older schemas
@@ -1535,7 +1535,7 @@ export async function checkMemoryInitialization(dbPath?: string): Promise<{
 
     // Check for metadata table
     const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
-    const tableNames = tables[0]?.values?.map(v => v[0] as string) || [];
+    const tableNames = tables[0]?.values?.map((v: unknown[]) => v[0] as string) || [];
 
     // Get version
     let version = 'unknown';
@@ -2037,7 +2037,7 @@ export async function verifyMemoryInit(dbPath: string, options?: {
     // Test 1: Schema verification
     const schemaStart = Date.now();
     const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
-    const tableNames = tables[0]?.values?.map(v => v[0] as string) || [];
+    const tableNames = tables[0]?.values?.map((v: unknown[]) => v[0] as string) || [];
     const expectedTables = ['memory_entries', 'patterns', 'metadata', 'vector_indexes'];
     const missingTables = expectedTables.filter(t => !tableNames.includes(t));
 

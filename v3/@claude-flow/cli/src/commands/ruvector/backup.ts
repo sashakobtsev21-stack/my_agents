@@ -199,7 +199,7 @@ const backupSubcommand: Command = {
           WHERE table_schema = $1 AND table_type = 'BASE TABLE'
           ORDER BY table_name
         `, [config.schema]);
-        tables = tablesResult.rows.map(r => r.table_name);
+        tables = tablesResult.rows.map((r: { table_name: string }) => r.table_name);
       }
 
       spinner.succeed(`Found ${tables.length} tables to backup`);
@@ -237,7 +237,7 @@ const backupSubcommand: Command = {
           ORDER BY ordinal_position
         `, [config.schema, tableName]);
 
-        const columns = columnsResult.rows.map(r => r.column_name);
+        const columns = columnsResult.rows.map((r: { column_name: string }) => r.column_name);
 
         // Get data
         const dataResult = await client.query(`
@@ -270,7 +270,7 @@ const backupSubcommand: Command = {
             AND NOT idx.indisprimary
         `, [config.schema]);
 
-        backupData.indexes = indexResult.rows.map(r => r.indexdef);
+        backupData.indexes = indexResult.rows.map((r: { indexdef: string }) => r.indexdef);
         spinner.succeed(`Exported ${backupData.indexes.length} index definitions`);
       }
 
