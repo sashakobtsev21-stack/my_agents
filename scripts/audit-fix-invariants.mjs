@@ -123,9 +123,10 @@ const INVARIANTS = [
   },
 
   // #1953 — hooks_pretrain code-file budget + code-dir-first traversal
+  // Moved to tools-pretrain.ts in W41 god-file decomposition (P3.2).
   {
     issue: '#1953',
-    file: 'v3/@claude-flow/cli/src/mcp-tools/hooks-tools.ts',
+    file: 'v3/@claude-flow/cli/src/mcp-tools/hooks-tools/tools-pretrain.ts',
     substring: 'codeFilesScanned',
     why: 'Separate code-file budget counter — without it, the 50-file budget is burned by .md/.yaml/.db files and patternsExtracted: 0 on docs-heavy repos.',
   },
