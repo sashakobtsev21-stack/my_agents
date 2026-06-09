@@ -455,7 +455,7 @@ const modelsCommand: Command = {
     { command: 'claude-flow providers models', description: 'List all models' },
     { command: 'claude-flow providers models -p anthropic', description: 'List Anthropic models' },
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     output.writeln();
     output.writeln(output.bold('Available Models'));
     output.writeln(output.dim('─'.repeat(70)));

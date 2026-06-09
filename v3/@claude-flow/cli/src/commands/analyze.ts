@@ -2297,7 +2297,7 @@ export const analyzeCommand: Command = {
     { command: 'claude-flow analyze circular src/', description: 'Find circular dependencies' },
     { command: 'claude-flow analyze deps --security', description: 'Check dependency vulnerabilities' },
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     // If no subcommand, show help
     output.writeln();
     output.writeln(output.bold('Analyze Commands'));

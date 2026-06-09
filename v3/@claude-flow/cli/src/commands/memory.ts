@@ -1686,7 +1686,7 @@ export const memoryCommand: Command = {
     { command: 'claude-flow memory search -q "auth patterns"', description: 'Search memory' },
     { command: 'claude-flow memory stats', description: 'Show statistics' }
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     output.writeln();
     output.writeln(output.bold('Memory Management Commands'));
     output.writeln();

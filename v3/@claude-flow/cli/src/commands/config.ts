@@ -418,7 +418,7 @@ export const configCommand: Command = {
     { command: 'claude-flow config get swarm.topology', description: 'Get config value' },
     { command: 'claude-flow config set swarm.maxAgents 20', description: 'Set config value' }
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     output.writeln();
     output.writeln(output.bold('Configuration Management'));
     output.writeln();

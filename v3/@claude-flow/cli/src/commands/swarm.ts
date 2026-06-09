@@ -859,7 +859,7 @@ export const swarmCommand: Command = {
     { command: 'claude-flow swarm start -o "Build API" -s development', description: 'Start development swarm' },
     { command: 'claude-flow swarm coordinate --agents 15', description: 'V3 coordination' }
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     output.writeln();
     output.writeln(output.bold('Swarm Coordination Commands'));
     output.writeln();

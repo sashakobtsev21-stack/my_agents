@@ -456,8 +456,8 @@ export class SQLiteBackend extends EventEmitter implements IMemoryBackend {
    * Use HybridBackend for semantic search with AgentDB
    */
   async search(
-    embedding: Float32Array,
-    options: SearchOptions
+    _embedding: Float32Array,
+    _options: SearchOptions
   ): Promise<SearchResult[]> {
     // SQLite is not optimized for vector search
     // This method returns empty to encourage use of HybridBackend

@@ -5,7 +5,9 @@
     "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,
-    "comment_noUnusedLocals": "48 pre-existing errors in this package — opt out until a dedicated cleanup pass lands. cli/hooks/security/embeddings/deployment/codex/browser inherit the strict flag from base.",
+    // 48 pre-existing noUnusedLocals errors — opt out at this package
+    // until a dedicated cleanup pass lands. cli/hooks/security/
+    // embeddings/deployment/codex/browser inherit the strict flag from base.
     "noUnusedLocals": false
   },
   "include": ["src/**/*"],

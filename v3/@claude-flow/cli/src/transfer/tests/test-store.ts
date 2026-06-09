@@ -165,7 +165,7 @@ async function runTests(): Promise<void> {
       let progressCalled = false;
       const downloadResult = await downloader.downloadPattern(pattern, {
         verify: true,
-      }, (progress) => {
+      }, (_progress) => {
         progressCalled = true;
       });
 

@@ -385,7 +385,9 @@ export class PatternDiscovery {
   /**
    * Verify registry signature
    */
-  verifyRegistry(registry: PatternRegistry, expectedPublicKey: string): boolean {
+  verifyRegistry(registry: PatternRegistry, _expectedPublicKey: string): boolean {
+    // expectedPublicKey reserved for pinned-publisher verification
+    // (TOFU model is planned but not implemented yet).
     if (!registry.registrySignature) {
       return false;
     }

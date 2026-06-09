@@ -878,7 +878,7 @@ export const sessionCommand: Command = {
     { command: 'claude-flow session import backup.json', description: 'Import session from file' },
     { command: 'claude-flow session current', description: 'Show current session' }
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     // Show help if no subcommand
     output.writeln();
     output.writeln(output.bold('Session Management Commands'));

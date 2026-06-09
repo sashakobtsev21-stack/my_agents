@@ -88,7 +88,7 @@ export const ruvectorCommand: Command = {
     { command: 'claude-flow ruvector optimize --analyze', description: 'Analyze and suggest optimizations' },
     { command: 'claude-flow ruvector backup --output backup.sql', description: 'Backup RuVector data' },
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     // Default action: show help/status overview
     output.writeln();
     output.writeln(output.bold('RuVector PostgreSQL Bridge'));

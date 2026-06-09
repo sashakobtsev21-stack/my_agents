@@ -723,7 +723,7 @@ export const migrateCommand: Command = {
     { command: 'claude-flow migrate run --dry-run', description: 'Preview migration' },
     { command: 'claude-flow migrate run -t all', description: 'Run full migration' }
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     output.writeln();
     output.writeln(output.bold('V2 to V3 Migration Tools'));
     output.writeln();

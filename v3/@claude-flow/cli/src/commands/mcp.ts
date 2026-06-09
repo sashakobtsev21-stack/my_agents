@@ -795,7 +795,7 @@ export const mcpCommand: Command = {
     { command: 'claude-flow mcp tools', description: 'List tools' },
     { command: 'claude-flow mcp stop', description: 'Stop the server' }
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     output.writeln();
     output.writeln(output.bold('MCP Server Management'));
     output.writeln();

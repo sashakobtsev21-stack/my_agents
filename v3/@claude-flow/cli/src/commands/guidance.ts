@@ -604,7 +604,7 @@ export const guidanceCommand: Command = {
     { command: 'claude-flow guidance optimize', description: 'Analyze and optimize CLAUDE.md' },
     { command: 'claude-flow guidance ab-test', description: 'Run A/B behavioral comparison' },
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     output.writeln();
     output.writeln(output.bold('Guidance Control Plane'));
     output.writeln(output.dim('─'.repeat(50)));

@@ -1006,7 +1006,7 @@ export const agentCommand: Command = {
     { command: 'claude-flow agent list', description: 'List all agents' },
     { command: 'claude-flow agent status agent-001', description: 'Show agent status' }
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     // Show help if no subcommand
     output.writeln();
     output.writeln(output.bold('Agent Management Commands'));

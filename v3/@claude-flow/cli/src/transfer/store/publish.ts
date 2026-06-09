@@ -309,7 +309,7 @@ export async function submitContribution(
  * Check contribution status
  */
 export async function checkContributionStatus(
-  submissionId: string
+  _submissionId: string
 ): Promise<{
   status: 'pending' | 'reviewing' | 'approved' | 'rejected';
   message: string;

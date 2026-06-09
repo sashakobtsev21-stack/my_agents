@@ -770,7 +770,7 @@ export const taskCommand: Command = {
     { command: 'claude-flow task assign task-123 --agent coder-1', description: 'Assign task to agent' },
     { command: 'claude-flow task retry task-123', description: 'Retry a failed task' }
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     // Show help if no subcommand
     output.writeln();
     output.writeln(output.bold('Task Management Commands'));

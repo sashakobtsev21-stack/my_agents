@@ -141,7 +141,7 @@ export const hooksCommand: Command = {
     { command: 'claude-flow hooks pretrain', description: 'Bootstrap intelligence from repository' },
     { command: 'claude-flow hooks metrics --v3-dashboard', description: 'View V3 performance metrics' }
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
     output.writeln();
     output.writeln(output.bold('Self-Learning Hooks System'));
     output.writeln();
