@@ -3,7 +3,7 @@
  * Provides intelligent hooks functionality via MCP protocol
  */
 
-import { mkdirSync, writeFileSync, existsSync, readFileSync, statSync, unlinkSync, readdirSync } from 'fs';
+import { mkdirSync, writeFileSync, existsSync, readFileSync, unlinkSync, readdirSync } from 'fs';
 import * as nodeFs from 'fs';
 import { join, resolve } from 'path';
 import { type MCPTool } from './types.js';
@@ -25,9 +25,21 @@ import {
   TASK_PATTERNS,
 } from './hooks-tools/routing-patterns.js';
 
+// Memory store helpers + intelligence stats + agent suggester
+// extracted to ./hooks-tools/memory-store.ts (W32, P3.2 cut #2).
+import {
+  type MemoryStore,
+  MEMORY_DIR,
+  MEMORY_FILE,
+  getMemoryPath,
+  loadMemoryStore,
+  getIntelligenceStatsFromMemory,
+  suggestAgentsForTask,
+} from './hooks-tools/memory-store.js';
+
 import { validateIdentifier, validateText, validatePath } from './validate-input.js';
 import { checkCommandLoop, recordCommandOutcome } from './tool-loop-guardrail.js';
-import { KEYWORD_PATTERNS, getFileExtension, suggestAgentsForFile, assessCommandRisk } from './hooks-tools/routing-helpers.js';
+import { getFileExtension, suggestAgentsForFile, assessCommandRisk } from './hooks-tools/routing-helpers.js';
 
 // Real vector search functions - lazy loaded to avoid circular imports
 let searchEntriesFn: ((options: {
@@ -337,168 +349,6 @@ interface TrajectoryData {
 const activeTrajectories = new Map<string, TrajectoryData>();
 
 // Memory store types and helpers
-interface MemoryEntry {
-  key: string;
-  value: unknown;
-  metadata?: Record<string, unknown>;
-  storedAt: string;
-  accessCount: number;
-  lastAccessed: string;
-}
-
-interface MemoryStore {
-  entries: Record<string, MemoryEntry>;
-  version: string;
-}
-
-const MEMORY_DIR = '.claude-flow/memory';
-const MEMORY_FILE = 'store.json';
-
-function getMemoryPath(): string {
-  return join(projectRoot(), MEMORY_DIR, MEMORY_FILE);
-}
-
-function loadMemoryStore(): MemoryStore {
-  try {
-    const path = getMemoryPath();
-    if (existsSync(path)) {
-      const data = readFileSync(path, 'utf-8');
-      return JSON.parse(data);
-    }
-  } catch {
-    // Return empty store on error
-  }
-  return { entries: {}, version: '3.0.0' };
-}
-
-/**
- * Get real intelligence statistics from memory store
- */
-function getIntelligenceStatsFromMemory(): {
-  trajectories: { total: number; successful: number };
-  patterns: { learned: number; categories: Record<string, number> };
-  memory: { indexSize: number; totalAccessCount: number; memorySizeBytes: number };
-  routing: { decisions: number; avgConfidence: number };
-} {
-  const store = loadMemoryStore();
-  const entries = Object.values(store.entries);
-
-  // Count trajectories (keys starting with "trajectory-" or containing trajectory data)
-  const trajectoryEntries = entries.filter(e =>
-    e.key.includes('trajectory') ||
-    (e.metadata?.type === 'trajectory')
-  );
-  const successfulTrajectories = trajectoryEntries.filter(e =>
-    e.metadata?.success === true ||
-    (typeof e.value === 'object' && e.value !== null && (e.value as Record<string, unknown>).success === true)
-  );
-
-  // Count patterns
-  const patternEntries = entries.filter(e =>
-    e.key.includes('pattern') ||
-    e.metadata?.type === 'pattern' ||
-    e.key.startsWith('learned-')
-  );
-
-  // Categorize patterns
-  const categories: Record<string, number> = {};
-  patternEntries.forEach(e => {
-    const category = (e.metadata?.category as string) || 'general';
-    categories[category] = (categories[category] || 0) + 1;
-  });
-
-  // Count routing decisions
-  const routingEntries = entries.filter(e =>
-    e.key.includes('routing') ||
-    e.metadata?.type === 'routing-decision'
-  );
-
-  // Calculate average confidence from routing decisions
-  let totalConfidence = 0;
-  let confidenceCount = 0;
-  routingEntries.forEach(e => {
-    const confidence = e.metadata?.confidence as number;
-    if (typeof confidence === 'number') {
-      totalConfidence += confidence;
-      confidenceCount++;
-    }
-  });
-
-  // Calculate total access count
-  const totalAccessCount = entries.reduce((sum, e) => sum + (e.accessCount || 0), 0);
-
-  // Calculate memory file size
-  let memorySizeBytes = 0;
-  try {
-    const memPath = getMemoryPath();
-    if (existsSync(memPath)) {
-      memorySizeBytes = statSync(memPath).size;
-    }
-  } catch {
-    // Ignore
-  }
-
-  return {
-    trajectories: {
-      total: trajectoryEntries.length,
-      successful: successfulTrajectories.length,
-    },
-    patterns: {
-      learned: patternEntries.length,
-      categories,
-    },
-    memory: {
-      indexSize: entries.length,
-      totalAccessCount,
-      memorySizeBytes,
-    },
-    routing: {
-      decisions: routingEntries.length,
-      avgConfidence: confidenceCount > 0 ? totalConfidence / confidenceCount : 0,
-    },
-  };
-}
-
-
-
-
-
-function suggestAgentsForTask(task: string): { agents: string[]; confidence: number } {
-  const taskLower = task.toLowerCase();
-
-  // Check static keyword patterns first
-  for (const [pattern, result] of Object.entries(KEYWORD_PATTERNS)) {
-    if (taskLower.includes(pattern)) {
-      return result;
-    }
-  }
-
-  // Check runtime-learned patterns from successful task outcomes
-  const taskKeywords = extractKeywords(task);
-  if (taskKeywords.length > 0) {
-    const outcomes = loadRoutingOutcomes();
-    let bestAgent = '';
-    let bestOverlap = 0;
-
-    for (const outcome of outcomes) {
-      if (!outcome.success || !outcome.agent || !outcome.keywords?.length) continue;
-      const overlap = taskKeywords.filter(kw => outcome.keywords.includes(kw)).length;
-      if (overlap > bestOverlap) {
-        bestOverlap = overlap;
-        bestAgent = outcome.agent;
-      }
-    }
-
-    // Require at least 2 keyword overlap to prevent false positives
-    if (bestAgent && bestOverlap >= 2) {
-      return { agents: [bestAgent], confidence: Math.min(0.6 + bestOverlap * 0.05, 0.85) };
-    }
-  }
-
-  // Default fallback
-  return { agents: ['coder', 'researcher', 'tester'], confidence: 0.7 };
-}
-
 
 // MCP Tool implementations - return raw data for direct CLI use
 export const hooksPreEdit: MCPTool = {
