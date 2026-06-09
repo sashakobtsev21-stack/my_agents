@@ -3,7 +3,7 @@
  * Creates .claude/settings.json with V3-optimized hook configurations
  */
 
-import type { InitOptions, HooksConfig, PlatformInfo } from './types.js';
+import type { InitOptions, HooksConfig } from './types.js';
 import { detectPlatform } from './types.js';
 
 /**

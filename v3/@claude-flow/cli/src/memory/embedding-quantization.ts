@@ -30,9 +30,11 @@
  * @module v3/cli/memory/embedding-quantization
  */
 
-const PQ_MAGIC_GLOBAL = 0x50514756; // "PQ_G" in little-endian uint32 = 0x47 'G', 0x56 'V'...
-// Actually spell it as ASCII bytes: P=0x50 Q=0x51 G=0x47 V=0x56
-// In little-endian uint32: bytes [0x50, 0x51, 0x47, 0x56] → uint32 = 0x56475150
+// PQ_MAGIC_GLOBAL was an early endian-incorrect spelling kept for
+// reference while the codec stabilized. Final magic below.
+//
+// ASCII bytes:        P=0x50 Q=0x51 G=0x47 V=0x56
+// Little-endian uint32: bytes [0x50, 0x51, 0x47, 0x56] → 0x56475150
 const PQ_MAGIC = 0x56475150;
 const INLINE_PREFIX = 'inline:';
 

@@ -18,7 +18,8 @@
 // Porter stemmer (1980) — single-pass, table-driven
 // ---------------------------------------------------------------------------
 
-const VOWEL = /^[aeiou]$/;
+// VOWEL was used by the original 5-step Porter stemmer; the simplified
+// 2-step Porter implementation below relies on CONSONANT_Y only.
 const CONSONANT_Y = /[aeiouy]/;
 
 function isCons(s: string, i: number): boolean {

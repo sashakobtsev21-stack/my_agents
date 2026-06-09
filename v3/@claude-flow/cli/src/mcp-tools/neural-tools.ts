@@ -115,7 +115,8 @@ try {
 const STORAGE_DIR = '.claude-flow';
 const NEURAL_DIR = 'neural';
 const MODELS_FILE = 'models.json';
-const PATTERNS_FILE = 'patterns.json';
+// PATTERNS_FILE used to live in this neural store; patterns now persist
+// through agentdb-tools via the unified namespace.
 
 interface NeuralModel {
   id: string;

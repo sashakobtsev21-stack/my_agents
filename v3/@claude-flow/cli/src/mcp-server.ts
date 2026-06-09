@@ -807,12 +807,8 @@ export class MCPServerManager extends EventEmitter {
     });
   }
 
-  /**
-   * Sleep utility
-   */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  // sleep() helper was only called by the dropped waitForReady() —
+  // see W24 commit message for the http-transport reference.
 }
 
 /**

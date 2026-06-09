@@ -12,7 +12,7 @@ import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { RvfaReader } from './rvfa-format.js';
-import type { RvfaHeader, RvfaSection } from './rvfa-format.js';
+import type { RvfaHeader } from './rvfa-format.js';
 
 // ── Options & Result ────────────────────────────────────────
 

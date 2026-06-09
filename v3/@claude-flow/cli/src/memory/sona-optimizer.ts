@@ -151,21 +151,9 @@ async function loadContrastiveTrainer(): Promise<any> {
   }
 }
 
-/**
- * Common agent types for routing
- */
-const AGENT_TYPES = [
-  'coder',
-  'tester',
-  'reviewer',
-  'architect',
-  'researcher',
-  'optimizer',
-  'debugger',
-  'documenter',
-  'security-architect',
-  'performance-engineer',
-];
+// AGENT_TYPES used to feed an enum-style validator before routing went
+// keyword-driven; the keys of KEYWORD_CATEGORIES below are the live
+// agent-name surface now.
 
 /**
  * Task keywords for pattern extraction

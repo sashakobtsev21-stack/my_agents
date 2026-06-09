@@ -4,7 +4,6 @@
  *
  * Pilot extraction (issue #7).
  */
-import { join } from 'node:path';
 import type { Command, CommandContext, CommandResult } from '../../types.js';
 import { output } from '../../output.js';
 import { callMCPTool, MCPClientError } from '../../mcp-client.js';

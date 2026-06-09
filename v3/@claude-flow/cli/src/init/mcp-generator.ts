@@ -4,7 +4,7 @@
  * Handles cross-platform compatibility (Windows requires cmd /c wrapper)
  */
 
-import type { InitOptions, MCPConfig } from './types.js';
+import type { InitOptions } from './types.js';
 
 /**
  * Check if running on Windows

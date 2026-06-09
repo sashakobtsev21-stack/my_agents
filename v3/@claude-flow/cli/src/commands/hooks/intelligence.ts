@@ -5,7 +5,6 @@
  * Pilot extraction (issue #7).
  */
 import { readFileSync, statSync } from 'fs';
-import { join } from 'path';
 import type { Command, CommandContext, CommandResult } from '../../types.js';
 import { output } from '../../output.js';
 import { callMCPTool, MCPClientError } from '../../mcp-client.js';
