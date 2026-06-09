@@ -102,7 +102,10 @@ class PromptManager {
     displayChoices(selectedIndex);
 
     return new Promise<T>((resolve, reject) => {
-      const rl = this.createInterface();
+      // createInterface() is called for its readline side effects
+      // (process.stdin.setRawMode etc.). The rl handle itself is not
+      // used since the select prompt drives input via stdin events.
+      this.createInterface();
 
       // Enable raw mode for arrow key detection
       if (process.stdin.isTTY) {
@@ -162,7 +165,6 @@ class PromptManager {
       inactive = 'No'
     } = options;
 
-    const defaultText = defaultValue ? `${active}/${inactive}` : `${active}/${inactive}`;
     const hint = defaultValue ? `[${active}]` : `[${inactive}]`;
 
     const prompt = `${this.formatter.bold('?')} ${message} ${this.formatter.dim(hint)} `;
@@ -241,7 +243,7 @@ class PromptManager {
 
   private async inputMasked(prompt: string): Promise<string> {
     return new Promise((resolve) => {
-      const rl = this.createInterface();
+      this.createInterface();
       let password = '';
 
       // Don't echo characters
@@ -348,7 +350,7 @@ class PromptManager {
     displayChoices();
 
     return new Promise<T[]>((resolve, reject) => {
-      const rl = this.createInterface();
+      this.createInterface();
 
       if (process.stdin.isTTY) {
         process.stdin.setRawMode(true);
@@ -537,7 +539,7 @@ class PromptManager {
     displayChoices();
 
     return new Promise<T>((resolve, reject) => {
-      const rl = this.createInterface();
+      this.createInterface();
 
       if (process.stdin.isTTY) {
         process.stdin.setRawMode(true);

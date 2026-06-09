@@ -8,19 +8,14 @@
 
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
-import { select, confirm } from '../prompt.js';
+import { confirm } from '../prompt.js';
 import { installParentDeathWatchdog } from '../runtime/parent-death-watchdog.js';
 import {
-  MCPServerManager,
-  createMCPServerManager,
   getServerManager,
-  startMCPServer,
-  stopMCPServer,
   getMCPServerStatus,
   type MCPServerOptions,
-  type MCPServerStatus,
 } from '../mcp-server.js';
-import { listMCPTools, callMCPTool, hasTool, getToolMetadata } from '../mcp-client.js';
+import { listMCPTools, callMCPTool, hasTool } from '../mcp-client.js';
 
 // MCP tools categories
 const TOOL_CATEGORIES = [
@@ -755,9 +750,11 @@ const restartCommand: Command = {
       default: false
     }
   ],
-  action: async (ctx: CommandContext): Promise<CommandResult> => {
-    const force = ctx.flags.force as boolean;
-
+  action: async (_ctx: CommandContext): Promise<CommandResult> => {
+    // --force is documented for the user but restart() always does a
+    // graceful stop + start under the hood, so the flag is currently a
+    // no-op. Kept in the options list for forward-compat once we wire
+    // a hard-kill path through manager.restart().
     output.printInfo('Restarting MCP Server...');
 
     try {
