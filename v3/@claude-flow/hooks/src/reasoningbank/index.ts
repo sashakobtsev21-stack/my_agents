@@ -14,7 +14,7 @@
  */
 
 import { EventEmitter } from 'node:events';
-import type { HookContext, HookEvent } from '../types.js';
+import type { HookContext } from '../types.js';
 
 // Dynamic imports for optional dependencies
 let AgentDBAdapter: any = null;

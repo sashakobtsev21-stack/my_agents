@@ -551,7 +551,11 @@ export class WorkerQueue extends EventEmitter {
    * Get queue statistics
    */
   async getStats(): Promise<QueueStats> {
-    const storeStats = this.store.getStats();
+    // store.getStats() probe is the store-warmup signal; the aggregate
+    // pending/completed renderer below currently returns 0 placeholders
+    // (TODO: aggregate across all queues), so the per-store stats aren't
+    // piped through yet.
+    this.store.getStats();
 
     // This is a simplified implementation
     // Full implementation would aggregate across all queues

@@ -1221,7 +1221,11 @@ export const agentdbGraphPathfinder: MCPTool = {
       if (!vSeed.valid) return { success: false, error: vSeed.error };
       const seedNodeId = validateString(params.seedNodeId, 'seedNodeId', 500);
       if (!seedNodeId) return { success: false, error: 'seedNodeId is required' };
-      const query = validateString(params.query, 'query', 2000) ?? '';
+      // params.query was used for a future semantic re-ranking pass over
+      // the k-hop neighborhood; the dynamic-mincut/spectral-sparsify
+      // branches below don't consume it yet. Still validated so callers
+      // don't pass garbage.
+      validateString(params.query, 'query', 2000);
 
       const budgetRaw = (params.complexityBudget ?? {}) as ComplexityBudget;
       const rawDepth = validatePositiveInt(params.depth, 3, 5);
@@ -1326,8 +1330,10 @@ export const agentdbGraphPathfinder: MCPTool = {
         case 'connected-component-churn':
         case 'dynamic-mincut':
         case 'spectral-sparsify': {
-          // Simplified implementations: return k-hop neighbors with basic score
-          const edgeTuples = edges.map(r => [r[0], r[1], Number(r[2]) || 1.0] as [string, string, number]);
+          // Simplified implementations: return k-hop neighbors with basic
+          // score. `edgeTuples` was the graph-edge buffer for a Stoer-
+          // Wagner mincut / spectral-sparsifier pass that we haven't
+          // wired yet; the K-hop fallback below doesn't need them.
           const khopResult = await agentdbGraphQuery.handler({
             nodeId: seedNodeId, mode: 'k-hop', depth, complexityBudget: budget,
           }) as any;

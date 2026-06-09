@@ -7,8 +7,10 @@
  * @module @claude-flow/hooks/reasoningbank/guidance-provider
  */
 
-import { ReasoningBank, GuidanceResult, RoutingResult } from './index.js';
-import type { HookContext, HookEvent, PreEditResult, RouteTaskResult } from '../types.js';
+import { ReasoningBank } from './index.js';
+// HookContext/HookEvent/PreEditResult/RouteTaskResult were used by the
+// hook-emitter glue dropped in W11; this file is now a pure data
+// provider. Local Guidance/Routing types live inline.
 
 /**
  * Official Claude hook output format

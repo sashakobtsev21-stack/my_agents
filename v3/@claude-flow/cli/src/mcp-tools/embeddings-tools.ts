@@ -461,8 +461,10 @@ export const embeddingsTools: MCPTool[] = [
 
       const startTime = performance.now();
 
-      // Generate real ONNX embedding for query
-      const queryEmbedding = await generateRealEmbedding(query, config.dimension);
+      // Generate real ONNX embedding for query — call kept so the ONNX
+      // session warms before the searchEntries() path; the value isn't
+      // piped into the search itself (search re-embeds internally).
+      await generateRealEmbedding(query, config.dimension);
 
       // Try to search using real memory search
       try {

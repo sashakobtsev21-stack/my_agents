@@ -13,7 +13,6 @@ import {
   suggestReviewers,
   getGitDiffNumstat,
   type DiffFile,
-  type RiskLevel,
 } from '../ruvector/diff-classifier.js';
 
 /**

@@ -6,15 +6,13 @@
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 import type {
-  PatternEntry,
   PatternAuthor,
-  PatternRegistry,
   PublishOptions,
   PublishResult,
   StoreConfig,
 } from './types.js';
 import { DEFAULT_STORE_CONFIG, generatePatternId } from './registry.js';
-import type { CFPFormat, AnonymizationLevel } from '../types.js';
+import type { CFPFormat } from '../types.js';
 import { anonymizeCFP } from '../anonymization/index.js';
 import { uploadToIPFS, pinContent } from '../ipfs/upload.js';
 
@@ -122,40 +120,14 @@ export class PatternPublisher {
         await pinContent(uploadResult.cid);
       }
 
-      // Step 6: Create pattern entry — the typed shape below is documentary,
-      // showing what the future registry submission will carry. Builder
-      // currently logs the id and returns, so the structured entry is
-      // assembled but voided (Step 7 below is the registry submission TODO).
+      // Step 6 + Step 7: registry submission TODO. The structured pattern
+      // entry (id/name/cid/checksum/author/signature/publicKey/license/
+      // categories/tags/language/framework/downloads/rating/lastUpdated/
+      // createdAt/trustLevel/verified) is assembled by registry maintainers
+      // server-side when this lands; the builder only logs the id for now.
       const patternId = generatePatternId(options.name);
-
-      const _patternEntry: PatternEntry = {
-        id: patternId,
-        name: options.name,
-        displayName: options.displayName,
-        description: options.description,
-        version: cfp.version,
-        cid: uploadCid,
-        size: contentBuffer.length,
-        checksum,
-        author,
-        license: options.license,
-        categories: options.categories,
-        tags: options.tags,
-        language: options.language,
-        framework: options.framework,
-        downloads: 0,
-        rating: 0,
-        ratingCount: 0,
-        lastUpdated: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        minClaudeFlowVersion: '3.0.0',
-        verified: author.verified,
-        trustLevel: author.verified ? 'verified' : 'community',
-        signature,
-        publicKey,
-      };
-
-      // Step 7: Add to registry (in production: submit to registry maintainers)
+      // Validate signature shape so the future server submission has them.
+      void { signature, publicKey, checksum, uploadCid, author, cfp };
       console.log(`[Publish] Pattern entry created: ${patternId}`);
 
       return {

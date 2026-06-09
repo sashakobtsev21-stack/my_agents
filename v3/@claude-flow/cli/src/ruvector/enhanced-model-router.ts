@@ -11,7 +11,7 @@
 
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { extname, isAbsolute, resolve as resolvePath } from 'path';
-import { ClaudeModel, getModelRouter, ModelRouter, ModelRoutingResult } from './model-router.js';
+import { ClaudeModel, getModelRouter, ModelRouter } from './model-router.js';
 import { applyCodemod, isDeterministicCodemod, type CodemodLanguage } from './codemods/engine.js';
 
 /** Map a file path to the codemod engine's language, falling back to a hint. */

@@ -19,7 +19,6 @@ import {
   getCategoryStats,
   getTagCloud,
   getSearchSuggestions,
-  getSimilarPatterns,
 } from '../index.js';
 
 async function main() {

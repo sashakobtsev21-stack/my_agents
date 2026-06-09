@@ -203,7 +203,9 @@ export const importCommand: Command = {
     const inputFile = ctx.flags.input as string | undefined;
     const fromMemory = ctx.flags['from-memory'] as boolean;
     const outputFile = ctx.flags.output as string | undefined;
-    const batchSize = (ctx.flags['batch-size'] as number) || 100;
+    // --batch-size documented but the importer chunks fixed at 100 rows
+    // per COPY; tunable batching is a TODO.
+    void ctx.flags['batch-size'];
     const containerName = (ctx.flags.container as string) || 'ruvector-postgres';
     const verbose = ctx.flags.verbose as boolean;
 

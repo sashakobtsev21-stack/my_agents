@@ -6,7 +6,6 @@
 import * as crypto from 'crypto';
 import type {
   PatternRegistry,
-  PatternEntry,
   KnownRegistry,
   StoreConfig,
 } from './types.js';

@@ -9,7 +9,8 @@ import { searchPatterns, getSearchSuggestions, getTagCloud } from '../store/sear
 import { createDownloader } from '../store/download.js';
 import { createPublisher } from '../store/publish.js';
 import { createSeraphineGenesis } from '../models/seraphine.js';
-import type { PatternRegistry, SearchOptions } from '../store/types.js';
+// PatternRegistry + SearchOptions were used by typed wrappers around the
+// search functions; tests now rely on the function return types directly.
 
 // Test results tracking
 const results: { test: string; passed: boolean; details?: string }[] = [];

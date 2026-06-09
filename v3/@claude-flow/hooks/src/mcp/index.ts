@@ -6,13 +6,9 @@
  */
 
 import type {
-  PreEditInput,
   PreEditResult,
-  PostEditInput,
   PostEditResult,
-  RouteTaskInput,
   RouteTaskResult,
-  MetricsQueryInput,
   MetricsQueryResult,
 } from '../types.js';
 

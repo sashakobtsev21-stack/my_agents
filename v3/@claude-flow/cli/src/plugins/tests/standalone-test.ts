@@ -14,7 +14,6 @@ import {
   searchPlugins,
   getFeaturedPlugins,
   getOfficialPlugins,
-  getTrendingPlugins,
   getPluginSearchSuggestions,
   getPluginTagCloud,
   findSimilarPlugins,

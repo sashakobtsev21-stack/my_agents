@@ -6,7 +6,6 @@
 import type {
   CFPFormat,
   AnonymizationLevel,
-  AnonymizationRecord,
   PIIDetectionResult,
 } from '../types.js';
 import * as crypto from 'crypto';

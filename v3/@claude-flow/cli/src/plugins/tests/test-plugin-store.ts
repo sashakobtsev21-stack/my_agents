@@ -13,8 +13,6 @@ import {
   getTrendingPlugins,
   getOfficialPlugins,
   findSimilarPlugins,
-  type PluginRegistry,
-  type PluginEntry,
 } from '../store/index.js';
 
 // Test results tracking

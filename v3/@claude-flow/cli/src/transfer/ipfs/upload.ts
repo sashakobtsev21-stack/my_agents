@@ -7,7 +7,7 @@
  */
 
 import * as crypto from 'crypto';
-import type { IPFSConfig, PinningService } from '../types.js';
+import type { PinningService } from '../types.js';
 
 /**
  * IPFS upload options
@@ -292,7 +292,8 @@ export async function pinContent(
   cid: string,
   options: { service?: PinningService; name?: string } = {}
 ): Promise<{ success: boolean; pinnedAt: string }> {
-  const web3Token = getWeb3StorageToken();
+  // web3.storage pinning used to live here too; current path is Pinata
+  // only, so we don't probe for the web3 token at the pin step.
   const pinataKey = process.env.PINATA_API_KEY;
 
   // Real pinning with Pinata

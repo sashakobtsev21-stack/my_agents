@@ -40,10 +40,11 @@ export interface RuVectorModule {
 
 class FallbackVectorDB implements VectorDB {
   private vectors: Map<string, { embedding: Float32Array; metadata?: Record<string, unknown> }> = new Map();
-  private dimensions: number;
+  // dimensions used to gate insert() to a single-dim index; the fallback
+  // accepts any dim and relies on the caller to keep them consistent.
 
-  constructor(dimensions: number) {
-    this.dimensions = dimensions;
+  constructor(_dimensions: number) {
+    // no-op (see comment above)
   }
 
   insert(embedding: Float32Array, id: string, metadata?: Record<string, unknown>): void {

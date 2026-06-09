@@ -10,7 +10,7 @@
  */
 
 import { readFileSync, existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import type { MCPTool } from './types.js';
 import { validateIdentifier, validateText } from './validate-input.js';
 

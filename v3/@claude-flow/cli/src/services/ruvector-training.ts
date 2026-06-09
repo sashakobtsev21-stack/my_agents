@@ -311,7 +311,9 @@ export async function initializeTraining(config: TrainingConfig = {}): Promise<{
   const alpha = config.alpha || 0.1;
 
   // --- Attempt WASM backend first ---
-  let wasmLoaded = false;
+  // `activeBackend = 'wasm'` is the live success signal — the legacy
+  // wasmLoaded flag was used by an earlier render path that branched on
+  // it; activeBackend serves the same purpose now.
   try {
     const fs = await import('fs');
     const { createRequire } = await import('module');
@@ -337,7 +339,6 @@ export async function initializeTraining(config: TrainingConfig = {}): Promise<{
     features.push('TrajectoryBuffer/WASM');
 
     activeBackend = 'wasm';
-    wasmLoaded = true;
   } catch (wasmError) {
     // WASM not available - fall back to JS implementation
     const reason = wasmError instanceof Error ? wasmError.message : String(wasmError);

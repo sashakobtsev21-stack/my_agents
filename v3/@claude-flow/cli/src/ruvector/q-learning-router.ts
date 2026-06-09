@@ -720,20 +720,10 @@ export class QLearningRouter {
 
   // Private methods
 
-  // hashState() was the legacy context-string hasher used before
-  // feature-hashing landed. No remaining caller — feature-hashing handles
-  // the state space directly now. Kept under `_` so a future migrate-
-  // from-legacy callback can still reach it via reflection.
-  private _hashState(context: string): string {
-    // Simple hash for context string
-    let hash = 0;
-    for (let i = 0; i < context.length; i++) {
-      const char = context.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return `state_${hash}`;
-  }
+  // hashState() (FNV-style context hasher) was the legacy state encoder
+  // before feature-hashing landed; hashStateOptimized() below is the
+  // live encoder. Dropped — git history at SHA 93a78dda2 holds the impl
+  // if a migrate-from-legacy path ever needs it.
 
   /**
    * Public state-key encoder (#2239). This is exactly what `route()` uses

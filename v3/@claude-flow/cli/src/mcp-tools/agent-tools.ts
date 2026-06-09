@@ -542,7 +542,8 @@ export const agentTools: MCPTool[] = [
           byType[agent.agentType] = (byType[agent.agentType] || 0) + 1;
           byStatus[agent.status] = (byStatus[agent.status] || 0) + 1;
         }
-        const idleAgents = agents.filter(a => a.status === 'idle').length;
+        // idleAgents was surfaced in an earlier pool stats payload;
+        // utilization (busy / total) is what the renderer shows now.
         const busyAgents = agents.filter(a => a.status === 'busy').length;
         const utilization = agents.length > 0 ? busyAgents / agents.length : 0;
         return {

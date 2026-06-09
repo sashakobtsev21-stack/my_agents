@@ -17,7 +17,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { spawn, execFile, type ChildProcess } from 'child_process';
+import { spawn, execFile } from 'child_process';
 import { promisify } from 'util';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';

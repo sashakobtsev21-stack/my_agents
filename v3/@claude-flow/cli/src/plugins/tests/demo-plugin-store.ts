@@ -7,7 +7,6 @@
 import {
   createPluginDiscoveryService,
   searchPlugins,
-  getFeaturedPlugins,
   getOfficialPlugins,
 } from '../store/index.js';
 

@@ -4,7 +4,7 @@
  * Exposes worker functionality via Model Context Protocol tools.
  */
 
-import type { WorkerManager, WorkerResult, StatuslineData, WorkerAlert, HistoricalMetric } from './index.js';
+import type { WorkerManager } from './index.js';
 
 // ============================================================================
 // Input Validation

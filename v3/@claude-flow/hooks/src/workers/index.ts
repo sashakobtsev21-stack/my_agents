@@ -21,44 +21,18 @@ const MAX_ALERTS = 100;
 const MAX_HISTORY = 1000;
 const FILE_CACHE_TTL = 30_000; // 30 seconds
 
-// Allowed worker names for input validation
-const ALLOWED_WORKERS = new Set([
-  'performance', 'health', 'security', 'adr', 'ddd',
-  'patterns', 'learning', 'cache', 'git', 'swarm', 'v3progress'
-]);
+// ALLOWED_WORKERS was the input-validation surface for the dropped
+// isValidWorkerName(); the worker-spawn guard lives inline in handler()
+// now. Git history holds the list at this commit's SHA.
 
 // ============================================================================
 // Security Utilities
 // ============================================================================
 
-/**
- * Validate and resolve a path ensuring it stays within projectRoot
- * Uses realpath to prevent TOCTOU symlink attacks
- */
-async function safePathAsync(projectRoot: string, ...segments: string[]): Promise<string> {
-  const resolved = path.resolve(projectRoot, ...segments);
-
-  try {
-    // Resolve symlinks to prevent TOCTOU attacks
-    const realResolved = await fs.realpath(resolved).catch(() => resolved);
-    const realRoot = await fs.realpath(projectRoot).catch(() => projectRoot);
-
-    if (!realResolved.startsWith(realRoot + path.sep) && realResolved !== realRoot) {
-      throw new Error(`Path traversal blocked: ${realResolved}`);
-    }
-    return realResolved;
-  } catch (error) {
-    // If file doesn't exist yet, validate the parent directory
-    const parent = path.dirname(resolved);
-    const realParent = await fs.realpath(parent).catch(() => parent);
-    const realRoot = await fs.realpath(projectRoot).catch(() => projectRoot);
-
-    if (!realParent.startsWith(realRoot + path.sep) && realParent !== realRoot) {
-      throw new Error(`Path traversal blocked: ${resolved}`);
-    }
-    return resolved;
-  }
-}
+// safePathAsync() (async TOCTOU-protected path validator) — dropped.
+// The sync safePath() below is the live path-validator at every
+// callsite. The async fs.realpath() variant lives in git history at
+// this commit's SHA for the future tighter security pass.
 
 /**
  * Synchronous path validation (for non-async contexts)
@@ -86,12 +60,9 @@ function safeJsonParse<T>(content: string): T {
   });
 }
 
-/**
- * Validate worker name against allowed list
- */
-function isValidWorkerName(name: unknown): name is string {
-  return typeof name === 'string' && (ALLOWED_WORKERS.has(name) || name.startsWith('test-'));
-}
+// isValidWorkerName() — dropped (allowed-list validator was used by a
+// guard-rail that lives directly in handler() now). Git history holds
+// the impl if it needs to come back.
 
 // ============================================================================
 // Pre-compiled Regexes for DDD Pattern Detection (20-40% faster)
@@ -161,22 +132,8 @@ async function safeReadFile(filePath: string, maxSize = MAX_FILE_SIZE): Promise<
   }
 }
 
-/**
- * Validate project root is a real directory
- */
-async function validateProjectRoot(root: string): Promise<string> {
-  const resolved = path.resolve(root);
-  try {
-    const stats = await fs.stat(resolved);
-    if (!stats.isDirectory()) {
-      throw new Error('Project root must be a directory');
-    }
-    return resolved;
-  } catch {
-    // If we can't validate, use cwd as fallback
-    return process.cwd();
-  }
-}
+// validateProjectRoot() — dropped (the path normalization happens
+// inline in each worker entrypoint via path.resolve()).
 
 // ============================================================================
 // Types

@@ -22,7 +22,7 @@
 import { spawn, execFileSync, type ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import { existsSync, readFileSync, readdirSync, mkdirSync, writeFileSync } from 'fs';
-import { join, relative } from 'path';
+import { join } from 'path';
 import type { WorkerType } from './worker-daemon.js';
 
 // ============================================

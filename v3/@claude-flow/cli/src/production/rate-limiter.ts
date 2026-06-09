@@ -61,11 +61,11 @@ const DEFAULT_CONFIG: RateLimiterConfig = {
 export class RateLimiter {
   private config: RateLimiterConfig;
   private buckets: Map<string, TokenBucket> = new Map();
-  private globalBucket: TokenBucket;
+  // globalBucket was set but never consumed — per-key buckets above
+  // already enforce the global rate via a 'global' synthetic key.
 
   constructor(config: Partial<RateLimiterConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    this.globalBucket = this.createBucket();
   }
 
   /**
@@ -190,7 +190,6 @@ export class RateLimiter {
    */
   resetAll(): void {
     this.buckets.clear();
-    this.globalBucket = this.createBucket();
   }
 
   /**

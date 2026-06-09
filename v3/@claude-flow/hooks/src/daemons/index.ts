@@ -11,7 +11,6 @@
 import type {
   DaemonConfig,
   DaemonState,
-  DaemonStatus,
   DaemonManagerConfig,
 } from '../types.js';
 

@@ -7,7 +7,7 @@
  */
 
 import type { MCPTool } from './types.js';
-import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync, statSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
 

@@ -9,7 +9,6 @@ import type {
   CFPFormat,
   ExportOptions,
   ExportResult,
-  AnonymizationLevel,
 } from './types.js';
 import { serializeToJson, serializeToBuffer, getFileExtension } from './serialization/cfp.js';
 import { anonymizeCFP, scanCFPForPII } from './anonymization/index.js';
@@ -27,7 +26,8 @@ export async function exportPatterns(
     format = 'json',
     anonymize = 'standard',
     redactPii = true,
-    stripPaths = false,
+    // stripPaths is documented but the anonymizer already strips
+    // path-like fields at every anonymization level; no separate gate.
     toIpfs = false,
     pin = true,
     gateway = 'https://w3s.link',

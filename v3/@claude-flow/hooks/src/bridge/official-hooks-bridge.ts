@@ -8,7 +8,7 @@
  * @module v3/hooks/bridge/official-hooks-bridge
  */
 
-import { HookEvent, HookPriority, type HookHandler, type HookContext, type HookResult } from '../types.js';
+import { HookEvent, type HookHandler, type HookContext, type HookResult } from '../types.js';
 
 /**
  * Official Claude Code hook event types
