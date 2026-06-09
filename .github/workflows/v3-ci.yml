@@ -351,6 +351,54 @@ jobs:
         run: pnpm typecheck
         continue-on-error: true
 
+  intelligence-bench-linux:
+    # Wave 9 (W9-4) — runs the same benchmark-intelligence.mjs we use locally
+    # on Linux, so we can compare the host-dependent recall@10 number
+    # (Windows fresh-install measured 0.59; the headline claim is ~0.99 on
+    # darwin-arm64 audit hosts). Posts the JSON as an artifact for inspection.
+    name: Intelligence benchmark (Linux, recall@10)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # benchmark numbers are informational, not a gate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: v3/pnpm-lock.yaml
+      - name: Install + build cli (bench reads dist/)
+        working-directory: v3
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @claude-flow/cli run build
+      - name: Run benchmark (small + medium sizes, capture JSON)
+        # Smaller sizes than the local default — Linux runners are 7 GB so
+        # N=50k+ is fine, but we keep it fast (~2 min total).
+        run: |
+          node scripts/benchmark-intelligence.mjs --sizes 1000,5000 --queries 30 2>&1 | tee bench-output.log
+          # Extract the trailing ===BENCH_JSON=== block for the artifact.
+          awk '/===BENCH_JSON===/{flag=1; next} flag' bench-output.log > bench-result.json
+      - name: Surface recall@10 in the summary
+        run: |
+          echo "## Intelligence benchmark (Linux)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat bench-result.json | head -c 4000 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+      - name: Upload bench JSON artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: intelligence-bench-linux
+          path: |
+            bench-output.log
+            bench-result.json
+          retention-days: 14
+
   build:
     name: Build V3 (${{ matrix.os }})
     runs-on: ${{ matrix.os }}

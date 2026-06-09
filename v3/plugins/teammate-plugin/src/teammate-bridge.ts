@@ -18,7 +18,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
@@ -330,9 +330,13 @@ export class TeammateBridge extends EventEmitter {
 
     // Detect Claude Code version
     try {
-      const output = execSync('claude --version 2>/dev/null', {
+      // ADR-078: execFileSync (no shell). On Windows the npm shim is .cmd.
+      // stdio swallows stderr so we don't need `2>/dev/null`.
+      const claudeBin = process.platform === 'win32' ? 'claude.cmd' : 'claude';
+      const output = execFileSync(claudeBin, ['--version'], {
         encoding: 'utf-8',
         timeout: 5000,
+        stdio: ['ignore', 'pipe', 'ignore'],
       }).trim();
 
       const match = output.match(/(\d+\.\d+\.\d+)/);
@@ -2062,7 +2066,9 @@ export class TeammateBridge extends EventEmitter {
 
     // tmux backend
     try {
-      execSync('which tmux', { encoding: 'utf-8' });
+      // ADR-078: cross-platform `which/where` probe; throw on not-found.
+      const probe = process.platform === 'win32' ? 'where' : 'which';
+      execFileSync(probe, ['tmux'], { stdio: 'ignore' });
       statuses.push({
         backend: 'tmux',
         available: true,
@@ -2364,8 +2370,10 @@ export class TeammateBridge extends EventEmitter {
 
   private getCurrentGitBranch(): string | undefined {
     try {
-      return execSync('git rev-parse --abbrev-ref HEAD 2>/dev/null', {
+      // ADR-078: execFileSync (no shell); stdio swallows stderr.
+      return execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
         encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'ignore'],
       }).trim() || undefined;
     } catch {
       return undefined;
@@ -2374,8 +2382,10 @@ export class TeammateBridge extends EventEmitter {
 
   private getCurrentGitRepo(): string | undefined {
     try {
-      return execSync('git config --get remote.origin.url 2>/dev/null', {
+      // ADR-078: execFileSync (no shell); stdio swallows stderr.
+      return execFileSync('git', ['config', '--get', 'remote.origin.url'], {
         encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'ignore'],
       }).trim() || undefined;
     } catch {
       return undefined;

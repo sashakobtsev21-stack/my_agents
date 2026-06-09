@@ -39,8 +39,7 @@
         "@claude-flow/deployment/src/publisher.ts",
         "@claude-flow/deployment/src/release-manager.ts",
         "@claude-flow/deployment/src/validator.ts",
-        "@claude-flow/hooks/src/statusline/index.ts",
-        "plugins/teammate-plugin/src/teammate-bridge.ts"
+        "@claude-flow/hooks/src/statusline/index.ts"
       ],
       "rules": {
         "no-restricted-imports": "off",
