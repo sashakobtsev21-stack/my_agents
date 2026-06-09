@@ -4,7 +4,7 @@
  * Aligned with AgentDB integration (ADR-006, ADR-009)
  */
 
-import type { IMemoryEntry, MemoryType, IVectorSearchParams, IVectorSearchResult } from '../core/interfaces/memory.interface.js';
+import type { IMemoryEntry, MemoryType, IVectorSearchParams } from '../core/interfaces/memory.interface.js';
 
 /**
  * Memory backend type

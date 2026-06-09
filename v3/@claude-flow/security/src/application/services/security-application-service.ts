@@ -6,7 +6,7 @@
  * @module v3/security/application/services
  */
 
-import { SecurityContext, PermissionLevel } from '../../domain/entities/security-context.js';
+import { SecurityContext } from '../../domain/entities/security-context.js';
 import { SecurityDomainService, ValidationResult, ThreatDetectionResult } from '../../domain/services/security-domain-service.js';
 
 /**

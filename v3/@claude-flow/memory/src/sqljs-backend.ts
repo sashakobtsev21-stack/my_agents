@@ -14,7 +14,6 @@ import { safeJsonParse } from './json-security.js';
 import {
   IMemoryBackend,
   MemoryEntry,
-  MemoryEntryInput,
   MemoryEntryUpdate,
   MemoryQuery,
   SearchOptions,
@@ -24,8 +23,6 @@ import {
   ComponentHealth,
   MemoryType,
   EmbeddingGenerator,
-  generateMemoryId,
-  createDefaultEntry,
 } from './types.js';
 
 /**

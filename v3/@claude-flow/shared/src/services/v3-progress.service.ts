@@ -13,7 +13,7 @@
  */
 
 import { promises as fs, existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 'fs';
-import { join, basename, dirname } from 'path';
+import { join, dirname } from 'path';
 import { EventEmitter } from 'events';
 
 // ============================================================================
@@ -120,7 +120,8 @@ export class V3ProgressService extends EventEmitter {
    * Calculate current V3 implementation progress
    */
   async calculate(): Promise<V3ProgressMetrics> {
-    const startTime = Date.now();
+    // startTime was used by an earlier "calculation took X ms" log line
+    // that was dropped; the metric object below carries its own timestamp.
 
     // Count CLI commands
     const cli = await this.countCliCommands();

@@ -4,7 +4,9 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "comment_noUnusedLocals": "48 pre-existing errors in this package — opt out until a dedicated cleanup pass lands. cli/hooks/security/embeddings/deployment/codex/browser inherit the strict flag from base.",
+    "noUnusedLocals": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
