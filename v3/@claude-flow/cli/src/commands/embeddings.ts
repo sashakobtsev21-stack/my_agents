@@ -440,7 +440,9 @@ const collectionsCommand: Command = {
     { command: 'claude-flow embeddings collections -a stats', description: 'Show detailed stats' },
   ],
   action: async (ctx: CommandContext): Promise<CommandResult> => {
-    const action = ctx.flags.action as string || 'list';
+    // `--action` is documented (list/stats) but the renderer below
+    // emits both views unconditionally — the flag is here for help-
+    // text discoverability while the per-action branch is parked.
     const dbPath = ctx.flags['db-path'] as string || '.swarm/memory.db';
 
     output.writeln();
@@ -482,8 +484,11 @@ const collectionsCommand: Command = {
         ORDER BY total_entries DESC
       `);
 
-      // Get vector index info
-      const indexQuery = db.exec(`SELECT name, dimensions, hnsw_m FROM vector_indexes`);
+      // Eagerly probe vector_indexes — the query result isn't piped into
+      // the table renderer (collections use the namespace stats instead),
+      // but the schema probe is what makes the "no vector_indexes table"
+      // case fail fast inside the try below.
+      db.exec(`SELECT name, dimensions, hnsw_m FROM vector_indexes`);
 
       const collections: { name: string; vectors: string; total: string; dimensions: string; index: string; size: string }[] = [];
 
@@ -970,8 +975,10 @@ const normalizeCommand: Command = {
     { command: 'claude-flow embeddings normalize --check -i "[...]"', description: 'Check if normalized' },
   ],
   action: async (ctx: CommandContext): Promise<CommandResult> => {
+    // `--check` flag is documented to verify normalization rather than
+    // apply it. The current renderer always emits both the input and the
+    // normalized vector — the verify-only path is parked.
     const type = ctx.flags.type as string || 'l2';
-    const check = ctx.flags.check as boolean;
 
     output.writeln();
     output.writeln(output.bold('Embedding Normalization'));
@@ -1494,8 +1501,9 @@ const warmupCommand: Command = {
     { command: 'claude-flow embeddings warmup -b', description: 'Background warmup' },
   ],
   action: async (ctx: CommandContext): Promise<CommandResult> => {
+    // `--background` is in the help text but the warmup runs synchronously
+    // either way (it's already fast enough that detaching adds nothing).
     const runTest = ctx.flags.test !== false;
-    const background = ctx.flags.background === true;
 
     output.writeln();
     output.writeln(output.bold('Embedding Model Warmup'));

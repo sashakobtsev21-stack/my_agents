@@ -4,7 +4,6 @@
  */
 
 import * as fs from 'fs';
-import * as path from 'path';
 import * as crypto from 'crypto';
 import type {
   PatternEntry,
@@ -14,7 +13,7 @@ import type {
   PublishResult,
   StoreConfig,
 } from './types.js';
-import { DEFAULT_STORE_CONFIG, addPatternToRegistry, generatePatternId } from './registry.js';
+import { DEFAULT_STORE_CONFIG, generatePatternId } from './registry.js';
 import type { CFPFormat, AnonymizationLevel } from '../types.js';
 import { anonymizeCFP } from '../anonymization/index.js';
 import { uploadToIPFS, pinContent } from '../ipfs/upload.js';
@@ -123,10 +122,13 @@ export class PatternPublisher {
         await pinContent(uploadResult.cid);
       }
 
-      // Step 6: Create pattern entry
+      // Step 6: Create pattern entry — the typed shape below is documentary,
+      // showing what the future registry submission will carry. Builder
+      // currently logs the id and returns, so the structured entry is
+      // assembled but voided (Step 7 below is the registry submission TODO).
       const patternId = generatePatternId(options.name);
 
-      const patternEntry: PatternEntry = {
+      const _patternEntry: PatternEntry = {
         id: patternId,
         name: options.name,
         displayName: options.displayName,

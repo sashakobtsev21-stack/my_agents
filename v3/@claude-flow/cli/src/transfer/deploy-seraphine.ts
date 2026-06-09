@@ -10,15 +10,14 @@
  *   npx tsx deploy-seraphine.ts --to-ipfs --anonymize strict
  */
 
-import * as fs from 'fs';
+// deploy-seraphine is a CLI script wrapper around exportPatterns;
+// fs / fileURLToPath / serializeToJson moved into exportPatterns.
+// `path` stays for the default-output filename and `__dirname` is
+// dropped — the script no longer reads its own location.
 import * as path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 import { createSeraphineGenesis, getSeraphineInfo } from './models/seraphine.js';
 import { exportPatterns } from './export.js';
-import { serializeToJson, validateCFP } from './serialization/cfp.js';
+import { validateCFP } from './serialization/cfp.js';
 import { scanCFPForPII } from './anonymization/index.js';
 import type { AnonymizationLevel } from './types.js';
 
