@@ -268,7 +268,8 @@ const profileCommand: Command = {
     { command: 'claude-flow performance profile -d 60', description: 'Profile for 60 seconds' },
   ],
   action: async (ctx: CommandContext): Promise<CommandResult> => {
-    const type = ctx.flags.type as string || 'all';
+    // `--type` is documented but the profile renderer below treats every
+    // request as "all" — kept the flag for forward-compat.
     const duration = parseInt(ctx.flags.duration as string || '30', 10);
 
     output.writeln();
@@ -280,7 +281,6 @@ const profileCommand: Command = {
 
     // Collect real metrics
     const startCpu = process.cpuUsage();
-    const startMem = process.memoryUsage();
     const startTime = process.hrtime.bigint();
 
     // Sample for a brief period
@@ -371,10 +371,8 @@ const metricsCommand: Command = {
     const rssMB = (memUsage.rss / 1024 / 1024).toFixed(1);
     const memPercent = ((1 - freeMem / totalMem) * 100).toFixed(1);
     const cpuUserMs = (cpuUsage.user / 1000).toFixed(0);
-    const cpuSystemMs = (cpuUsage.system / 1000).toFixed(0);
 
     // Try to get HNSW/cache stats from real data
-    let cacheHitRate = 'N/A';
     let hnswEntries = 0;
     try {
       const { getHNSWStatus } = await import('../memory/memory-initializer.js');
@@ -539,8 +537,8 @@ const optimizeCommand: Command = {
     { command: 'claude-flow performance optimize --apply', description: 'Apply all optimizations' },
   ],
   action: async (ctx: CommandContext): Promise<CommandResult> => {
-    const target = ctx.flags.target as string || 'all';
-
+    // `--target` is documented for forward-compat; optimize() runs the
+    // full pipeline regardless.
     output.writeln();
     output.writeln(output.bold('Performance Optimization'));
     output.writeln(output.dim('─'.repeat(50)));

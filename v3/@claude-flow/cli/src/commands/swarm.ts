@@ -5,7 +5,7 @@
 
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
-import { select, confirm, multiSelect } from '../prompt.js';
+import { select, confirm } from '../prompt.js';
 import { callMCPTool, MCPClientError } from '../mcp-client.js';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -13,7 +13,6 @@ import * as path from 'path';
 // Get dynamic swarm status from memory/session files
 function getSwarmStatus(swarmId?: string) {
   const swarmDir = path.join(process.cwd(), '.swarm');
-  const sessionDir = path.join(process.cwd(), '.claude', 'sessions');
   const memoryPaths = [
     path.join(process.cwd(), '.swarm', 'memory.db'),
     path.join(process.cwd(), '.claude', 'memory.db'),
@@ -54,22 +53,18 @@ function getSwarmStatus(swarmId?: string) {
     }
   }
 
-  // Get session count
-  let sessionCount = 0;
-  if (fs.existsSync(sessionDir)) {
-    try {
-      sessionCount = fs.readdirSync(sessionDir).filter(f => f.endsWith('.json')).length;
-    } catch {
-      // Ignore
-    }
-  }
+  // Dead-code from an earlier swarm-status surface (#TBD): we read
+  // session count + memory DB size off disk but never reported them.
+  // The renderer below only uses the task counts, so we don't bother
+  // reading either back.
 
-  // Get memory size as rough indicator of activity
-  let memorySize = 0;
+  // Probe the memory DB for activity — the assignment is the side
+  // effect we care about (warming the FS cache); the size value
+  // itself is intentionally ignored.
   for (const dbPath of memoryPaths) {
     if (fs.existsSync(dbPath)) {
       try {
-        memorySize = fs.statSync(dbPath).size;
+        fs.statSync(dbPath).size;
         break;
       } catch {
         // Ignore
@@ -501,8 +496,10 @@ const startCommand: Command = {
     spinner.start();
 
     try {
-      // Actually call MCP to initialize the swarm
-      const initResult = await callMCPTool('swarm_init', {
+      // Actually call MCP to initialize the swarm. The result payload is
+      // not consumed — success is signalled by the absence of a throw,
+      // and the renderer reads back from MCP via swarm_status afterwards.
+      await callMCPTool('swarm_init', {
         topology: 'hierarchical',
         maxAgents: totalAgents,
         strategy: strategy === 'development' ? 'specialized' : strategy,
@@ -730,7 +727,8 @@ const scaleCommand: Command = {
   action: async (ctx: CommandContext): Promise<CommandResult> => {
     const swarmId = ctx.args[0];
     const targetAgents = ctx.flags.agents as number;
-    const agentType = ctx.flags.type as string;
+    // `--type` is documented (heterogeneous scaling) but the MCP scale call
+    // currently picks the agent type — kept the flag for forward-compat.
 
     if (!swarmId) {
       output.printError('Swarm ID is required');

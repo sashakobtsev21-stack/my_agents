@@ -16,8 +16,6 @@ import { cpus } from 'os';
 import { join } from 'path';
 import {
   HeadlessWorkerExecutor,
-  HEADLESS_WORKER_TYPES,
-  HEADLESS_WORKER_CONFIGS,
   isHeadlessWorker,
   type HeadlessWorkerType,
   type HeadlessExecutionResult,

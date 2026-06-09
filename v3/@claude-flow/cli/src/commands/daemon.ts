@@ -5,10 +5,10 @@
 
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
-import { WorkerDaemon, getDaemon, startDaemon, stopDaemon, type WorkerType, type DaemonConfig } from '../services/worker-daemon.js';
-import { spawn, execFile, fork } from 'child_process';
+import { getDaemon, startDaemon, stopDaemon, type WorkerType, type DaemonConfig } from '../services/worker-daemon.js';
+import { fork } from 'child_process';
 import { fileURLToPath } from 'url';
-import { dirname, join, resolve, isAbsolute } from 'path';
+import { dirname, join, resolve } from 'path';
 import * as fs from 'fs';
 
 // Start daemon subcommand
@@ -317,7 +317,6 @@ async function startBackgroundDaemon(projectRoot: string, quiet: boolean, forwar
   // cmd.exe interpretation pass that broke Windows + Node 25 when
   // process.execPath contained a space (#1691). It also avoids the [DEP0190]
   // shell:true security warning.
-  const isWin = process.platform === 'win32';
   const forkOpts: Record<string, unknown> = {
     cwd: resolvedRoot,
     // detached: true on every platform (#1766). On Windows, leaving detached:false
