@@ -90,7 +90,8 @@ const INVARIANTS = [
   },
   {
     issue: '#1946',
-    file: 'v3/@claude-flow/cli/src/commands/doctor.ts',
+    // W10 split: checkMemoryDatabase moved from doctor.ts to doctor/checks/config.ts.
+    file: 'v3/@claude-flow/cli/src/commands/doctor/checks/config.ts',
     substring: 'getMemoryRoot',
     why: 'doctor.checkMemoryDatabase() routes through getMemoryRoot() — without it, doctor reports "Not initialized" on any DB at a non-default path.',
   },

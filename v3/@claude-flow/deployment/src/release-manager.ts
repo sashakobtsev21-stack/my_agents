@@ -3,7 +3,7 @@
  * Handles version bumping, changelog generation, and git tagging
  */
 
-import { execSync, execFileSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
@@ -351,8 +351,16 @@ export class ReleaseManager {
     // Validate command against allowlist
     validateCommand(cmd);
 
+    // ADR-078: same defence-in-depth pattern as validator + publisher —
+    // existing validateCommand() gate stays, then we argv-split and use
+    // execFile (no shell) so a bypass can't escalate to RCE.
+    const [rawFile, ...args] = cmd.split(/\s+/).filter(Boolean);
+    const file = process.platform === 'win32' && /^(npm|npx|yarn|pnpm)$/.test(rawFile)
+      ? `${rawFile}.cmd`
+      : rawFile;
+
     try {
-      const output = execSync(cmd, {
+      const output = execFileSync(file, args, {
         cwd: this.cwd,
         encoding: 'utf-8',
         stdio: returnOutput ? 'pipe' : 'inherit',

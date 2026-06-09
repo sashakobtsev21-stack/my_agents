@@ -36,8 +36,6 @@
     },
     {
       "files": [
-        "@claude-flow/deployment/src/publisher.ts",
-        "@claude-flow/deployment/src/release-manager.ts",
         "@claude-flow/hooks/src/statusline/index.ts"
       ],
       "rules": {

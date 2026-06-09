@@ -3,7 +3,7 @@
  * Handles npm package publishing with tag support
  */
 
-import { execSync, execFileSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { PublishOptions, PublishResult, PackageInfo } from './types.js';
@@ -227,8 +227,15 @@ export class Publisher {
     if (/[;&|`$()<>]/.test(cmd)) {
       throw new Error(`Invalid command: contains shell metacharacters`);
     }
+    // ADR-078: same defence-in-depth pattern as validator.ts.execCommand —
+    // metachar gate + prefix allowlist + execFile (no shell) + .cmd shim on
+    // Windows for the npm-family bins.
+    const [rawFile, ...args] = cmd.split(/\s+/).filter(Boolean);
+    const file = process.platform === 'win32' && /^(npm|npx|yarn|pnpm)$/.test(rawFile)
+      ? `${rawFile}.cmd`
+      : rawFile;
     try {
-      const output = execSync(cmd, {
+      const output = execFileSync(file, args, {
         cwd: this.cwd,
         encoding: 'utf-8',
         stdio: returnOutput ? 'pipe' : 'inherit'

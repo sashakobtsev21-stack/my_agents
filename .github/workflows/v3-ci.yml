@@ -372,11 +372,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: v3/pnpm-lock.yaml
-      - name: Install + build cli (bench reads dist/)
+      - name: Install + build cli + its workspace deps (bench reads dist/)
         working-directory: v3
         run: |
           pnpm install --frozen-lockfile
-          pnpm --filter @claude-flow/cli run build
+          # `...@claude-flow/cli` builds every workspace dep first (cli-core,
+          # shared, swarm, ...) so the bench's dynamic dist imports resolve.
+          # Just --filter @claude-flow/cli would leave cli-core/dist missing
+          # and tsc would fail on the `export *` re-exports in mcp-tools/.
+          pnpm --filter ...@claude-flow/cli run build
       - name: Run benchmark (small + medium sizes, capture JSON)
         # Smaller sizes than the local default — Linux runners are 7 GB so
         # N=50k+ is fine, but we keep it fast (~2 min total).
