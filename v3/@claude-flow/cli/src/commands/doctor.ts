@@ -7,15 +7,10 @@
 
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
-import { existsSync, readFileSync, statSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { createHash } from 'crypto';
-import { execFileSync } from 'child_process';
-import { decodeKey, isEncryptionEnabled } from '../encryption/vault.js';
-import { isEncryptedBlob } from '../encryption/vault.js';
 // Shared utilities + pilot extractions live under ./doctor/ (issue #7).
-import { runCommand, type HealthCheck } from './doctor/utils.js';
+// All node:fs/path/url/crypto/child_process + encryption/vault imports were
+// only used by the check functions, which all moved to ./doctor/checks/*.
+import { type HealthCheck } from './doctor/utils.js';
 import { checkNodeVersion, checkNpmVersion } from './doctor/checks/node.js';
 import { checkGit, checkGitRepo } from './doctor/checks/git.js';
 import { checkConfigFile, checkDaemonStatus, checkMemoryDatabase, checkApiKeys } from './doctor/checks/config.js';

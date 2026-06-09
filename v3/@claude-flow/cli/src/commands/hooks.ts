@@ -3,21 +3,14 @@
  * Self-learning hooks system for intelligent workflow automation
  */
 
+// After the issue #7 split, hooks.ts holds only the `hooksCommand` parent
+// that wires every subcommand together — every per-command implementation
+// lives under ./hooks/*.ts. The prompt/MCP/fs/path/helpers imports that
+// used to be needed for inline command actions were all carried out with
+// their commands; the parent itself only renders text via output.*.
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
-import { select, confirm, input } from '../prompt.js';
-import { callMCPTool, MCPClientError } from '../mcp-client.js';
-// storeCommand is now imported transitively via ./hooks/transfer.ts.
-import { existsSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
-import {
-  readCoverageFromDisk,
-  classifyCoverageGap,
-  suggestAgentsForFile,
-} from './hooks/coverage-reader.js';
-import { safeNum, formatIntelligenceStatus, formatWorkerStatus } from './hooks/helpers.js';
-// Pilot extractions (issue #7) — each command was inline in this file before.
-// Replicate the pattern for the other 36 commands.
+
 import { notifyCommand } from './hooks/notify.js';
 import { workerCommand } from './hooks/worker.js';
 import { coverageRouteCommand, coverageSuggestCommand, coverageGapsCommand } from './hooks/coverage.js';
