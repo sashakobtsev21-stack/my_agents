@@ -163,8 +163,10 @@ const INVARIANTS = [
   // #1987 — memory stats uses persistent HNSW count from MCP tool, not
   // the in-process JS state (which is always 0 from a fresh CLI invocation).
   {
+    // statsCommand moved out of the memory.ts monolith into the
+    // commands-manage.ts sub-module during the P3.10 god-file split (W101).
     issue: '#1987',
-    file: 'v3/@claude-flow/cli/src/commands/memory.ts',
+    file: 'v3/@claude-flow/cli/src/commands/memory/commands-manage.ts',
     substring: 'statsResult.entriesWithEmbeddings',
     why: 'memory stats reads persistent entriesWithEmbeddings, not in-process hnsw.entryCount. Without this, `memory stats` shows HNSW (0 entries) even when the DB has thousands of vectors.',
   },
