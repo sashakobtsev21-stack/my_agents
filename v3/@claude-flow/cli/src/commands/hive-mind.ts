@@ -16,6 +16,8 @@ import { callMCPTool, MCPClientError } from '../mcp-client.js';
 // path imports left with it.
 import { TOPOLOGIES, CONSENSUS_STRATEGIES, spawnClaudeCodeInstance } from './hive-mind/spawn.js';
 import type { HiveWorker } from './hive-mind/spawn.js';
+// Status/health/priority formatters moved to ./hive-mind/format.ts (W117).
+import { formatAgentStatus, formatHiveStatus, formatHealth, formatPriority } from './hive-mind/format.js';
 
 // Init subcommand
 const initCommand: Command = {
@@ -992,71 +994,5 @@ export const hiveMindCommand: Command = {
   }
 };
 
-// Helper functions
-function formatAgentStatus(status: unknown): string {
-  const statusStr = String(status);
-  switch (statusStr) {
-    case 'active':
-    case 'ready':
-    case 'running':
-      return output.success(statusStr);
-    case 'idle':
-    case 'waiting':
-      return output.dim(statusStr);
-    case 'busy':
-      return output.highlight(statusStr);
-    case 'error':
-    case 'failed':
-      return output.error(statusStr);
-    default:
-      return statusStr;
-  }
-}
-
-function formatHiveStatus(status: string): string {
-  switch (status) {
-    case 'active':
-      return output.success(status);
-    case 'idle':
-      return output.dim(status);
-    case 'degraded':
-      return output.warning(status);
-    case 'offline':
-      return output.error(status);
-    default:
-      return status;
-  }
-}
-
-function formatHealth(health: string): string {
-  switch (health) {
-    case 'healthy':
-    case 'good':
-      return output.success(health);
-    case 'warning':
-    case 'degraded':
-      return output.warning(health);
-    case 'critical':
-    case 'unhealthy':
-      return output.error(health);
-    default:
-      return health;
-  }
-}
-
-function formatPriority(priority: string): string {
-  switch (priority) {
-    case 'critical':
-      return output.error(priority.toUpperCase());
-    case 'high':
-      return output.warning(priority);
-    case 'normal':
-      return priority;
-    case 'low':
-      return output.dim(priority);
-    default:
-      return priority;
-  }
-}
 
 export default hiveMindCommand;
