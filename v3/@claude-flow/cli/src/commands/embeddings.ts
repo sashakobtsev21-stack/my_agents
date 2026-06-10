@@ -15,15 +15,9 @@
 
 import type { Command, CommandContext, CommandResult } from '../types.js';
 import { output } from '../output.js';
-
-// Dynamic imports for embeddings package
-async function getEmbeddings() {
-  try {
-    return await import('@claude-flow/embeddings');
-  } catch {
-    return null;
-  }
-}
+// Shared helpers (lazy @claude-flow/embeddings loader, cosineSimilarity,
+// formatBytes) moved to ./embeddings/helpers.ts (W88, P3.8 cut #1).
+import { getEmbeddings, cosineSimilarity, formatBytes } from './embeddings/helpers.js';
 
 // Generate subcommand - REAL implementation
 const generateCommand: Command = {
@@ -308,29 +302,6 @@ const searchCommand: Command = {
   },
 };
 
-/**
- * Optimized cosine similarity
- * V8 JIT-friendly - ~0.5μs per 384-dim vector comparison
- */
-function cosineSimilarity(a: number[], b: number[]): number {
-  const len = Math.min(a.length, b.length);
-  if (len === 0) return 0;
-
-  let dot = 0, normA = 0, normB = 0;
-
-  // Simple loop - V8 optimizes this well
-  for (let i = 0; i < len; i++) {
-    const ai = a[i], bi = b[i];
-    dot += ai * bi;
-    normA += ai * ai;
-    normB += bi * bi;
-  }
-
-  const mag = Math.sqrt(normA * normB);
-  return mag === 0 ? 0 : dot / mag;
-}
-
-// Compare subcommand - REAL similarity computation
 const compareCommand: Command = {
   name: 'compare',
   description: 'Compare similarity between texts',
@@ -540,16 +511,6 @@ const collectionsCommand: Command = {
   },
 };
 
-// Helper: Format bytes to human readable
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-}
-
-// Index subcommand - REAL HNSW stats
 const indexCommand: Command = {
   name: 'index',
   description: 'Manage HNSW indexes',
