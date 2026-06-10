@@ -28,16 +28,14 @@ import {
   generateRufloHookCjs,
 } from './helpers-generator.js';
 import { generateClaudeMd } from './claudemd-generator.js';
-// Static config maps (SKILLS_MAP, COMMANDS_MAP, AGENTS_MAP, DIRECTORIES)
-// moved to ./executor-maps.ts (W77, P3.6 cut #1).
-import { SKILLS_MAP, COMMANDS_MAP, AGENTS_MAP, DIRECTORIES } from './executor-maps.js';
-// Pure fs/counting utilities (findSourceDir, copyDirRecursive, count
-// Files, countEnabledHooks, findSourceHelpersDir) moved to
-// ./executor-fs-utils.ts (W78/W79, P3.6 cuts #2-3).
+// Static config maps moved to ./executor-maps.ts (W77, P3.6 cut #1).
+// DIRECTORIES is still used inline by createDirectories; the SKILLS/
+// COMMANDS/AGENTS maps moved to the copiers with their consumers.
+import { DIRECTORIES } from './executor-maps.js';
+// Pure fs/counting utilities moved to ./executor-fs-utils.ts (W78/W79).
+// countEnabledHooks (executeInit) + findSourceHelpersDir (writeHelpers)
+// remain inline consumers here; the rest moved with the copiers.
 import {
-  findSourceDir,
-  copyDirRecursive,
-  countFiles,
   countEnabledHooks,
   findSourceHelpersDir,
 } from './executor-fs-utils.js';
@@ -46,6 +44,9 @@ import {
 // (W79, P3.6 cut #3). Re-exported so the init command resolves them.
 export type { UpgradeResult } from './executor-upgrade.js';
 export { executeUpgrade, executeUpgradeWithMissing } from './executor-upgrade.js';
+// Asset copiers (copySkills, copyCommands, copyAgents) moved to
+// ./executor-copiers.ts (W80, P3.6 cut #4).
+import { copySkills, copyCommands, copyAgents } from './executor-copiers.js';
 
 /**
  * Execute initialization
@@ -334,186 +335,6 @@ async function writeMCPConfig(
   fs.writeFileSync(mcpPath, content, 'utf-8');
   result.created.files.push('.mcp.json');
 }
-
-/**
- * Copy skills from source
- */
-async function copySkills(
-  targetDir: string,
-  options: InitOptions,
-  result: InitResult
-): Promise<void> {
-  const skillsConfig = options.skills;
-  const targetSkillsDir = path.join(targetDir, '.claude', 'skills');
-
-  // Determine which skills to copy
-  const skillsToCopy: string[] = [];
-
-  if (skillsConfig.all) {
-    // Copy all available skills
-    Object.values(SKILLS_MAP).forEach(skills => skillsToCopy.push(...skills));
-  } else {
-    if (skillsConfig.core) skillsToCopy.push(...SKILLS_MAP.core);
-    if (skillsConfig.agentdb) skillsToCopy.push(...SKILLS_MAP.agentdb);
-    if (skillsConfig.github) skillsToCopy.push(...SKILLS_MAP.github);
-    if (skillsConfig.flowNexus) skillsToCopy.push(...SKILLS_MAP.flowNexus);
-    if (skillsConfig.browser) skillsToCopy.push(...SKILLS_MAP.browser);
-    if (skillsConfig.v3) skillsToCopy.push(...SKILLS_MAP.v3);
-    if (skillsConfig.dualMode) skillsToCopy.push(...SKILLS_MAP.dualMode);
-  }
-
-  // Find source skills directory
-  const sourceSkillsDir = findSourceDir('skills', options.sourceBaseDir);
-  if (!sourceSkillsDir) {
-    result.errors.push('Could not find source skills directory');
-    return;
-  }
-
-  // Copy each skill
-  for (const skillName of [...new Set(skillsToCopy)]) {
-    const sourcePath = path.join(sourceSkillsDir, skillName);
-    const targetPath = path.join(targetSkillsDir, skillName);
-
-    if (fs.existsSync(sourcePath)) {
-      if (!fs.existsSync(targetPath) || options.force) {
-        copyDirRecursive(sourcePath, targetPath);
-        result.created.files.push(`.claude/skills/${skillName}`);
-        result.summary.skillsCount++;
-      } else {
-        result.skipped.push(`.claude/skills/${skillName}`);
-      }
-    }
-  }
-}
-
-/**
- * Copy commands from source
- */
-async function copyCommands(
-  targetDir: string,
-  options: InitOptions,
-  result: InitResult
-): Promise<void> {
-  const commandsConfig = options.commands;
-  const targetCommandsDir = path.join(targetDir, '.claude', 'commands');
-
-  // Determine which commands to copy
-  const commandsToCopy: string[] = [];
-
-  if (commandsConfig.all) {
-    Object.values(COMMANDS_MAP).forEach(cmds => commandsToCopy.push(...cmds));
-  } else {
-    if (commandsConfig.core) commandsToCopy.push(...COMMANDS_MAP.core);
-    if (commandsConfig.analysis) commandsToCopy.push(...COMMANDS_MAP.analysis);
-    if (commandsConfig.automation) commandsToCopy.push(...COMMANDS_MAP.automation);
-    if (commandsConfig.github) commandsToCopy.push(...COMMANDS_MAP.github);
-    if (commandsConfig.hooks) commandsToCopy.push(...COMMANDS_MAP.hooks);
-    if (commandsConfig.monitoring) commandsToCopy.push(...COMMANDS_MAP.monitoring);
-    if (commandsConfig.optimization) commandsToCopy.push(...COMMANDS_MAP.optimization);
-    if (commandsConfig.sparc) commandsToCopy.push(...COMMANDS_MAP.sparc);
-    // ADR-128 Phase 4 substrate promotions
-    if (commandsConfig.agents) commandsToCopy.push(...(COMMANDS_MAP.agents || []));
-    if (commandsConfig.coordination) commandsToCopy.push(...(COMMANDS_MAP.coordination || []));
-    if (commandsConfig.hiveMind) commandsToCopy.push(...(COMMANDS_MAP.hiveMind || []));
-    if (commandsConfig.memory) commandsToCopy.push(...(COMMANDS_MAP.memory || []));
-    if (commandsConfig.swarm) commandsToCopy.push(...(COMMANDS_MAP.swarm || []));
-    if (commandsConfig.workflows) commandsToCopy.push(...(COMMANDS_MAP.workflows || []));
-    // ADR-128 Phase 4 opt-in categories
-    if (commandsConfig.pair) commandsToCopy.push(...(COMMANDS_MAP.pair || []));
-    if (commandsConfig.training) commandsToCopy.push(...(COMMANDS_MAP.training || []));
-    if (commandsConfig.streamChain) commandsToCopy.push(...(COMMANDS_MAP.streamChain || []));
-    if (commandsConfig.truth) commandsToCopy.push(...(COMMANDS_MAP.truth || []));
-    if (commandsConfig.verify) commandsToCopy.push(...(COMMANDS_MAP.verify || []));
-  }
-
-  // Find source commands directory
-  const sourceCommandsDir = findSourceDir('commands', options.sourceBaseDir);
-  if (!sourceCommandsDir) {
-    result.errors.push('Could not find source commands directory');
-    return;
-  }
-
-  // Copy each command/directory
-  for (const cmdName of [...new Set(commandsToCopy)]) {
-    const sourcePath = path.join(sourceCommandsDir, cmdName);
-    const targetPath = path.join(targetCommandsDir, cmdName);
-
-    if (fs.existsSync(sourcePath)) {
-      if (!fs.existsSync(targetPath) || options.force) {
-        if (fs.statSync(sourcePath).isDirectory()) {
-          copyDirRecursive(sourcePath, targetPath);
-        } else {
-          fs.copyFileSync(sourcePath, targetPath);
-        }
-        result.created.files.push(`.claude/commands/${cmdName}`);
-        result.summary.commandsCount++;
-      } else {
-        result.skipped.push(`.claude/commands/${cmdName}`);
-      }
-    }
-  }
-}
-
-/**
- * Copy agents from source
- */
-async function copyAgents(
-  targetDir: string,
-  options: InitOptions,
-  result: InitResult
-): Promise<void> {
-  const agentsConfig = options.agents;
-  const targetAgentsDir = path.join(targetDir, '.claude', 'agents');
-
-  // Determine which agents to copy
-  const agentsToCopy: string[] = [];
-
-  if (agentsConfig.all) {
-    Object.values(AGENTS_MAP).forEach(agents => agentsToCopy.push(...agents));
-  } else {
-    if (agentsConfig.core) agentsToCopy.push(...AGENTS_MAP.core);
-    if (agentsConfig.consensus) agentsToCopy.push(...AGENTS_MAP.consensus);
-    if (agentsConfig.github) agentsToCopy.push(...AGENTS_MAP.github);
-    if (agentsConfig.hiveMind) agentsToCopy.push(...AGENTS_MAP.hiveMind);
-    if (agentsConfig.sparc) agentsToCopy.push(...AGENTS_MAP.sparc);
-    if (agentsConfig.swarm) agentsToCopy.push(...AGENTS_MAP.swarm);
-    if (agentsConfig.browser) agentsToCopy.push(...AGENTS_MAP.browser);
-    // V3-specific agent categories
-    if (agentsConfig.v3) agentsToCopy.push(...(AGENTS_MAP.v3 || []));
-    if (agentsConfig.optimization) agentsToCopy.push(...(AGENTS_MAP.optimization || []));
-    if (agentsConfig.testing) agentsToCopy.push(...(AGENTS_MAP.testing || []));
-    // Dual-mode agents (Claude Code + Codex hybrid)
-    if (agentsConfig.dualMode) agentsToCopy.push(...(AGENTS_MAP.dualMode || []));
-  }
-
-  // Find source agents directory
-  const sourceAgentsDir = findSourceDir('agents', options.sourceBaseDir);
-  if (!sourceAgentsDir) {
-    result.errors.push('Could not find source agents directory');
-    return;
-  }
-
-  // Copy each agent category
-  for (const agentCategory of [...new Set(agentsToCopy)]) {
-    const sourcePath = path.join(sourceAgentsDir, agentCategory);
-    const targetPath = path.join(targetAgentsDir, agentCategory);
-
-    if (fs.existsSync(sourcePath)) {
-      if (!fs.existsSync(targetPath) || options.force) {
-        copyDirRecursive(sourcePath, targetPath);
-        // Count agent files (.md only — .yaml agents were migrated to .md)
-        const mdFiles = countFiles(sourcePath, '.md');
-        result.summary.agentsCount += mdFiles;
-        result.created.files.push(`.claude/agents/${agentCategory}`);
-      } else {
-        result.skipped.push(`.claude/agents/${agentCategory}`);
-      }
-    }
-  }
-}
-
-/**
- * Find source helpers directory.
 
 /**
  * Write helper scripts
