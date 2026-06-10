@@ -13,46 +13,18 @@
 
 import type { MCPTool } from './types.js';
 import { validateIdentifier, validateText } from './validate-input.js';
+// Shared validators + size caps + lazy bridge loader moved to
+// ./agentdb-tools/helpers.ts (W120, P3.15 cut #1).
+import {
+  MAX_BATCH_SIZE,
+  MAX_TOP_K,
+  validateString,
+  validatePositiveInt,
+  validateScore,
+  sanitizeError,
+  getBridge,
+} from './agentdb-tools/helpers.js';
 
-// ===== Shared validation helpers =====
-
-const MAX_STRING_LENGTH = 100_000; // 100KB max for any string input
-const MAX_BATCH_SIZE = 500;        // Max entries per batch operation
-const MAX_TOP_K = 100;             // Max results per query
-
-function validateString(value: unknown, name: string, maxLen = MAX_STRING_LENGTH): string | null {
-  if (typeof value !== 'string' || value.length === 0) return null;
-  if (value.length > maxLen) return null;
-  return value;
-}
-
-function validatePositiveInt(value: unknown, defaultVal: number, max: number): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return defaultVal;
-  const n = Math.floor(value);
-  return n > 0 ? Math.min(n, max) : defaultVal;
-}
-
-function validateScore(value: unknown, defaultVal: number): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return defaultVal;
-  return Math.max(0, Math.min(1, value));
-}
-
-function sanitizeError(error: unknown): string {
-  if (error instanceof Error) {
-    // Strip filesystem paths from error messages
-    return error.message.replace(/\/[^\s:]+\//g, '<path>/').substring(0, 500);
-  }
-  return 'Internal error';
-}
-
-// Lazy-cached bridge module
-let bridgeModule: typeof import('../memory/memory-bridge.js') | null = null;
-async function getBridge() {
-  if (!bridgeModule) {
-    bridgeModule = await import('../memory/memory-bridge.js');
-  }
-  return bridgeModule;
-}
 
 // ===== agentdb_health — Controller health check =====
 
