@@ -18,7 +18,6 @@ import {
   HeadlessWorkerExecutor,
   isHeadlessWorker,
   type HeadlessWorkerType,
-  type HeadlessExecutionResult,
 } from './headless-worker-executor.js';
 // Type definitions + DEFAULT_WORKERS schedule + timeout moved to
 // ./worker-daemon/types.ts (W108, P3.12 cut #1). Imported for internal
@@ -44,6 +43,24 @@ import {
   readDaemonConfigFromFile,
   type DaemonFileConfig,
 } from './worker-daemon/env-config.js';
+// Metrics persistence + local-mode worker fallbacks moved to
+// ./worker-daemon/local-workers.ts (W110, P3.12 cut #3) — pure functions
+// of projectRoot, called from executeWorker's local-dispatch switch.
+import {
+  persistHeadlessResult,
+  runMapWorker,
+  runAuditWorkerLocal,
+  runOptimizeWorkerLocal,
+  runConsolidateWorker,
+  runTestGapsWorkerLocal,
+  runPredictWorkerLocal,
+  runDocumentWorkerLocal,
+  runUltralearnWorkerLocal,
+  runRefactorWorkerLocal,
+  runDeepdiveWorkerLocal,
+  runBenchmarkWorkerLocal,
+  runPreloadWorkerLocal,
+} from './worker-daemon/local-workers.js';
 
 /**
  * Worker Daemon - Manages background workers with Node.js
@@ -967,7 +984,7 @@ export class WorkerDaemon extends EventEmitter {
           // never reached `.claude-flow/metrics/<name>.json` — `memory stats`
           // and downstream consumers saw nothing despite successful runs.
           try {
-            this.persistHeadlessResult(workerConfig.type as HeadlessWorkerType, result);
+            persistHeadlessResult(this.projectRoot, workerConfig.type as HeadlessWorkerType, result);
           } catch (persistError) {
             this.log('warn', `Failed to persist headless result for ${workerConfig.type}: ${(persistError as Error).message}`);
           }
@@ -986,320 +1003,40 @@ export class WorkerDaemon extends EventEmitter {
       }
     }
 
-    // Local execution (fallback or for non-headless workers)
+    // Local execution (fallback or for non-headless workers). The local
+    // worker bodies are free functions in ./worker-daemon/local-workers.ts
+    // (W110); they only need projectRoot.
+    const root = this.projectRoot;
     switch (workerConfig.type) {
       case 'map':
-        return this.runMapWorker();
+        return runMapWorker(root);
       case 'audit':
-        return this.runAuditWorkerLocal();
+        return runAuditWorkerLocal(root);
       case 'optimize':
-        return this.runOptimizeWorkerLocal();
+        return runOptimizeWorkerLocal(root);
       case 'consolidate':
-        return this.runConsolidateWorker();
+        return runConsolidateWorker(root);
       case 'testgaps':
-        return this.runTestGapsWorkerLocal();
+        return runTestGapsWorkerLocal(root);
       case 'predict':
-        return this.runPredictWorkerLocal();
+        return runPredictWorkerLocal(root);
       case 'document':
-        return this.runDocumentWorkerLocal();
+        return runDocumentWorkerLocal(root);
       case 'ultralearn':
-        return this.runUltralearnWorkerLocal();
+        return runUltralearnWorkerLocal(root);
       case 'refactor':
-        return this.runRefactorWorkerLocal();
+        return runRefactorWorkerLocal(root);
       case 'deepdive':
-        return this.runDeepdiveWorkerLocal();
+        return runDeepdiveWorkerLocal(root);
       case 'benchmark':
-        return this.runBenchmarkWorkerLocal();
+        return runBenchmarkWorkerLocal(root);
       case 'preload':
-        return this.runPreloadWorkerLocal();
+        return runPreloadWorkerLocal(root);
       default:
         return { status: 'unknown worker type', mode: 'local' };
     }
   }
 
-  /**
-   * #1793: persist a headless worker result to the same metrics file the
-   * local fallback writes to. Without this, AI-mode workers produced rich
-   * structured output (audit findings, perf signals, test-gap analysis)
-   * that lived only in `.claude-flow/logs/headless/*_result.log` and was
-   * invisible to `npx ruflo memory stats` or the metrics consumers.
-   *
-   * The mapping mirrors the `*Local` worker implementations below so a
-   * single consumer path works regardless of execution mode.
-   */
-  private persistHeadlessResult(
-    workerType: HeadlessWorkerType,
-    result: HeadlessExecutionResult,
-  ): void {
-    const metricsDir = join(this.projectRoot, '.claude-flow', 'metrics');
-    if (!existsSync(metricsDir)) mkdirSync(metricsDir, { recursive: true });
-
-    // Filename mirrors the local-mode worker writes (security-audit.json,
-    // performance.json, test-gaps.json) so a downstream reader doesn't
-    // care which mode produced the data.
-    const filenameMap: Partial<Record<HeadlessWorkerType, string>> = {
-      audit: 'security-audit.json',
-      optimize: 'performance.json',
-      testgaps: 'test-gaps.json',
-      document: 'documentation.json',
-      refactor: 'refactor.json',
-      deepdive: 'deepdive.json',
-      ultralearn: 'ultralearn.json',
-      predict: 'predictions.json',
-    };
-    const filename = filenameMap[workerType] ?? `${workerType}.json`;
-    const metricsFile = join(metricsDir, filename);
-
-    const persisted = {
-      timestamp: result.timestamp instanceof Date ? result.timestamp.toISOString() : new Date().toISOString(),
-      mode: 'headless' as const,
-      workerType,
-      model: result.model,
-      durationMs: result.durationMs,
-      tokensUsed: result.tokensUsed,
-      executionId: result.executionId,
-      success: result.success,
-      // Structured findings live here when the worker emits JSON (e.g. the
-      // audit worker's vulnerability list). Fall back to a raw-output
-      // pointer so consumers can still locate the full log.
-      findings: result.parsedOutput ?? null,
-      rawOutputPreview: typeof result.output === 'string' ? result.output.slice(0, 2000) : undefined,
-      rawOutputLength: typeof result.output === 'string' ? result.output.length : 0,
-    };
-
-    writeFileSync(metricsFile, JSON.stringify(persisted, null, 2));
-  }
-
-  // Worker implementations
-
-  private async runMapWorker(): Promise<unknown> {
-    // Scan project structure and update metrics
-    const metricsFile = join(this.projectRoot, '.claude-flow', 'metrics', 'codebase-map.json');
-    const metricsDir = join(this.projectRoot, '.claude-flow', 'metrics');
-
-    if (!existsSync(metricsDir)) {
-      mkdirSync(metricsDir, { recursive: true });
-    }
-
-    const map = {
-      timestamp: new Date().toISOString(),
-      projectRoot: this.projectRoot,
-      structure: {
-        hasPackageJson: existsSync(join(this.projectRoot, 'package.json')),
-        hasTsConfig: existsSync(join(this.projectRoot, 'tsconfig.json')),
-        hasClaudeConfig: existsSync(join(this.projectRoot, '.claude')),
-        hasClaudeFlow: existsSync(join(this.projectRoot, '.claude-flow')),
-      },
-      scannedAt: Date.now(),
-    };
-
-    writeFileSync(metricsFile, JSON.stringify(map, null, 2));
-    return map;
-  }
-
-  /**
-   * Local audit worker (fallback when headless unavailable)
-   */
-  private async runAuditWorkerLocal(): Promise<unknown> {
-    // Basic security checks
-    const auditFile = join(this.projectRoot, '.claude-flow', 'metrics', 'security-audit.json');
-    const metricsDir = join(this.projectRoot, '.claude-flow', 'metrics');
-
-    if (!existsSync(metricsDir)) {
-      mkdirSync(metricsDir, { recursive: true });
-    }
-
-    const audit = {
-      timestamp: new Date().toISOString(),
-      mode: 'local',
-      checks: {
-        envFilesProtected: !existsSync(join(this.projectRoot, '.env.local')),
-        gitIgnoreExists: existsSync(join(this.projectRoot, '.gitignore')),
-        noHardcodedSecrets: true, // Would need actual scanning
-      },
-      riskLevel: 'low',
-      recommendations: [],
-      note: 'Install Claude Code CLI for AI-powered security analysis',
-    };
-
-    writeFileSync(auditFile, JSON.stringify(audit, null, 2));
-    return audit;
-  }
-
-  /**
-   * Local optimize worker (fallback when headless unavailable)
-   */
-  private async runOptimizeWorkerLocal(): Promise<unknown> {
-    // Update performance metrics
-    const optimizeFile = join(this.projectRoot, '.claude-flow', 'metrics', 'performance.json');
-    const metricsDir = join(this.projectRoot, '.claude-flow', 'metrics');
-
-    if (!existsSync(metricsDir)) {
-      mkdirSync(metricsDir, { recursive: true });
-    }
-
-    const perf = {
-      timestamp: new Date().toISOString(),
-      mode: 'local',
-      memoryUsage: process.memoryUsage(),
-      uptime: process.uptime(),
-      optimizations: {
-        cacheHitRate: 0.78,
-        avgResponseTime: 45,
-      },
-      note: 'Install Claude Code CLI for AI-powered optimization suggestions',
-    };
-
-    writeFileSync(optimizeFile, JSON.stringify(perf, null, 2));
-    return perf;
-  }
-
-  private async runConsolidateWorker(): Promise<unknown> {
-    // Memory consolidation - clean up old patterns
-    const consolidateFile = join(this.projectRoot, '.claude-flow', 'metrics', 'consolidation.json');
-    const metricsDir = join(this.projectRoot, '.claude-flow', 'metrics');
-
-    if (!existsSync(metricsDir)) {
-      mkdirSync(metricsDir, { recursive: true });
-    }
-
-    const result = {
-      timestamp: new Date().toISOString(),
-      patternsConsolidated: 0,
-      memoryCleaned: 0,
-      duplicatesRemoved: 0,
-    };
-
-    writeFileSync(consolidateFile, JSON.stringify(result, null, 2));
-    return result;
-  }
-
-  /**
-   * Local testgaps worker (fallback when headless unavailable)
-   */
-  private async runTestGapsWorkerLocal(): Promise<unknown> {
-    // Check for test coverage gaps
-    const testGapsFile = join(this.projectRoot, '.claude-flow', 'metrics', 'test-gaps.json');
-    const metricsDir = join(this.projectRoot, '.claude-flow', 'metrics');
-
-    if (!existsSync(metricsDir)) {
-      mkdirSync(metricsDir, { recursive: true });
-    }
-
-    const result = {
-      timestamp: new Date().toISOString(),
-      mode: 'local',
-      hasTestDir: existsSync(join(this.projectRoot, 'tests')) || existsSync(join(this.projectRoot, '__tests__')),
-      estimatedCoverage: 'unknown',
-      gaps: [],
-      note: 'Install Claude Code CLI for AI-powered test gap analysis',
-    };
-
-    writeFileSync(testGapsFile, JSON.stringify(result, null, 2));
-    return result;
-  }
-
-  /**
-   * Local predict worker (fallback when headless unavailable)
-   */
-  private async runPredictWorkerLocal(): Promise<unknown> {
-    return {
-      timestamp: new Date().toISOString(),
-      mode: 'local',
-      predictions: [],
-      preloaded: [],
-      note: 'Install Claude Code CLI for AI-powered predictions',
-    };
-  }
-
-  /**
-   * Local document worker (fallback when headless unavailable)
-   */
-  private async runDocumentWorkerLocal(): Promise<unknown> {
-    return {
-      timestamp: new Date().toISOString(),
-      mode: 'local',
-      filesDocumented: 0,
-      suggestedDocs: [],
-      note: 'Install Claude Code CLI for AI-powered documentation generation',
-    };
-  }
-
-  /**
-   * Local ultralearn worker (fallback when headless unavailable)
-   */
-  private async runUltralearnWorkerLocal(): Promise<unknown> {
-    return {
-      timestamp: new Date().toISOString(),
-      mode: 'local',
-      patternsLearned: 0,
-      insightsGained: [],
-      note: 'Install Claude Code CLI for AI-powered deep learning',
-    };
-  }
-
-  /**
-   * Local refactor worker (fallback when headless unavailable)
-   */
-  private async runRefactorWorkerLocal(): Promise<unknown> {
-    return {
-      timestamp: new Date().toISOString(),
-      mode: 'local',
-      suggestions: [],
-      duplicatesFound: 0,
-      note: 'Install Claude Code CLI for AI-powered refactoring suggestions',
-    };
-  }
-
-  /**
-   * Local deepdive worker (fallback when headless unavailable)
-   */
-  private async runDeepdiveWorkerLocal(): Promise<unknown> {
-    return {
-      timestamp: new Date().toISOString(),
-      mode: 'local',
-      analysisDepth: 'shallow',
-      findings: [],
-      note: 'Install Claude Code CLI for AI-powered deep code analysis',
-    };
-  }
-
-  /**
-   * Local benchmark worker
-   */
-  private async runBenchmarkWorkerLocal(): Promise<unknown> {
-    const benchmarkFile = join(this.projectRoot, '.claude-flow', 'metrics', 'benchmark.json');
-    const metricsDir = join(this.projectRoot, '.claude-flow', 'metrics');
-
-    if (!existsSync(metricsDir)) {
-      mkdirSync(metricsDir, { recursive: true });
-    }
-
-    const result = {
-      timestamp: new Date().toISOString(),
-      mode: 'local',
-      benchmarks: {
-        memoryUsage: process.memoryUsage(),
-        cpuUsage: process.cpuUsage(),
-        uptime: process.uptime(),
-      },
-    };
-
-    writeFileSync(benchmarkFile, JSON.stringify(result, null, 2));
-    return result;
-  }
-
-  /**
-   * Local preload worker
-   */
-  private async runPreloadWorkerLocal(): Promise<unknown> {
-    return {
-      timestamp: new Date().toISOString(),
-      mode: 'local',
-      resourcesPreloaded: 0,
-      cacheStatus: 'active',
-    };
-  }
 
   /**
    * Manually trigger a worker
