@@ -182,7 +182,7 @@ const INVARIANTS = [
   // #1937 — exclusion patterns for memory_import_claude (voice-fidelity)
   {
     issue: '#1937',
-    file: 'v3/@claude-flow/cli/src/mcp-tools/memory-tools.ts',
+    file: 'v3/@claude-flow/cli/src/mcp-tools/memory-tools/tools-extra-a.ts',
     substring: 'excludeFilePatterns',
     why: 'memory_import_claude accepts excludeFilePatterns (glob) for voice-fidelity / persona-restricted operators. Per-file granularity beyond the coarse allProjects:true/false.',
   },
