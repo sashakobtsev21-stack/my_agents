@@ -35,6 +35,15 @@ import type {
 import type { DaemonConfig } from './worker-daemon/types.js';
 import { DEFAULT_WORKERS, DEFAULT_WORKER_TIMEOUT_MS } from './worker-daemon/types.js';
 export type { WorkerType, DaemonConfig } from './worker-daemon/types.js';
+// Environment probes + file-config loader moved to ./worker-daemon/
+// env-config.ts (W109, P3.12 cut #2); the class wraps these in thin
+// static/private delegators that preserve the public API.
+import {
+  isWslEnvironment,
+  getEffectiveCpuCount,
+  readDaemonConfigFromFile,
+  type DaemonFileConfig,
+} from './worker-daemon/env-config.js';
 
 /**
  * Worker Daemon - Manages background workers with Node.js
@@ -217,36 +226,15 @@ export class WorkerDaemon extends EventEmitter {
    *   3. `/proc/sys/kernel/osrelease` contains "microsoft" or "WSL"
    *      (kernel build marker; survives env stripping)
    */
+  // Thin static delegators — logic lives in ./worker-daemon/env-config.ts
+  // (W109). Kept static so `WorkerDaemon.isWslEnvironment()` /
+  // `WorkerDaemon.getEffectiveCpuCount()` stay part of the public API.
   static isWslEnvironment(): boolean {
-    if (process.env.WSL_DISTRO_NAME || process.env.WSL_INTEROP) return true;
-    try {
-      const osrelease = readFileSync('/proc/sys/kernel/osrelease', 'utf8').toLowerCase();
-      if (osrelease.includes('microsoft') || osrelease.includes('wsl')) return true;
-    } catch { /* not on Linux or /proc inaccessible */ }
-    return false;
+    return isWslEnvironment();
   }
 
   static getEffectiveCpuCount(): number {
-    // 1. Try cgroup v2: /sys/fs/cgroup/cpu.max
-    try {
-      const cpuMax = readFileSync('/sys/fs/cgroup/cpu.max', 'utf8').trim();
-      const [quotaStr, periodStr] = cpuMax.split(' ');
-      if (quotaStr !== 'max') {
-        const quota = parseInt(quotaStr, 10);
-        const period = parseInt(periodStr, 10);
-        if (quota > 0 && period > 0) return Math.ceil(quota / period);
-      }
-    } catch { /* not in cgroup v2 */ }
-
-    // 2. Try cgroup v1: /sys/fs/cgroup/cpu/cpu.cfs_quota_us
-    try {
-      const quota = parseInt(readFileSync('/sys/fs/cgroup/cpu/cpu.cfs_quota_us', 'utf8').trim(), 10);
-      const period = parseInt(readFileSync('/sys/fs/cgroup/cpu/cpu.cfs_period_us', 'utf8').trim(), 10);
-      if (quota > 0 && period > 0) return Math.ceil(quota / period);
-    } catch { /* not in cgroup v1 */ }
-
-    // 3. Fallback to os.cpus().length
-    return cpus().length || 1;
+    return getEffectiveCpuCount();
   }
 
   /**
@@ -256,72 +244,10 @@ export class WorkerDaemon extends EventEmitter {
    * to YAML so operators using the v3 canonical YAML format aren't silently
    * ignored. The chosen path is logged at info level.
    */
-  private readDaemonConfigFromFile(claudeFlowDir: string): {
-    autoStart?: boolean;
-    maxConcurrent?: number;
-    workerTimeoutMs?: number;
-    maxCpuLoad?: number;
-    minFreeMemoryPercent?: number;
-  } {
-    const jsonPath = join(claudeFlowDir, 'config.json');
-    const yamlPath = join(claudeFlowDir, 'config.yaml');
-    const ymlPath = join(claudeFlowDir, 'config.yml');
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let raw: Record<string, any> | undefined;
-    let chosenPath: string | undefined;
-
-    if (existsSync(jsonPath)) {
-      try {
-        raw = JSON.parse(readFileSync(jsonPath, 'utf-8'));
-        chosenPath = jsonPath;
-      } catch {
-        return {};
-      }
-    } else if (existsSync(yamlPath) || existsSync(ymlPath)) {
-      const yPath = existsSync(yamlPath) ? yamlPath : ymlPath;
-      try {
-        // Lazy-load yaml so the daemon doesn't hard-require it; if the
-        // dep isn't installed, fall back to the previous warn-only path.
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const yamlMod = require('yaml') as { parse(s: string): unknown };
-        const parsed = yamlMod.parse(readFileSync(yPath, 'utf-8'));
-        if (parsed && typeof parsed === 'object') {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          raw = parsed as Record<string, any>;
-          chosenPath = yPath;
-        }
-      } catch {
-        this.log(
-          'warn',
-          `Found ${yPath} but yaml parser unavailable. Install \`yaml\` or convert to JSON. Falling back to defaults.`,
-        );
-        return {};
-      }
-    }
-
-    if (!raw || !chosenPath) {
-      return {};
-    }
-    this.log('info', `Daemon config loaded from ${chosenPath}`);
-
-    try {
-      // Support both flat keys at root and nested under scopes.project
-      const cfg = raw?.scopes?.project ?? raw;
-      const rawCpuLoad = cfg['daemon.resourceThresholds.maxCpuLoad'] ?? raw['daemon.resourceThresholds.maxCpuLoad'];
-      const rawMinMem = cfg['daemon.resourceThresholds.minFreeMemoryPercent'] ?? raw['daemon.resourceThresholds.minFreeMemoryPercent'];
-      const rawMaxConcurrent = cfg['daemon.maxConcurrent'] ?? raw['daemon.maxConcurrent'];
-      const rawTimeout = cfg['daemon.workerTimeoutMs'] ?? raw['daemon.workerTimeoutMs'];
-      return {
-        autoStart: typeof raw['daemon.autoStart'] === 'boolean' ? raw['daemon.autoStart'] : undefined,
-        maxConcurrent: (typeof rawMaxConcurrent === 'number' && rawMaxConcurrent > 0) ? rawMaxConcurrent : undefined,
-        workerTimeoutMs: (typeof rawTimeout === 'number' && rawTimeout > 0) ? rawTimeout : undefined,
-        maxCpuLoad: (typeof rawCpuLoad === 'number' && rawCpuLoad > 0 && rawCpuLoad < 1000) ? rawCpuLoad : undefined,
-        minFreeMemoryPercent: (typeof rawMinMem === 'number' && rawMinMem >= 0 && rawMinMem <= 100) ? rawMinMem : undefined,
-      };
-    } catch {
-      return {};
-    }
+  // Delegates to ./worker-daemon/env-config.ts (W109), passing this.log
+  // so the file-choice + parse-failure messages stay on the daemon log.
+  private readDaemonConfigFromFile(claudeFlowDir: string): DaemonFileConfig {
+    return readDaemonConfigFromFile(claudeFlowDir, (level, message) => this.log(level, message));
   }
 
   /**
