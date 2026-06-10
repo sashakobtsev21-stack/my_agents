@@ -229,3 +229,8 @@ export interface IContentAwareExecutor extends IHeadlessExecutor {
   /** Set the CLAUDE.md content that the executor should use as behavioral context */
   setContext(claudeMdContent: string): void;
 }
+
+/** Type guard for content-aware executors */
+export function isContentAwareExecutor(executor: IHeadlessExecutor): executor is IContentAwareExecutor {
+  return 'setContext' in executor && typeof (executor as IContentAwareExecutor).setContext === 'function';
+}
