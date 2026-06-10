@@ -42,13 +42,13 @@ const INVARIANTS = [
   // #1939 — Win32 cwd → Claude Code slug
   {
     issue: '#1939',
-    file: 'v3/@claude-flow/cli/src/mcp-tools/memory-tools.ts',
+    file: 'v3/@claude-flow/cli/src/mcp-tools/memory-tools/helpers.ts',
     regex: /\/\^\[A-Za-z\]:\[\\\\\/\]\//,
     why: 'Win32 slug candidate regex (`^[A-Za-z]:[\\/]`) — without it, memory_import_claude({allProjects:false}) returns 0 on Win32 paths like `C:\\Users\\…\\Claude Stuff`.',
   },
   {
     issue: '#1939',
-    file: 'v3/@claude-flow/cli/src/mcp-tools/memory-tools.ts',
+    file: 'v3/@claude-flow/cli/src/mcp-tools/memory-tools/helpers.ts',
     substring: "replace(/[:\\\\/]/g, '-')",
     why: 'Win32 slug normalization — drops `:` / `\\` / `/` so `C:\\Users\\…\\Claude Stuff` → `C--Users-…-Claude-Stuff`.',
   },
