@@ -16,12 +16,70 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import { dirname } from 'path';
 import type { InitOptions } from './types.js';
 
 // ESM-compatible __dirname (same init/ directory as executor.ts)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+/**
+ * Find the bundled .claude/helpers source directory. Tries require.resolve
+ * of the package root, then __dirname-relative, then a walk-up, then cwd —
+ * accepting only a directory that contains the hook-handler.cjs sentinel.
+ */
+export function findSourceHelpersDir(sourceBaseDir?: string): string | null {
+  const possiblePaths: string[] = [];
+  const SENTINEL_FILE = 'hook-handler.cjs'; // Must exist in valid source
+
+  // If explicit source base directory is provided, check it first
+  if (sourceBaseDir) {
+    possiblePaths.push(path.join(sourceBaseDir, '.claude', 'helpers'));
+  }
+
+  // Strategy 1: require.resolve to find package root (most reliable for npx)
+  try {
+    const esmRequire = createRequire(import.meta.url);
+    const pkgJsonPath = esmRequire.resolve('@claude-flow/cli/package.json');
+    const pkgRoot = path.dirname(pkgJsonPath);
+    possiblePaths.push(path.join(pkgRoot, '.claude', 'helpers'));
+  } catch {
+    // Not installed as a package — skip
+  }
+
+  // Strategy 2: __dirname-based (dist/src/init -> package root)
+  const packageRoot = path.resolve(__dirname, '..', '..', '..');
+  const packageHelpers = path.join(packageRoot, '.claude', 'helpers');
+  possiblePaths.push(packageHelpers);
+
+  // Strategy 3: Walk up from __dirname looking for package root
+  let currentDir = __dirname;
+  for (let i = 0; i < 10; i++) {
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) break; // hit filesystem root
+    const helpersPath = path.join(parentDir, '.claude', 'helpers');
+    possiblePaths.push(helpersPath);
+    currentDir = parentDir;
+  }
+
+  // Strategy 4: Check cwd-relative paths (for local dev)
+  const cwdBased = [
+    path.join(process.cwd(), '.claude', 'helpers'),
+    path.join(process.cwd(), '..', '.claude', 'helpers'),
+    path.join(process.cwd(), '..', '..', '.claude', 'helpers'),
+  ];
+  possiblePaths.push(...cwdBased);
+
+  // Return first path that exists AND contains the sentinel file
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p) && fs.existsSync(path.join(p, SENTINEL_FILE))) {
+      return p;
+    }
+  }
+
+  return null;
+}
 
 /**
  * Find source directory for skills/commands/agents
