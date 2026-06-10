@@ -11,84 +11,35 @@
 
 import type { Command, CommandContext, CommandResult } from './cli-types.js';
 import { output, select, confirm, input, callMCPTool, MCPClientError } from './cli-types.js';
+// Domain types moved to ./cli-commands-types.ts (W141, P3.23 cut #1).
+import type {
+  ClaimServices,
+  ClaimantType,
+  ClaimStatus,
+  Claim,
+  ClaimFilter,
+  HandoffRequest,
+  ContestResult,
+  AgentLoad,
+  RebalanceResult,
+} from './cli-commands-types.js';
+// Re-exported so external callers importing these types from
+// './cli-commands.js' keep resolving byte-identically.
+export type {
+  ClaimServices,
+  ClaimantType,
+  ClaimStatus,
+  Claim,
+  ClaimFilter,
+  HandoffRequest,
+  ContestResult,
+  AgentLoad,
+  RebalanceResult,
+} from './cli-commands-types.js';
 
 // ============================================
 // Types
 // ============================================
-
-export interface ClaimServices {
-  claimIssue: (issueId: string, claimantId: string, claimantType: ClaimantType) => Promise<Claim>;
-  releaseClaim: (issueId: string, claimantId: string) => Promise<void>;
-  requestHandoff: (issueId: string, targetId: string, targetType: ClaimantType) => Promise<HandoffRequest>;
-  updateStatus: (issueId: string, status: ClaimStatus, reason?: string) => Promise<Claim>;
-  listClaims: (filter?: ClaimFilter) => Promise<Claim[]>;
-  listStealable: () => Promise<Claim[]>;
-  stealIssue: (issueId: string, stealerId: string) => Promise<Claim>;
-  markStealable: (issueId: string, reason?: string) => Promise<Claim>;
-  contestSteal: (issueId: string, contesterId: string, reason: string) => Promise<ContestResult>;
-  getAgentLoad: (agentId?: string) => Promise<AgentLoad[]>;
-  rebalance: (dryRun?: boolean) => Promise<RebalanceResult>;
-}
-
-export type ClaimantType = 'agent' | 'human';
-export type ClaimStatus = 'active' | 'blocked' | 'review-requested' | 'stealable' | 'completed';
-
-export interface Claim {
-  issueId: string;
-  claimantId: string;
-  claimantType: ClaimantType;
-  status: ClaimStatus;
-  progress: number;
-  claimedAt: string;
-  expiresAt?: string;
-  blockedReason?: string;
-  stealableReason?: string;
-}
-
-export interface ClaimFilter {
-  claimantId?: string;
-  status?: ClaimStatus;
-  available?: boolean;
-}
-
-export interface HandoffRequest {
-  issueId: string;
-  fromId: string;
-  toId: string;
-  toType: ClaimantType;
-  requestedAt: string;
-  status: 'pending' | 'accepted' | 'rejected';
-}
-
-export interface ContestResult {
-  issueId: string;
-  contesterId: string;
-  originalClaimantId: string;
-  resolution: 'steal-reverted' | 'steal-upheld' | 'pending-review';
-  reason?: string;
-}
-
-export interface AgentLoad {
-  agentId: string;
-  agentType: string;
-  activeIssues: number;
-  totalCapacity: number;
-  utilizationPercent: number;
-  avgCompletionTime: string;
-  status: 'healthy' | 'overloaded' | 'idle';
-}
-
-export interface RebalanceResult {
-  moved: number;
-  reassignments: Array<{
-    issueId: string;
-    fromAgent: string;
-    toAgent: string;
-    reason: string;
-  }>;
-  skipped: number;
-  dryRun: boolean;
-}
 
 // ============================================
 // Formatting Helpers
