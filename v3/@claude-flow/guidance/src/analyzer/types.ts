@@ -210,3 +210,22 @@ export const SIZE_BUDGETS: Record<ContextSize, SizeBudget> = {
  * - Clarity (10%): code blocks, examples, specificity
  * - Completeness (10%): missing common sections
  */
+
+/** Executor interface for headless claude commands */
+export interface IHeadlessExecutor {
+  execute(prompt: string, workDir: string): Promise<{ stdout: string; stderr: string; exitCode: number }>;
+}
+
+/**
+ * Content-aware executor that adapts behavior based on CLAUDE.md content.
+ *
+ * When `validateEffect()` detects this interface, it calls `setContext()`
+ * before each phase (before/after) so the executor can vary its responses
+ * based on the quality of the loaded CLAUDE.md. This is the key mechanism
+ * that makes the empirical validation meaningful — without it, the same
+ * executor produces identical adherence for both phases.
+ */
+export interface IContentAwareExecutor extends IHeadlessExecutor {
+  /** Set the CLAUDE.md content that the executor should use as behavioral context */
+  setContext(claudeMdContent: string): void;
+}
