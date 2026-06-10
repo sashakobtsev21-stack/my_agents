@@ -61,8 +61,10 @@ const INVARIANTS = [
     why: 'Per-namespace vector_indexes provisioning in bridgeStoreEntry — without it, memory_search({namespace:"X"}) returns 0 for any non-default namespace.',
   },
   {
+    // storeEntry moved out of the memory-initializer.ts monolith into the
+    // crud-write.ts sub-module during the P3.3 god-file split (W61).
     issue: '#1941',
-    file: 'v3/@claude-flow/cli/src/memory/memory-initializer.ts',
+    file: 'v3/@claude-flow/cli/src/memory/memory-initializer/crud-write.ts',
     substring: 'INSERT OR IGNORE INTO vector_indexes (id, name, dimensions)',
     why: 'Per-namespace vector_indexes provisioning in storeEntry (sql.js fallback) — same root cause as the bridge path; one needs both branches.',
   },
