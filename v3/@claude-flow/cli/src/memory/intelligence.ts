@@ -11,78 +11,23 @@
  * @module v3/cli/intelligence
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { join } from 'node:path';
-// `dirname` was used to derive the parent dir before mkdir; the writer
-// now calls mkdirSync({ recursive: true }) on the full path so the
-// helper isn't needed.
 
 // ============================================================================
-// Persistence Configuration
+// Persistence path resolution (basePath override + neural data-dir +
+// patterns/stats paths) moved to ./intelligence/paths.ts (W105, P3.11
+// cut #2). Imported for internal use; setIntelligenceBasePath re-exported
+// so external/test callers keep resolving it byte-identically.
 // ============================================================================
-
-/**
- * Test-side override for the cwd used to resolve `.claude-flow/neural/`.
- * `null` (the default) means use `process.cwd()` as before. Tests can call
- * setIntelligenceBasePath(tmpDir) to pin persistence to a per-test scratch
- * dir without having to do `process.chdir()` — vitest's worker_threads
- * forbid `chdir` on Windows, which is why the chdir tests were flaky there.
- *
- * Issue #7 follow-up — this is the basePath pilot. Replicate the same
- * pattern in hooks-tools.ts and the other 4 production modules that the
- * 4 chdir-using tests reach through.
- */
-let basePathOverride: string | null = null;
-
-/** Pin the intelligence persistence base to `p`. Pass `null` to reset. */
-export function setIntelligenceBasePath(p: string | null): void {
-  basePathOverride = p;
-}
-
-/**
- * Get the data directory for neural pattern persistence.
- * Uses .claude-flow/neural in basePathOverride (if set) or process.cwd(),
- * falling back to the home directory.
- */
-function getDataDir(): string {
-  const cwd = basePathOverride ?? process.cwd();
-  const localDir = join(cwd, '.claude-flow', 'neural');
-  const homeDir = join(homedir(), '.claude-flow', 'neural');
-
-  // Prefer local directory if .claude-flow exists
-  if (existsSync(join(cwd, '.claude-flow'))) {
-    return localDir;
-  }
-
-  return homeDir;
-}
-
-/**
- * Ensure the data directory exists
- */
-function ensureDataDir(): string {
-  const dir = getDataDir();
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-  return dir;
-}
-
-/**
- * Get the patterns file path
- */
-function getPatternsPath(): string {
-  return join(getDataDir(), 'patterns.json');
-}
-
-/**
- * Get the stats file path
- */
-function getStatsPath(): string {
-  return join(getDataDir(), 'stats.json');
-}
+import {
+  setIntelligenceBasePath,
+  getDataDir,
+  ensureDataDir,
+  getPatternsPath,
+  getStatsPath,
+} from './intelligence/paths.js';
+export { setIntelligenceBasePath };
 
 // ============================================================================
 // Type definitions + DEFAULT_SONA_CONFIG moved to ./intelligence/types.ts
