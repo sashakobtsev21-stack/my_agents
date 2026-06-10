@@ -141,13 +141,13 @@ const INVARIANTS = [
   // #1968 — daemon launcher forwards --workers / --headless / --sandbox
   {
     issue: '#1968',
-    file: 'v3/@claude-flow/cli/src/commands/daemon.ts',
+    file: 'v3/@claude-flow/cli/src/commands/daemon-process.ts',
     regex: /forkArgs\.push\(['"]--workers['"]/,
     why: 'Daemon launcher forwards --workers to the forked child — without it, `daemon start --workers map` silently uses the default worker set.',
   },
   {
     issue: '#1968',
-    file: 'v3/@claude-flow/cli/src/commands/daemon.ts',
+    file: 'v3/@claude-flow/cli/src/commands/daemon-process.ts',
     regex: /forkArgs\.push\(['"]--headless['"]\)/,
     why: 'Daemon launcher forwards --headless — same family as the --workers gap.',
   },
