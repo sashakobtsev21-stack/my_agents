@@ -85,8 +85,11 @@ const INVARIANTS = [
 
   // #1945 / #1946 — memory bridge + doctor honor CLAUDE_FLOW_MEMORY_PATH
   {
+    // getDbPath moved out of the memory-bridge.ts monolith into the
+    // bridge-core.ts shared-infrastructure sub-module during the P3.4
+    // god-file split (W65).
     issue: '#1945',
-    file: 'v3/@claude-flow/cli/src/memory/memory-bridge.ts',
+    file: 'v3/@claude-flow/cli/src/memory/memory-bridge/bridge-core.ts',
     substring: 'getMemoryRoot',
     why: 'getDbPath() routes through getMemoryRoot() — without it, the bridge hard-codes `<cwd>/.swarm/memory.db` and CLI store writes to a different file than memory init created.',
   },
