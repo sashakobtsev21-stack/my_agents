@@ -55,8 +55,10 @@ const INVARIANTS = [
 
   // #1941 — provision per-namespace vector_indexes row before entry insert
   {
+    // bridgeStoreEntry moved out of the memory-bridge.ts monolith into the
+    // bridge-crud.ts sub-module during the P3.4 god-file split (W66).
     issue: '#1941',
-    file: 'v3/@claude-flow/cli/src/memory/memory-bridge.ts',
+    file: 'v3/@claude-flow/cli/src/memory/memory-bridge/bridge-crud.ts',
     substring: 'INSERT OR IGNORE INTO vector_indexes (id, name, dimensions)',
     why: 'Per-namespace vector_indexes provisioning in bridgeStoreEntry — without it, memory_search({namespace:"X"}) returns 0 for any non-default namespace.',
   },
