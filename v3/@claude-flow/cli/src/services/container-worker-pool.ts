@@ -31,115 +31,24 @@ async function docker(args: string[], timeoutMs: number): Promise<{ stdout: stri
   return { stdout: String(r.stdout), stderr: String(r.stderr) };
 }
 
-// ============================================
-// Type Definitions
-// ============================================
 
-/**
- * Container state
- */
-export type ContainerState = 'creating' | 'ready' | 'busy' | 'unhealthy' | 'terminated';
-
-/**
- * Container info
- */
-export interface ContainerInfo {
-  id: string;
-  name: string;
-  state: ContainerState;
-  createdAt: Date;
-  lastUsedAt?: Date;
-  workerType?: HeadlessWorkerType;
-  executionCount: number;
-  healthCheckFailures: number;
-  pid?: number;
-}
-
-/**
- * Container pool configuration
- */
-export interface ContainerPoolConfig {
-  /** Maximum number of containers in the pool */
-  maxContainers: number;
-
-  /** Minimum number of containers to keep warm */
-  minContainers: number;
-
-  /** Docker image to use */
-  image: string;
-
-  /** Container resource limits */
-  resources: {
-    cpus: string;
-    memory: string;
-  };
-
-  /** Health check interval in ms */
-  healthCheckIntervalMs: number;
-
-  /** Container idle timeout in ms */
-  idleTimeoutMs: number;
-
-  /** Workspace volume mount path */
-  workspacePath: string;
-
-  /** State persistence path */
-  statePath: string;
-
-  /** Network name for container isolation */
-  network?: string;
-
-  /** Environment variables for containers */
-  env?: Record<string, string>;
-
-  /** Default sandbox mode */
-  defaultSandbox: SandboxMode;
-}
-
-/**
- * Container execution options
- */
-export interface ContainerExecutionOptions {
-  workerType: HeadlessWorkerType;
-  prompt: string;
-  contextPatterns?: string[];
-  sandbox?: SandboxMode;
-  model?: string;
-  timeoutMs?: number;
-}
-
-/**
- * Pool status
- */
-export interface ContainerPoolStatus {
-  totalContainers: number;
-  readyContainers: number;
-  busyContainers: number;
-  unhealthyContainers: number;
-  queuedTasks: number;
-  containers: ContainerInfo[];
-  dockerAvailable: boolean;
-  lastHealthCheck?: Date;
-}
-
-// ============================================
-// Constants
-// ============================================
-
-const DEFAULT_CONFIG: ContainerPoolConfig = {
-  maxContainers: 3,
-  minContainers: 1,
-  image: 'ghcr.io/ruvnet/claude-flow-headless:latest',
-  resources: {
-    cpus: '2',
-    memory: '4g',
-  },
-  healthCheckIntervalMs: 30000,
-  idleTimeoutMs: 300000, // 5 minutes
-  workspacePath: '/workspace',
-  statePath: '.claude-flow/container-pool',
-  defaultSandbox: 'strict',
-};
+// Types/defaults extracted into ./container-worker-pool-types.ts during
+// campaign-2 wave 59 (W265).
+export type {
+  ContainerState,
+  ContainerInfo,
+  ContainerPoolConfig,
+  ContainerExecutionOptions,
+  ContainerPoolStatus,
+} from './container-worker-pool-types.js';
+import { DEFAULT_CONFIG } from './container-worker-pool-types.js';
+import type {
+  ContainerExecutionOptions,
+  ContainerInfo,
+  ContainerPoolConfig,
+  ContainerPoolStatus,
+  ContainerState,
+} from './container-worker-pool-types.js';
 
 // ============================================
 // ContainerWorkerPool Class
