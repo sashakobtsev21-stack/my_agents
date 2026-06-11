@@ -37,173 +37,37 @@ import {
   satisfiesVersion,
 } from './dependency-graph.js';
 
-// ============================================================================
-// Types
-// ============================================================================
 
-export type InitializationStrategy = 'sequential' | 'parallel' | 'parallel-safe';
+// The public type shapes and the private default service implementations
+// were extracted into ./enhanced-plugin-registry-types.ts and
+// ./enhanced-plugin-registry-support.ts during the P3.52 god-file
+// decomposition (W173). Re-export the nine public types; the support
+// classes stay module-private to this surface.
+import {
+  DefaultEventBus,
+  DefaultLogger,
+  EnhancedServiceContainer,
+} from './enhanced-plugin-registry-support.js';
+import type {
+  ConflictResolution,
+  EnhancedPluginRegistryConfig,
+  HotReloadOptions,
+  PluginEntry,
+  RegistryStats,
+  UnregisterOptions,
+} from './enhanced-plugin-registry-types.js';
 
-export type ConflictStrategy = 'first' | 'last' | 'error' | 'namespace';
-
-export interface ConflictResolution {
-  strategy: ConflictStrategy;
-  namespaceTemplate?: string;  // e.g., "{plugin}:{name}"
-}
-
-export interface EnhancedPluginRegistryConfig {
-  coreVersion: string;
-  dataDir: string;
-  logger?: ILogger;
-  eventBus?: IEventBus;
-  defaultConfig?: Partial<PluginConfig>;
-  maxPlugins?: number;
-  loadTimeout?: number;
-  initializationStrategy?: InitializationStrategy;
-  maxParallelInit?: number;
-  conflictResolution?: {
-    mcpTools?: ConflictResolution;
-    cliCommands?: ConflictResolution;
-    agentTypes?: ConflictResolution;
-    taskTypes?: ConflictResolution;
-  };
-}
-
-export interface PluginEntry {
-  plugin: IPlugin;
-  config: PluginConfig;
-  loadTime: Date;
-  initTime?: Date;
-  error?: string;
-}
-
-export interface UnregisterOptions {
-  cascade?: boolean;  // Unload dependents first
-  force?: boolean;    // Ignore dependency errors
-}
-
-export interface HotReloadOptions {
-  preserveState?: boolean;
-  migrateState?: (oldState: unknown, newVersion: string) => unknown;
-  timeout?: number;
-}
-
-export interface RegistryStats {
-  total: number;
-  initialized: number;
-  failed: number;
-  agentTypes: number;
-  taskTypes: number;
-  mcpTools: number;
-  cliCommands: number;
-  hooks: number;
-  workers: number;
-  providers: number;
-}
-
-export interface ServiceMetadata {
-  description?: string;
-  provider: string;
-  version?: string;
-  deprecated?: boolean;
-  replacement?: string;
-}
-
-// ============================================================================
-// Enhanced Service Container
-// ============================================================================
-
-class EnhancedServiceContainer implements ServiceContainer {
-  private services = new Map<string, unknown>();
-  private metadata = new Map<string, ServiceMetadata>();
-
-  get<T>(key: string): T | undefined {
-    return this.services.get(key) as T | undefined;
-  }
-
-  set<T>(key: string, value: T): void {
-    this.services.set(key, value);
-  }
-
-  setWithMetadata<T>(key: string, value: T, metadata: ServiceMetadata): void {
-    this.services.set(key, value);
-    this.metadata.set(key, metadata);
-  }
-
-  has(key: string): boolean {
-    return this.services.has(key);
-  }
-
-  delete(key: string): boolean {
-    this.metadata.delete(key);
-    return this.services.delete(key);
-  }
-
-  list(): string[] {
-    return Array.from(this.services.keys());
-  }
-
-  listByPrefix(prefix: string): string[] {
-    return this.list().filter(key => key.startsWith(prefix));
-  }
-
-  getMetadata(key: string): ServiceMetadata | undefined {
-    return this.metadata.get(key);
-  }
-}
-
-// ============================================================================
-// Default Implementations
-// ============================================================================
-
-class DefaultEventBus implements IEventBus {
-  private emitter = new EventEmitter();
-
-  emit(event: string, data?: unknown): void {
-    this.emitter.emit(event, data);
-  }
-
-  on(event: string, handler: (data?: unknown) => void | Promise<void>): () => void {
-    this.emitter.on(event, handler);
-    return () => this.off(event, handler);
-  }
-
-  off(event: string, handler: (data?: unknown) => void | Promise<void>): void {
-    this.emitter.off(event, handler);
-  }
-
-  once(event: string, handler: (data?: unknown) => void | Promise<void>): () => void {
-    this.emitter.once(event, handler);
-    return () => this.off(event, handler);
-  }
-}
-
-class DefaultLogger implements ILogger {
-  private context: Record<string, unknown> = {};
-
-  constructor(context?: Record<string, unknown>) {
-    if (context) this.context = context;
-  }
-
-  debug(message: string, ...args: unknown[]): void {
-    console.debug(`[DEBUG]`, message, ...args, this.context);
-  }
-
-  info(message: string, ...args: unknown[]): void {
-    console.info(`[INFO]`, message, ...args, this.context);
-  }
-
-  warn(message: string, ...args: unknown[]): void {
-    console.warn(`[WARN]`, message, ...args, this.context);
-  }
-
-  error(message: string, ...args: unknown[]): void {
-    console.error(`[ERROR]`, message, ...args, this.context);
-  }
-
-  child(context: Record<string, unknown>): ILogger {
-    return new DefaultLogger({ ...this.context, ...context });
-  }
-}
+export type {
+  InitializationStrategy,
+  ConflictStrategy,
+  ConflictResolution,
+  EnhancedPluginRegistryConfig,
+  PluginEntry,
+  UnregisterOptions,
+  HotReloadOptions,
+  RegistryStats,
+  ServiceMetadata,
+} from './enhanced-plugin-registry-types.js';
 
 // ============================================================================
 // Enhanced Plugin Registry
