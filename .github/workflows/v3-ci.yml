@@ -265,6 +265,45 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  # Campaign gates (W202, decomposition-campaign follow-up) — the manual
+  # per-wave gates, automated: agent-catalog validity + connectivity,
+  # the 36 fix-invariants, and the v3/mcp per-package type-check that
+  # closed the W198 verification hole. Catalog drift is also caught
+  # (check-agents regenerates docs; a dirty tree means a stale commit).
+  campaign-gates:
+    name: Campaign Gates (agents · invariants · mcp tsc)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: check-agents (validity + connectivity + catalog freshness)
+        run: |
+          node scripts/check-agents.mjs
+          git diff --exit-code docs/AGENT-CATALOG.md docs/agent-catalog.html docs/agent-report.html             || { echo "::error::agent catalog is stale — run scripts/check-agents.mjs and commit the regenerated docs"; exit 1; }
+
+      - name: audit-fix-invariants (36 invariants)
+        run: node scripts/audit-fix-invariants.mjs
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install v3 workspace (for the mcp type-check)
+        working-directory: v3
+        run: pnpm install --frozen-lockfile
+
+      - name: v3/mcp package type-check (W198/W201 gate)
+        working-directory: v3/mcp
+        run: npx tsc --noEmit
+
+
   test:
     name: Test V3 Packages
     runs-on: ubuntu-latest
