@@ -1,6 +1,6 @@
 {
   "name": "alexko",
-  "version": "3.10.31",
+  "version": "3.10.42",
   "description": "AlexKo - Enterprise AI agent orchestration platform. Deploy 120+ specialized agents in coordinated swarms with self-learning, fault-tolerant consensus, vector memory, and MCP integration. Brand alias of the same CLI as `ruflo`.",
   "main": "bin/alexko.js",
   "type": "module",

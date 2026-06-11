@@ -1,8 +1,8 @@
-# Claude Code Configuration — my_agents (v3.10.31)
+# Claude Code Configuration — my_agents (v3.10.42)
 
 > **my_agents** — reusable AI agent team for Claude Code. Fork of [ruvnet/claude-flow](https://github.com/ruvnet/claude-flow) (MIT).
 > Verified in this checkout: 104 agents, 41 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, ~305 MCP tools.
-> Packages: `@claude-flow/cli@3.10.31`, root `my_agents@3.10.31`.
+> Packages: `@claude-flow/cli@3.10.42`, root `my_agents@3.10.42`.
 
 ## Behavioral Rules (Always Enforced)
 

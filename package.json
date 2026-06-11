@@ -1,7 +1,7 @@
 {
   "name": "my_agents",
-  "version": "3.10.31",
-  "description": "my_agents — reusable AI agent team for Claude Code: 104 agents, 41 skills, 33 plugins and MCP tools to plug into any project for development, analysis and testing. Fork of ruvnet/claude-flow (MIT).",
+  "version": "3.10.42",
+  "description": "my_agents \u2014 reusable AI agent team for Claude Code: 104 agents, 41 skills, 33 plugins and MCP tools to plug into any project for development, analysis and testing. Fork of ruvnet/claude-flow (MIT).",
   "main": "bin/cli.js",
   "type": "module",
   "bin": {
