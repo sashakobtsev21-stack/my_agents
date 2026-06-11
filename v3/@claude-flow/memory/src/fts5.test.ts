@@ -12,6 +12,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { createRequire } from 'node:module';
 import { SqlJsBackend } from './sqljs-backend.js';
 import { createDefaultEntry } from './types.js';
@@ -25,8 +26,11 @@ const require = createRequire(import.meta.url);
  */
 function locateSqlWasm(): string | null {
   try {
-    const sqljsPkg = require.resolve('sql.js/package.json');
-    const wasmPath = sqljsPkg.replace(/package\.json$/, 'dist/sql-wasm.wasm');
+    // sql.js's exports map does not expose './package.json'
+    // (ERR_PACKAGE_PATH_NOT_EXPORTED), so resolve the main entry
+    // (dist/sql-wasm.js) and look for the wasm next to it. (W199)
+    const mainEntry = require.resolve('sql.js');
+    const wasmPath = join(dirname(mainEntry), 'sql-wasm.wasm');
     return existsSync(wasmPath) ? wasmPath : null;
   } catch {
     return null;

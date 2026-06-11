@@ -8,6 +8,9 @@
  */
 import { defineConfig } from 'vitest/config';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const configDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   test: {
@@ -15,7 +18,9 @@ export default defineConfig({
     environment: 'node',
 
     // Global test setup
-    setupFiles: ['./__tests__/setup.ts'],
+    // Absolute path so the setup file resolves regardless of the CWD the
+    // runner was started from (e.g. `npx vitest` inside v3/mcp) — see W199.
+    setupFiles: [path.resolve(configDir, '__tests__/setup.ts')],
 
     // Include patterns
     include: [

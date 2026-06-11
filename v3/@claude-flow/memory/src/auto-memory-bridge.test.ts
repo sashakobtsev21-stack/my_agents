@@ -86,7 +86,8 @@ function createTestInsight(overrides: Partial<MemoryInsight> = {}): MemoryInsigh
 describe('resolveAutoMemoryDir', () => {
   it('should derive path from working directory', () => {
     const result = resolveAutoMemoryDir('/workspaces/my-project');
-    expect(result).toContain('.claude/projects/');
+    // path.join so the separator matches the host platform (W199)
+    expect(result).toContain(path.join('.claude', 'projects') + path.sep);
     expect(result).toContain('memory');
     expect(result).not.toContain('//');
   });
