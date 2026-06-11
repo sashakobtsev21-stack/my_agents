@@ -25,302 +25,35 @@
 
 import { EventEmitter } from 'events';
 
-// =============================================================================
-// Types & Interfaces
-// =============================================================================
 
-/**
- * Worker trigger types (matching agentic-flow@alpha)
- */
-export type WorkerTrigger =
-  | 'ultralearn'    // Deep knowledge acquisition
-  | 'optimize'      // Performance optimization
-  | 'consolidate'   // Memory consolidation
-  | 'predict'       // Predictive preloading
-  | 'audit'         // Security analysis
-  | 'map'           // Codebase mapping
-  | 'preload'       // Resource preloading
-  | 'deepdive'      // Deep code analysis
-  | 'document'      // Auto-documentation
-  | 'refactor'      // Refactoring suggestions
-  | 'benchmark'     // Performance benchmarks
-  | 'testgaps';     // Test coverage analysis
+// The public worker types and the private trigger tables were extracted
+// into ./worker-dispatch-types.ts and ./worker-dispatch-triggers.ts
+// during the P3.55 god-file decomposition (W176). Re-export the nine
+// public type names; the tables stay module-private to this surface.
+import {
+  TRIGGER_CONFIGS,
+  TRIGGER_PATTERNS,
+} from './worker-dispatch-triggers.js';
+import type {
+  DispatchOptions,
+  TriggerDetectionResult,
+  WorkerConfig,
+  WorkerInstance,
+  WorkerResult,
+  WorkerTrigger,
+} from './worker-dispatch-types.js';
 
-/**
- * Worker status
- */
-export type WorkerStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-
-/**
- * Worker configuration
- */
-export interface WorkerConfig {
-  /** Maximum concurrent workers */
-  maxConcurrent: number;
-  /** Default timeout in milliseconds */
-  defaultTimeout: number;
-  /** Memory limit per worker in MB */
-  memoryLimit: number;
-  /** Enable auto-dispatch based on context */
-  autoDispatch: boolean;
-  /** Priority queue for workers */
-  priorityQueue: boolean;
-}
-
-/**
- * Worker instance
- */
-export interface WorkerInstance {
-  id: string;
-  trigger: WorkerTrigger;
-  context: string;
-  sessionId: string;
-  status: WorkerStatus;
-  progress: number;
-  phase: string;
-  startedAt: Date;
-  completedAt?: Date;
-  result?: WorkerResult;
-  error?: Error;
-  metadata?: Record<string, unknown>;
-}
-
-/**
- * Worker result
- */
-export interface WorkerResult {
-  success: boolean;
-  data?: unknown;
-  artifacts?: WorkerArtifact[];
-  metrics?: WorkerMetrics;
-  summary?: string;
-}
-
-/**
- * Worker artifact
- */
-export interface WorkerArtifact {
-  type: 'file' | 'data' | 'report' | 'suggestion';
-  name: string;
-  content: string | Buffer | Record<string, unknown>;
-  size?: number;
-}
-
-/**
- * Worker metrics
- */
-export interface WorkerMetrics {
-  duration: number;
-  tokensUsed?: number;
-  filesProcessed?: number;
-  itemsAnalyzed?: number;
-  memoryUsed?: number;
-}
-
-/**
- * Trigger detection result
- */
-export interface TriggerDetectionResult {
-  detected: boolean;
-  triggers: WorkerTrigger[];
-  confidence: number;
-  context?: string;
-}
-
-/**
- * Worker dispatch options
- */
-export interface DispatchOptions {
-  priority?: 'low' | 'normal' | 'high' | 'critical';
-  timeout?: number;
-  context?: Record<string, unknown>;
-  callback?: (worker: WorkerInstance) => void;
-}
-
-// =============================================================================
-// Trigger Detection Patterns
-// =============================================================================
-
-/**
- * Patterns for detecting triggers from user prompts/context
- */
-const TRIGGER_PATTERNS: Record<WorkerTrigger, RegExp[]> = {
-  ultralearn: [
-    /learn\s+about/i,
-    /understand\s+(how|what|why)/i,
-    /deep\s+dive\s+into/i,
-    /explain\s+in\s+detail/i,
-    /comprehensive\s+guide/i,
-    /master\s+this/i,
-  ],
-  optimize: [
-    /optimize/i,
-    /improve\s+performance/i,
-    /make\s+(it\s+)?faster/i,
-    /speed\s+up/i,
-    /reduce\s+(memory|time)/i,
-    /performance\s+issue/i,
-  ],
-  consolidate: [
-    /consolidate/i,
-    /merge\s+memories/i,
-    /clean\s+up\s+memory/i,
-    /deduplicate/i,
-    /memory\s+maintenance/i,
-  ],
-  predict: [
-    /what\s+will\s+happen/i,
-    /predict/i,
-    /forecast/i,
-    /anticipate/i,
-    /preload/i,
-    /prepare\s+for/i,
-  ],
-  audit: [
-    /security\s+audit/i,
-    /vulnerability/i,
-    /security\s+check/i,
-    /pentest/i,
-    /security\s+scan/i,
-    /cve/i,
-    /owasp/i,
-  ],
-  map: [
-    /map\s+(the\s+)?codebase/i,
-    /architecture\s+overview/i,
-    /project\s+structure/i,
-    /dependency\s+graph/i,
-    /code\s+map/i,
-    /explore\s+codebase/i,
-  ],
-  preload: [
-    /preload/i,
-    /cache\s+ahead/i,
-    /prefetch/i,
-    /warm\s+(up\s+)?cache/i,
-  ],
-  deepdive: [
-    /deep\s+dive/i,
-    /analyze\s+thoroughly/i,
-    /in-depth\s+analysis/i,
-    /comprehensive\s+review/i,
-    /detailed\s+examination/i,
-  ],
-  document: [
-    /document\s+(this|the)/i,
-    /generate\s+docs/i,
-    /add\s+documentation/i,
-    /write\s+readme/i,
-    /api\s+docs/i,
-    /jsdoc/i,
-  ],
-  refactor: [
-    /refactor/i,
-    /clean\s+up\s+code/i,
-    /improve\s+code\s+quality/i,
-    /restructure/i,
-    /simplify/i,
-    /make\s+more\s+readable/i,
-  ],
-  benchmark: [
-    /benchmark/i,
-    /performance\s+test/i,
-    /measure\s+speed/i,
-    /stress\s+test/i,
-    /load\s+test/i,
-  ],
-  testgaps: [
-    /test\s+coverage/i,
-    /missing\s+tests/i,
-    /untested\s+code/i,
-    /coverage\s+report/i,
-    /test\s+gaps/i,
-    /add\s+tests/i,
-  ],
-};
-
-/**
- * Trigger configurations
- */
-const TRIGGER_CONFIGS: Record<WorkerTrigger, {
-  description: string;
-  priority: 'low' | 'normal' | 'high' | 'critical';
-  estimatedDuration: number; // ms
-  capabilities: string[];
-}> = {
-  ultralearn: {
-    description: 'Deep knowledge acquisition and learning',
-    priority: 'normal',
-    estimatedDuration: 60000,
-    capabilities: ['research', 'analysis', 'synthesis'],
-  },
-  optimize: {
-    description: 'Performance optimization and tuning',
-    priority: 'high',
-    estimatedDuration: 30000,
-    capabilities: ['profiling', 'optimization', 'benchmarking'],
-  },
-  consolidate: {
-    description: 'Memory consolidation and cleanup',
-    priority: 'low',
-    estimatedDuration: 20000,
-    capabilities: ['memory-management', 'deduplication'],
-  },
-  predict: {
-    description: 'Predictive preloading and anticipation',
-    priority: 'normal',
-    estimatedDuration: 15000,
-    capabilities: ['prediction', 'caching', 'preloading'],
-  },
-  audit: {
-    description: 'Security analysis and vulnerability scanning',
-    priority: 'critical',
-    estimatedDuration: 45000,
-    capabilities: ['security', 'vulnerability-scanning', 'audit'],
-  },
-  map: {
-    description: 'Codebase mapping and architecture analysis',
-    priority: 'normal',
-    estimatedDuration: 30000,
-    capabilities: ['analysis', 'mapping', 'visualization'],
-  },
-  preload: {
-    description: 'Resource preloading and cache warming',
-    priority: 'low',
-    estimatedDuration: 10000,
-    capabilities: ['caching', 'preloading'],
-  },
-  deepdive: {
-    description: 'Deep code analysis and examination',
-    priority: 'normal',
-    estimatedDuration: 60000,
-    capabilities: ['analysis', 'review', 'understanding'],
-  },
-  document: {
-    description: 'Auto-documentation generation',
-    priority: 'normal',
-    estimatedDuration: 45000,
-    capabilities: ['documentation', 'writing', 'generation'],
-  },
-  refactor: {
-    description: 'Code refactoring suggestions',
-    priority: 'normal',
-    estimatedDuration: 30000,
-    capabilities: ['refactoring', 'code-quality', 'improvement'],
-  },
-  benchmark: {
-    description: 'Performance benchmarking',
-    priority: 'normal',
-    estimatedDuration: 60000,
-    capabilities: ['benchmarking', 'testing', 'measurement'],
-  },
-  testgaps: {
-    description: 'Test coverage analysis',
-    priority: 'normal',
-    estimatedDuration: 30000,
-    capabilities: ['testing', 'coverage', 'analysis'],
-  },
-};
+export type {
+  WorkerTrigger,
+  WorkerStatus,
+  WorkerConfig,
+  WorkerInstance,
+  WorkerResult,
+  WorkerArtifact,
+  WorkerMetrics,
+  TriggerDetectionResult,
+  DispatchOptions,
+} from './worker-dispatch-types.js';
 
 // =============================================================================
 // Worker Dispatch Service
