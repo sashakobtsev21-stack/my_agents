@@ -21,7 +21,7 @@ import { spawn, execFile } from 'child_process';
 import { promisify } from 'util';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import type { HeadlessWorkerType, HeadlessExecutionResult, SandboxMode } from './headless-worker-executor.js';
+import type { HeadlessWorkerType, HeadlessExecutionResult } from './headless-worker-executor.js';
 
 // ADR-078: execFile (no shell) — argv-based, no template interpolation
 // reaches a shell. All callsites below pass docker subcommands as argv.
@@ -47,7 +47,6 @@ import type {
   ContainerInfo,
   ContainerPoolConfig,
   ContainerPoolStatus,
-  ContainerState,
 } from './container-worker-pool-types.js';
 
 // ============================================
