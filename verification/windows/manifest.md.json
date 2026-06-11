@@ -1,8 +1,8 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-06-11T23:18:26.757Z",
-    "gitCommit": "95fc1a6b16286126f00a0ed821bb560bd78dda12",
+    "issuedAt": "2026-06-11T23:19:40.844Z",
+    "gitCommit": "59df986edad9c962c53d7cd708b20638966ea9ef",
     "branch": "main",
     "os": "windows",
     "releases": {
@@ -957,10 +957,10 @@
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "8dabbc8f02f3e50a2ec4b54184dd69f9a01c728fd7622767ea382e8fbb8054b0",
+    "manifestHash": "d61325307da3e7f93ed1afef13bf7b8839f3be29478a3905cb004579331c8785",
     "signatureAlgo": "ed25519",
-    "publicKey": "c8c95981f638f65c964af63a5dea53c5110f752fe58dda64c8ab95d13f44784c",
-    "signature": "5859e66a2c8128c90d804139ebad1fcd8f6ef316dc4c7189774065fdef0277e8625afeeb3804b9f1d24791fcf26d9ea8c45671c9252ca3ee8314fed2d3d67501",
+    "publicKey": "2d88506d8e97056ae89c163aed6eb70b98eea343f39f46ce3b3acbf8851fe755",
+    "signature": "ac515f70c2aaa4d66141d698aa1e7afdcc36fed41fa183b5c325dfccb881dee347da11de4526674fec4a9dcee5075ccd791b8634a5d4a5c81fad39274d28c607",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }
