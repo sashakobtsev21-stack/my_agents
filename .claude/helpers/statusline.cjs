@@ -469,22 +469,8 @@ function generateStatusline() {
   }
   lines.push(header);
 
-  // Separator
-  lines.push(c.dim + '─'.repeat(40) + c.reset);
-
-  // Single status line — only the day-to-day useful signals:
-  //   Swarm (is parallel agent work running?) · CVE/Security · Tests (coverage at a glance).
-  const swarmInd = coordinationActive ? c.brightGreen + '◉' + c.reset : c.dim + '○' + c.reset;
-  const agentsColor = activeAgents > 0 ? c.brightGreen : c.dim;
-  const secIcon = secStatus === 'CLEAN' ? '🟢' : (secStatus === 'IN_PROGRESS' || secStatus === 'STALE') ? '🟡' : (secStatus === 'NONE' ? '⚪' : '🔴');
-  const secColor = secStatus === 'CLEAN' ? c.brightGreen : (secStatus === 'IN_PROGRESS' || secStatus === 'STALE') ? c.brightYellow : (secStatus === 'NONE' ? c.dim : c.brightRed);
-  const testColor = testFiles > 0 ? c.brightGreen : c.dim;
-
-  lines.push(
-    c.brightYellow + '🤖 Swarm' + c.reset + ' ' + swarmInd + ' [' + agentsColor + String(activeAgents).padStart(2) + c.reset + '/' + c.brightWhite + maxAgents + c.reset + ']    ' +
-    secIcon + ' ' + secColor + 'CVE ' + cvesFixed + c.reset + '/' + c.brightWhite + totalCves + c.reset + '    ' +
-    '🧪 ' + c.cyan + 'Tests' + c.reset + ' ' + testColor + testFiles + c.reset
-  );
+  // The 'Swarm/CVE/Tests' status line was removed at the user's request
+  // (2026-06-11) — only the header (branch · model · ctx · cost) remains.
 
   return lines.join('\n');
 }
