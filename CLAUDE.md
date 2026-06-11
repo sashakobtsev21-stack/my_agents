@@ -942,6 +942,14 @@ memory_search_unified({ query: "authentication security", limit: 5 })
 
 ## Publishing to npm
 
+> ⚠️ **OWNERSHIP REALITY (verified 2026-06-11): publishing from this fork is NOT possible
+> for `claude-flow`, `@claude-flow/cli`, and `ruflo`** — on the npm registry all three are
+> owned solely by **ruvnet** (the upstream author); e.g. 3.10.41 was published by upstream.
+> The instructions below are inherited from upstream and would fail with 403 from any other
+> account. **The release channel for this fork is GitHub releases** (`gh release create`).
+> The only npm name available to this fork is `alexko` (unclaimed as of 2026-06-11) — it can
+> be published from the user's own account (`sashakobtsev21`) if desired.
+
 ### Versioning policy (stable releases — alpha series ended at 3.7.0-alpha.81, 2026-05-23)
 
 - **From 3.7.0 onward we ship stable semver**, NOT alpha pre-releases.
