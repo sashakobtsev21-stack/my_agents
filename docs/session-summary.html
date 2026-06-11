@@ -23,14 +23,36 @@ ul{margin:6px 0 6px 0;padding-left:20px}li{margin:4px 0}
 </style></head><body><div class="wrap">
 
 <h1>🏁 my_agents — что сделано</h1>
-<p class="sub">Итог работы над проектом: честность, тесты, кросс-платформа, новые сценарии — и как всё работает сейчас.</p>
+<p class="sub">Декомпозиция god-файлов (100+ волн), честность, тесты, CI-гейты, witness — и как всё работает сейчас (обновлено 2026-06).</p>
 
 <div class="kpis">
-  <div class="kpi"><div class="n">~30</div><div class="l">коммитов в <code>main</code></div></div>
-  <div class="kpi"><div class="n">+200</div><div class="l">тестов добавлено</div></div>
-  <div class="kpi"><div class="n">~268</div><div class="l">тестов починено (структурно)</div></div>
+  <div class="kpi"><div class="n">100+</div><div class="l">волн декомпозиции god-файлов</div></div>
+  <div class="kpi"><div class="n">~3500</div><div class="l">тестов зелёные</div></div>
+  <div class="kpi"><div class="n">13/13</div><div class="l">пакетов <code>tsc</code> 0 ошибок</div></div>
+  <div class="kpi"><div class="n">104 / 41</div><div class="l">агента / скилла</div></div>
+  <div class="kpi"><div class="n">117/117</div><div class="l">witness fix-маркеров ×3 ОС</div></div>
   <div class="kpi"><div class="n">0</div><div class="l">уязвимостей (<code>npm audit</code>)</div></div>
-  <div class="kpi"><div class="n">48→20</div><div class="l">падающих файлов (остаток — native/CI)</div></div>
+</div>
+
+<h2>★ Кампания деконсолидации god-файлов (2026-06)</h2>
+<div class="card">
+Большие монолитные файлы разбиты на сфокусированные модули <b>без единого изменения публичного API</b>
+(баррели / <code>export *</code> / re-export — байт-идентичная поверхность):
+<ul>
+<li><b>Кампания-1 (W1–W200):</b> 72 god-файла декомпозированы; все публичные API байт-идентичны.</li>
+<li><b>Кампания-2 (W207–W308, 100+ волн):</b> вычищены диапазоны <b>1000→700 строк целиком</b> и чистые
+type-сплиты диапазона <b>700→500</b>. Паттерны: <code>*-types</code>/<code>*-core</code>/<code>*-extended</code> (типы),
+<code>*-defs</code>/<code>*-handler</code> (MCP-инструменты), <code>*-run</code>/<code>*-ops</code>/<code>*-lifecycle</code> (CLI-команды),
+per-class барели.</li>
+<li><b>Дисциплина каждой волны:</b> <code>tsc</code> 0 → пакетный сьют → lint → <code>check-agents</code> →
+36 инвариантов → witness ×3 ОС → commit. <b>Ни одного нового падения теста</b> за всю кампанию
+(все красные сьюты — задокументированные pre-existing baseline экспериментального WASM, A/B-подтверждены).</li>
+<li><b>Верификационные дыры закрыты:</b> пакеты без своего <code>tsconfig</code>, <code>@ts-nocheck</code>-заголовки,
+устаревшие dist-артефакты, flat-scan смоки сделаны layout-aware. Добавлены CI-гейты кампании
+(GitHub Actions) и подписанный witness-манифест.</li>
+<li><b>Публикация:</b> бренд-обёртка <code>npx alexko</code> опубликована на npm (<code>3.10.42</code>);
+основной канал релизов форка — GitHub releases (имена claude-flow/ruflo принадлежат upstream).</li>
+</ul>
 </div>
 
 <h2>1 · Честность и доверие</h2>
@@ -89,8 +111,17 @@ vitest перестал гонять застывшие копии из <code>no
 
 <h2>⚙️ Текущее состояние</h2>
 <div class="card">
-<span class="ok">CLI собирается · <code>npm audit</code> 0 уязвимостей · ~300 ключевых тестов зелёные · дерево чисто в <code>origin/main</code>.</span>
-Тяжёлые native-тесты (ruvector/sona/onnx) зелёные в CI.
+<span class="ok">13/13 ядровых пакетов <code>tsc</code> 0 ошибок · ~3500 тестов зелёные · <code>npm audit</code> 0 уязвимостей ·
+witness 117/117 на linux/macos/windows · 104 агента / 41 скилл, связность чистая · дерево чисто в <code>origin/main</code>.</span>
+<table style="margin-top:12px">
+<tr><th>Пакет</th><th>Тесты</th><th>Пакет</th><th>Тесты</th></tr>
+<tr><td><code>guidance</code></td><td>1331</td><td><code>memory</code></td><td>403</td></tr>
+<tr><td><code>swarm</code></td><td>282</td><td><code>shared</code></td><td>267</td></tr>
+<tr><td><code>claims</code></td><td>203</td><td><code>codex</code></td><td>184</td></tr>
+<tr><td><code>mcp</code></td><td>187</td><td><code>neural</code></td><td>144</td></tr>
+<tr><td><code>hooks</code></td><td>116</td><td><code>integration</code></td><td>42</td></tr>
+<tr><td><code>cli</code> (фокус)</td><td>507</td><td><code>plugins</code></td><td>438</td></tr>
+</table>
 <p style="margin:10px 0 0">👉 Как именно проект устроен и как им пользоваться — отдельная страница:
 <a href="how-it-works.html"><b>⚙️ Что и как работает</b></a>.</p>
 </div>

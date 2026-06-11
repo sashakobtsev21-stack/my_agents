@@ -4,7 +4,7 @@
 
 **Один репозиторий с готовой командой агентов, скиллов и инструментов, который я подключаю к любому своему проекту.**
 
-[![version](https://img.shields.io/badge/version-3.10.31-6366f1?style=for-the-badge)](package.json)
+[![version](https://img.shields.io/badge/version-3.10.42-6366f1?style=for-the-badge)](package.json)
 [![license](https://img.shields.io/badge/license-MIT-yellow?style=for-the-badge)](LICENSE)
 [![agents](https://img.shields.io/badge/agents-104-10b981?style=for-the-badge)](.claude/agents/)
 [![plugins](https://img.shields.io/badge/plugins-33-8b5cf6?style=for-the-badge)](.claude-plugin/marketplace.json)
@@ -115,7 +115,7 @@ my_agents/
 ├── .claude/          # ядро команды: agents/ (104), skills/ (41), commands/ (168), helpers/
 ├── .claude-plugin/   # marketplace.json (33 плагина) + хуки
 ├── plugins/          # 33 плагина ruflo-*
-├── v3/               # монорепо v3 (CLI, MCP, память, swarm, security) — pnpm, 23 пакета
+├── v3/               # монорепо v3 (CLI, MCP, память, swarm, security) — pnpm-workspace
 ├── ruflo/ · alexko/  # npm-обёртки CLI (один и тот же движок)
 ├── docs/             # витрины, гайды, CORE-AGENTS, аудиты
 └── scripts/          # утилиты: check-agents, detect-profile, gen-*
@@ -125,11 +125,21 @@ my_agents/
 
 ## 🩺 Состояние
 
-- **Сборка:** `cd v3 && pnpm build` → 23/23 пакета, 0 ошибок. `npm audit` → 0 уязвимостей в корне.
+- **Сборка:** все 13 ядровых пакетов `v3/@claude-flow/*` → `tsc --noEmit` 0 ошибок. `npm audit` → 0 уязвимостей в корне.
 - **Честность:** непроверенные перф-цифры («150x–12500x», «Flash Attention») вычищены или помечены `unverified`.
 - **Агенты:** 104 агента / 41 скилл — фронтматтер валиден, дублей нет, связность чистая. Счётчики и витрины **авто-обновляются** хуком (`scripts/check-agents.mjs`).
-- **Тесты:** ~300+ ключевых тестов зелёные; тяжёлые native-тесты (ruvector/sona/onnx) зелёные в CI.
+- **Тесты:** ~3500+ тестов зелёные (guidance 1331, memory 403, swarm 282, shared 267, claims 203, codex 184, mcp 187, neural 144, hooks 116, integration 42, cli-фокус 507).
+- **CI/witness:** GitHub Actions с гейтами кампании; подписанный witness-манифест 117/117 fix-маркеров на linux/macos/windows.
 - Форк [ruvnet/claude-flow](https://github.com/ruvnet/claude-flow) (MIT); `LICENSE` © ruvnet сохранён.
+
+### 🧹 Кампания деконсолидации god-файлов (2026-06)
+
+Большие монолитные файлы разбиты на сфокусированные модули **без единого изменения публичного API** (баррели / `export *` / re-export — байт-идентичная поверхность):
+
+- **Кампания-1 (W1–W200):** 72 god-файла декомпозированы; все публичные API байт-идентичны.
+- **Кампания-2 (W207–W308, 100+ волн):** систематически вычищены диапазоны **1000→700 строк целиком** и чистые type-сплиты диапазона **700→500**. Паттерны: `*-types`/`*-core`/`*-extended` (типы), `*-defs`/`*-handler` (MCP-инструменты), `*-run`/`*-ops`/`*-lifecycle` (CLI-команды), per-class барели.
+- **Дисциплина каждой волны:** `tsc` 0 → пакетный сьют → lint → `check-agents` → 36 инвариантов → witness ×3 ОС → commit. Ни одного нового падения теста за всю кампанию (все красные сьюты — задокументированные pre-existing baseline экспериментального WASM, A/B-подтверждены).
+- **Верификационные дыры закрыты:** пакеты без своего `tsconfig`, `@ts-nocheck`-заголовки, устаревшие dist-артефакты, flat-scan смоки сделаны layout-aware.
 
 ## 📜 Лицензия
 
