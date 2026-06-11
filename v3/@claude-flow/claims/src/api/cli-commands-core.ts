@@ -1,7 +1,3 @@
-// @ts-nocheck - CLI integration requires the full @claude-flow/cli package
-// (posture inherited verbatim from the pre-split cli-commands.ts: these
-// commands are written against the richer cli-core Command/output API,
-// while claims ships only a minimal mirror — see W200 notes)
 /**
  * Claims CLI — core subcommands
  *

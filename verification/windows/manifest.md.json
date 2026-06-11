@@ -1,8 +1,8 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-06-11T13:56:04.573Z",
-    "gitCommit": "4e65be12a5bf3c95da27bf38850e27427c3ab52a",
+    "issuedAt": "2026-06-11T14:39:53.182Z",
+    "gitCommit": "69437e8ae73f679426e6c236737914f5ef60ab60",
     "branch": "main",
     "os": "windows",
     "releases": {
@@ -621,7 +621,7 @@
         "id": "#1463",
         "desc": "statusline detects Python test_*.py / spec_*.py",
         "file": ".claude/helpers/statusline.cjs",
-        "sha256": "7690456eb7b400a792ebbb094ffd336989ca5f51f4be0b5f3b5aa16ba2ced45f",
+        "sha256": "43a35672786c4a42f74d2e6626679308d0caf4249bf4283f6bbfe27fd377717b",
         "marker": "startsWith('test_')",
         "markerVerified": true
       },
@@ -957,10 +957,10 @@
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "11b3b4aa9d7c6a1c97547a81b23937dc4c5740719efdb966f625d37129aa6b85",
+    "manifestHash": "be956afd7a2db831daefb1a9f813f95d1f316f49113f231bb231065b464ee505",
     "signatureAlgo": "ed25519",
-    "publicKey": "5f51470717bdc69c22a4c0fcad445f9fcbb8332ef4c4c1cf0db09fe7c98e2ae3",
-    "signature": "2b4be32abf37e839f1e560e14ee6a4e88e7e4484f1f6bb11557167a53e55254ef6f6caf30c34db0efef72a4b6362abca8d548ed997f76c92e9972c6eed695a03",
+    "publicKey": "051c5ca13c5dc8d8d0062a003d289723eef55cbdfd995e8e91ef0cf94439a524",
+    "signature": "4ffb9348fb08253ee1a1d56a415dab7b7c388cc1da015aded92379c987c0e58596c39465de42042260ac570e5ea88dfc202261c7f96a9496af2466db08e3c603",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }

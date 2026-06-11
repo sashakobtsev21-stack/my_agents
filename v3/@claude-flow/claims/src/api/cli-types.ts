@@ -14,6 +14,8 @@ export interface CommandContext {
   flags: Record<string, string | boolean | number | undefined>;
   cwd: string;
   verbose: boolean;
+  /** Whether the session is attached to an interactive TTY (cli-core parity, W203). */
+  interactive?: boolean;
 }
 
 export interface CommandResult {
@@ -21,6 +23,8 @@ export interface CommandResult {
   message?: string;
   data?: unknown;
   error?: Error;
+  /** Process exit code override (cli-core parity, W203). */
+  exitCode?: number;
 }
 
 export interface Command {
@@ -28,24 +32,49 @@ export interface Command {
   description: string;
   aliases?: string[];
   usage?: string;
-  examples?: string[];
+  /** cli-core parity (W203): examples may be strings or command/description pairs. */
+  examples?: Array<string | { command: string; description: string }>;
   options?: CommandOption[];
   subcommands?: Command[];
-  execute: (context: CommandContext) => Promise<CommandResult>;
+  /** cli-core parity (W203): either execute or action drives the command. */
+  execute?: (context: CommandContext) => Promise<CommandResult>;
+  action?: (context: CommandContext) => Promise<CommandResult>;
 }
 
 export interface CommandOption {
   name: string;
   alias?: string;
+  /** Single-letter flag (cli-core parity, W203). */
+  short?: string;
   description: string;
   type: 'string' | 'boolean' | 'number';
   required?: boolean;
   default?: string | boolean | number;
+  /** Enumerated values (cli-core parity, W203). */
+  choices?: string[];
 }
 
 // =============================================================================
 // Output Utilities (mirrors @claude-flow/cli/src/output.ts)
 // =============================================================================
+
+/** cli-core parity (W203): printTable column descriptor. */
+export interface TableColumn {
+  key: string;
+  header: string;
+  width?: number;
+  align?: 'left' | 'right' | 'center';
+  format?: (value: unknown) => string;
+}
+
+/** cli-core parity (W203): printTable options. */
+export interface TableOptions {
+  columns: TableColumn[];
+  data?: Record<string, unknown>[];
+  border?: boolean;
+  padding?: number;
+  maxWidth?: number;
+}
 
 export const output = {
   log: (message: string): void => {
@@ -75,6 +104,63 @@ export const output = {
   },
   json: (data: unknown): void => {
     console.log(JSON.stringify(data, null, 2));
+  },
+  // Console-printing family — cli-core OutputFormatter parity (W203)
+  writeln: (message: string = ''): void => {
+    console.log(message);
+  },
+  printSuccess: (message: string): void => {
+    console.log(`✓ ${message}`);
+  },
+  printError: (message: string, details?: string): void => {
+    console.error(`✗ ${message}`);
+    if (details) console.error(details);
+  },
+  printWarning: (message: string): void => {
+    console.warn(`⚠ ${message}`);
+  },
+  printInfo: (message: string): void => {
+    console.log(`ℹ ${message}`);
+  },
+  printJson: (data: unknown): void => {
+    console.log(JSON.stringify(data, null, 2));
+  },
+  progressBar: (current: number, total: number, width: number = 40): string => {
+    const ratio = total > 0 ? Math.min(Math.max(current / total, 0), 1) : 0;
+    const filled = Math.round(ratio * width);
+    return `[${'#'.repeat(filled)}${'-'.repeat(width - filled)}] ${Math.round(ratio * 100)}%`;
+  },
+  createSpinner: (options: { text: string; spinner?: string }): {
+    start: () => void;
+    succeed: (text?: string) => void;
+    fail: (text?: string) => void;
+    stop: () => void;
+  } => {
+    const label = options.text;
+    return {
+      start: () => console.log(`... ${label}`),
+      succeed: (text?: string) => console.log(`✓ ${text ?? label}`),
+      fail: (text?: string) => console.error(`✗ ${text ?? label}`),
+      stop: () => {},
+    };
+  },
+  printTable: (options: TableOptions): void => {
+    const cols = options.columns;
+    const rows = options.data ?? [];
+    console.table(
+      rows.map((row) => {
+        const out: Record<string, unknown> = {};
+        for (const col of cols) out[col.header] = row[col.key];
+        return out;
+      }),
+    );
+  },
+  printList: (items: string[], bullet: string = '-'): void => {
+    for (const item of items) console.log(`${bullet} ${item}`);
+  },
+  printBox: (content: string, title?: string): void => {
+    if (title) console.log(`== ${title} ==`);
+    console.log(content);
   },
   // Formatting helpers that return strings for composition
   dim: (message: string): string => message,
@@ -117,14 +203,34 @@ export async function select<T = string>(
   return options[0]?.value as T;
 }
 
-export async function confirm(message: string, defaultValue = false): Promise<boolean> {
+export interface ConfirmOptions {
+  message: string;
+  default?: boolean;
+}
+
+export interface InputOptions {
+  message: string;
+  default?: string;
+  validate?: (value: string) => true | string;
+}
+
+export async function confirm(message: string | ConfirmOptions, defaultValue = false): Promise<boolean> {
+  if (typeof message === 'object') {
+    return confirmImpl(message.message, message.default ?? false);
+  }
+  return confirmImpl(message, defaultValue);
+}
+
+async function confirmImpl(message: string, defaultValue: boolean): Promise<boolean> {
   console.log(`[Confirm] ${message} (default: ${defaultValue ? 'yes' : 'no'})`);
   return defaultValue;
 }
 
-export async function input(message: string, defaultValue = ''): Promise<string> {
-  console.log(`[Input] ${message} (default: ${defaultValue})`);
-  return defaultValue;
+export async function input(message: string | InputOptions, defaultValue = ''): Promise<string> {
+  const msg = typeof message === 'object' ? message.message : message;
+  const def = typeof message === 'object' ? (message.default ?? '') : defaultValue;
+  console.log(`[Input] ${msg} (default: ${def})`);
+  return def;
 }
 
 // =============================================================================
@@ -146,13 +252,15 @@ export interface MCPToolResult {
   success: boolean;
   data?: unknown;
   error?: string;
+  /** Domain payload fields (claims/summary/status/...) — cli-core parity, W203. */
+  [key: string]: unknown;
 }
 
-export async function callMCPTool(
+export async function callMCPTool<T = MCPToolResult>(
   toolName: string,
   params: Record<string, unknown>
-): Promise<MCPToolResult> {
+): Promise<T> {
   // MCP tool call - delegates to active MCP server
   console.log(`[MCP] Calling tool: ${toolName}`, params);
-  return { success: true, data: {} };
+  return { success: true, data: {} } as T;
 }
