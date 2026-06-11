@@ -26,166 +26,44 @@
 
 import { EventEmitter } from 'events';
 
-// ============================================================================
-// Types
-// ============================================================================
 
-export type FederationId = string;
-export type SwarmId = string;
-export type EphemeralAgentId = string;
+// The types and DEFAULT_CONFIG were extracted into
+// ./federation-hub-types.ts during campaign-2 wave 4 (W210). Import what
+// the class uses + re-export the public surface; FederationId is
+// re-export-only; DEFAULT_CONFIG stays module-private. The stale sibling
+// federation-hub.d.ts is left untouched (name surface unchanged — W176
+// precedent).
+import { DEFAULT_CONFIG } from './federation-hub-types.js';
+import type {
+  SwarmId,
+  EphemeralAgentId,
+  FederationConfig,
+  SwarmRegistration,
+  EphemeralAgent,
+  SpawnEphemeralOptions,
+  SpawnResult,
+  FederationMessage,
+  ConsensusProposal,
+  FederationStats,
+  FederationEvent,
+  FederationEventType,
+} from './federation-hub-types.js';
 
-export interface FederationConfig {
-  /** Federation identifier */
-  federationId?: FederationId;
-  /** Maximum ephemeral agents per swarm */
-  maxEphemeralAgents?: number;
-  /** Default TTL for ephemeral agents (ms) */
-  defaultTTL?: number;
-  /** Sync interval for federation state (ms) */
-  syncIntervalMs?: number;
-  /** Enable auto-cleanup of expired agents */
-  autoCleanup?: boolean;
-  /** Cleanup check interval (ms) */
-  cleanupIntervalMs?: number;
-  /** Cross-swarm communication timeout (ms) */
-  communicationTimeoutMs?: number;
-  /** Enable federation-wide consensus */
-  enableConsensus?: boolean;
-  /** Consensus quorum percentage */
-  consensusQuorum?: number;
-}
-
-export interface SwarmRegistration {
-  swarmId: SwarmId;
-  name: string;
-  endpoint?: string;
-  capabilities: string[];
-  maxAgents: number;
-  currentAgents: number;
-  status: 'active' | 'inactive' | 'degraded';
-  registeredAt: Date;
-  lastHeartbeat: Date;
-  metadata?: Record<string, unknown>;
-}
-
-export interface EphemeralAgent {
-  id: EphemeralAgentId;
-  swarmId: SwarmId;
-  type: string;
-  task: string;
-  status: 'spawning' | 'active' | 'completing' | 'terminated';
-  ttl: number;
-  createdAt: Date;
-  expiresAt: Date;
-  completedAt?: Date;
-  result?: unknown;
-  error?: Error;
-  metadata?: Record<string, unknown>;
-}
-
-export interface SpawnEphemeralOptions {
-  /** Target swarm (auto-select if not specified) */
-  swarmId?: SwarmId;
-  /** Agent type */
-  type: string;
-  /** Task description */
-  task: string;
-  /** Time-to-live in ms (default from config) */
-  ttl?: number;
-  /** Required capabilities */
-  capabilities?: string[];
-  /** Priority for swarm selection */
-  priority?: 'low' | 'normal' | 'high' | 'critical';
-  /** Wait for completion */
-  waitForCompletion?: boolean;
-  /** Completion timeout (ms) */
-  completionTimeout?: number;
-  /** Additional metadata */
-  metadata?: Record<string, unknown>;
-}
-
-export interface SpawnResult {
-  agentId: EphemeralAgentId;
-  swarmId: SwarmId;
-  status: 'spawned' | 'queued' | 'failed';
-  estimatedTTL: number;
-  result?: unknown;
-  error?: string;
-}
-
-export interface FederationMessage {
-  id: string;
-  type: 'broadcast' | 'direct' | 'consensus' | 'heartbeat';
-  sourceSwarmId: SwarmId;
-  targetSwarmId?: SwarmId;
-  payload: unknown;
-  timestamp: Date;
-  ttl?: number;
-}
-
-export interface ConsensusProposal {
-  id: string;
-  proposerId: SwarmId;
-  type: string;
-  value: unknown;
-  votes: Map<SwarmId, boolean>;
-  status: 'pending' | 'accepted' | 'rejected';
-  createdAt: Date;
-  expiresAt: Date;
-}
-
-export interface FederationStats {
-  federationId: FederationId;
-  totalSwarms: number;
-  activeSwarms: number;
-  totalEphemeralAgents: number;
-  activeEphemeralAgents: number;
-  completedAgents: number;
-  failedAgents: number;
-  avgAgentLifespanMs: number;
-  messagesExchanged: number;
-  consensusProposals: number;
-  uptime: number;
-}
-
-export interface FederationEvent {
-  type: FederationEventType;
-  federationId: FederationId;
-  swarmId?: SwarmId;
-  agentId?: EphemeralAgentId;
-  data?: unknown;
-  timestamp: Date;
-}
-
-export type FederationEventType =
-  | 'swarm_joined'
-  | 'swarm_left'
-  | 'swarm_degraded'
-  | 'agent_spawned'
-  | 'agent_completed'
-  | 'agent_failed'
-  | 'agent_expired'
-  | 'message_sent'
-  | 'message_received'
-  | 'consensus_started'
-  | 'consensus_completed'
-  | 'federation_synced';
-
-// ============================================================================
-// Default Configuration
-// ============================================================================
-
-const DEFAULT_CONFIG: Required<FederationConfig> = {
-  federationId: `federation_${Date.now()}`,
-  maxEphemeralAgents: 100,
-  defaultTTL: 300000, // 5 minutes
-  syncIntervalMs: 30000, // 30 seconds
-  autoCleanup: true,
-  cleanupIntervalMs: 60000, // 1 minute
-  communicationTimeoutMs: 5000,
-  enableConsensus: true,
-  consensusQuorum: 0.66,
-};
+export type {
+  FederationId,
+  SwarmId,
+  EphemeralAgentId,
+  FederationConfig,
+  SwarmRegistration,
+  EphemeralAgent,
+  SpawnEphemeralOptions,
+  SpawnResult,
+  FederationMessage,
+  ConsensusProposal,
+  FederationStats,
+  FederationEvent,
+  FederationEventType,
+} from './federation-hub-types.js';
 
 // ============================================================================
 // Federation Hub Implementation
