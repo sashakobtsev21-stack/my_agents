@@ -33,113 +33,27 @@ import {
 import { BdBridge, type BeadQuery } from '../bridges/bd-bridge.js';
 import { ConvoyError, GasTownErrorCode, wrapError } from '../errors.js';
 
-// ============================================================================
-// Types
-// ============================================================================
 
-/**
- * Convoy event types
- */
-export type ConvoyEventType =
-  | 'convoy:created'
-  | 'convoy:started'
-  | 'convoy:progressed'
-  | 'convoy:completed'
-  | 'convoy:cancelled'
-  | 'convoy:paused'
-  | 'convoy:resumed'
-  | 'convoy:issue:added'
-  | 'convoy:issue:removed'
-  | 'convoy:issue:updated';
-
-/**
- * Convoy event payload
- */
-export interface ConvoyEvent {
-  /** Event type */
-  type: ConvoyEventType;
-  /** Convoy ID */
-  convoyId: string;
-  /** Convoy name */
-  convoyName: string;
-  /** Event timestamp */
-  timestamp: Date;
-  /** Previous status (for status change events) */
-  previousStatus?: ConvoyStatus;
-  /** Current status */
-  status: ConvoyStatus;
-  /** Progress at time of event */
-  progress: ConvoyProgress;
-  /** Issue IDs affected (for issue events) */
-  issues?: string[];
-  /** Cancellation reason (for cancelled events) */
-  reason?: string;
-  /** Additional metadata */
-  metadata?: Record<string, unknown>;
-}
-
-/**
- * Convoy tracker configuration
- */
-export interface ConvoyTrackerConfig {
-  /** BD bridge instance for bead operations */
-  bdBridge: BdBridge;
-  /** Auto-update progress on issue changes */
-  autoUpdateProgress?: boolean;
-  /** Progress update interval in milliseconds */
-  progressUpdateInterval?: number;
-  /** Enable persistent storage */
-  persistConvoys?: boolean;
-  /** Storage path for convoy data */
-  storagePath?: string;
-}
-
-/**
- * Internal convoy storage
- */
-interface ConvoyStore {
-  convoy: Convoy;
-  createdAt: Date;
-  updatedAt: Date;
-  metadata: Record<string, unknown>;
-}
-
-/**
- * Logger interface
- */
-export interface ConvoyLogger {
-  debug: (msg: string, meta?: Record<string, unknown>) => void;
-  info: (msg: string, meta?: Record<string, unknown>) => void;
-  warn: (msg: string, meta?: Record<string, unknown>) => void;
-  error: (msg: string, meta?: Record<string, unknown>) => void;
-}
-
-// ============================================================================
-// Default Logger
-// ============================================================================
-
-const defaultLogger: ConvoyLogger = {
-  debug: (msg, meta) => console.debug(`[convoy-tracker] ${msg}`, meta ?? ''),
-  info: (msg, meta) => console.info(`[convoy-tracker] ${msg}`, meta ?? ''),
-  warn: (msg, meta) => console.warn(`[convoy-tracker] ${msg}`, meta ?? ''),
-  error: (msg, meta) => console.error(`[convoy-tracker] ${msg}`, meta ?? ''),
-};
-
-// ============================================================================
-// Validation Schemas
-// ============================================================================
-
-/**
- * Convoy ID schema
- */
-const ConvoyIdSchema = z.string()
-  .uuid('Invalid convoy ID format');
-
-/**
- * Issue ID array schema
- */
-const IssueIdsSchema = z.array(z.string().min(1))
-  .min(1, 'At least one issue ID required');
+// Defs extracted into ./tracker-defs.ts during campaign-2 wave 43
+// (W249).
+export type {
+  ConvoyEventType,
+  ConvoyEvent,
+  ConvoyTrackerConfig,
+  ConvoyLogger,
+} from './tracker-defs.js';
+import {
+  ConvoyIdSchema,
+  IssueIdsSchema,
+  defaultLogger,
+} from './tracker-defs.js';
+import type {
+  ConvoyEvent,
+  ConvoyEventType,
+  ConvoyLogger,
+  ConvoyStore,
+  ConvoyTrackerConfig,
+} from './tracker-defs.js';
 
 // ============================================================================
 // Convoy Tracker Implementation
