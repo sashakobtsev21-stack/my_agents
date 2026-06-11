@@ -27,4 +27,3 @@
 import { MCPTool } from '../types.js';
 export declare const sonaTools: MCPTool[];
 export default sonaTools;
-//# sourceMappingURL=sona-tools.d.ts.map

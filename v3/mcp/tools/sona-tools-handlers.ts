@@ -6,6 +6,7 @@
  * (P3.62, W183); NOT re-exported by the barrel.
  */
 
+import { z } from 'zod';
 import type { ToolContext } from '../types.js';
 import {
   trajectoryBeginSchema,
@@ -26,6 +27,25 @@ import type {
   SONAProfile,
   SONAStats,
 } from './sona-tools-support.js';
+
+// Lazy-loaded agentic-flow imports for HNSW search optimization
+// (restored in W198 — dropped by the W183 slice, masked by the stale
+// committed .js artifact)
+let agenticFlowCore: typeof import('agentic-flow/core') | null = null;
+let agentDBInstance: unknown | null = null;
+
+async function loadAgenticFlow(): Promise<boolean> {
+  try {
+    agenticFlowCore = await import('agentic-flow/core');
+    if (agenticFlowCore?.createFastAgentDB) {
+      agentDBInstance = agenticFlowCore.createFastAgentDB({ dimensions: 768 });
+    }
+    return true;
+  } catch {
+    // agentic-flow not available - use fallback implementations
+    return false;
+  }
+}
 
 // State Management
 // ============================================================================

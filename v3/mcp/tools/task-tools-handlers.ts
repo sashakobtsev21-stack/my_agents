@@ -7,6 +7,7 @@
  * NOT re-exported by the barrel.
  */
 
+import { z } from 'zod';
 import { randomBytes } from 'crypto';
 import type { ToolContext } from '../types.js';
 import {
@@ -28,7 +29,17 @@ import type {
   CancelTaskResult,
   AssignTaskResult,
   TaskDependenciesResult,
+  TaskWithMetrics,
+  UpdateTaskResult,
 } from './task-tools-support.js';
+
+// Secure ID generation helper (restored in W198 — dropped by the W182
+// slice, masked by the stale committed .js artifact)
+function generateSecureTaskId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = randomBytes(12).toString('hex');
+  return `task-${timestamp}-${random}`;
+}
 
 // In-memory task store (for simple implementation)
 // ============================================================================

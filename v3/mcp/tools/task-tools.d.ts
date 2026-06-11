@@ -48,4 +48,3 @@ export declare const taskDependenciesTool: MCPTool;
 export declare const taskResultsTool: MCPTool;
 export declare const taskTools: MCPTool[];
 export default taskTools;
-//# sourceMappingURL=task-tools.d.ts.map

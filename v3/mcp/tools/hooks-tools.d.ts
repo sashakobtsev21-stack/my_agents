@@ -54,4 +54,3 @@ export declare const metricsTool: MCPTool;
 export declare const listHooksTool: MCPTool;
 export declare const hooksTools: MCPTool[];
 export default hooksTools;
-//# sourceMappingURL=hooks-tools.d.ts.map
