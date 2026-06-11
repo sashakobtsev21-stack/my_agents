@@ -51,8 +51,12 @@ export const output = {
   log: (message: string): void => {
     console.log(message);
   },
-  error: (message: string): void => {
-    console.error(`Error: ${message}`);
+  // String-returning formatter — aligned with the authoritative
+  // @claude-flow/cli-core OutputFormatter (its success/error/info all
+  // return styled strings). The old void/console.log variants made the
+  // formatClaim* helpers return undefined into templates (W200).
+  error: (message: string): string => {
+    return `✗ ${message}`;
   },
   warn: (message: string): void => {
     console.warn(`Warning: ${message}`);
@@ -60,11 +64,11 @@ export const output = {
   warning: (message: string): string => {
     return `⚠ ${message}`;
   },
-  success: (message: string): void => {
-    console.log(`✓ ${message}`);
+  success: (message: string): string => {
+    return `✓ ${message}`;
   },
-  info: (message: string): void => {
-    console.log(`ℹ ${message}`);
+  info: (message: string): string => {
+    return `ℹ ${message}`;
   },
   table: (data: Record<string, unknown>[]): void => {
     console.table(data);
