@@ -28,7 +28,14 @@ import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const REPO_ROOT = process.cwd();
-const EXECUTOR_TS = join(REPO_ROOT, 'v3', '@claude-flow', 'cli', 'src', 'init', 'executor.ts');
+// The COMMANDS_MAP/AGENTS_MAP literals moved from executor.ts into
+// executor-maps.ts during the decomposition campaign — read the maps
+// module (with the old path as fallback for older checkouts).
+const EXECUTOR_TS = (() => {
+  const maps = join(REPO_ROOT, 'v3', '@claude-flow', 'cli', 'src', 'init', 'executor-maps.ts');
+  const legacy = join(REPO_ROOT, 'v3', '@claude-flow', 'cli', 'src', 'init', 'executor.ts');
+  return existsSync(maps) ? maps : legacy;
+})();
 const CLI_DOT_CLAUDE = join(REPO_ROOT, 'v3', '@claude-flow', 'cli', '.claude');
 const PLUGINS_DIR = join(REPO_ROOT, 'plugins');
 

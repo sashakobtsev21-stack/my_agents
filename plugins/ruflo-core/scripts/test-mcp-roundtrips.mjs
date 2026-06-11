@@ -19,11 +19,15 @@
  * The dist-scan check is the hard gate; behavioral is informational.
  */
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const REPO_ROOT = resolve(process.argv[2] ?? process.cwd());
 const DIST = resolve(REPO_ROOT, 'v3/@claude-flow/cli/dist/src/mcp-tools/agentdb-tools.js');
+// The decomposition campaign split agentdb-tools into a barrel +
+// ./agentdb-tools/ sub-modules; the contract code now lives one hop deeper.
+// Scan barrel + every sub-module — same dist-scan strength, layout-aware.
+const DIST_DIR = resolve(REPO_ROOT, 'v3/@claude-flow/cli/dist/src/mcp-tools/agentdb-tools');
 
 if (!existsSync(DIST)) {
   console.error(`FAIL: ${DIST} not found — run \`npm --prefix v3/@claude-flow/cli run build\` first`);
@@ -36,7 +40,12 @@ const pass = (m) => console.log(`ok: ${m}`);
 
 // ===== STAGE 1 — Static dist scan (durable contract; always runs) =====
 
-const distSrc = readFileSync(DIST, 'utf-8');
+let distSrc = readFileSync(DIST, 'utf-8');
+if (existsSync(DIST_DIR)) {
+  for (const f of readdirSync(DIST_DIR)) {
+    if (f.endsWith('.js')) distSrc += '\n' + readFileSync(resolve(DIST_DIR, f), 'utf-8');
+  }
+}
 
 if (!distSrc.includes("controller: 'memory-store-fallback'")) {
   fail('#1889-store-fallback-missing — agentdb_pattern-store no longer has the memory-store-fallback path');

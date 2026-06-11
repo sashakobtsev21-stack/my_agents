@@ -1,8 +1,8 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-06-11T17:53:59.583Z",
-    "gitCommit": "514fb888e5879febff9765ca06117be5fbe06a41",
+    "issuedAt": "2026-06-11T18:25:50.530Z",
+    "gitCommit": "5e70c5cfd2faec81190ab6de718c492715c06e42",
     "branch": "main",
     "os": "macos",
     "releases": {
@@ -861,7 +861,7 @@
         "id": "#1916-guard",
         "desc": "CLI↔MCP tool coverage CI guard (scripts/audit-cli-mcp-tools.mjs) — fails if any `ruflo <cmd>` subcommand callMCPTool()s a name not registered in src/mcp-tools/*.ts. Monotone-decreasing baseline at verification/cli-mcp-tool-baseline.json — now at 0 (was 20). Wired into v3-ci.yml `tool-descriptions-audit` job (already in witness-verify needs[]).",
         "file": "scripts/audit-cli-mcp-tools.mjs",
-        "sha256": "77883bac35c00c92eda4a5999853f8d1d2864806065b0b900548f501f5511b7c",
+        "sha256": "7ae2a7bfc19115aae268cb790b27999982788675fd9e8492fcdb351fc34e4918",
         "marker": "cli-mcp-tool-baseline.json",
         "markerVerified": true
       },
@@ -957,10 +957,10 @@
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "08a49d891415094bc740de44b139d3384e610cbe104a3663d5b5da99ec87cff1",
+    "manifestHash": "1a73e324c4bd267a7ee8de37505a1195efc6eff0e4ce958bdb0338debce598e6",
     "signatureAlgo": "ed25519",
-    "publicKey": "2880698c0563fd9883d42b83685a7594fe5ab4db5e23d7bd7a1348fe8e2e467e",
-    "signature": "eda077e8c7bc87583b43dfb5c8b5537cc5e784c11cb6e239af732be5c70c63cd2ff2bcf143a42d9167425fc59990f5453ef2bbc43c346a0350914c485ecd9c06",
+    "publicKey": "cc6eeb59ed648628acba47ff65883fac0b2b6a7f447d820bcc61b65e85bcf0d3",
+    "signature": "6ccf49adf95c0a2a4330045546e475b66bdbdbba766dd3e4a085d94050cbca11a6d01c8f0506ae9ae2ef8a1585823f3c1501e0a097ec73667131d67a82fc760d",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }

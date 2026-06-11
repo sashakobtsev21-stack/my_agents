@@ -31,12 +31,16 @@
  * regressions.
  */
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const REPO_ROOT = resolve(process.argv[2] ?? process.cwd());
 const DIST = resolve(REPO_ROOT, 'v3/@claude-flow/cli/dist/src/mcp-tools/memory-tools.js');
+// W124 split memory-tools into a barrel + ./memory-tools/ sub-modules, so the
+// contract markers (#1883/#1884) now live in the compiled sub-modules. Scan
+// the barrel PLUS every sub-module file — same dist-scan strength, layout-aware.
+const DIST_DIR = resolve(REPO_ROOT, 'v3/@claude-flow/cli/dist/src/mcp-tools/memory-tools');
 
 let failed = 0;
 const fail = (m) => { console.error(`FAIL: ${m}`); failed++; };
@@ -46,7 +50,12 @@ if (!existsSync(DIST)) {
   fail(`${DIST} not found — run \`npm --prefix v3/@claude-flow/cli run build\` first`);
   process.exit(1);
 }
-const distSrc = readFileSync(DIST, 'utf-8');
+let distSrc = readFileSync(DIST, 'utf-8');
+if (existsSync(DIST_DIR)) {
+  for (const f of readdirSync(DIST_DIR)) {
+    if (f.endsWith('.js')) distSrc += '\n' + readFileSync(resolve(DIST_DIR, f), 'utf-8');
+  }
+}
 
 // ---------- 1. Static dist scan ----------
 

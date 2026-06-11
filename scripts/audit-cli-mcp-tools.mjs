@@ -42,6 +42,19 @@ function listTs(dir) {
   return readdirSync(dir).filter(f => f.endsWith('.ts') && !f.endsWith('.test.ts')).map(f => join(dir, f));
 }
 
+// Recursive variant — the decomposition campaign moved several tool
+// REGISTRATIONS into sub-directories (e.g. mcp-tools/memory-tools/), so the
+// registration side scans recursively. The caller side keeps the original
+// flat scan (expanding it surfaces ~43 pre-existing dangling references in
+// command sub-directories — tracked separately, out of this guard's baseline).
+function listTsRecursive(dir) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { recursive: true })
+    .map(String)
+    .filter(f => f.endsWith('.ts') && !f.endsWith('.test.ts'))
+    .map(f => join(dir, f));
+}
+
 // --- which tool-source files are ACTUALLY registered ---
 // Mirror mcp-client.ts: find every `...<ident>(?())` spread inside its
 // `registerTools([ … ])` call, then resolve each <ident> to its
@@ -79,7 +92,25 @@ function registeredToolSourceFiles() {
       if (existsSync(cand)) files.add(cand);
     }
   }
-  return [...files];
+  // Follow re-exports: the decomposition campaign turned several tool files
+  // into thin barrels (e.g. memory-tools.ts -> ./memory-tools/*.js), so the
+  // `name:` literals live one hop deeper. Walk `export ... from '<spec>'` and
+  // relative `import ... from '<spec>'` edges transitively.
+  const queue = [...files];
+  const seen = new Set(files);
+  while (queue.length) {
+    const f = queue.pop();
+    const body = readFileSync(f, 'utf-8');
+    for (const m of body.matchAll(/(?:export|import)[^'";]*from\s*['"](\.[^'"]+)['"]/g)) {
+      const dir = f.slice(0, Math.max(f.lastIndexOf('/'), f.lastIndexOf('\\')));
+      const child = join(dir, m[1].replace(/\.js$/, '.ts'));
+      if (existsSync(child) && !seen.has(child)) {
+        seen.add(child);
+        queue.push(child);
+      }
+    }
+  }
+  return [...seen];
 }
 
 // --- registered tool names ---
