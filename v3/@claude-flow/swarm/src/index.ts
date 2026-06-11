@@ -299,7 +299,7 @@ export {
 // Default Export
 // =============================================================================
 
-import { UnifiedSwarmCoordinator, createUnifiedSwarmCoordinator } from './unified-coordinator.js';
+import { UnifiedSwarmCoordinator } from './unified-coordinator.js';
 export default UnifiedSwarmCoordinator;
 
 // =============================================================================

@@ -19,7 +19,6 @@
 import {
   WorkerBase,
   WorkerConfig,
-  WorkerType,
   AgentOutput,
   WorkerArtifact,
 } from './worker-base.js';
@@ -499,7 +498,7 @@ export class SpecializedWorker extends WorkerBase {
 
     // Add skill influence
     let skillIdx = 16;
-    for (const [skill, level] of Array.from(this.skills.entries())) {
+    for (const [, level] of Array.from(this.skills.entries())) {
       if (skillIdx < baseDimension) {
         embedding[skillIdx] = level;
         skillIdx++;

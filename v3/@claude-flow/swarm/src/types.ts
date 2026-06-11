@@ -3,7 +3,6 @@
  * Consolidated type definitions for the unified swarm coordination system
  */
 
-import { EventEmitter } from 'events';
 
 // ===== CORE IDENTIFIERS =====
 

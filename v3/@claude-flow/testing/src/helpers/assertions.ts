@@ -104,7 +104,7 @@ export function assertContractCompliance<T extends object>(
   implementation: T,
   contract: ContractDefinition<T>
 ): void {
-  for (const [method, spec] of Object.entries(contract.methods)) {
+  for (const [method] of Object.entries(contract.methods)) {
     expect(typeof (implementation as Record<string, unknown>)[method]).toBe('function');
   }
 }

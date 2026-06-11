@@ -7,8 +7,8 @@
  * @module v3/swarm/domain/services
  */
 
-import { Agent, AgentRole } from '../entities/agent.js';
-import { Task, TaskPriority } from '../entities/task.js';
+import { Agent } from '../entities/agent.js';
+import { Task } from '../entities/task.js';
 import { IAgentRepository } from '../repositories/agent-repository.interface.js';
 import { ITaskRepository } from '../repositories/task-repository.interface.js';
 

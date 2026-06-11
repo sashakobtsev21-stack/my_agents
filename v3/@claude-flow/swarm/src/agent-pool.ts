@@ -6,8 +6,6 @@
 import { EventEmitter } from 'events';
 import {
   AgentState,
-  AgentType,
-  AgentStatus,
   AgentCapabilities,
   AgentMetrics,
   AgentPoolConfig,

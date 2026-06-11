@@ -15,12 +15,6 @@
 import { EventEmitter } from 'events';
 
 // Types for agentic-flow integration
-interface TokenStats {
-  saved: number;
-  baseline: number;
-  reduction: number;
-  method: string;
-}
 
 interface MemoryContext {
   query: string;

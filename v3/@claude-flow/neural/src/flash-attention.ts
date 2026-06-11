@@ -405,7 +405,6 @@ export class FlashAttention {
     // Process in blocks
     for (let kStart = 0; kStart < numKeys; kStart += blockSize) {
       const kEnd = Math.min(kStart + blockSize, numKeys);
-      const kBlockSize = kEnd - kStart;
 
       // Process each query against this key block
       for (let qStart = 0; qStart < numQueries; qStart += blockSize) {

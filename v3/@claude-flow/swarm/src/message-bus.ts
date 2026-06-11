@@ -229,7 +229,6 @@ export class MessageBus extends EventEmitter implements IMessageBus {
   private statsInterval?: NodeJS.Timeout;
   private messageCounter: number = 0;
   private stats: MessageBusStats;
-  private startTime: Date = new Date();
   // Circular buffer for message history (max 60 entries for 60 seconds)
   private messageHistory: { timestamp: number; count: number }[] = [];
   private messageHistoryIndex: number = 0;
@@ -322,7 +321,7 @@ export class MessageBus extends EventEmitter implements IMessageBus {
 
     if (message.to === 'broadcast') {
       // Broadcast to all subscribed agents
-      for (const [agentId, subscription] of this.subscriptions) {
+      for (const [agentId] of this.subscriptions) {
         if (agentId !== message.from) {
           this.addToQueue(agentId, message);
         }

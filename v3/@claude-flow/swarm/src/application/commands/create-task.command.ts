@@ -6,7 +6,7 @@
  * @module v3/swarm/application/commands
  */
 
-import { Task, TaskPriority, TaskProps } from '../../domain/entities/task.js';
+import { Task, TaskPriority } from '../../domain/entities/task.js';
 import { ITaskRepository } from '../../domain/repositories/task-repository.interface.js';
 
 /**

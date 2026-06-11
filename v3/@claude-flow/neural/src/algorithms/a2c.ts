@@ -13,7 +13,6 @@
 import type {
   RLConfig,
   Trajectory,
-  TrajectoryStep,
 } from '../types.js';
 
 /**

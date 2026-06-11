@@ -212,7 +212,7 @@ describe('AgentAdapter', () => {
 
   describe('Delegation Status', () => {
     it('should track delegation status', async () => {
-      const agent = await adapter.createWithDelegation({
+      await adapter.createWithDelegation({
         id: 'delegation-check-agent',
         name: 'Delegation Check',
         type: 'coder',

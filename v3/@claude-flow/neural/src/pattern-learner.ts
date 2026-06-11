@@ -13,7 +13,6 @@
 import type {
   Pattern,
   PatternMatch,
-  PatternEvolution,
   Trajectory,
   DistilledMemory,
   NeuralEvent,
@@ -737,7 +736,6 @@ export class PatternLearner {
 
     const patterns = Array.from(this.patterns.values());
     const k = Math.min(this.config.numClusters, Math.ceil(patterns.length / 5));
-    const dim = patterns[0].embedding.length;
 
     // Initialize clusters with random patterns
     this.clusters = [];

@@ -4,7 +4,6 @@
  * Creates isolated test instances of the application
  * Following London School principles for dependency injection
  */
-import { vi, type Mock } from 'vitest';
 import { createMock, type MockedInterface } from './create-mock.js';
 
 /**

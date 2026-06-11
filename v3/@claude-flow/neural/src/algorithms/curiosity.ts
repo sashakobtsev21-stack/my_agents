@@ -10,7 +10,7 @@
  * Performance Target: <5ms per forward pass
  */
 
-import type { CuriosityConfig, Trajectory, TrajectoryStep } from '../types.js';
+import type { CuriosityConfig, Trajectory } from '../types.js';
 
 /**
  * Default Curiosity configuration

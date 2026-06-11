@@ -31,7 +31,6 @@ import type {
   LoRAWeights,
   EWCConfig,
   EWCState,
-  RLAlgorithm,
 } from './types.js';
 
 import { RealTimeMode } from './modes/real-time.js';
@@ -569,7 +568,7 @@ export class SONAManager {
     const config = this.getEWCConfig();
 
     // Update Fisher information with decay
-    for (const [key, fisher] of this.ewcState.fisher) {
+    for (const [, fisher] of this.ewcState.fisher) {
       for (let i = 0; i < fisher.length; i++) {
         fisher[i] *= config.decay;
       }

@@ -22,8 +22,6 @@ import {
   WorkerBase,
   WorkerConfig,
   WorkerType,
-  WorkerMetrics,
-  WorkerHealth,
 } from './worker-base.js';
 import { SpecializedWorker, SpecializedWorkerConfig } from './specialized-worker.js';
 import { LongRunningWorker, LongRunningWorkerConfig } from './long-running-worker.js';
@@ -190,9 +188,6 @@ export class WorkerPool extends EventEmitter {
 
   /** Pool creation time */
   private createdAt: number;
-
-  /** Round-robin index */
-  private roundRobinIndex: number = 0;
 
   /** Pool-level metrics */
   private poolMetrics: {

@@ -10,8 +10,6 @@ import {
   createFlashAttentionOptimizer,
   FlashAttention,
   DotProductAttention,
-  type BenchmarkResult,
-  type AttentionInput,
 } from './attention-integration.js';
 
 // ============================================================================
@@ -275,20 +273,6 @@ export class AttentionBenchmarkRunner {
     };
   }
 
-  /**
-   * Calculate memory reduction percentage
-   */
-  private calculateMemoryReduction(
-    baselineBytes?: number,
-    flashBytes?: number
-  ): number | undefined {
-    if (!baselineBytes || !flashBytes) {
-      return undefined;
-    }
-
-    const reduction = ((baselineBytes - flashBytes) / baselineBytes) * 100;
-    return Math.max(0, reduction);
-  }
 
   /**
    * Get current memory usage

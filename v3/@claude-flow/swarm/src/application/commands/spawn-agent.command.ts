@@ -6,7 +6,7 @@
  * @module v3/swarm/application/commands
  */
 
-import { Agent, AgentRole, AgentProps } from '../../domain/entities/agent.js';
+import { Agent, AgentRole } from '../../domain/entities/agent.js';
 import { IAgentRepository } from '../../domain/repositories/agent-repository.interface.js';
 
 /**

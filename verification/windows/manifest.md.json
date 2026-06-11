@@ -1,8 +1,8 @@
 {
   "manifest": {
     "schema": "ruflo-witness/v1",
-    "issuedAt": "2026-06-11T14:39:53.182Z",
-    "gitCommit": "69437e8ae73f679426e6c236737914f5ef60ab60",
+    "issuedAt": "2026-06-11T17:53:59.778Z",
+    "gitCommit": "514fb888e5879febff9765ca06117be5fbe06a41",
     "branch": "main",
     "os": "windows",
     "releases": {
@@ -645,7 +645,7 @@
         "id": "#1867",
         "desc": "Node 26 install: better-sqlite3 dynamic import + optionalDependencies",
         "file": "v3/@claude-flow/memory/dist/sqlite-backend.js",
-        "sha256": "fda0d97f6ff80ecb10d6bd23d1afaa4346d58f3d2b8e5f17ce7b6f027442ab58",
+        "sha256": "c170cc67b729e76c3e989ae92dfb5a6b99559a75d51cbd0dee9c0e3bc90c96c0",
         "marker": "(await import('better-sqlite3')).default",
         "markerVerified": true
       },
@@ -701,7 +701,7 @@
         "id": "ADR-097-Phase2b-coordinator",
         "desc": "Coordinator outbound short-circuit on !peer.isActive (companion to ADR-097-Phase2b) — refuses sends to SUSPENDED/EVICTED peers before session lookup, no remaining-budget echo",
         "file": "v3/@claude-flow/plugin-agent-federation/dist/application/federation-coordinator.js",
-        "sha256": "4ec03c4b422ce30e3a3f4aeb816b6254d43fc2bc4ad3c8c8f64baab8a0eeab7c",
+        "sha256": "94474cda9f0f2d3339c39da8b50588fc763e697155f9d8e610847c0951ddd14a",
         "marker": "PEER_EVICTED",
         "markerVerified": true
       },
@@ -957,10 +957,10 @@
   },
   "integrity": {
     "manifestHashAlgo": "sha256",
-    "manifestHash": "be956afd7a2db831daefb1a9f813f95d1f316f49113f231bb231065b464ee505",
+    "manifestHash": "e52873ced3babb71be060a0d2399d7e5d7e330c229fbe92643111c19f436cbb1",
     "signatureAlgo": "ed25519",
-    "publicKey": "051c5ca13c5dc8d8d0062a003d289723eef55cbdfd995e8e91ef0cf94439a524",
-    "signature": "4ffb9348fb08253ee1a1d56a415dab7b7c388cc1da015aded92379c987c0e58596c39465de42042260ac570e5ea88dfc202261c7f96a9496af2466db08e3c603",
+    "publicKey": "2880698c0563fd9883d42b83685a7594fe5ab4db5e23d7bd7a1348fe8e2e467e",
+    "signature": "912e1734aed36b733020c07918623af110591531bdb0903c6da88f0bf7d769f798616ee31e78409081afb25bfb6a29daf8b72f07d3df44a1db3325486dd83c05",
     "seedDerivation": "sha256(gitCommit + ':ruflo-witness/v1')"
   }
 }

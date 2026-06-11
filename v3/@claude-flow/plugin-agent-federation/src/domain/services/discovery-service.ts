@@ -1,4 +1,4 @@
-import { FederationNode, type FederationNodeProps } from '../entities/federation-node.js';
+import { FederationNode } from '../entities/federation-node.js';
 import { TrustLevel } from '../entities/trust-level.js';
 import type { WgManifestSection } from '../value-objects/wg-config.js';
 

@@ -11,7 +11,6 @@
 
 import type {
   SONAModeConfig,
-  ModeOptimizations,
   Trajectory,
   Pattern,
   PatternMatch,

@@ -21,7 +21,6 @@ import type {
   TrajectoryVerdict,
   DistilledMemory,
   Pattern,
-  PatternEvolution,
   NeuralEvent,
   NeuralEventListener,
 } from './types.js';
@@ -1261,7 +1260,7 @@ export class ReasoningBank {
 
         if (sim > 0.9 && patterns[i][1].domain === patterns[j][1].domain) {
           // Merge into higher quality pattern
-          const [keepId, keep] = patterns[i][1].successRate >= patterns[j][1].successRate
+          const [, keep] = patterns[i][1].successRate >= patterns[j][1].successRate
             ? patterns[i]
             : patterns[j];
           const [removeId, remove] = patterns[i][1].successRate < patterns[j][1].successRate

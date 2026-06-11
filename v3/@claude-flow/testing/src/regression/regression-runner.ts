@@ -134,7 +134,6 @@ export class RegressionTestRunner {
    */
   async runAll(): Promise<RegressionReport> {
     const startTime = Date.now();
-    const results: RegressionResult[] = [];
 
     const report: RegressionReport = {
       timestamp: new Date(),

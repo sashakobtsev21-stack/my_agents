@@ -17,11 +17,7 @@ import type {
   IntegrationStatus,
   RuntimeInfo,
   ComponentHealth,
-  IntegrationEvent,
-  IntegrationEventType,
-  IntegrationError,
   FeatureFlags,
-  DEFAULT_INTEGRATION_CONFIG,
 } from './types.js';
 import { SONAAdapter } from './sona-adapter.js';
 import { AttentionCoordinator } from './attention-coordinator.js';

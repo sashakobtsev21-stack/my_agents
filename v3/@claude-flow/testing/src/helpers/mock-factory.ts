@@ -4,12 +4,12 @@
  * Factory functions for creating comprehensive mocks of V3 services and components.
  * Implements London School TDD patterns with behavior verification.
  */
-import { vi, type Mock } from 'vitest';
-import { createMock, createMockWithBehavior, type MockedInterface } from './create-mock.js';
+import { vi } from 'vitest';
+import { createMock, type MockedInterface } from './create-mock.js';
 import type { V3AgentType, AgentInstance, AgentMetrics } from '../fixtures/agent-fixtures.js';
-import type { MemoryEntry, SearchResult, VectorQuery } from '../fixtures/memory-fixtures.js';
-import type { SwarmState, SwarmConfig, SwarmTask, SwarmTaskResult, CoordinationResult } from '../fixtures/swarm-fixtures.js';
-import type { MCPTool, MCPToolResult, MCPServerConfig, MCPSessionContext } from '../fixtures/mcp-fixtures.js';
+import type { SearchResult, VectorQuery } from '../fixtures/memory-fixtures.js';
+import type { SwarmState, SwarmConfig, SwarmTask, CoordinationResult } from '../fixtures/swarm-fixtures.js';
+import type { MCPTool, MCPToolResult, MCPSessionContext } from '../fixtures/mcp-fixtures.js';
 
 /**
  * Event bus interface for DDD events

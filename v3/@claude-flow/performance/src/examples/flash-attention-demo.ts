@@ -5,12 +5,10 @@
  */
 
 import {
-  FlashAttentionOptimizer,
   createFlashAttentionOptimizer,
   quickBenchmark,
   AttentionBenchmarkRunner,
   quickValidation,
-  runAndDisplaySuite,
   type AttentionInput,
 } from '../index.js';
 

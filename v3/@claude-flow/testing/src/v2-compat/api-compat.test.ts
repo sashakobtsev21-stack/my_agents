@@ -11,7 +11,6 @@ import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vite
 import {
   V2CompatibilityValidator,
   V2_API_INTERFACES,
-  type V2APIInterface,
   type ValidationResult,
 } from './compatibility-validator.js';
 

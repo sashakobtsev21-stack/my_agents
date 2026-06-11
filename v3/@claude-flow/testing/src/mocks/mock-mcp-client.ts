@@ -4,7 +4,7 @@
  * Comprehensive mock MCP client for testing CLI and server interactions.
  * Simulates full MCP protocol behavior with request/response tracking.
  */
-import { vi, type Mock } from 'vitest';
+import { vi } from 'vitest';
 import type {
   MCPTool,
   MCPToolResult,
@@ -14,11 +14,6 @@ import type {
   MCPSessionContext,
   MCPError,
   MCPContent,
-  mcpTools,
-  mcpResources,
-  mcpPrompts,
-  mcpToolResults,
-  mcpErrors,
 } from '../fixtures/mcp-fixtures.js';
 
 /**
@@ -474,7 +469,7 @@ export class MockMCPServer {
   }
 
   private handleToolCall(request: MCPRequest): MCPResponse {
-    const { name, arguments: params } = request.params as { name: string; arguments: Record<string, unknown> };
+    const { name } = request.params as { name: string; arguments: Record<string, unknown> };
     const tool = this._tools.get(name);
 
     if (!tool) {

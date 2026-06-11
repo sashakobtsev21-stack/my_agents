@@ -4,7 +4,7 @@
  * Creates isolated swarm instances for testing
  * Supports 15-agent V3 swarm topology testing
  */
-import { vi, type Mock } from 'vitest';
+import { vi } from 'vitest';
 import { createMock, type MockedInterface, InteractionRecorder } from './create-mock.js';
 
 /**
@@ -319,7 +319,9 @@ export class SwarmTestInstance {
     this.taskResults = [];
     this.interactionRecorder.clear();
 
-    for (const agent of this.agents.values()) {
+    // vi.clearAllMocks() is global — one call suffices (the per-agent loop
+    // never used its binding; W202b cleanup).
+    if (this.agents.size > 0) {
       vi.clearAllMocks();
     }
   }

@@ -23,7 +23,6 @@
 
 import {
   AgentId,
-  AgentRole,
   AgentDomain,
   AgentState,
   TaskId,
@@ -47,11 +46,10 @@ import {
   EventBus,
   swarmInitializedEvent,
   swarmPhaseChangedEvent,
-  swarmMilestoneReachedEvent,
-  swarmErrorEvent
+  swarmMilestoneReachedEvent
 } from '../shared/events';
 import { IAgentRegistry, AgentRegistry, createAgentRegistry } from './agent-registry';
-import { ITaskOrchestrator, TaskOrchestrator, TaskSpec, createTaskOrchestrator } from './task-orchestrator';
+import { ITaskOrchestrator, TaskSpec, createTaskOrchestrator } from './task-orchestrator';
 import { UnifiedSwarmCoordinator, createUnifiedSwarmCoordinator } from '../unified-coordinator';
 
 // =============================================================================

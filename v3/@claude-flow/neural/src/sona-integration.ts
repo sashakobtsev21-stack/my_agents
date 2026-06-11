@@ -13,9 +13,6 @@
 import { SonaEngine, type JsSonaConfig, type JsLearnedPattern } from '@ruvector/sona';
 import type {
   Trajectory,
-  TrajectoryStep,
-  TrajectoryVerdict,
-  DistilledMemory,
   SONAMode,
   SONAModeConfig,
 } from './types.js';

@@ -10,7 +10,7 @@
  */
 
 import { EventEmitter } from 'events';
-import type { FeatureFlags, DEFAULT_FEATURE_FLAGS } from './types.js';
+import type { FeatureFlags } from './types.js';
 
 /**
  * Feature flag metadata

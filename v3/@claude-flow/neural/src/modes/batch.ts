@@ -11,7 +11,6 @@
 
 import type {
   SONAModeConfig,
-  ModeOptimizations,
   Trajectory,
   Pattern,
   PatternMatch,
@@ -35,7 +34,6 @@ export class BatchMode extends BaseModeImplementation {
   private learningQueue: Trajectory[] = [];
 
   // Batch buffers
-  private embeddingBuffer: Float32Array | null = null;
   private batchEmbeddings: Float32Array[] = [];
 
   // Gradient accumulation
@@ -43,7 +41,6 @@ export class BatchMode extends BaseModeImplementation {
   private gradientSteps = 0;
 
   // Batch processing state
-  private isBatchProcessing = false;
   private batchTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Stats
@@ -235,7 +232,6 @@ export class BatchMode extends BaseModeImplementation {
     if (this.patternQueue.length === 0) return;
 
     const startTime = performance.now();
-    this.isBatchProcessing = true;
 
     const batch = this.patternQueue;
     this.patternQueue = [];
@@ -257,7 +253,6 @@ export class BatchMode extends BaseModeImplementation {
     this.totalBatches++;
     this.totalItems += batch.length;
     this.totalBatchTime += performance.now() - startTime;
-    this.isBatchProcessing = false;
   }
 
   /**

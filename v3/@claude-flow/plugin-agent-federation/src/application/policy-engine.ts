@@ -1,5 +1,5 @@
 import { TrustLevel, isOperationAllowed } from '../domain/entities/trust-level.js';
-import { type PIIAction, type PIIType, type PIIDetection, type PIIPolicyConfig } from '../domain/services/pii-pipeline-service.js';
+import { type PIIAction, type PIIDetection, type PIIPolicyConfig } from '../domain/services/pii-pipeline-service.js';
 import { type FederationMessageType } from '../domain/entities/federation-envelope.js';
 
 export type FederationClaimType =

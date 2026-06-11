@@ -18,13 +18,10 @@
 
 import type {
   Trajectory,
-  TrajectoryVerdict,
-  DistilledMemory,
-  Pattern,
   SONAMode,
 } from './types.js';
 import { createSONAManager, SONAManager } from './sona-manager.js';
-import { createPatternLearner, PatternLearner } from './pattern-learner.js';
+import { createPatternLearner } from './pattern-learner.js';
 
 // ============================================================================
 // ReasoningBank Types (agentic-flow compatible)
@@ -132,7 +129,6 @@ export interface ReasoningBankConfig {
 export class ReasoningBankAdapter {
   private readonly config: Required<ReasoningBankConfig>;
   private readonly sonaManager: SONAManager;
-  private readonly patternLearner: PatternLearner;
   private patterns: Map<string, ReasoningBankPattern> = new Map();
   private newPatternsSinceConsolidation = 0;
   private initialized = false;
@@ -155,7 +151,8 @@ export class ReasoningBankAdapter {
     };
 
     this.sonaManager = createSONAManager(this.config.sonaMode);
-    this.patternLearner = createPatternLearner({
+    // Instance kept side-effect-only: nothing reads it (W202b cleanup).
+    createPatternLearner({
       maxPatterns: 5000,
       matchThreshold: 0.7,
       qualityThreshold: 0.5,

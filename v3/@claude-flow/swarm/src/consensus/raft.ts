@@ -315,7 +315,7 @@ export class RaftConsensus extends EventEmitter {
     const votesNeeded = Math.floor((this.peers.size + 1) / 2) + 1;
 
     // Request votes from peers
-    for (const [peerId, peer] of this.peers) {
+    for (const [peerId] of this.peers) {
       const granted = await this.requestVote(peerId);
       if (granted) {
         votesReceived++;
@@ -386,7 +386,7 @@ export class RaftConsensus extends EventEmitter {
   }
 
   private async sendHeartbeats(): Promise<void> {
-    for (const [peerId, peer] of this.peers) {
+    for (const [peerId] of this.peers) {
       await this.appendEntries(peerId, []);
     }
   }

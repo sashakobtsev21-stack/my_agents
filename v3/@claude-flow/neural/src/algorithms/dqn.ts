@@ -14,7 +14,6 @@
 import type {
   DQNConfig,
   Trajectory,
-  TrajectoryStep,
 } from '../types.js';
 
 /**

@@ -280,7 +280,6 @@ export class FlashAttentionOptimizer {
       }
     }
     const baselineEnd = performance.now();
-    const baselineMemoryAfter = this.getMemoryUsage();
     const baselineTimeMs = baselineEnd - baselineStart;
     const baselineAvgMs = baselineTimeMs / iterations;
     const baselineMemoryUsed = Math.max(0, baselinePeakMemory - baselineMemoryBefore);

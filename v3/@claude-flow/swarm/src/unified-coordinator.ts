@@ -36,12 +36,9 @@ import {
   SwarmStatus,
   SwarmEvent,
   SwarmEventType,
-  TopologyConfig,
   TopologyType,
-  ConsensusConfig,
   ConsensusResult,
   Message,
-  MessageType,
   PerformanceReport,
   IUnifiedSwarmCoordinator,
   SWARM_CONSTANTS,
@@ -153,7 +150,6 @@ export class UnifiedSwarmCoordinator extends EventEmitter implements IUnifiedSwa
   private taskCounter: number = 0;
   private agentCounter: number = 0;
   private coordinationLatencies: number[] = [];
-  private lastMetricsUpdate: Date = new Date();
 
   // Background intervals
   private heartbeatInterval?: NodeJS.Timeout;
@@ -1026,7 +1022,6 @@ export class UnifiedSwarmCoordinator extends EventEmitter implements IUnifiedSwa
       (this.state.tasks.size * 1000) +
       (this.messageBus.getQueueDepth() * 500);
 
-    this.lastMetricsUpdate = now;
   }
 
   private recordCoordinationLatency(latencyMs: number): void {
@@ -1373,7 +1368,7 @@ export class UnifiedSwarmCoordinator extends EventEmitter implements IUnifiedSwa
   } {
     const domains: DomainStatus[] = [];
 
-    for (const [domain, config] of this.domainConfigs) {
+    for (const [domain] of this.domainConfigs) {
       const pool = this.domainPools.get(domain);
       const stats = pool?.getPoolStats();
       const queue = this.domainTaskQueues.get(domain) || [];

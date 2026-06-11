@@ -20,7 +20,7 @@ export interface IngestionResult {
 
 export class TelemetryIngestionService {
   constructor(
-    private readonly deps: TelemetryIngestionDeps,
+    _deps: TelemetryIngestionDeps, // retained in the DI signature; nothing reads it (W202b)
     private readonly anomalyDetector: AnomalyDetectionService,
   ) {}
 

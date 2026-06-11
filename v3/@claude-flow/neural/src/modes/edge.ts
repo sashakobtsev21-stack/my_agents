@@ -11,7 +11,6 @@
 
 import type {
   SONAModeConfig,
-  ModeOptimizations,
   Trajectory,
   Pattern,
   PatternMatch,
@@ -266,7 +265,6 @@ export class EdgeMode extends BaseModeImplementation {
     qB: Int8Array
   ): Float32Array {
     const dim = input.length;
-    const rank = 1; // Edge mode uses rank-1
 
     const output = new Float32Array(dim);
     const dequantScale = 1 / this.quantizationScale;

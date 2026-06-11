@@ -9,7 +9,7 @@ import type {
 import * as ed from '@noble/ed25519';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 
 // @noble/ed25519 v2 needs a sync sha512 wired explicitly.
 ed.etc.sha512Sync = (...m: Uint8Array[]): Uint8Array => {
@@ -25,9 +25,8 @@ import { RoutingService } from './domain/services/routing-service.js';
 import { AuditService, type ComplianceMode } from './domain/services/audit-service.js';
 import { PIIPipelineService } from './domain/services/pii-pipeline-service.js';
 import { TrustEvaluator } from './application/trust-evaluator.js';
-import { PolicyEngine, type FederationClaimType } from './application/policy-engine.js';
+import { PolicyEngine } from './application/policy-engine.js';
 import { TrustLevel, getTrustLevelLabel } from './domain/entities/trust-level.js';
-import { type FederationMessageType } from './domain/entities/federation-envelope.js';
 
 // ADR-104: real wire transport via agentic-flow loader pattern.
 // ADR-120: midstream-aware loader wraps the agentic-flow loader so

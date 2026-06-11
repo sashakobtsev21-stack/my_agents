@@ -7,16 +7,13 @@
 
 import {
   AgentId,
-  AgentRole,
   AgentDomain,
   AgentStatus,
   AgentDefinition,
   AgentState,
-  AgentCapability,
   AgentMetrics,
   TaskType,
   TaskId,
-  SwarmEvent,
   EventHandler
 } from '../shared/types';
 import {

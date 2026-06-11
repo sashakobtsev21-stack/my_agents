@@ -13,7 +13,6 @@
 import type {
   DecisionTransformerConfig,
   Trajectory,
-  TrajectoryStep,
 } from '../types.js';
 
 /**

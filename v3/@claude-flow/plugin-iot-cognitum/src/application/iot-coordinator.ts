@@ -12,7 +12,6 @@ import type { MeshTopology } from '../domain/services/mesh-service.js';
 import { AnomalyDetectionService } from '../domain/services/anomaly-detection-service.js';
 import type { TelemetryBaseline, AnomalyDetectionConfig } from '../domain/services/anomaly-detection-service.js';
 import { TelemetryIngestionService } from '../domain/services/telemetry-ingestion-service.js';
-import type { IngestionResult } from '../domain/services/telemetry-ingestion-service.js';
 import { FleetTopologyService } from '../domain/services/fleet-topology-service.js';
 import type { CreateFleetOptions, FleetSummary } from '../domain/services/fleet-topology-service.js';
 import { InMemoryFleetRepository } from '../infrastructure/in-memory-fleet-repository.js';

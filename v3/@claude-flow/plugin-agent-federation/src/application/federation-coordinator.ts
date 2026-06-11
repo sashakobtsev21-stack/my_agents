@@ -11,10 +11,9 @@ import { HandshakeService } from '../domain/services/handshake-service.js';
 import { RoutingService, type RoutingResult } from '../domain/services/routing-service.js';
 import { AuditService } from '../domain/services/audit-service.js';
 import { PIIPipelineService } from '../domain/services/pii-pipeline-service.js';
-import { TrustEvaluator, type ImmediateDowngradeReason } from './trust-evaluator.js';
+import { TrustEvaluator } from './trust-evaluator.js';
 import { PolicyEngine } from './policy-engine.js';
 import {
-  type Budget,
   type BudgetEnforcement,
   enforceBudget,
   validateBudget,
@@ -96,7 +95,6 @@ export class FederationCoordinator {
   private readonly handshake: HandshakeService;
   private readonly routing: RoutingService;
   private readonly audit: AuditService;
-  private readonly piiPipeline: PIIPipelineService;
   private readonly trustEvaluator: TrustEvaluator;
   private readonly policyEngine: PolicyEngine;
   private readonly sessions: Map<string, FederationSession>;
@@ -112,7 +110,7 @@ export class FederationCoordinator {
     handshake: HandshakeService,
     routing: RoutingService,
     audit: AuditService,
-    piiPipeline: PIIPipelineService,
+    _piiPipeline: PIIPipelineService, // retained in the signature; nothing reads it (W202b)
     trustEvaluator: TrustEvaluator,
     policyEngine: PolicyEngine,
     integrations: FederationCoordinatorIntegrations = {},
@@ -122,7 +120,6 @@ export class FederationCoordinator {
     this.handshake = handshake;
     this.routing = routing;
     this.audit = audit;
-    this.piiPipeline = piiPipeline;
     this.trustEvaluator = trustEvaluator;
     this.policyEngine = policyEngine;
     this.sessions = new Map();

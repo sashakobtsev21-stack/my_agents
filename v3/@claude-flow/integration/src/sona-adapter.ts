@@ -22,7 +22,6 @@ import type {
   SONATrajectoryStep,
   SONAPattern,
   SONALearningStats,
-  DEFAULT_SONA_CONFIG,
 } from './types.js';
 
 /**
@@ -601,7 +600,7 @@ export class SONAAdapter extends EventEmitter {
     this.stopConsolidationTimer();
 
     // Complete any active trajectories
-    for (const [id, trajectory] of this.activeTrajectories) {
+    for (const [, trajectory] of this.activeTrajectories) {
       trajectory.endTime = Date.now();
       trajectory.verdict = 'neutral';
     }

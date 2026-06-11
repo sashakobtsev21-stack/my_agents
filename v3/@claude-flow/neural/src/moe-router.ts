@@ -17,7 +17,7 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
 
 // ============================================================================
 // Types & Constants
@@ -325,7 +325,6 @@ export class MoERouter {
   private lastInput: Float32Array | null = null;
   private lastHiddenActivated: Float32Array | null = null;
   private lastProbs: Float32Array | null = null;
-  private lastSelectedExperts: number[] = [];
 
   constructor(config: Partial<MoERouterConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -422,7 +421,6 @@ export class MoERouter {
     this.lastInput = new Float32Array(input);
     this.lastHiddenActivated = new Float32Array(this.hiddenActivated);
     this.lastProbs = new Float32Array(this.probs);
-    this.lastSelectedExperts = expertIndices;
 
     // Build result
     const totalWeight = expertIndices.reduce((sum, idx) => sum + this.probs[idx], 0);
@@ -558,7 +556,6 @@ export class MoERouter {
     const utilization: Record<ExpertType, number> = {} as Record<ExpertType, number>;
 
     const total = this.totalRoutings || 1;
-    const idealUtilization = 1 / NUM_EXPERTS;
 
     for (let i = 0; i < NUM_EXPERTS; i++) {
       const name = EXPERT_NAMES[i];
@@ -768,7 +765,6 @@ export class MoERouter {
     // Sort counts
     const sorted = Array.from(this.routingCounts).sort((a, b) => a - b);
     const n = sorted.length;
-    const mean = this.totalRoutings / n;
 
     // Compute Gini using the formula: G = (2 * sum(i * x_i) - (n+1) * sum(x_i)) / (n * sum(x_i))
     let weightedSum = 0;

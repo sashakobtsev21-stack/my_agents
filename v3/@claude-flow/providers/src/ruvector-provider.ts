@@ -169,7 +169,6 @@ export class RuVectorProvider extends BaseProvider {
   private ruvectorConfig: RuVectorConfig = {};
   private ruvllm: unknown; // Dynamic import of @ruvector/ruvllm
   private useOllamaFallback: boolean = false;
-  private ruvllmAvailable: boolean = false;
 
   constructor(options: BaseProviderOptions) {
     super(options);
@@ -186,7 +185,6 @@ export class RuVectorProvider extends BaseProvider {
       this.ruvllm = await import('@ruvector/ruvllm').catch(() => null);
       if (this.ruvllm) {
         this.logger.info('RuVector ruvLLM native module loaded');
-        this.ruvllmAvailable = true;
       }
     } catch {
       this.logger.debug('RuVector ruvLLM native module not available');

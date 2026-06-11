@@ -11,7 +11,6 @@
 
 import type {
   SONAModeConfig,
-  ModeOptimizations,
   Trajectory,
   Pattern,
   PatternMatch,
@@ -31,7 +30,6 @@ export class ResearchMode extends BaseModeImplementation {
   private clusterCentroids: Float32Array[] = [];
 
   // Learning state with checkpointing
-  private gradientHistory: Array<Map<string, Float32Array>> = [];
   private checkpoints: Array<{ iteration: number; state: Map<string, Float32Array> }> = [];
 
   // Adam optimizer state
@@ -45,13 +43,11 @@ export class ResearchMode extends BaseModeImplementation {
   private totalLearnTime = 0;
   private learnIterations = 0;
   private qualityHistory: number[] = [];
-  private explorationRewards: number[] = [];
 
   async initialize(): Promise<void> {
     await super.initialize();
     this.patternIndex.clear();
     this.clusterCentroids = [];
-    this.gradientHistory = [];
     this.checkpoints = [];
     this.adamM.clear();
     this.adamV.clear();
@@ -61,7 +57,6 @@ export class ResearchMode extends BaseModeImplementation {
   async cleanup(): Promise<void> {
     this.patternIndex.clear();
     this.clusterCentroids = [];
-    this.gradientHistory = [];
     this.checkpoints = [];
     this.adamM.clear();
     this.adamV.clear();
@@ -83,14 +78,12 @@ export class ResearchMode extends BaseModeImplementation {
       await this.rebuildClusters(patterns);
     }
 
-    // Find nearest cluster
-    let bestCluster = 0;
+    // Find nearest cluster (only the similarity is consumed here)
     let bestSim = -1;
     for (let c = 0; c < this.clusterCentroids.length; c++) {
       const sim = this.cosineSimilarity(embedding, this.clusterCentroids[c]);
       if (sim > bestSim) {
         bestSim = sim;
-        bestCluster = c;
       }
     }
 
@@ -353,7 +346,6 @@ export class ResearchMode extends BaseModeImplementation {
   ): Promise<number> {
     const beta1 = 0.9;
     const beta2 = 0.999;
-    const epsilon = 1e-8;
 
     this.adamStep++;
 

@@ -1,5 +1,5 @@
 import { FederationNode } from '../entities/federation-node.js';
-import { FederationSession, type SessionMetrics } from '../entities/federation-session.js';
+import { FederationSession } from '../entities/federation-session.js';
 import { TrustLevel } from '../entities/trust-level.js';
 
 export interface HandshakeChallenge {

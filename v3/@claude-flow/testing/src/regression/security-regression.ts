@@ -6,7 +6,7 @@
  * @module v3/testing/regression/security-regression
  */
 
-import { readFile, readdir, stat } from 'fs/promises';
+import { readFile, readdir } from 'fs/promises';
 import { join, extname } from 'path';
 
 /**

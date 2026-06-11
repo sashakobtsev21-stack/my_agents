@@ -10,7 +10,6 @@ import {
   TopologyNode,
   TopologyEdge,
   TopologyPartition,
-  TopologyType,
   ITopologyManager,
 } from './types.js';
 

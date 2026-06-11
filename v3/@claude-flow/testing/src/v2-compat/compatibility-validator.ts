@@ -384,7 +384,6 @@ export class V2CompatibilityValidator {
   async validateAPI(): Promise<ValidationResult> {
     const startTime = Date.now();
     const checks: ValidationCheck[] = [];
-    const v3Classes = this.v3Service.api.getClasses();
 
     for (const iface of V2_API_INTERFACES) {
       const v3Equivalent = iface.v3Equivalent || iface.name;

@@ -13,7 +13,6 @@
 import type {
   PPOConfig,
   Trajectory,
-  TrajectoryStep,
 } from '../types.js';
 
 /**

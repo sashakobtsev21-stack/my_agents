@@ -25,7 +25,6 @@ import type {
   AttentionMechanism,
   AttentionResult,
   AttentionMetrics,
-  DEFAULT_ATTENTION_CONFIG,
 } from './types.js';
 
 /**

@@ -19,7 +19,7 @@
 
 import { TrustLevel, getTrustLevelLabel } from '../entities/trust-level.js';
 import { FederationNode } from '../entities/federation-node.js';
-import type { WgManifestSection, WgLocalKey } from '../value-objects/wg-config.js';
+import type { WgLocalKey } from '../value-objects/wg-config.js';
 import { DEFAULT_MESH_SUBNET } from '../value-objects/wg-config.js';
 
 export interface WgPortRule {

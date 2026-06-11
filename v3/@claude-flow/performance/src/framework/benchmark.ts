@@ -15,7 +15,7 @@
  * - Memory Usage: <256MB (50% reduction)
  */
 
-import { performance, PerformanceObserver } from 'perf_hooks';
+import { performance } from 'perf_hooks';
 import os from 'node:os';
 
 // ============================================================================
@@ -262,7 +262,6 @@ export async function benchmark(
 
   // Run benchmark
   const times: number[] = [];
-  const startTime = performance.now();
 
   for (let i = 0; i < actualIterations; i++) {
     if (doForceGC && i % 10 === 0) forceGC();
@@ -280,7 +279,6 @@ export async function benchmark(
     times.push(iterEnd - iterStart);
   }
 
-  const totalTime = performance.now() - startTime;
 
   // Memory after benchmark
   const memoryAfter = getMemoryUsage();

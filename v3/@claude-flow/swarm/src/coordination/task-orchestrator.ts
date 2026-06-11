@@ -11,7 +11,6 @@ import {
   TaskStatus,
   TaskPriority,
   TaskDefinition,
-  TaskMetadata,
   TaskResult,
   TaskResultMetrics,
   AgentId,
@@ -171,7 +170,7 @@ export class TaskOrchestrator implements ITaskOrchestrator {
   // ==========================================================================
 
   queueTask(taskId: TaskId): void {
-    const task = this.getTaskOrThrow(taskId);
+    this.getTaskOrThrow(taskId); // validates existence, throws otherwise
 
     if (this.isBlocked(taskId)) {
       this.updateTaskStatus(taskId, 'blocked');

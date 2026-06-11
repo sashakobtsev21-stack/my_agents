@@ -9,7 +9,6 @@
 
 import {
   V2CompatibilityValidator,
-  generateCompatibilityReport,
   type FullValidationReport,
   type ValidationResult,
   V2_CLI_COMMANDS,
@@ -424,7 +423,7 @@ function padNum(num: number): string {
  * Run validation and save report to file
  */
 export async function runAndSaveReport(outputPath: string): Promise<FullValidationReport> {
-  const { report, markdown } = await generateFullReport({
+  const { report } = await generateFullReport({
     detailed: true,
     includeExamples: true,
     includeMigrationScripts: true,
