@@ -285,7 +285,10 @@ jobs:
       - name: check-agents (validity + connectivity + catalog freshness)
         run: |
           node scripts/check-agents.mjs
-          git diff --exit-code docs/AGENT-CATALOG.md docs/agent-catalog.html docs/agent-report.html             || { echo "::error::agent catalog is stale — run scripts/check-agents.mjs and commit the regenerated docs"; exit 1; }
+          # Freshness check on the canonical markdown only: the generated
+          # .html reports embed host/locale-formatted numbers and differ
+          # between Windows (where they are committed) and the Linux runner.
+          git diff --exit-code docs/AGENT-CATALOG.md             || { echo "::error::agent catalog is stale — run scripts/check-agents.mjs and commit the regenerated docs"; exit 1; }
 
       - name: audit-fix-invariants (36 invariants)
         run: node scripts/audit-fix-invariants.mjs
