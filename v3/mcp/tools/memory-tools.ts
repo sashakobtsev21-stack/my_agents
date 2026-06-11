@@ -132,7 +132,7 @@ async function handleStoreMemory(
   if (resourceManager?.memoryService) {
     try {
       const { UnifiedMemoryService } = await import('@claude-flow/memory');
-      const memoryService = resourceManager.memoryService as UnifiedMemoryService;
+      const memoryService = resourceManager.memoryService as InstanceType<typeof UnifiedMemoryService>;
 
       // Store the memory entry
       const entry = await memoryService.storeEntry({
@@ -182,7 +182,7 @@ async function handleSearchMemory(
   if (resourceManager?.memoryService) {
     try {
       const { UnifiedMemoryService } = await import('@claude-flow/memory');
-      const memoryService = resourceManager.memoryService as UnifiedMemoryService;
+      const memoryService = resourceManager.memoryService as InstanceType<typeof UnifiedMemoryService>;
 
       let searchResults: any[];
 
@@ -275,7 +275,7 @@ async function handleListMemory(
   if (resourceManager?.memoryService) {
     try {
       const { UnifiedMemoryService } = await import('@claude-flow/memory');
-      const memoryService = resourceManager.memoryService as UnifiedMemoryService;
+      const memoryService = resourceManager.memoryService as InstanceType<typeof UnifiedMemoryService>;
 
       // Query all entries
       const entries = await memoryService.query({

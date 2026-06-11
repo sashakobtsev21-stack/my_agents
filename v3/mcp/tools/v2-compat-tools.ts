@@ -540,7 +540,7 @@ export const featuresDetectTool: MCPTool = {
       ...info as object,
       category: input.category || 'all',
       features: {
-        wasm: typeof WebAssembly !== 'undefined',
+        wasm: typeof (globalThis as { WebAssembly?: unknown }).WebAssembly !== 'undefined',
         simd: false,
         memory: true,
         platform: process.platform,

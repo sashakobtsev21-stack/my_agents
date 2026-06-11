@@ -108,9 +108,9 @@ class InProcessTransport implements ITransport {
   async getHealthStatus() {
     return {
       healthy: true,
-      metrics: {
-        transport: 'in-process',
-      },
+      // ITransport requires Record<string, number> metrics; the transport
+      // label moved out of metrics during the W198-follow-up type fix.
+      metrics: {},
     };
   }
 }

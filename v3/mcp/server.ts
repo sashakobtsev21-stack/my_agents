@@ -461,7 +461,7 @@ export class MCPServer extends EventEmitter implements IMCPServer {
    * Handle initialize request
    */
   private async handleInitialize(request: MCPRequest): Promise<MCPResponse> {
-    const params = request.params as MCPInitializeParams;
+    const params = request.params as unknown as MCPInitializeParams;
 
     if (!params) {
       return this.createErrorResponse(

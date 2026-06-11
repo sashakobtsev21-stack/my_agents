@@ -21,6 +21,9 @@
  * @version 3.0.0
  */
 
+import { MCPServer, createMCPServer } from './server.js';
+import type { MCPServerConfig, ILogger } from './types.js';
+
 // Core types
 export {
   // Protocol types
