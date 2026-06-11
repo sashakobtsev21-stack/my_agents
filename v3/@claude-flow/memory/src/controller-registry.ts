@@ -11,218 +11,35 @@
  */
 
 import { EventEmitter } from 'node:events';
-import type {
-  IMemoryBackend,
-  HealthCheckResult,
-  ComponentHealth,
-  BackendStats,
-  EmbeddingGenerator,
-  SONAMode,
-} from './types.js';
+import type { IMemoryBackend } from './types.js';
 import { LearningBridge } from './learning-bridge.js';
-import type { LearningBridgeConfig } from './learning-bridge.js';
 import { MemoryGraph } from './memory-graph.js';
-import type { MemoryGraphConfig } from './memory-graph.js';
 import { TieredCacheManager } from './cache-manager.js';
-import type { CacheConfig } from './types.js';
 
-// ===== Types =====
+// The controller-name unions, health/config shapes, and INIT_LEVELS were
+// extracted into ./controller-registry-types.ts during the P3.49 god-file
+// decomposition (W170). Import what the class uses + re-export the
+// original public surface; ControllerEntry stays module-private.
+import { INIT_LEVELS } from './controller-registry-types.js';
+import type {
+  ControllerEntry,
+  ControllerHealth,
+  ControllerName,
+  RegistryHealthReport,
+  RuntimeConfig,
+} from './controller-registry-types.js';
 
-/**
- * Controllers accessible via AgentDB.getController()
- */
-export type AgentDBControllerName =
-  | 'reasoningBank'
-  | 'skills'
-  | 'reflexion'
-  | 'causalGraph'
-  | 'causalRecall'
-  | 'learningSystem'
-  | 'explainableRecall'
-  | 'nightlyLearner'
-  | 'graphTransformer'
-  | 'mutationGuard'
-  | 'attestationLog'
-  | 'vectorBackend'
-  | 'graphAdapter';
+export { INIT_LEVELS } from './controller-registry-types.js';
+export type {
+  AgentDBControllerName,
+  CLIControllerName,
+  ControllerName,
+  InitLevel,
+  ControllerHealth,
+  RegistryHealthReport,
+  RuntimeConfig,
+} from './controller-registry-types.js';
 
-/**
- * CLI-layer controllers (from @claude-flow/memory or new)
- */
-export type CLIControllerName =
-  | 'learningBridge'
-  | 'memoryGraph'
-  | 'agentMemoryScope'
-  | 'tieredCache'
-  | 'hybridSearch'
-  | 'federatedSession'
-  | 'semanticRouter'
-  | 'sonaTrajectory'
-  | 'hierarchicalMemory'
-  | 'memoryConsolidation'
-  | 'batchOperations'
-  | 'contextSynthesizer'
-  | 'gnnService'
-  | 'rvfOptimizer'
-  | 'mmrDiversityRanker'
-  | 'guardedVectorBackend';
-
-/**
- * All controller names
- */
-export type ControllerName = AgentDBControllerName | CLIControllerName;
-
-/**
- * Initialization level for dependency ordering
- */
-export interface InitLevel {
-  level: number;
-  controllers: ControllerName[];
-}
-
-/**
- * Individual controller health status
- */
-export interface ControllerHealth {
-  name: ControllerName;
-  status: 'healthy' | 'degraded' | 'unavailable';
-  initTimeMs: number;
-  error?: string;
-}
-
-/**
- * Aggregated health report for all controllers
- */
-export interface RegistryHealthReport {
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  controllers: ControllerHealth[];
-  agentdbAvailable: boolean;
-  initTimeMs: number;
-  timestamp: number;
-  activeControllers: number;
-  totalControllers: number;
-}
-
-/**
- * Runtime configuration for controller activation
- */
-export interface RuntimeConfig {
-  /** Database path for AgentDB */
-  dbPath?: string;
-
-  /** Vector dimension (default: 384 for MiniLM) */
-  dimension?: number;
-
-  /** Embedding generator function */
-  embeddingGenerator?: EmbeddingGenerator;
-
-  /** Memory backend config */
-  memory?: {
-    enableHNSW?: boolean;
-    learningBridge?: Partial<LearningBridgeConfig>;
-    memoryGraph?: Partial<MemoryGraphConfig>;
-    tieredCache?: Partial<CacheConfig>;
-  };
-
-  /** Neural config */
-  neural?: {
-    enabled?: boolean;
-    modelPath?: string;
-    sonaMode?: SONAMode;
-  };
-
-  /** Controllers to explicitly enable/disable */
-  controllers?: Partial<Record<ControllerName, boolean>>;
-
-  /** Backend instance to use (if pre-created) */
-  backend?: IMemoryBackend;
-
-  /**
-   * Pre-initialized AgentDB instance to use. When provided, the
-   * registry skips its own dynamic-import / initialize cycle and uses
-   * this instance as-is — useful for testing, multi-registry sharing,
-   * and consumers that already hold an AgentDB they want governed by
-   * the registry. Issue #2019 added the regression tests that depend
-   * on this injection point.
-   */
-  agentdb?: unknown;
-
-  /**
-   * `MemoryService` (or compatible) used to back the `nightlyLearner`
-   * controller. When provided, ADR-125 Phase 4 wraps it with
-   * `MemoryConsolidator.runAll()` instead of delegating directly to AgentDB's
-   * `NightlyLearner`. Accepts `any` to avoid a circular import.
-   */
-  memoryService?: any;
-}
-
-/**
- * Controller instance wrapper
- */
-interface ControllerEntry {
-  name: ControllerName;
-  instance: unknown;
-  level: number;
-  initTimeMs: number;
-  enabled: boolean;
-  error?: string;
-}
-
-// ===== Initialization Levels =====
-
-/**
- * Level-based initialization order per ADR-053.
- * Controllers at each level can be initialized in parallel.
- * Each level must complete before the next begins.
- */
-export const INIT_LEVELS: InitLevel[] = [
-  // Level 0: Foundation - already exists
-  { level: 0, controllers: [] },
-  // Level 1: Core intelligence
-  { level: 1, controllers: ['reasoningBank', 'hierarchicalMemory', 'learningBridge', 'hybridSearch', 'tieredCache'] },
-  // Level 2: Graph & security
-  { level: 2, controllers: ['memoryGraph', 'agentMemoryScope', 'vectorBackend', 'mutationGuard', 'gnnService'] },
-  // Level 3: Specialization
-  { level: 3, controllers: ['skills', 'explainableRecall', 'reflexion', 'attestationLog', 'batchOperations', 'memoryConsolidation'] },
-  // Level 4: Causal & routing
-  { level: 4, controllers: ['causalGraph', 'nightlyLearner', 'learningSystem', 'semanticRouter'] },
-  // Level 5: Advanced services
-  { level: 5, controllers: ['graphTransformer', 'sonaTrajectory', 'contextSynthesizer', 'rvfOptimizer', 'mmrDiversityRanker', 'guardedVectorBackend'] },
-  // Level 6: Session management
-  { level: 6, controllers: ['federatedSession', 'graphAdapter'] },
-];
-
-// ===== ControllerRegistry =====
-
-/**
- * Central registry for AgentDB v3 controller lifecycle management.
- *
- * Handles:
- * - Level-based initialization ordering (levels 0-6)
- * - Graceful degradation (each controller fails independently)
- * - Config-driven activation (controllers only instantiate when enabled)
- * - Health check aggregation across all controllers
- * - Ordered shutdown (reverse initialization order)
- *
- * @example
- * ```typescript
- * const registry = new ControllerRegistry();
- * await registry.initialize({
- *   dbPath: './data/memory.db',
- *   dimension: 384,
- *   memory: {
- *     enableHNSW: true,
- *     learningBridge: { sonaMode: 'balanced' },
- *     memoryGraph: { pageRankDamping: 0.85 },
- *   },
- * });
- *
- * const reasoning = registry.get<ReasoningBank>('reasoningBank');
- * const graph = registry.get<MemoryGraph>('memoryGraph');
- *
- * await registry.shutdown();
- * ```
- */
 export class ControllerRegistry extends EventEmitter {
   private controllers: Map<ControllerName, ControllerEntry> = new Map();
   private agentdb: any = null;
