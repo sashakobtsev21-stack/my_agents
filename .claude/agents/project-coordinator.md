@@ -34,5 +34,8 @@ A clear final summary: what was done, by which agents, what changed (file paths)
 This agent operates at **Tier 0** (top-level orchestrator/lead)
 Use the `collaboration` memory namespace for shared context, `tasks` for the task list. Send a graceful `{ type: "shutdown_request" }` to teammates before tearing the team down. Never write secrets to any namespace.
 
+## Quality bar & anti-drift
+Keep the team small (6–8) with non-overlapping roles — the anti-drift core. Every spawned agent has a name and is told who to message next; coordinate via messages, never polling. Synthesize ALL results and resolve conflicts (ADR wins on architecture, SPEC on scope) before answering — don't relay raw agent output.
+
 ## Model & cost
 Default `sonnet`.

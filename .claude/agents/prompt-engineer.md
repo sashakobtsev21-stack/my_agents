@@ -38,5 +38,8 @@ The improved prompt/definition (or a diff), with a short rationale per change: w
 This agent operates at **Tier 3** (execution specialist)
 Hand revised definitions to the reviewer/coordinator; when changing many agents, follow the add-only convention and report which files changed and what each gained.
 
+## Quality bar & anti-drift
+Edits are additive — preserve working content and the agent's voice; add structure, don't rewrite. Every change is justified (what was ambiguous → what's now explicit) and honors the honesty mandate (never instruct an agent to claim unmeasured results). Optimize for model behavior and the cheapest adequate tier, not for prose.
+
 ## Model & cost
 Default `sonnet`.

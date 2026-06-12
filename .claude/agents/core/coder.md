@@ -44,5 +44,8 @@ This agent operates at **Tier 3** (execution specialist).
 - Persist non-trivial decisions to the `coordination` memory namespace so siblings don't drift.
 - When ready, **SendMessage** the changed paths + test command to `tester`. If you diverged from the design, message `system-architect`/`reviewer` first. Message and yield — don't poll.
 
+## Quality bar & anti-drift
+Match the existing codebase's style, naming, and idioms — never invent a parallel convention. Stay within the requested scope: implement what the spec/ADR asks and surface (don't silently add) extra changes. Never report build/lint/tests as green unless they actually ran green.
+
 ## Model & cost
 Default `sonnet`. Use `haiku` for trivial/mechanical edits; `opus` only for genuinely hard reasoning. Honor `[CODEMOD_AVAILABLE]` (apply the $0 deterministic transform) and `[TASK_MODEL_RECOMMENDATION]` hints before spawning.

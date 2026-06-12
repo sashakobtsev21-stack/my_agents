@@ -24,6 +24,27 @@ const NAME_RE = /^[a-z0-9][a-z0-9]*(?:-[a-z0-9]+)*$/;       // kebab-case (leadi
 // vocabulary/code tokens must be registered in VOCAB below (see audit W-ST-3).
 const REF_RE = /`([a-z][a-z0-9]+(?:-[a-z0-9]+)*)`/g;        // backticked, hyphen optional
 
+// Prompt-section standard (audit W-ST-1, hybrid enforcement). The ~25 core/lead
+// agents below MUST carry the full standard (missing section → error); every
+// other agent only gets a warning, so the standard is visible without churn.
+// Section matching is alias-aware — agents express the same intent under varied
+// headings (e.g. "## Workflow" / "## Method" / "## How you coordinate" all
+// satisfy "How you work"), so the check enforces substance, not exact wording.
+const CORE_AGENTS = new Set([
+  'coder', 'planner', 'researcher', 'tester', 'reviewer', 'debugger',
+  'system-architect', 'security-auditor', 'backend-dev', 'frontend-specialist', 'prompt-engineer',
+  'project-coordinator', 'task-orchestrator', 'sparc-coord', 'dual-orchestrator',
+  'queen-coordinator', 'hierarchical-coordinator', 'mesh-coordinator', 'adaptive-coordinator',
+  'game-director', 'release-manager', 'pr-manager', 'production-validator', 'code-analyzer', 'analyst',
+]);
+const STD_SECTIONS = [
+  ['When to use', /^##\s*When to use\b/im],
+  ['How you work', /^##\s*(How (you|i) (work|coordinate)|Workflow|Orchestration Workflow|Method|Methodology|Strateg(y|ies)|Approach|What to check|Operating rules|Process|How it works|Core practices|Core Functionality)\b/im],
+  ['Output contract', /^##\s*(Output contract|Deliverables?|Output|What you deliver)\b/im],
+  ['Coordination', /^##\s*(Coordination|Position & handoff|Agent Coordination)\b/im],
+  ['Quality bar & anti-drift', /^##\s*(Quality bar|Anti-drift|Best practices)\b/im],
+];
+
 function walk(dir) {
   let out = [];
   if (!fs.existsSync(dir)) return out;
@@ -59,6 +80,12 @@ for (const f of walk(AGENTS)) {
   if (!desc) errors.push(`${name}: missing \`description\``);
   if (!TIERS.has(model)) errors.push(`${name}: model must be opus|sonnet|haiku (got "${model}")`);
   if (!/^##\s*Model & cost/m.test(t)) errors.push(`${name}: missing "## Model & cost" section (unified standard)`);
+  // Prompt-section standard: hard-required for the core/lead set, advisory for the rest.
+  for (const [label, re] of STD_SECTIONS) {
+    if (re.test(t)) continue;
+    const msg = `${name}: missing a "## ${label}" section (prompt standard)`;
+    if (CORE_AGENTS.has(name)) errors.push(msg); else warnings.push(msg);
+  }
   bodies.push({ name, file: rel, body: t.replace(/^---\n[\s\S]*?\n---/, '') });
 }
 
