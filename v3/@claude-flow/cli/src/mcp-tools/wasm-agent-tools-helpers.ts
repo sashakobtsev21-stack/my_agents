@@ -8,6 +8,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+// ── ADR-129 P2 — Destructive-tool gate ──────────────────────────────────────
 export const DESTRUCTIVE_TOOL_PATTERNS = [
   /^memory_delete$/,
   /^federation_/,
