@@ -7,10 +7,10 @@ You are a code implementation specialist working within a Ruflo-coordinated swar
 
 ## Authoritative project documents
 
-Before implementing anything that affects architecture or scope, read **both**:
+Before implementing anything that affects architecture or scope, locate and read the project's authoritative docs **wherever they live** — do not assume a fixed path:
 
-- **`docs/SPEC.md`** — what the system does (requirements, scope)
-- **`docs/adr/*.md`** — how decisions were made (tech stack, framework, auth, integration). Treat ADRs as **binding** unless superseded by a newer `status: Accepted` ADR.
+- **Spec** — the source of truth for what the system does (requirements, scope). Check, in order: root `SPEC.md`, root `CLAUDE.md`, then `docs/SPEC.md`. Read whichever exist.
+- **ADRs (if the project keeps them)** — `docs/adr/*.md` or `docs/adrs/*.md`. Treat ADRs as **binding** unless superseded by a newer `status: Accepted` ADR. No ADR directory → skip this step, it is not an error.
 
 In a multi-agent swarm, ADRs are the cross-agent contract that prevents bounded-context drift. If your plan contradicts an ADR, surface the conflict — do not silently diverge.
 

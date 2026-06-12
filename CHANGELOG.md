@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `RUFLO_STATUSLINE_COST_SYMBOL` — override the leading `$` (e.g. `⚡`, `€`, `🌱`); empty string shows the number alone.
   - `RUFLO_STATUSLINE_HIDE_COST` — `1`/`true`/`yes`/`on` hides the segment. `cost.total_cost_usd` is a client-side estimate that may differ from the actual bill and is misleading on subscription plans.
 
+### Fixed
+
+- `ruflo-core` coder agent (`0.2.2` → `0.2.3`): removed the hardcoded `docs/SPEC.md` / `docs/adr/*.md` paths in the "Authoritative project documents" section. The agent now discovers the spec wherever it lives (root `SPEC.md`/`CLAUDE.md` → `docs/SPEC.md`) and treats a missing ADR directory as a no-op instead of silently reading nothing — fixes portability for projects that keep their spec at the repo root.
+
 ## [3.5.0] - 2026-02-27
 
 ### Ruflo v3.5 — First Major Stable Release
