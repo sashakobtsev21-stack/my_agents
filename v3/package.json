@@ -61,7 +61,13 @@
     ],
     "overrides": {
       "@ruvector/gnn": "0.1.25",
-      "@ruvector/gnn-linux-x64-gnu": "0.1.25"
+      "@ruvector/gnn-linux-x64-gnu": "0.1.25",
+      "protobufjs": ">=8.2.0",
+      "minimatch": ">=10.0.0",
+      "uuid": ">=14.0.0",
+      "@opentelemetry/sdk-node": ">=0.218.0",
+      "@opentelemetry/auto-instrumentations-node": ">=0.75.0",
+      "@opentelemetry/exporter-prometheus": ">=0.217.0"
     }
   }
 }
