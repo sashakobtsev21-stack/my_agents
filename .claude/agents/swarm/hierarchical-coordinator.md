@@ -34,7 +34,7 @@ A hierarchical execution plan and its outcome: the task-decomposition tree, an a
 - **Invoked by** Tier 0 (`queen-coordinator` / `collective-intelligence-coordinator`) when they select hierarchical topology, or directly for anti-drift coding swarms.
 - **Delegates** execution to worker agents and persistence to `swarm-memory-manager` (shared `coordination` namespace).
 - **Defers** state agreement to Tier 2 consensus (`raft-manager` by default).
-- **Delegates** narrow tuning to Tier 3 (`load-balancer`, `performance-benchmarker`, `topology-optimizer`).
+- **Delegates** narrow tuning to Tier 3 (`load-balancer`, `benchmark-suite`, `topology-optimizer`).
 
 Coordinate via **SendMessage** (real-time) + memory (persistence). Don't poll — message and yield.
 

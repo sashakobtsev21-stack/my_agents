@@ -131,8 +131,10 @@ I'll help you think through the data models
 and error handling strategies.
 ```
 
-### Phase 2: Headless Implementation (Codex)
+### Phase 2: Parallel Claude Workers (Headless)
 ```bash
+# These are Claude Code headless workers (claude -p).
+# True Codex workers run via: codex exec --sandbox workspace-write --skip-git-repo-check "<prompt>"
 claude -p "Implement GET /users endpoint" &
 claude -p "Implement POST /users endpoint" &
 claude -p "Write integration tests" &
@@ -152,7 +154,8 @@ I'll help identify any issues or improvements.
 # 1. Interactive: Claude Code designs
 # (This happens in current session)
 
-# 2. Headless: Codex implements in parallel
+# 2. Parallel Claude Code workers (headless via claude -p)
+# For real Codex workers use: codex exec --sandbox workspace-write --skip-git-repo-check "<prompt>"
 claude -p "Implement user service" --session-id impl-1 &
 claude -p "Implement user controller" --session-id impl-2 &
 claude -p "Write user tests" --session-id test-1 &
@@ -224,16 +227,17 @@ mcp__claude-flow__memory_store {
 
 ## Platform Selection Guide
 
-| Task Type | Platform | Reason |
-|-----------|----------|--------|
-| Design/Architecture | Claude Code | Needs reasoning |
-| Debugging | Claude Code | Interactive analysis |
-| Code Review | Claude Code | Discussion required |
-| Implementation | Codex | Can parallelize |
-| Test Writing | Codex | Batch execution |
-| Documentation | Codex | Independent work |
-| Refactoring | Hybrid | Design → Execute |
-| New Feature | Hybrid | Design → Implement → Review |
+| Task Type | Platform | Real agent / command | Reason |
+|-----------|----------|----------------------|--------|
+| Design/Architecture | Claude Code | `system-architect` | Needs reasoning |
+| Debugging | Claude Code | `debugger` | Interactive analysis |
+| Code Review | Claude Code | `reviewer` | Discussion required |
+| Implementation | Codex / claude -p | `coder` / `sparc-coder` | Can parallelize |
+| Test Writing | Codex / claude -p | `tester` | Batch execution |
+| Documentation | Codex / claude -p | `technical-writer` / `api-docs` | Independent work |
+| Performance Optimization | Hybrid | `perf-analyzer` → `coder` | Profile then optimize |
+| Refactoring | Hybrid | `architecture` → `coder` | Design → Execute |
+| New Feature | Hybrid | `system-architect` → `coder` → `tester` → `reviewer` | Design → Implement → Review |
 
 ## Best Practices
 

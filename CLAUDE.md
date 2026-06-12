@@ -1,7 +1,7 @@
 # Claude Code Configuration — my_agents (v3.10.42)
 
 > **my_agents** — reusable AI agent team for Claude Code. Fork of [ruvnet/claude-flow](https://github.com/ruvnet/claude-flow) (MIT).
-> Verified in this checkout: 104 agents, 41 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, ~305 MCP tools.
+> Verified in this checkout: 104 agents, 41 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, 330 MCP tools.
 > Packages: `@claude-flow/cli@3.10.42`, root `my_agents@3.10.42`.
 
 ## Behavioral Rules (Always Enforced)
@@ -385,11 +385,16 @@ TodoWrite({ todos: [
 
 ## Project Configuration
 
-This project is configured with Claude Flow V3 (Anti-Drift Defaults):
-- **Topology**: hierarchical (prevents drift via central coordination)
-- **Max Agents**: 8 (smaller team = less drift)
-- **Strategy**: specialized (clear roles, no overlap)
-- **Consensus**: raft (leader maintains authoritative state)
+This project is configured with Claude Flow V3. The **actual runtime defaults** come from `.claude/settings.json`; the **anti-drift recommendation** for tight coding swarms is noted separately:
+
+| Setting | Actual default (settings.json) | Anti-drift recommendation (coding swarms) |
+|---------|-------------------------------|-------------------------------------------|
+| **Topology** | `hierarchical-mesh` | `hierarchical` (prevents drift via central coordination) |
+| **Max Agents** | 15 | 8 (smaller team = less drift) |
+| **Strategy** | specialized | specialized (clear roles, no overlap) |
+| **Consensus** | raft | raft (leader maintains authoritative state) |
+
+Additional settings (both configs):
 - **Memory Backend**: hybrid (SQLite + AgentDB)
 - **HNSW Indexing**: Enabled (measured ~1.9x at N=20k, ~3.2x–4.7x at N=5k vs brute force; ANN wins above the crossover)
 - **Neural Learning**: Enabled (SONA)

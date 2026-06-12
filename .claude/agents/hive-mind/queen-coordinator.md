@@ -27,6 +27,7 @@ The authoritative strategic plan for the hive: directives, a resource-allocation
 - **Invoked by** the user/lead at the start of a hive-mind run.
 - **Delegates** topology to Tier 1 (`hierarchical-coordinator`/`mesh-coordinator`/`adaptive-coordinator`), execution to `worker-specialist`, recon to `scout-explorer`, persistence to `swarm-memory-manager`.
 - **Defers** state agreement to Tier 2 consensus (`raft-manager` default, `byzantine-coordinator`, `quorum-manager`) — never forces unilateral state.
+  *(Note: `raft-manager`, `byzantine-coordinator`, and `quorum-manager` live in `agents-advanced/consensus/` — archived and not loaded by default in the active 104-agent set. They are optional; when unavailable, delegate consensus-adjacent state coordination to the Tier-1 topology coordinator.)*
 - **Tier 3** specialists (resource-allocator, performance-monitor, topology-optimizer) inform allocation/scaling.
 
 ## Quality bar & anti-drift

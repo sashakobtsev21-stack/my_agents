@@ -97,16 +97,23 @@ The SPARC methodology enhances GOAP planning by providing a structured framework
 
 ### SPARC Command Integration
 
-```bash
-# Execute SPARC phases for goal achievement
-npx claude-flow sparc run spec-pseudocode "OAuth2 authentication system"
-npx claude-flow sparc run architect "microservices communication layer"
-npx claude-flow sparc tdd "payment processing feature"
-npx claude-flow sparc pipeline "complete feature implementation"
+SPARC in this repo is driven by **slash-commands** (`.claude/commands/sparc/*`) or by spawning the individual SPARC phase agents via the Task tool — there is no `npx claude-flow sparc` CLI subcommand.
 
-# Batch processing for complex goals
-npx claude-flow sparc batch spec,arch,refine "user management system"
-npx claude-flow sparc concurrent tdd tasks.json
+```bash
+# Execute SPARC phases via slash-commands
+/sparc-spec-pseudocode "OAuth2 authentication system"
+/sparc-architect "microservices communication layer"
+/sparc-tdd "payment processing feature"
+/sparc-integration "complete feature implementation"
+```
+
+```javascript
+// Or spawn SPARC phase agents directly via the Task tool
+Task("Specification phase", { subagent_type: "specification" })
+Task("Pseudocode phase",    { subagent_type: "pseudocode" })
+Task("Architecture phase",  { subagent_type: "architecture" })
+Task("Refinement/TDD phase",{ subagent_type: "refinement" })
+// Completion: use sparc-coder for final implementation + production-validator for sign-off
 ```
 
 ### SPARC-GOAP Feature Implementation Plan
@@ -114,7 +121,8 @@ npx claude-flow sparc concurrent tdd tasks.json
 goal: implement_payment_processing_with_sparc
 sparc_phases:
   specification:
-    command: "npx claude-flow sparc run spec-pseudocode 'payment processing'"
+    invoke: "/sparc-spec-pseudocode 'payment processing'"
+    agent: specification
     deliverables:
       - requirements_doc
       - acceptance_criteria
@@ -125,7 +133,8 @@ sparc_phases:
       - compliance_standards_identified
       
   pseudocode:
-    command: "npx claude-flow sparc run pseudocode 'payment flow algorithms'"
+    invoke: "spawn pseudocode agent via Task tool"
+    agent: pseudocode
     deliverables:
       - payment_flow_logic
       - error_handling_patterns
@@ -135,7 +144,8 @@ sparc_phases:
       - edge_cases_covered
       
   architecture:
-    command: "npx claude-flow sparc run architect 'payment system design'"
+    invoke: "/sparc-architect 'payment system design'"
+    agent: architecture
     deliverables:
       - system_components
       - api_contracts
@@ -145,7 +155,8 @@ sparc_phases:
       - security_layers_defined
       
   refinement:
-    command: "npx claude-flow sparc tdd 'payment feature'"
+    invoke: "/sparc-tdd 'payment feature'"
+    agent: refinement
     deliverables:
       - unit_tests
       - integration_tests
@@ -155,7 +166,8 @@ sparc_phases:
       - all_tests_passing
       
   completion:
-    command: "npx claude-flow sparc run integration 'deploy payment system'"
+    invoke: "/sparc-integration 'deploy payment system'"
+    agent: sparc-coder  # implementation; production-validator for final sign-off
     deliverables:
       - deployed_system
       - documentation
@@ -279,27 +291,29 @@ pipeline_goals:
 
 ### Available SPARC Modes for Goals
 
-1. **Development Mode** (`sparc run dev`)
+SPARC phases are invoked via slash-commands or by spawning the named phase agents. Representative mappings:
+
+1. **Development Mode** — invoke `/sparc-spec-pseudocode` → `/sparc-architect` → `/sparc-tdd`
    - Full-stack feature development
    - Component creation
    - Service implementation
 
-2. **API Mode** (`sparc run api`)
+2. **API Mode** — spawn `specification` then `architecture` agents
    - RESTful endpoint design
    - GraphQL schema development
    - API documentation generation
 
-3. **UI Mode** (`sparc run ui`)
+3. **UI Mode** — spawn `specification` + `refinement` agents
    - Component library creation
    - User interface implementation
    - Responsive design patterns
 
-4. **Test Mode** (`sparc run test`)
+4. **Test Mode** — invoke `/sparc-tdd` or spawn `refinement` agent
    - Test suite development
    - Coverage improvement
    - E2E scenario creation
 
-5. **Refactor Mode** (`sparc run refactor`)
+5. **Refactor Mode** — spawn `architecture` + `refinement` agents
    - Code quality improvement
    - Architecture optimization
    - Technical debt reduction
@@ -412,20 +426,20 @@ class SPARCGoalPlanner {
 ### Example: Complete Feature Implementation
 
 ```bash
-# 1. Initialize SPARC-GOAP planning
-npx claude-flow sparc run spec-pseudocode "user authentication feature"
+# 1. Specification + Pseudocode phase (slash-command)
+/sparc-spec-pseudocode "user authentication feature"
 
-# 2. Execute architecture phase
-npx claude-flow sparc run architect "authentication system design"
+# 2. Architecture phase
+/sparc-architect "authentication system design"
 
-# 3. TDD implementation with goal tracking
-npx claude-flow sparc tdd "authentication feature" --track-goals
+# 3. TDD / Refinement phase
+/sparc-tdd "authentication feature"
 
-# 4. Complete integration with goal validation
-npx claude-flow sparc run integration "deploy authentication" --validate-goals
+# 4. Integration / Completion phase
+/sparc-integration "deploy authentication"
 
-# 5. Verify goal achievement
-npx claude-flow sparc verify "authentication feature complete"
+# 5. Final validation — spawn production-validator agent
+# Task("Validate production readiness", { subagent_type: "production-validator" })
 ```
 
 ## Continuous Improvement

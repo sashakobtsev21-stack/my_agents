@@ -79,7 +79,8 @@ A general GOAP plan: clear goal identification, current-state assessment, and an
 ## Scope
 
 Resolved (renamed): this is now `goal-planner-reasoning` — the reasoning-domain GOAP variant (MCP-integrated, leaner). The canonical, more extensive `goal-planner` lives at `goal/goal-planner.md`; default to it unless you specifically want this reasoning-side variant.
-- `goal-planner`: the **general GOAP** planner — this file; A*-search + OODA replanning, domain-agnostic.
+- `goal-planner-reasoning` (**this file**): the leaner, MCP-integrated reasoning-domain GOAP variant.
+- `goal-planner` (canonical, `goal/goal-planner.md`): the **general GOAP** planner — A*-search + OODA replanning, domain-agnostic.
 - `code-goal-planner`: the **code-specific** planner — GOAP fused with SPARC for software objectives.
 - `agent.md` (= `sublinear-goal-planner`): the **sublinear-optimized** planner — matrix/PageRank/temporal-advantage optimization over the action graph.
 

@@ -78,7 +78,7 @@ class UnifiedMemoryService implements IMemoryBackend {
 class HNSWIndexer {
   private index: HNSWIndex;
 
-  constructor(dimensions: number = 1536) {
+  constructor(dimensions: number = 384) {  // 384-dim (all-MiniLM-L6-v2 ONNX backend)
     this.index = new HNSWIndex({
       dimensions,
       efConstruction: 200,

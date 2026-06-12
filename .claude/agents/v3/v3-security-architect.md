@@ -24,13 +24,13 @@ Design and implement comprehensive security architecture for v3, addressing all 
 ### **CVE-2: Weak Password Hashing**
 - **Issue**: SHA-256 with hardcoded salt
 - **Action**: Implement bcrypt with 12 rounds
-- **Files**: api/auth-service.ts:580-588
+- **Files**: `src/services/<auth-service>.ts` (example — locate the actual auth module in the target project)
 - **Timeline**: Phase 1 Week 1
 
 ### **CVE-3: Hardcoded Default Credentials**
 - **Issue**: Default credentials in auth service
 - **Action**: Generate random credentials on installation
-- **Files**: api/auth-service.ts:602-643
+- **Files**: `src/services/<auth-service>.ts` (example — locate the actual auth module in the target project)
 - **Timeline**: Phase 1 Week 1
 
 ### **HIGH-1: Command Injection**

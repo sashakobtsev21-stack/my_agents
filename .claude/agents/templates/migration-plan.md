@@ -133,21 +133,21 @@ allowed/restricted tools, triggers). Summary of the mapping by category:
 | Coordination | `coordination/orchestrate.md` | orchestrator / Task Orchestrator | no Bash/Write/Edit | `orchestrate` |
 | GitHub | `github/code-review-swarm.md` | reviewer / Code Review Coordinator | Bash (gh) ok; no Write/Edit | code-review |
 | GitHub | `github/release-manager.md` | release-coordinator / Release Manager | use VCS, not Write/Edit | `release-manager` |
-| SPARC | `sparc/orchestrator.md` | sparc-coordinator / SPARC Orchestrator | no Bash/Write/Edit | sparc-orchestrator |
+| SPARC | `sparc/orchestrator.md` | sparc-coordinator / `sparc-coord` | no Bash/Write/Edit | `sparc-coord` |
 | SPARC | `sparc/coder.md` | implementer / SPARC Coder | full edit tools; no swarm_init | `sparc-coder` |
-| SPARC | `sparc/tester.md` | quality-assurance / SPARC Tester | no swarm_init | sparc-tester |
-| Analysis | `analysis/performance-bottlenecks.md` | analyst / Performance Analyzer | read-only (no Write/Edit/Bash) | performance-analyzer |
-| Analysis | `analysis/token-efficiency.md` | analyst / Token Efficiency Analyzer | read-only | token-analyzer |
+| SPARC | `sparc/tester.md` | quality-assurance / `tester` | no swarm_init | `tester` |
+| Analysis | `analysis/performance-bottlenecks.md` | analyst / `perf-analyzer` | read-only (no Write/Edit/Bash) | `perf-analyzer` |
+| Analysis | `analysis/token-efficiency.md` | analyst / `analyst` | read-only | `analyst` |
 | Memory | `memory/usage.md` | memory-manager / Memory Coordinator | no Write/Edit/Bash | memory-manager |
 | Memory | `memory/neural.md` | ai-specialist / Neural Pattern Coordinator | no Write/Edit/Bash | neural-patterns |
-| Automation | `automation/smart-agents.md` | automation-specialist / Smart Agent Coordinator | no Write/Edit/Bash | smart-agents |
+| Automation | `automation/smart-agents.md` | automation-specialist / `smart-agent` | no Write/Edit/Bash | `smart-agent` |
 | Automation | `automation/self-healing.md` | reliability-engineer / Self-Healing Coordinator | Bash ok; no Write/Edit | self-healing |
-| Optimization | `optimization/parallel-execution.md` | optimizer / Parallel Execution Optimizer | no Write/Edit | `performance-optimizer` |
+| Optimization | `optimization/parallel-execution.md` | optimizer / `perf-analyzer` | no Write/Edit | `perf-analyzer` |
 | Optimization | `optimization/auto-topology.md` | optimizer / Topology Optimization Specialist | read-only | `topology-optimizer` |
 | Monitoring | `monitoring/status.md` | monitor / Swarm Status Monitor | read-only | `performance-monitor` |
 
 Common restriction rules: analysis/memory/monitoring agents are read-only (no `Write`/`Edit`/`Bash`);
-implementers (SPARC Coder) keep full edit tools; GitHub agents prefer `Bash` + `gh` CLI over direct
+implementers (`sparc-coder`) keep full edit tools; GitHub agents prefer `Bash` + `gh` CLI over direct
 `Write`/`Edit` for repo operations.
 
 ## Implementation Guidelines
@@ -201,7 +201,7 @@ A complete command-to-agent migration plan: each `.claude/commands/*` mapped to 
 
 ## Scope
 
-This is a template/scaffold variant; it is a planning document rather than a runtime agent. The individual agent definitions it specifies (PR manager, SPARC orchestrator/coder, performance analyzer, memory coordinator, smart agent, etc.) are the canonical agents under `templates/*`, `github/*`, and `sparc/*` — this file describes how to derive them and should not be treated as an executable coordinator.
+This is a template/scaffold variant; it is a planning document rather than a runtime agent. The individual agent definitions it specifies (PR manager, `sparc-coord`/`sparc-coder`, `perf-analyzer`, memory coordinator, `smart-agent`, etc.) are the canonical agents under `templates/*`, `github/*`, and `sparc/*` — this file describes how to derive them and should not be treated as an executable coordinator.
 
 ## Coordination
 Tier 3 planning template. Hand the produced agent definitions to whoever scaffolds the files (e.g. `base-template-generator`), and route the phased-rollout work through a coordinator such as `sparc-coord`. This file plans the migration; it does not execute it.

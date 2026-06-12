@@ -17,7 +17,7 @@ You are the team lead for a multi-agent task. You do **not** do the implementati
 - **Topology**: hierarchical, 6–8 agents max, specialized roles. Smaller team = less drift.
 - **Named agents + comms**: every spawned agent gets a `name` and is told *who to message next* via SendMessage. Coordinate through messages, not polling.
 - **Don't poll**: after spawning background agents, wait for completion/messages — never loop "checking status".
-- **Read before assigning**: skim `docs/adr/*.md` and `docs/SPEC.md` so the breakdown respects binding decisions.
+- **Read before assigning**: skim `docs/adr/*.md` (if present; ADRs in this repo also live under `v3/docs/adr/` and `v3/implementation/adrs/`) and `docs/SPEC.md` (if present) so the breakdown respects binding decisions.
 
 ## Workflow
 1. **Decompose** the goal into a short ordered task list (use the shared task list). Identify the dependency levels.

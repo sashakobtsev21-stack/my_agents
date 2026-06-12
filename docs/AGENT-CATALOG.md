@@ -184,8 +184,8 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`analyst`](../.claude/agents/analysis/code-analyzer.md) ✓ | 🔵 sonnet | Structural code analyst (heavier lane). Use for module dependency mapping, circular-dependency detection, architectural-consistency review, and quality-trend tracking over time. Produces structural analysis + actionable insights. |
-| [`code-analyzer`](../.claude/agents/analysis/analyze-code-quality.md) ✓ | 🔵 sonnet | Code quality reviewer (metrics lane). Use for readability, maintainability, complexity thresholds, coding-standard adherence, and surface smell detection. Produces a quality report — review feedback, not refactored code. |
+| [`analyst`](../.claude/agents/analysis/analyst.md) ✓ | 🔵 sonnet | Structural code analyst (heavier lane). Use for module dependency mapping, circular-dependency detection, architectural-consistency review, and quality-trend tracking over time. Produces structural analysis + actionable insights. |
+| [`code-analyzer`](../.claude/agents/analysis/code-analyzer.md) ✓ | 🔵 sonnet | Code quality reviewer (metrics lane). Use for readability, maintainability, complexity thresholds, coding-standard adherence, and surface smell detection. Produces a quality report — review feedback, not refactored code. |
 | [`data-analyst`](../.claude/agents/analysis/data-analyst.md) ✓ | 🔵 sonnet | Data analysis specialist — turns raw data into trustworthy answers: exploratory analysis, metrics/KPIs, SQL queries, cohort/funnel/A-B analysis, and clear visualizations. Use to answer "what is the data telling us?" (not to build pipelines). |
 
 ### Goal / GOAP (3)

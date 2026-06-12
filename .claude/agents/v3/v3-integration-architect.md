@@ -95,7 +95,7 @@ class AgentDBIntegration {
   async setupCrossAgentMemory(): Promise<void> {
     await this.agentdb.enableCrossAgentSharing({
       indexType: 'HNSW',
-      dimensions: 1536,
+      dimensions: 384,  // all-MiniLM-L6-v2 ONNX backend (384-dim)
       speedupTarget: '~1.9x-4.7x (measured)'
     });
   }
@@ -104,7 +104,7 @@ class AgentDBIntegration {
 
 ### **MCP Tools Integration**
 ```typescript
-// Leverage 213 pre-built tools + 19 hook types
+// Leverage 330 registered MCP tools + 17 hook types
 class MCPToolsIntegration {
   async integrateBuiltinTools(): Promise<void> {
     const tools = await this.agenticFlow.mcp.getAvailableTools();

@@ -71,11 +71,11 @@ Completion → Final Review → Deployment
 ## Agent Coordination
 
 ### Specialized SPARC Agents
-1. **SPARC Researcher**: Requirements and feasibility
-2. **SPARC Designer**: Architecture and interfaces
-3. **SPARC Coder**: Implementation and refinement
-4. **SPARC Tester**: Quality assurance
-5. **SPARC Documenter**: Documentation and guides
+1. **Researcher** (`researcher`): Requirements gathering and feasibility analysis
+2. **System Architect** (`system-architect`): Architecture design and interface contracts
+3. **SPARC Coder** (`sparc-coder`): Implementation and refinement
+4. **Tester** (`tester`): Quality assurance and test coverage
+5. **Technical Writer** (`technical-writer`) / **API Docs** (`api-docs`): Documentation and guides
 
 ### Parallel Execution Patterns
 - Spawn multiple agents for independent components

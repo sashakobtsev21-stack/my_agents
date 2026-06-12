@@ -57,16 +57,16 @@ Pre-task and post-task hooks for SONA learning are available via:
 
 ```bash
 # Pre-task: Initialize trajectory
-npx claude-flow@alpha hooks pre-task --description "$TASK"
+npx claude-flow@v3alpha hooks pre-task --description "$TASK"
 
 # Post-task: Record outcome
-npx claude-flow@alpha hooks post-task --task-id "$ID" --success true
+npx claude-flow@v3alpha hooks post-task --task-id "$ID" --success true
 ```
 
 ## References
 
-- **Package**: @ruvector/sona@0.1.1
-- **Integration Guide**: docs/RUVECTOR_SONA_INTEGRATION.md
+- **Package**: @ruvector/sona@0.1.5
+- **Intelligence System Audit**: `docs/reviews/intelligence-system-audit-2026-05-29.md` (verified benchmarks for SONA, HNSW, and EWC++)
 
 ## Deliverable
 

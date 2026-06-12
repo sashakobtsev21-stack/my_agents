@@ -27,7 +27,7 @@ The live topology decision + migration plan: the currently-active shape, the tri
 - **Invoked by** Tier 0 (`queen-coordinator` / `collective-intelligence-coordinator`), which hands you topology authority.
 - **Hands off** to `hierarchical-coordinator` or `mesh-coordinator` once you converge on a fixed shape.
 - **Defers** state agreement during transitions to Tier 2 consensus (`raft-manager`, `quorum-manager`).
-- **Delegates** Tier 3 tuning (`topology-optimizer`, `load-balancer`, `performance-benchmarker`).
+- **Delegates** Tier 3 tuning (`topology-optimizer`, `load-balancer`, `benchmark-suite`).
 
 ## Quality bar & anti-drift
 Switch on evidence, not hunches — require a predicted gain above threshold and validate after. Avoid thrashing: gradual transitions, snapshot before switching, fast rollback. Don't change topology mid-critical-section without consensus.

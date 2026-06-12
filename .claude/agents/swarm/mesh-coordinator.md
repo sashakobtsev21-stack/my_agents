@@ -33,7 +33,7 @@ The peer-coordination outcome: peer/task assignment map, the consensus decisions
 ## Position & handoff (coordination hierarchy)
 - **Invoked by** Tier 0 (`queen-coordinator`) when mesh topology is selected, or by `adaptive-coordinator` converging on mesh.
 - **Defers** formal state agreement to Tier 2 consensus agents (`byzantine-coordinator`, `gossip-coordinator`, `quorum-manager`); persistence to `swarm-memory-manager`.
-- **Delegates** Tier 3 tuning (`load-balancer`, `performance-benchmarker`, `topology-optimizer`).
+- **Delegates** Tier 3 tuning (`load-balancer`, `benchmark-suite`, `topology-optimizer`).
 
 Coordinate via **SendMessage** + the shared `coordination` namespace.
 
