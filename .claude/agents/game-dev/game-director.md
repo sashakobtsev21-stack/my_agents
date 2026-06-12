@@ -33,7 +33,7 @@ The GDD (vision, pillars, core loop, scope for v1), a prioritized milestone road
 
 ## Coordination
 
-This agent operates at **Tier 3** (execution specialist).
+This agent operates at **Tier 0** (top-level creative/technical director for the game).
 Spawn and brief the discipline agents (game-designer, unity-engine-architect, and through them the rest); collect their results and judge against the pillars. Use the `collaboration` namespace for the shared GDD/decisions. Don't micromanage implementation — set the bar and the brief, then synthesize.
 
 ## Model & cost

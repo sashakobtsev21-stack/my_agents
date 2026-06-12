@@ -42,7 +42,7 @@ plan:
 ## Coordination
 
 This agent operates at **Tier 3** (execution specialist).
-Store the plan in the `tasks`/`coordination` namespace and **SendMessage** it to the lead/coordinator (or the first pipeline agent — usually `researcher`/`architect`). Re-plan as execution feedback arrives; don't poll.
+Store the plan in the `tasks`/`coordination` namespace and **SendMessage** it to the lead/coordinator (or the first pipeline agent — usually `researcher`/`system-architect`). Re-plan as execution feedback arrives; don't poll.
 
 ## Quality bar & anti-drift
 Every task is specific, measurable, and owned — no task without a consumer. Surface unknowns as explicit risks rather than padding the plan. A good plan executed now beats a perfect plan never.

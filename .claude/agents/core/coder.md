@@ -42,7 +42,7 @@ Production-quality code + tests, plus: changed file paths, how to run the tests,
 
 This agent operates at **Tier 3** (execution specialist).
 - Persist non-trivial decisions to the `coordination` memory namespace so siblings don't drift.
-- When ready, **SendMessage** the changed paths + test command to `tester`. If you diverged from the design, message `architect`/`reviewer` first. Message and yield — don't poll.
+- When ready, **SendMessage** the changed paths + test command to `tester`. If you diverged from the design, message `system-architect`/`reviewer` first. Message and yield — don't poll.
 
 ## Model & cost
 Default `sonnet`. Use `haiku` for trivial/mechanical edits; `opus` only for genuinely hard reasoning. Honor `[CODEMOD_AVAILABLE]` (apply the $0 deterministic transform) and `[TASK_MODEL_RECOMMENDATION]` hints before spawning.

@@ -25,7 +25,7 @@ A coherent collective decision plus a synchronized knowledge graph: aggregated c
 ## Position & handoff (coordination hierarchy)
 **Tier 0 (top)** — co-owns the goal with `queen-coordinator` (its strategic advisor/successor).
 - **Invoked by** the user/lead, or as advisor to the queen.
-- **Delegates** topology to Tier 1 (`hierarchical`/`mesh`/`adaptive-coordinator`), execution to `worker-specialist`, persistence to `swarm-memory-manager` (Tier 3).
+- **Delegates** topology to Tier 1 (`hierarchical-coordinator`/`mesh-coordinator`/`adaptive-coordinator`), execution to `worker-specialist`, persistence to `swarm-memory-manager` (Tier 3).
 - **Defers** state agreement to Tier 2 consensus (`raft-manager`, `byzantine-coordinator`, `quorum-manager`).
 - Tier 3 specialists report up for cross-cutting optimization.
 

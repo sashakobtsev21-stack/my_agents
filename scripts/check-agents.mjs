@@ -19,7 +19,10 @@ import { execFileSync } from 'node:child_process';
 const AGENTS = '.claude/agents';
 const TIERS = new Set(['opus', 'sonnet', 'haiku']);
 const NAME_RE = /^[a-z0-9][a-z0-9]*(?:-[a-z0-9]+)*$/;       // kebab-case (leading digit ok, e.g. 3d-artist)
-const REF_RE = /`([a-z][a-z0-9]+(?:-[a-z0-9]+)+)`/g;        // backticked, ≥1 hyphen
+// Backticked agent-shaped token. Hyphen is now OPTIONAL so single-word addresses
+// (e.g. `architect`, `animator`) are connectivity-checked too — single-word
+// vocabulary/code tokens must be registered in VOCAB below (see audit W-ST-3).
+const REF_RE = /`([a-z][a-z0-9]+(?:-[a-z0-9]+)*)`/g;        // backticked, hyphen optional
 
 function walk(dir) {
   let out = [];
@@ -84,10 +87,34 @@ try {
 } catch { /* optional */ }
 dirNames('.claude/skills').forEach((n) => valid.add(n));                  // skill-builder, agentdb-*, …
 for (const p of dirNames('plugins')) dirNames(path.join('plugins', p, 'skills')).forEach((n) => valid.add(n));
-// Non-agent tokens that legitimately appear backticked in prompts:
+// Non-agent tokens that legitimately appear backticked in prompts.
+// Multi-word infra/tool names:
 ['workspace-write', 'read-only', 'danger-full-access', 'claude-flow', 'ruv-swarm', 'flow-nexus',
  'agentic-flow', 'agent-booster', 'agent-browser', 'claude-flow-codex', 'better-sqlite3',
  'all-minilm-l6-v2', 'controller-service-repository'].forEach((n) => valid.add(n));
+// Single-word vocabulary now visible to the connectivity check (REF_RE hyphen-optional).
+// Grouped so it stays maintainable; add new inline code/vocab tokens here, not agent typos.
+const VOCAB = [
+  // model tiers
+  'sonnet', 'opus', 'haiku',
+  // memory namespaces
+  'coordination', 'tasks', 'results', 'collaboration', 'patterns',
+  // swarm topologies & consensus vocabulary (bare words; the *-coordinator/-manager agents are separate)
+  'hierarchical', 'mesh', 'ring', 'star', 'adaptive', 'raft', 'byzantine', 'gossip', 'quorum', 'crdt',
+  // config / package / registry keys
+  'overrides', 'latest', 'sha512', 'deployment', 'embeddings', 'ruflo', 'security', 'migrate', 'name', 'description', 'cost',
+  // GOAP planning vocabulary
+  'preconditions', 'effects', 'step', 'action',
+  // web / a11y vocabulary
+  'button', 'label', 'nav', 'components',
+  // Python keywords / libraries used inline
+  'mypy', 'pyright', 'dataclass', 'pydantic', 'pathlib', 'with', 'enumerate', 'zip', 'eval', 'exec', 'pickle', 'timeit',
+  // TypeScript keywords used inline
+  'strict', 'unknown', 'readonly', 'extends', 'any',
+  // misc tools / verbs used inline
+  'wait', 'foreach', 'fs', 'orchestrate', 'gh',
+];
+VOCAB.forEach((n) => valid.add(n));
 
 const danglers = {};
 for (const { file, body } of bodies) {

@@ -35,7 +35,7 @@ Cite concrete evidence; mark unknowns as unknown — don't fill gaps with plausi
 ## Coordination
 
 This agent operates at **Tier 3** (execution specialist).
-Store findings in the `coordination` namespace and **SendMessage** them to the consumer (`planner`/`architect`). Surface what you couldn't determine explicitly.
+Store findings in the `coordination` namespace and **SendMessage** them to the consumer (`planner`/`system-architect`). Surface what you couldn't determine explicitly.
 
 ## Quality bar & anti-drift
 Thorough over fast: check multiple locations and naming conventions before concluding. Question assumptions; keep verified facts separate from inference.
