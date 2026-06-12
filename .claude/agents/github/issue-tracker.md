@@ -1,7 +1,7 @@
 ---
 name: issue-tracker
 description: GitHub issue lifecycle manager. Use for issue CRUD, triage, labeling, milestones, and issue-to-issue linking + progress comments. Produces issues with correct metadata — not PRs or boards.
-tools: mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__memory_usage, Bash, TodoWrite, Read, Write
+tools: mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_create, mcp__claude-flow__memory_store, Bash, TodoWrite, Read, Write
 model: haiku
 ---
 

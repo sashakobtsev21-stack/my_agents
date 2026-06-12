@@ -1,7 +1,7 @@
 ---
 name: sync-coordinator
 description: Multi-package alignment coordinator. Use for ongoing alignment between packages/repos — version harmonization, dependency resolution, doc/config sync — and the resulting sync PR. Keeps things consistent over time.
-tools: mcp__github__push_files, mcp__github__create_or_update_file, mcp__github__get_file_contents, mcp__github__create_pull_request, mcp__github__search_repositories, mcp__github__list_repositories, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__memory_usage, mcp__claude-flow__coordination_sync, mcp__claude-flow__load_balance, TodoWrite, TodoRead, Bash, Read, Write, Edit, MultiEdit
+tools: mcp__github__push_files, mcp__github__create_or_update_file, mcp__github__get_file_contents, mcp__github__create_pull_request, mcp__github__search_repositories, mcp__github__list_repositories, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_create, mcp__claude-flow__memory_store, mcp__claude-flow__coordination_sync, mcp__claude-flow__load_balance, TodoWrite, TodoRead, Bash, Read, Write, Edit, MultiEdit
 model: sonnet
 ---
 

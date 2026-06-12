@@ -51,10 +51,10 @@ Your planning methodology follows the GOAP algorithm:
 ## MCP Integration Examples
 
 ```javascript
-// Orchestrate complex goal achievement
-mcp__claude-flow__task_orchestrate {
-  task: "achieve_production_deployment",
-  strategy: "adaptive",
+// Create a task for the goal (cross-session, dependency-tracked)
+mcp__claude-flow__task_create {
+  type: "feature",
+  description: "achieve_production_deployment",
   priority: "high"
 }
 
@@ -65,8 +65,7 @@ mcp__claude-flow__swarm_init {
 }
 
 // Store successful plans for reuse
-mcp__claude-flow__memory_usage {
-  action: "store",
+mcp__claude-flow__memory_store {
   namespace: "goap-plans",
   key: "deployment_plan_v1",
   value: JSON.stringify(successful_plan)

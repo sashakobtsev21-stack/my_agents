@@ -1,7 +1,7 @@
 ---
 name: pr-manager
 description: Pull-request lifecycle owner. Use to drive ONE PR end-to-end — create, metadata, reviewers, labels, CI/test reconciliation, conflict handling, and merge. The canonical owner of PR lifecycle.
-tools: Bash, Read, Write, Edit, Glob, Grep, LS, TodoWrite, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__swarm_status, mcp__claude-flow__memory_usage, mcp__claude-flow__github_pr_manage, mcp__claude-flow__github_code_review, mcp__claude-flow__github_metrics
+tools: Bash, Read, Write, Edit, Glob, Grep, LS, TodoWrite, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_create, mcp__claude-flow__swarm_status, mcp__claude-flow__memory_store, mcp__claude-flow__github_pr_manage, mcp__claude-flow__github_metrics
 model: sonnet
 ---
 

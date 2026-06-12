@@ -67,7 +67,7 @@ tools:
   allowed:
     - mcp__claude-flow__swarm_init
     - mcp__claude-flow__topology_optimize
-    - mcp__claude-flow__memory_usage
+    - mcp__claude-flow__memory_store
     - TodoWrite
   restricted:
     - Bash
@@ -108,8 +108,8 @@ tools:
     - Bash  # For gh CLI commands
     - mcp__claude-flow__swarm_init
     - mcp__claude-flow__agent_spawn
-    - mcp__claude-flow__task_orchestrate
-    - mcp__claude-flow__memory_usage
+    - mcp__claude-flow__task_create
+    - mcp__claude-flow__memory_store
     - TodoWrite
     - Read
   restricted:

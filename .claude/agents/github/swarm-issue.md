@@ -1,7 +1,7 @@
 ---
 name: swarm-issue
 description: Issue-to-swarm executor. Use to CONVERT a GitHub issue into executing work — auto-decompose into subtasks, assign agents, orchestrate, and report progress back on the issue until done.
-tools: mcp__github__get_issue, mcp__github__create_issue, mcp__github__update_issue, mcp__github__list_issues, mcp__github__create_issue_comment, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__memory_usage, TodoWrite, TodoRead, Bash, Grep, Read, Write
+tools: mcp__github__get_issue, mcp__github__create_issue, mcp__github__update_issue, mcp__github__list_issues, mcp__github__create_issue_comment, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_create, mcp__claude-flow__memory_store, TodoWrite, TodoRead, Bash, Grep, Read, Write
 model: sonnet
 ---
 

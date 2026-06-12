@@ -65,8 +65,7 @@ mcp__claude-flow__neural_train {
 }
 
 // Store learning patterns
-mcp__claude-flow__memory_usage {
-  action: "store",
+mcp__claude-flow__memory_store {
   namespace: "safla-learning",
   key: "pattern_${timestamp}",
   value: JSON.stringify({

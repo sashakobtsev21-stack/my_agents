@@ -509,7 +509,7 @@ Once added, Codex can use these tools via MCP:
 | `swarm_status` | Check swarm state |
 | `agent_spawn` | Register agent roles |
 | `agent_status` | Check agent state |
-| `task_orchestrate` | Coordinate multi-agent tasks |
+| `task_create` | Create a tracked task (then `task_assign` to route it) |
 
 **Learning & Memory (USE THESE!):**
 | Tool | Purpose | When |
@@ -526,6 +526,15 @@ Once added, Codex can use these tools via MCP:
 | `hive-mind_init` | Byzantine consensus swarm |
 | `hive-mind_spawn` | Spawn hive workers |
 | `hive-mind_broadcast` | Message all workers |
+
+> **`mcp__github__*` tools require an external server.** Several GitHub agents
+> (`pr-manager`, `release-manager`, `swarm-pr`, `swarm-issue`, `multi-repo-swarm`,
+> `repo-architect`, `sync-coordinator`, `workflow-automation`) list
+> `mcp__github__*` tools in their frontmatter. Those are provided by the
+> *optional* official GitHub MCP server, which is **not** configured by default.
+> Without it, use the built-in `gh` CLI (via `Bash`) — the primary, always-available
+> path — or the registered `github_*` claude-flow tools (`github_pr_manage`,
+> `github_issue_track`, `github_repo_analyze`, `github_workflow`, `github_metrics`).
 
 ### Self-Learning via MCP Tools (PREFERRED)
 

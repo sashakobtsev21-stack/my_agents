@@ -347,16 +347,15 @@ mcp__claude-flow__agent_spawn {
   capabilities: ["refactoring", "optimization"]
 }
 
-// Orchestrate development tasks
-mcp__claude-flow__task_orchestrate {
-  task: "implement_oauth_system",
-  strategy: "adaptive",
+// Create a development task (cross-session, dependency-tracked)
+mcp__claude-flow__task_create {
+  type: "feature",
+  description: "implement_oauth_system",
   priority: "high"
 }
 
 // Store successful patterns
-mcp__claude-flow__memory_usage {
-  action: "store",
+mcp__claude-flow__memory_store {
   namespace: "code-patterns",
   key: "oauth_implementation_plan",
   value: JSON.stringify(successful_plan)

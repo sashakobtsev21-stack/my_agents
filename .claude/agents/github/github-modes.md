@@ -1,7 +1,7 @@
 ---
 name: github-modes
 description: GitHub request dispatcher. Use FIRST when it's unclear which github agent fits — routes a GitHub task to the right specialist (pr-manager, code-review-swarm, release-*, issue-tracker, …) with context. Produces a routing decision, not the end work.
-tools: mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, Bash, TodoWrite, Read, Write
+tools: mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_create, Bash, TodoWrite, Read, Write
 model: sonnet
 ---
 

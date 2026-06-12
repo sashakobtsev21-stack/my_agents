@@ -1,7 +1,7 @@
 ---
 name: code-review-swarm
 description: Parallel multi-agent deep code review. Use to run several specialist reviewers (security/performance/style/architecture/accessibility) over an existing PR's diff. Produces consolidated findings + an aggregate verdict.
-tools: mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, Bash, Read, Write, TodoWrite
+tools: mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_create, Bash, Read, Write, TodoWrite
 model: sonnet
 ---
 

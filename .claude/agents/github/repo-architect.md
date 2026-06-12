@@ -1,7 +1,7 @@
 ---
 name: repo-architect
 description: Repository architecture designer. Use to DESIGN repo structure, standards, templates, and governance (greenfield setup or restructuring). Produces a blueprint + scaffolding, not a propagated content change.
-tools: Bash, Read, Write, Edit, LS, Glob, TodoWrite, TodoRead, Task, mcp__github__create_repository, mcp__github__fork_repository, mcp__github__search_repositories, mcp__github__push_files, mcp__github__create_or_update_file, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__memory_usage
+tools: Bash, Read, Write, Edit, LS, Glob, TodoWrite, TodoRead, Task, mcp__github__create_repository, mcp__github__fork_repository, mcp__github__search_repositories, mcp__github__push_files, mcp__github__create_or_update_file, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_create, mcp__claude-flow__memory_store
 model: opus
 ---
 

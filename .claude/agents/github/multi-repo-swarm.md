@@ -1,7 +1,7 @@
 ---
 name: multi-repo-swarm
 description: Cross-repository change orchestrator. Use to fan ONE change out across MANY repos (org-wide updates, shared-lib bumps, cross-service refactors) with cross-repo consistency guarantees. Produces per-repo PRs + a consistency verdict.
-tools: Bash, Read, Write, Edit, Glob, Grep, LS, TodoWrite, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_orchestrate, mcp__claude-flow__swarm_status, mcp__claude-flow__memory_usage, mcp__claude-flow__github_repo_analyze, mcp__claude-flow__github_pr_manage, mcp__claude-flow__github_sync_coord, mcp__claude-flow__github_metrics
+tools: Bash, Read, Write, Edit, Glob, Grep, LS, TodoWrite, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_create, mcp__claude-flow__swarm_status, mcp__claude-flow__memory_store, mcp__claude-flow__github_repo_analyze, mcp__claude-flow__github_pr_manage, mcp__claude-flow__github_metrics
 model: opus
 ---
 
