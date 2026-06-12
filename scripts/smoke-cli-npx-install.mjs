@@ -31,8 +31,17 @@ import { join, resolve } from 'node:path';
 const REPO_ROOT = process.cwd();
 const CLI_DIR = join(REPO_ROOT, 'v3', '@claude-flow', 'cli');
 
+const IS_WIN = process.platform === 'win32';
 function run(cmd, args, opts = {}) {
-  const r = spawnSync(cmd, args, { encoding: 'utf-8', ...opts });
+  // npm/pnpm/npx ship as .cmd shims on Windows, and Node 20.12+/24 refuse to
+  // spawn a .cmd without a shell — resolve the shim + use shell there (audit
+  // W-T5). All commands/args here are constants or generated temp paths.
+  const winShim = IS_WIN && ['npm', 'pnpm', 'npx', 'yarn'].includes(cmd);
+  const r = spawnSync(winShim ? `${cmd}.cmd` : cmd, args, {
+    encoding: 'utf-8',
+    ...(winShim ? { shell: true } : {}),
+    ...opts,
+  });
   return { code: r.status ?? -1, stdout: r.stdout || '', stderr: r.stderr || '' };
 }
 

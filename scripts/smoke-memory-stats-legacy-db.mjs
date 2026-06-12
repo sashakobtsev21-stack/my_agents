@@ -23,7 +23,7 @@ import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -87,7 +87,7 @@ try {
   process.env.CLAUDE_FLOW_MEMORY_PATH = swarmDir;
   process.env.CLAUDE_FLOW_DISABLE_BRIDGE = '1';
   // Reset getMemoryRoot cache so the env var takes effect.
-  const init = await import(resolve(REPO_ROOT, 'v3/@claude-flow/cli/dist/src/memory/memory-initializer.js'));
+  const init = await import(pathToFileURL(resolve(REPO_ROOT, 'v3/@claude-flow/cli/dist/src/memory/memory-initializer.js')).href);
   if (typeof init._resetMemoryRootCache === 'function') init._resetMemoryRootCache();
 
   // Force-route through raw sql.js by passing explicit dbPath

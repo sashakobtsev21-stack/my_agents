@@ -107,6 +107,7 @@
     "@noble/ed25519": "^2.1.0",
     "@ruvector/rabitq-wasm": "^0.1.0",
     "semver": "^7.6.0",
+    "sql.js": "^1.13.0",
     "yaml": "^2.8.0"
   },
   "optionalDependencies": {

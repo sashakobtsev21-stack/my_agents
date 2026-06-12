@@ -14,32 +14,48 @@
  */
 
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
-import { join, basename, relative } from 'node:path';
+import { join, basename, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = (() => {
-  // Resolve project root regardless of where the script is invoked from
+  // Resolve project root regardless of where the script is invoked from.
+  // Walk up to the filesystem root via dirname() (cross-platform — the old
+  // `while (dir !== '/')` never terminated on Windows where the drive root is
+  // `C:\`, hanging the script). Anchor on package.json + CLAUDE.md, which only
+  // co-exist at the repo root, not in the scripts/ dir or nested packages we
+  // pass through on the way up.
   let dir = fileURLToPath(new URL('.', import.meta.url));
-  while (dir !== '/') {
-    if (existsSync(join(dir, 'verification.md'))) return dir;
-    dir = join(dir, '..');
+  while (true) {
+    if (existsSync(join(dir, 'package.json')) && existsSync(join(dir, 'CLAUDE.md'))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break; // reached the filesystem root
+    dir = parent;
   }
-  throw new Error('could not find project root (looked for verification.md)');
+  throw new Error('could not find project root (looked for package.json + CLAUDE.md)');
 })();
 
 // ── MCP tools ─────────────────────────────────────────────────────────────────
 
 const MCP_TOOLS_DIR = join(ROOT, 'v3/@claude-flow/cli/src/mcp-tools');
 
+const MCP_SKIP_FILES = ['types.ts', 'validate-input.ts', 'auto-install.ts', 'request-tracker.ts', 'agent-execute-core.ts', 'index.ts'];
+function walkMcpTs(dir) {
+  // Recursive — tools were decomposed into sub-directories (e.g.
+  // mcp-tools/agentdb-tools/pattern.ts), which a flat readdir undercounts.
+  let out = [];
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, e.name);
+    if (e.isDirectory()) out = out.concat(walkMcpTs(p));
+    else if (e.name.endsWith('.ts') && !e.name.endsWith('.test.ts') && !MCP_SKIP_FILES.includes(e.name)) out.push(p);
+  }
+  return out;
+}
+
 function extractMcpTools() {
   const tools = [];
-  const files = readdirSync(MCP_TOOLS_DIR)
-    .filter(f => f.endsWith('.ts'))
-    .filter(f => !f.endsWith('.test.ts'))
-    .filter(f => !['types.ts', 'validate-input.ts', 'auto-install.ts', 'request-tracker.ts', 'agent-execute-core.ts', 'index.ts'].includes(f));
+  const files = walkMcpTs(MCP_TOOLS_DIR);
 
-  for (const file of files) {
-    const path = join(MCP_TOOLS_DIR, file);
+  for (const path of files) {
     const src = readFileSync(path, 'utf-8');
     // Match the literal `name: 'foo_bar',` lines that the MCPTool object literals use.
     const re = /name:\s*['"]([a-z_][a-z0-9_-]*)['"]\s*,/gi;

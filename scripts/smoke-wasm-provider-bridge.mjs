@@ -33,7 +33,7 @@ const SOURCE = resolve(__dirname, '../v3/@claude-flow/cli/src/ruvector/agent-was
 function fail(msg) { console.error(`✗ ${msg}`); process.exitCode = 1; }
 function pass(msg) { console.log(`✓ ${msg}`); }
 
-const src = readFileSync(SOURCE, 'utf8');
+const src = readFileSync(SOURCE, 'utf8').replace(/\r\n/g, '\n');
 
 // 1. JsModelProvider constructor is called
 if (!/new mod\.JsModelProvider\(/.test(src)) {

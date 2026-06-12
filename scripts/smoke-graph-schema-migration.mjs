@@ -12,7 +12,7 @@
  * Usage: node scripts/smoke-graph-schema-migration.mjs
  */
 
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -67,7 +67,7 @@ async function testSchemaCreation() {
   try {
     // Dynamically import initializeMemoryDatabase
     const { initializeMemoryDatabase, MEMORY_SCHEMA_V3 } = await import(
-      path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/memory-initializer.js')
+      pathToFileURL(path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/memory-initializer.js')).href
     );
 
     // Initialize db into tmpDir
@@ -109,7 +109,7 @@ async function testEdgeInsert() {
 
   try {
     const { insertGraphEdge, countGraphEdges, _resetBridgeDb } = await import(
-      path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/graph-edge-writer.js')
+      pathToFileURL(path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/graph-edge-writer.js')).href
     );
 
     // Reset cache so it picks up our tmpDir db
@@ -139,7 +139,7 @@ async function testEdgeInsert() {
 
     // Verify decoding round-trip
     const { decodeEmbedding } = await import(
-      path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/embedding-quantization.js')
+      pathToFileURL(path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/embedding-quantization.js')).href
     );
     const decoded = decodeEmbedding(embRef);
     assert(decoded !== null, '2d: embedding decodes without error');
@@ -158,7 +158,7 @@ async function testLegacyIdPrefix() {
 
   try {
     const { insertGraphEdge, countGraphEdges, _resetBridgeDb } = await import(
-      path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/graph-edge-writer.js')
+      pathToFileURL(path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/graph-edge-writer.js')).href
     );
 
     _resetBridgeDb();
@@ -194,7 +194,7 @@ async function testPQEncoding() {
 
   try {
     const { encodeEmbedding, decodeEmbedding, encodedByteSize } = await import(
-      path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/embedding-quantization.js')
+      pathToFileURL(path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/embedding-quantization.js')).href
     );
 
     // Test 384-dim encoding
@@ -250,7 +250,7 @@ async function testTableAutoCreate() {
 
     // Now insert via graph-edge-writer — it should auto-create graph_edges
     const { insertGraphEdge, _resetBridgeDb } = await import(
-      path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/graph-edge-writer.js')
+      pathToFileURL(path.join(projectRoot, 'v3/@claude-flow/cli/dist/src/memory/graph-edge-writer.js')).href
     );
     _resetBridgeDb();
 

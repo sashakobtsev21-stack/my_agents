@@ -1,0 +1,28 @@
+# Line-ending policy (audit W-T4).
+#
+# Several scripts/tests parse source with \n-based regexes; a CRLF checkout on
+# Windows (core.autocrlf=true) otherwise leaves trailing \r and breaks them.
+# Pin text sources to LF so they parse identically on every platform. The git
+# index already stores LF for these, so this is explicit, not a renormalization.
+
+# Default: let git detect text and check it out with LF.
+* text=auto eol=lf
+
+# Binary assets — never normalize or diff as text.
+*.wasm    binary
+*.db      binary
+*.sqlite  binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.webp    binary
+*.pdf     binary
+*.woff    binary
+*.woff2   binary
+*.ttf     binary
+*.eot     binary
+*.node    binary
+*.gz      binary
+*.zip     binary

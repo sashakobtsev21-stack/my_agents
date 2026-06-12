@@ -103,7 +103,7 @@ for (const a of AGENTS) {
     check(`${a.file} exists`, false);
     continue;
   }
-  const src = readFileSync(path, 'utf8');
+  const src = readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
   agentBodies.set(a.name, src);
   // Frontmatter: between leading `---` and the next `---`
   const fmMatch = /^---\n([\s\S]+?)\n---/m.exec(src);
@@ -212,7 +212,7 @@ console.log('\n[4/4] Message schemas + behavioral mock pipeline');
 if (!existsSync(MESSAGES_TS)) {
   failures.push('pipeline-messages.ts not found');
 } else {
-  const src = readFileSync(MESSAGES_TS, 'utf8');
+  const src = readFileSync(MESSAGES_TS, 'utf8').replace(/\r\n/g, '\n');
   check(
     'pipeline-messages.ts exports `RegimeVerdict` with `type: "regime-verdict/v1"`',
     /export\s+interface\s+RegimeVerdict/.test(src) &&

@@ -39,7 +39,7 @@ function pass(msg) {
   console.log(`✓ ${msg}`);
 }
 
-const src = readFileSync(SOURCE, 'utf8');
+const src = readFileSync(SOURCE, 'utf8').replace(/\r\n/g, '\n');
 
 // Check 1: loadRuvllmWasm awaits mod.initRuvllmWasm()
 const loaderBlock = src.match(/async function loadRuvllmWasm\(\)[\s\S]*?\n\}/);

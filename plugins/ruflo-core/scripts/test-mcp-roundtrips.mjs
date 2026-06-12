@@ -21,6 +21,7 @@
 
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const REPO_ROOT = resolve(process.argv[2] ?? process.cwd());
 const DIST = resolve(REPO_ROOT, 'v3/@claude-flow/cli/dist/src/mcp-tools/agentdb-tools.js');
@@ -88,7 +89,7 @@ const watchdog = setTimeout(() => {
 watchdog.unref();
 
 try {
-  const tools = await import(DIST);
+  const tools = await import(pathToFileURL(DIST).href);
   const TOOLS = Object.fromEntries(
     Object.values(tools)
       .filter(t => t && typeof t === 'object' && typeof t.name === 'string' && typeof t.handler === 'function')

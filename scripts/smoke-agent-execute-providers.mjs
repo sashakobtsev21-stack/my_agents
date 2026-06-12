@@ -30,7 +30,7 @@ const SOURCE = resolve(__dirname, '../v3/@claude-flow/cli/src/mcp-tools/agent-ex
 function fail(msg) { console.error(`✗ ${msg}`); process.exitCode = 1; }
 function pass(msg) { console.log(`✓ ${msg}`); }
 
-const src = readFileSync(SOURCE, 'utf8');
+const src = readFileSync(SOURCE, 'utf8').replace(/\r\n/g, '\n');
 
 // 1. executeAgentTask must no longer contain the bypass fetch
 const execBody = src.match(/export async function executeAgentTask[\s\S]*?\n\}\n/);

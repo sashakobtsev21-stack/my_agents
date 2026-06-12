@@ -9,7 +9,7 @@
  * Usage: node scripts/smoke-trajectory-graph-edges.mjs
  */
 
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -17,6 +17,8 @@ import * as os from 'os';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
 const distBase = path.join(projectRoot, 'v3/@claude-flow/cli/dist/src');
+// Dynamic import() needs a file:// URL for absolute paths on Windows.
+const importDist = (rel) => import(pathToFileURL(path.join(distBase, rel)).href);
 
 // sql.js is available in root node_modules (installed by the CI setup step via
 // `npm install --legacy-peer-deps --ignore-scripts` at the repo root).
@@ -72,10 +74,10 @@ console.log('\n[ADR-130 smoke] Phase 3 — SONA trajectory-to-graph hooks\n');
 async function testTrajectoryStep() {
   console.log('TEST 1: trajectory-step writes trajectory-caused edge');
   try {
-    const { initializeMemoryDatabase } = await import(path.join(distBase, 'memory/memory-initializer.js'));
+    const { initializeMemoryDatabase } = await importDist('memory/memory-initializer.js');
     await initializeMemoryDatabase({ dbPath, force: true });
 
-    const mod = await import(path.join(distBase, 'mcp-tools/hooks-tools.js'));
+    const mod = await importDist('mcp-tools/hooks-tools.js');
     const traj = mod.hooksTrajectoryStep ?? mod.allHooksTools?.find(t => t.name === 'hooks_intelligence_trajectory-step');
     if (!traj) { fail('1a', 'hooks_intelligence_trajectory-step not found'); return; }
 
@@ -107,7 +109,7 @@ async function testTrajectoryStep() {
 async function testPostTask() {
   console.log('\nTEST 2: post-task writes reinforced-by edge');
   try {
-    const mod = await import(path.join(distBase, 'mcp-tools/hooks-tools.js'));
+    const mod = await importDist('mcp-tools/hooks-tools.js');
     const postTask = mod.hooksPostTask ?? mod.allHooksTools?.find(t => t.name === 'hooks_post-task');
     if (!postTask) { fail('2a', 'hooks_post-task not found'); return; }
 
@@ -139,7 +141,7 @@ async function testPostTask() {
 async function testPostTaskFailure() {
   console.log('\nTEST 3: post-task with success=false does not write reinforced-by edge');
   try {
-    const mod = await import(path.join(distBase, 'mcp-tools/hooks-tools.js'));
+    const mod = await importDist('mcp-tools/hooks-tools.js');
     const postTask = mod.hooksPostTask ?? mod.allHooksTools?.find(t => t.name === 'hooks_post-task');
 
     const beforeCount = await countEdgesByRelation('reinforced-by');
@@ -165,7 +167,7 @@ async function testPostTaskFailure() {
 async function testNonBlocking() {
   console.log('\nTEST 4: async writes are non-blocking (<200ms tool response)');
   try {
-    const mod = await import(path.join(distBase, 'mcp-tools/hooks-tools.js'));
+    const mod = await importDist('mcp-tools/hooks-tools.js');
     const traj = mod.hooksTrajectoryStep ?? mod.allHooksTools?.find(t => t.name === 'hooks_intelligence_trajectory-step');
 
     const times = [];
@@ -189,6 +191,15 @@ async function testNonBlocking() {
     fail('4', err.message);
   }
 }
+
+// Warm up the ONNX embedding model once so its one-time cold load (model
+// fetch + WASM init, ~2-3s on a fresh host) isn't charged to the
+// non-blocking (<200ms) assertions below — those validate steady-state tool
+// latency (TEST 4 confirms it), not the unrelated first-call model init.
+try {
+  const { loadEmbeddingModel } = await importDist('memory/memory-initializer.js');
+  await loadEmbeddingModel({ verbose: false });
+} catch { /* warmup is best-effort */ }
 
 try {
   await testTrajectoryStep();

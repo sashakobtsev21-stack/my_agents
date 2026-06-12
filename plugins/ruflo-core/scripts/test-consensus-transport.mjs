@@ -18,6 +18,7 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const REPO_ROOT = resolve(process.argv[2] ?? process.cwd());
 const DIST_INDEX = resolve(REPO_ROOT, 'v3/@claude-flow/swarm/dist/consensus/index.js');
@@ -64,7 +65,7 @@ const watchdog = setTimeout(() => {
 watchdog.unref();
 
 try {
-  const m = await import(DIST_INDEX);
+  const m = await import(pathToFileURL(DIST_INDEX).href);
   const { LocalTransport, LocalTransportRegistry, generateNodeKeyPair, signMessage, verifyMessage } = m;
 
   // LocalTransport round-trip

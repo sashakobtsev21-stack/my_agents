@@ -33,6 +33,18 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+
+// Windows ships npm as `npm.cmd`, and Node 20.12+/24 refuse to spawn a .cmd
+// without a shell. Run npm via npm.cmd+shell on Windows, plain npm (no shell)
+// on POSIX. Every arg we pass is a constant flag or an npm package name
+// validated by PKG_NAME_RE below, so the shell path stays injection-safe
+// (audit W-T5 / preserves the CWE-78 guarantee on the `npm view` call).
+const IS_WIN = process.platform === 'win32';
+const NPM_BIN = IS_WIN ? 'npm.cmd' : 'npm';
+const PKG_NAME_RE = /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/i;
+function npmExec(args, opts = {}) {
+  return execFileSync(NPM_BIN, args, IS_WIN ? { ...opts, shell: true } : opts);
+}
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -125,7 +137,7 @@ function runCveAudit(packageDir, accepted) {
 
   let audit;
   try {
-    const out = execFileSync('npm', ['audit', '--json', '--audit-level=high'], {
+    const out = npmExec(['audit', '--json', '--audit-level=high'], {
       cwd: join(REPO_ROOT, packageDir),
       stdio: ['ignore', 'pipe', 'pipe'],
       timeout: 60_000,
@@ -297,10 +309,14 @@ function runTyposquatAudit(allowlist) {
 function runPublisherTrustAudit(allowlist) {
   const critical = allowlist.publisherTrust?.criticalUpstreamPackages ?? [];
   for (const name of critical) {
+    // Validate the package name before it ever reaches a shell on Windows
+    // (CWE-78 mitigation — keeps the injection guarantee from execFileSync).
+    if (typeof name !== 'string' || !PKG_NAME_RE.test(name)) {
+      log(`  [publisher-trust] skipped invalid package name: ${String(name)}`);
+      continue;
+    }
     try {
-      // Use execFileSync + array args to prevent shell injection through
-      // package names sourced from the allowlist JSON (CWE-78 mitigation).
-      const out = execFileSync('npm', ['view', name, 'maintainers', '--json'], {
+      const out = npmExec(['view', name, 'maintainers', '--json'], {
         stdio: ['ignore', 'pipe', 'pipe'],
         timeout: 10_000,
       });

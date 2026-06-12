@@ -12,7 +12,7 @@
  * Usage: node scripts/smoke-graph-pathfinder.mjs
  */
 
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -20,6 +20,9 @@ import * as os from 'os';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
 const distBase = path.join(projectRoot, 'v3/@claude-flow/cli/dist/src');
+// Dynamic import() needs a file:// URL for absolute paths on Windows
+// (a raw `C:\...` path throws ERR_UNSUPPORTED_ESM_URL_SCHEME).
+const importDist = (rel) => import(pathToFileURL(path.join(distBase, rel)).href);
 
 let passed = 0, failed = 0;
 function pass(l) { console.log(`  PASS  ${l}`); passed++; }
@@ -37,10 +40,10 @@ async function cleanup() {
 }
 
 async function seedEdges() {
-  const { initializeMemoryDatabase } = await import(path.join(distBase, 'memory/memory-initializer.js'));
+  const { initializeMemoryDatabase } = await importDist('memory/memory-initializer.js');
   await initializeMemoryDatabase({ dbPath, force: true });
 
-  const { insertGraphEdge, _resetBridgeDb } = await import(path.join(distBase, 'memory/graph-edge-writer.js'));
+  const { insertGraphEdge, _resetBridgeDb } = await importDist('memory/graph-edge-writer.js');
   _resetBridgeDb();
 
   const edges = [
@@ -65,11 +68,11 @@ console.log('\n[ADR-130 smoke] Phase 5 — agentdb_graph-pathfinder\n');
 async function testBasicPathfinder() {
   console.log('TEST 1: basic pathfinder call returns success with paths array');
   try {
-    const mod = await import(path.join(distBase, 'mcp-tools/agentdb-tools.js'));
+    const mod = await importDist('mcp-tools/agentdb-tools.js');
     const tool = mod.agentdbGraphPathfinder ?? mod.agentdbTools?.find(t => t.name === 'agentdb_graph-pathfinder');
     if (!tool) { fail('1a', 'agentdb_graph-pathfinder not found in exports'); return; }
 
-    const { _resetBridgeDb } = await import(path.join(distBase, 'memory/graph-edge-writer.js'));
+    const { _resetBridgeDb } = await importDist('memory/graph-edge-writer.js');
     _resetBridgeDb();
 
     const result = await tool.handler({ seedNodeId: 'agent:alice', query: 'authentication', depth: 2 });
@@ -86,10 +89,10 @@ async function testBasicPathfinder() {
 async function testPPRAlgorithm() {
   console.log('\nTEST 2: personalized-pagerank algorithm returns ranked results');
   try {
-    const mod = await import(path.join(distBase, 'mcp-tools/agentdb-tools.js'));
+    const mod = await importDist('mcp-tools/agentdb-tools.js');
     const tool = mod.agentdbGraphPathfinder ?? mod.agentdbTools?.find(t => t.name === 'agentdb_graph-pathfinder');
 
-    const { _resetBridgeDb } = await import(path.join(distBase, 'memory/graph-edge-writer.js'));
+    const { _resetBridgeDb } = await importDist('memory/graph-edge-writer.js');
     _resetBridgeDb();
 
     const result = await tool.handler({
@@ -116,10 +119,10 @@ async function testPPRAlgorithm() {
 async function testDepthClamping() {
   console.log('\nTEST 3: depth > 5 is clamped to 5 without error');
   try {
-    const mod = await import(path.join(distBase, 'mcp-tools/agentdb-tools.js'));
+    const mod = await importDist('mcp-tools/agentdb-tools.js');
     const tool = mod.agentdbGraphPathfinder ?? mod.agentdbTools?.find(t => t.name === 'agentdb_graph-pathfinder');
 
-    const { _resetBridgeDb } = await import(path.join(distBase, 'memory/graph-edge-writer.js'));
+    const { _resetBridgeDb } = await importDist('memory/graph-edge-writer.js');
     _resetBridgeDb();
 
     const result = await tool.handler({ seedNodeId: 'agent:alice', query: 'test', depth: 10 });
@@ -142,10 +145,10 @@ async function testDepthClamping() {
 async function testEmptyGraph() {
   console.log('\nTEST 4: non-existent seed node returns empty paths, not error');
   try {
-    const mod = await import(path.join(distBase, 'mcp-tools/agentdb-tools.js'));
+    const mod = await importDist('mcp-tools/agentdb-tools.js');
     const tool = mod.agentdbGraphPathfinder ?? mod.agentdbTools?.find(t => t.name === 'agentdb_graph-pathfinder');
 
-    const { _resetBridgeDb } = await import(path.join(distBase, 'memory/graph-edge-writer.js'));
+    const { _resetBridgeDb } = await importDist('memory/graph-edge-writer.js');
     _resetBridgeDb();
 
     const result = await tool.handler({ seedNodeId: 'entity:nonexistent-xyz-99999', query: 'nothing' });
@@ -162,10 +165,10 @@ async function testEmptyGraph() {
 async function testComplexityBudget() {
   console.log('\nTEST 5: complexityBudget.maxNodesVisited limits traversal');
   try {
-    const mod = await import(path.join(distBase, 'mcp-tools/agentdb-tools.js'));
+    const mod = await importDist('mcp-tools/agentdb-tools.js');
     const tool = mod.agentdbGraphPathfinder ?? mod.agentdbTools?.find(t => t.name === 'agentdb_graph-pathfinder');
 
-    const { _resetBridgeDb } = await import(path.join(distBase, 'memory/graph-edge-writer.js'));
+    const { _resetBridgeDb } = await importDist('memory/graph-edge-writer.js');
     _resetBridgeDb();
 
     // With maxNodesVisited: 1, traversal must be extremely limited
@@ -198,11 +201,11 @@ async function testAllAlgorithms() {
   ];
 
   try {
-    const mod = await import(path.join(distBase, 'mcp-tools/agentdb-tools.js'));
+    const mod = await importDist('mcp-tools/agentdb-tools.js');
     const tool = mod.agentdbGraphPathfinder ?? mod.agentdbTools?.find(t => t.name === 'agentdb_graph-pathfinder');
 
     for (const algo of algorithms) {
-      const { _resetBridgeDb } = await import(path.join(distBase, 'memory/graph-edge-writer.js'));
+      const { _resetBridgeDb } = await importDist('memory/graph-edge-writer.js');
       _resetBridgeDb();
 
       const result = await tool.handler({ seedNodeId: 'agent:alice', query: 'test', algorithm: algo, depth: 2 });
