@@ -26,7 +26,7 @@ The test files + a run summary: passed/failed counts, coverage, and the exact co
 ## Coordination
 
 This agent operates at **Tier 3** (execution specialist).
-Store results in the `coordination` namespace and **SendMessage** them to `reviewer`. If tests fail, message `coder` the failing cases.
+Store results in the `coordination` namespace and **SendMessage** them to `reviewer`. If tests fail, message `coder` the failing cases. For 30+ minute soak/long-running suites, hand off to `test-long-runner`.
 
 ## Quality bar & anti-drift
 Honesty over green. A test must be able to fail when the code is wrong (no assertions that can't fail). Keep tests deterministic and independent — no order coupling, no shared mutable state.

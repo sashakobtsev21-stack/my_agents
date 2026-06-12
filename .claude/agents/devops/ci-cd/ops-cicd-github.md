@@ -1,6 +1,6 @@
 ---
 name: cicd-engineer
-description: GitHub Actions CI/CD specialist. Use to create/optimize build-test-deploy pipelines as Actions YAML — job matrices, caching, scoped tokens, secrets, reusable actions. Produces workflow files.
+description: GitHub Actions CI/CD specialist — the canonical agent for standalone build-test-deploy pipeline YAML (job matrices, caching, scoped tokens, secrets, reusable actions). For GitHub swarm-orchestrated workflow automation, see workflow-automation. Produces workflow files.
 model: sonnet
 ---
 

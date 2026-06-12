@@ -74,7 +74,7 @@
 | [`swarm-issue`](../.claude/agents/github/swarm-issue.md) ✓ | 🔵 sonnet | Issue-to-swarm executor. Use to CONVERT a GitHub issue into executing work — auto-decompose into subtasks, assign agents, orchestrate, and report progress back on the issue until done. |
 | [`swarm-pr`](../.claude/agents/github/swarm-pr.md) ✓ | 🔵 sonnet | Comment/label-driven PR swarm. Use only when you want swarm control of a PR directly from GitHub (/swarm comment commands, webhook-triggered PR swarms). For canonical PR lifecycle use pr-manager; for deep review use code-review-swarm. |
 | [`sync-coordinator`](../.claude/agents/github/sync-coordinator.md) 🎖 ✓ | 🔵 sonnet | Multi-package alignment coordinator. Use for ongoing alignment between packages/repos — version harmonization, dependency resolution, doc/config sync — and the resulting sync PR. Keeps things consistent over time. |
-| [`workflow-automation`](../.claude/agents/github/workflow-automation.md) ✓ | 🔵 sonnet | GitHub Actions author. Use to author/maintain CI/CD as code (Actions YAML) — pipelines, matrices, caching, self-healing, optimization. Produces workflow files, not PRs/releases/issues. |
+| [`workflow-automation`](../.claude/agents/github/workflow-automation.md) ✓ | 🔵 sonnet | GitHub Actions author for the GitHub automation pack (swarm-coordinated repo orchestration). Use to author/maintain CI/CD-as-code (Actions YAML) as part of broader GitHub workflow automation. For standalone build-test-deploy pipeline authoring, prefer cicd-engineer. Produces workflow files, not PRs/releases/issues. |
 
 ### Прочие (9)
 
@@ -167,7 +167,7 @@
 
 | Агент | Тир | Описание |
 |---|---|---|
-| [`cicd-engineer`](../.claude/agents/devops/ci-cd/ops-cicd-github.md) ✓ | 🔵 sonnet | GitHub Actions CI/CD specialist. Use to create/optimize build-test-deploy pipelines as Actions YAML — job matrices, caching, scoped tokens, secrets, reusable actions. Produces workflow files. |
+| [`cicd-engineer`](../.claude/agents/devops/ci-cd/ops-cicd-github.md) ✓ | 🔵 sonnet | GitHub Actions CI/CD specialist — the canonical agent for standalone build-test-deploy pipeline YAML (job matrices, caching, scoped tokens, secrets, reusable actions). For GitHub swarm-orchestrated workflow automation, see workflow-automation. Produces workflow files. |
 | [`devops-engineer`](../.claude/agents/devops/devops-engineer.md) ✓ | 🔵 sonnet | DevOps / infrastructure specialist — IaC (Terraform/Pulumi), containers, Kubernetes, and deployment pipelines. Use to provision infra, write/review IaC, containerize, and design safe deploys. |
 | [`incident-responder`](../.claude/agents/devops/incident-responder.md) ✓ | 🔵 sonnet | SRE / incident-response specialist — triages production incidents, restores service fast, runs blameless postmortems, and writes runbooks. Use during or after an outage, or to harden on-call readiness. |
 | [`observability-engineer`](../.claude/agents/devops/observability-engineer.md) ✓ | 🔵 sonnet | Observability specialist — logging, distributed tracing, metrics, dashboards, and alerting. Use to instrument code, diagnose production issues from telemetry, or design SLO-based alerts. |

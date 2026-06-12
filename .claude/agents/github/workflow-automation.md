@@ -1,6 +1,6 @@
 ---
 name: workflow-automation
-description: GitHub Actions author. Use to author/maintain CI/CD as code (Actions YAML) — pipelines, matrices, caching, self-healing, optimization. Produces workflow files, not PRs/releases/issues.
+description: GitHub Actions author for the GitHub automation pack (swarm-coordinated repo orchestration). Use to author/maintain CI/CD-as-code (Actions YAML) as part of broader GitHub workflow automation. For standalone build-test-deploy pipeline authoring, prefer cicd-engineer. Produces workflow files, not PRs/releases/issues.
 tools: mcp__github__create_workflow, mcp__github__update_workflow, mcp__github__list_workflows, mcp__github__get_workflow_runs, mcp__github__create_workflow_dispatch, mcp__claude-flow__swarm_init, mcp__claude-flow__agent_spawn, mcp__claude-flow__task_create, mcp__claude-flow__memory_store, mcp__claude-flow__performance_report, mcp__claude-flow__bottleneck_analyze, mcp__claude-flow__workflow_create, mcp__claude-flow__automation_setup, TodoWrite, TodoRead, Bash, Read, Write, Edit, Grep
 model: sonnet
 ---
