@@ -22,18 +22,25 @@
  *   6. includePlugins param exists in wasm_agent_compose schema (P4 wire)
  */
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TOOLS = resolve(__dirname, '../v3/@claude-flow/cli/src/mcp-tools/wasm-agent-tools.ts');
+const _MCP = resolve(__dirname, '../v3/@claude-flow/cli/src/mcp-tools');
+// W283 split wasm-agent-tools.ts into a barrel + -helpers + -defs;
+// concatenate all three so this dist-scan stays layout-aware (W205 fix).
+const _TOOL_FILES = [
+  resolve(_MCP, 'wasm-agent-tools.ts'),
+  resolve(_MCP, 'wasm-agent-tools-helpers.ts'),
+  resolve(_MCP, 'wasm-agent-tools-defs.ts'),
+];
 const WASM = resolve(__dirname, '../v3/@claude-flow/cli/src/ruvector/agent-wasm.ts');
 
 function fail(msg) { console.error(`✗ ${msg}`); process.exitCode = 1; }
 function pass(msg) { console.log(`✓ ${msg}`); }
 
-const toolsSrc = readFileSync(TOOLS, 'utf8');
+const toolsSrc = _TOOL_FILES.filter((p) => existsSync(p)).map((p) => readFileSync(p, 'utf8')).join('\n');
 const wasmSrc = readFileSync(WASM, 'utf8');
 
 // 1. wasm_agent_compose tool registered

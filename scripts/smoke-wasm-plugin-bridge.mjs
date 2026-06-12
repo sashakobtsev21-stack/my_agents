@@ -19,17 +19,27 @@
  *   5. extractPluginSkills correctly parses a mock manifest
  */
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TOOLS = resolve(__dirname, '../v3/@claude-flow/cli/src/mcp-tools/wasm-agent-tools.ts');
+const MCP = resolve(__dirname, '../v3/@claude-flow/cli/src/mcp-tools');
+// campaign-2 wave 77 (W283) split wasm-agent-tools.ts into a barrel +
+// ./wasm-agent-tools-helpers.ts (loadPluginManifest/extractPluginSkills)
+// + ./wasm-agent-tools-defs.ts (the tool defs incl. wasm_agent_compose).
+// Concatenate the barrel PLUS its sub-modules — same scan strength,
+// layout-aware (same fix as W205 for the other drifted smokes).
+const TOOL_FILES = [
+  resolve(MCP, 'wasm-agent-tools.ts'),
+  resolve(MCP, 'wasm-agent-tools-helpers.ts'),
+  resolve(MCP, 'wasm-agent-tools-defs.ts'),
+];
 
 function fail(msg) { console.error(`✗ ${msg}`); process.exitCode = 1; }
 function pass(msg) { console.log(`✓ ${msg}`); }
 
-const toolsSrc = readFileSync(TOOLS, 'utf8');
+const toolsSrc = TOOL_FILES.filter((f) => existsSync(f)).map((f) => readFileSync(f, 'utf8')).join('\n');
 
 // 1. includePlugins param in wasm_agent_compose inputSchema
 const composeToolBlock = toolsSrc.match(/name:\s*['"]wasm_agent_compose['"][\s\S]*?handler:/);
