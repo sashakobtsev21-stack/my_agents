@@ -637,8 +637,9 @@ describe('Security Checks', () => {
 
   it('.env.example does not contain actual API key values', () => {
     const env = readFile(ENV_EXAMPLE);
-    // Key lines should be empty or placeholder
-    const keyLine = env.split('\n').find(l => l.startsWith('OPENAI_API_KEY='));
+    // Key lines should be empty or placeholder. Split on \r?\n so a CRLF
+    // checkout on Windows doesn't leave a trailing \r on the matched line.
+    const keyLine = env.split(/\r?\n/).find(l => l.startsWith('OPENAI_API_KEY='));
     expect(keyLine).toBe('OPENAI_API_KEY=');
   });
 

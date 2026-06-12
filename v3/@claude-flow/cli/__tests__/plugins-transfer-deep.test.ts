@@ -113,7 +113,8 @@ describe('PluginManager', () => {
   });
 
   it('should return correct plugins dir and manifest path', () => {
-    expect(manager.getPluginsDir()).toContain('.claude-flow/plugins');
+    // Normalize separators so the assertion holds on Windows (backslashes) too.
+    expect(manager.getPluginsDir().replace(/\\/g, '/')).toContain('.claude-flow/plugins');
     expect(manager.getManifestPath()).toContain('installed.json');
   });
 

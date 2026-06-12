@@ -4,6 +4,9 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { agentCommand } from '../src/commands/agent.js';
 import { swarmCommand } from '../src/commands/swarm.js';
 import { memoryCommand } from '../src/commands/memory.js';
@@ -534,14 +537,35 @@ describe('Swarm Commands', () => {
 
 describe('Memory Commands', () => {
   let ctx: CommandContext;
+  let prevDbPath: string | undefined;
+  let prevDisableBridge: string | undefined;
+  let tmpDbDir: string;
 
   beforeEach(() => {
+    // #W-T1: isolate memory tests from any pre-existing (and possibly
+    // encrypted) .swarm/memory.db in process.cwd(). Point at a fresh,
+    // non-existent temp DB and force the raw sql.js path so search/list
+    // deterministically hit the empty-corpus path (success, zero rows) on
+    // every host instead of depending on leftover working-tree state.
+    prevDbPath = process.env.CLAUDE_FLOW_DB_PATH;
+    prevDisableBridge = process.env.CLAUDE_FLOW_DISABLE_BRIDGE;
+    tmpDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-mem-'));
+    process.env.CLAUDE_FLOW_DB_PATH = path.join(tmpDbDir, 'memory.db');
+    process.env.CLAUDE_FLOW_DISABLE_BRIDGE = '1';
     ctx = {
       args: [],
       flags: { _: [] },
       cwd: '/test',
       interactive: false
     };
+  });
+
+  afterEach(() => {
+    if (prevDbPath === undefined) delete process.env.CLAUDE_FLOW_DB_PATH;
+    else process.env.CLAUDE_FLOW_DB_PATH = prevDbPath;
+    if (prevDisableBridge === undefined) delete process.env.CLAUDE_FLOW_DISABLE_BRIDGE;
+    else process.env.CLAUDE_FLOW_DISABLE_BRIDGE = prevDisableBridge;
+    try { fs.rmSync(tmpDbDir, { recursive: true, force: true }); } catch { /* best effort */ }
   });
 
   describe('memory store', () => {
@@ -661,14 +685,24 @@ describe('Memory Commands', () => {
 
 describe('Config Commands', () => {
   let ctx: CommandContext;
+  let tmpCwd: string;
 
   beforeEach(() => {
+    // #W-T1: use a fresh writable temp dir as cwd so config writes succeed
+    // deterministically on every host. The previous '/test' cwd was
+    // unwritable on POSIX (root) but writable on Windows (C:\test), which
+    // made these tests pass-by-accident on CI and fail on Windows.
+    tmpCwd = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-config-'));
     ctx = {
       args: [],
       flags: { _: [] },
-      cwd: '/test',
+      cwd: tmpCwd,
       interactive: false
     };
+  });
+
+  afterEach(() => {
+    try { fs.rmSync(tmpCwd, { recursive: true, force: true }); } catch { /* best effort */ }
   });
 
   describe('config init', () => {
@@ -678,9 +712,8 @@ describe('Config Commands', () => {
 
       const result = await initCmd!.action!(ctx);
 
-      // #1425: config init is not yet implemented
-      expect(result.success).toBe(false);
-      expect(result.exitCode).toBe(1);
+      // config init writes claude-flow.config.json into the (writable) cwd.
+      expect(result.success).toBe(true);
     });
 
     it('should initialize with V3 mode', async () => {
@@ -689,9 +722,7 @@ describe('Config Commands', () => {
       ctx.flags = { v3: true, _: [] };
       const result = await initCmd!.action!(ctx);
 
-      // #1425: config init is not yet implemented
-      expect(result.success).toBe(false);
-      expect(result.exitCode).toBe(1);
+      expect(result.success).toBe(true);
     });
   });
 
@@ -725,9 +756,8 @@ describe('Config Commands', () => {
       ctx.flags = { key: 'swarm.maxAgents', value: '20', _: [] };
       const result = await setCmd!.action!(ctx);
 
-      // #1425: config set is not yet implemented
-      expect(result.success).toBe(false);
-      expect(result.exitCode).toBe(1);
+      // config set persists the value into the cwd config file.
+      expect(result.success).toBe(true);
     });
 
     it('should fail without key and value', async () => {
@@ -759,9 +789,8 @@ describe('Config Commands', () => {
       ctx.flags = { force: true, _: [] };
       const result = await resetCmd!.action!(ctx);
 
-      // #1425: config reset is not yet implemented
-      expect(result.success).toBe(false);
-      expect(result.exitCode).toBe(1);
+      // config reset rewrites the cwd config file with defaults.
+      expect(result.success).toBe(true);
     });
   });
 
@@ -772,9 +801,8 @@ describe('Config Commands', () => {
 
       const result = await exportCmd!.action!(ctx);
 
-      // #1425: config export is not yet implemented
-      expect(result.success).toBe(false);
-      expect(result.exitCode).toBe(1);
+      // config export writes the resolved config to a file under cwd.
+      expect(result.success).toBe(true);
     });
   });
 

@@ -203,13 +203,15 @@ describe('Swarm Integration Tests', () => {
     const initialCount = (await coordinator.listAgents()).length;
     expect(initialCount).toBe(1);
 
-    // Scale up
+    // Scale up. ruflo#1872: `count` is the TARGET TOTAL for the type, not a
+    // delta — so scaling coders to 3 yields 3 agents total (the lone base
+    // coder + 2 new), not 1 + 3.
     await coordinator.scaleAgents({ type: 'coder', count: 3 });
 
     const scaledUpCount = (await coordinator.listAgents()).length;
-    expect(scaledUpCount).toBe(4);
+    expect(scaledUpCount).toBe(3);
 
-    // Scale down
+    // Scale down to a target total of 2 coders.
     await coordinator.scaleAgents({ type: 'coder', count: 2 });
 
     const scaledDownCount = (await coordinator.listAgents()).length;

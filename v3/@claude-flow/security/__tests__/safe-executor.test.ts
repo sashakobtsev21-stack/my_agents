@@ -16,6 +16,20 @@ import {
   createReadOnlyExecutor,
 } from '../src/safe-executor.js';
 
+// Cross-platform "print to stdout" command (audit W-T1). Windows has no
+// echo.exe and SafeExecutor deliberately never uses a shell, so on Windows we
+// route prints through `node`; POSIX keeps `echo` to exercise the real binary.
+// Argument-validation tests keep using 'echo' directly because validation
+// rejects before any process is spawned, so the missing binary is irrelevant.
+const isWindows = process.platform === 'win32';
+const PRINT = isWindows ? 'node' : 'echo';
+const printArgs = (text: string): string[] =>
+  isWindows ? ['-e', `process.stdout.write(${JSON.stringify(text)})`] : [text];
+// Pass extra args through to a no-op runner so arg validation is still
+// exercised (dashes/equals) without the runner interpreting them as flags.
+const passthruArgs = (extra: string[]): string[] =>
+  isWindows ? ['-e', 'process.exit(0)', '--', ...extra] : extra;
+
 describe('SafeExecutor', () => {
   let executor: SafeExecutor;
 
@@ -54,7 +68,7 @@ describe('SafeExecutor', () => {
 
   describe('Command Validation', () => {
     it('should allow commands in allowlist', async () => {
-      const result = await executor.execute('echo', ['hello']);
+      const result = await executor.execute(PRINT, printArgs('hello'));
       expect(result.exitCode).toBe(0);
       expect(result.stdout.trim()).toBe('hello');
     });
@@ -124,17 +138,17 @@ describe('SafeExecutor', () => {
     });
 
     it('should allow safe arguments', async () => {
-      const result = await executor.execute('echo', ['hello', 'world']);
+      const result = await executor.execute(PRINT, passthruArgs(['hello', 'world']));
       expect(result.exitCode).toBe(0);
     });
 
     it('should allow arguments with dashes', async () => {
-      const result = await executor.execute('echo', ['-n', 'hello']);
+      const result = await executor.execute(PRINT, passthruArgs(['-n', 'hello']));
       expect(result.exitCode).toBe(0);
     });
 
     it('should allow arguments with equals', async () => {
-      const result = await executor.execute('echo', ['KEY=value']);
+      const result = await executor.execute(PRINT, passthruArgs(['KEY=value']));
       expect(result.exitCode).toBe(0);
     });
   });
@@ -153,7 +167,7 @@ describe('SafeExecutor', () => {
 
   describe('Command Execution', () => {
     it('should return stdout', async () => {
-      const result = await executor.execute('echo', ['hello']);
+      const result = await executor.execute(PRINT, printArgs('hello'));
       expect(result.stdout.trim()).toBe('hello');
     });
 
@@ -169,14 +183,14 @@ describe('SafeExecutor', () => {
     });
 
     it('should track execution duration', async () => {
-      const result = await executor.execute('echo', ['hello']);
+      const result = await executor.execute(PRINT, printArgs('hello'));
       expect(result.duration).toBeGreaterThanOrEqual(0);
     });
 
     it('should include command in result', async () => {
-      const result = await executor.execute('echo', ['hello']);
-      expect(result.command).toBe('echo');
-      expect(result.args).toEqual(['hello']);
+      const result = await executor.execute(PRINT, printArgs('hello'));
+      expect(result.command).toBe(PRINT);
+      expect(result.args).toEqual(printArgs('hello'));
     });
   });
 
@@ -195,7 +209,7 @@ describe('SafeExecutor', () => {
 
   describe('Streaming Execution', () => {
     it('should return process handle', () => {
-      const streaming = executor.executeStreaming('echo', ['hello']);
+      const streaming = executor.executeStreaming(PRINT, printArgs('hello'));
       expect(streaming.process).toBeDefined();
       expect(streaming.promise).toBeInstanceOf(Promise);
 
@@ -204,7 +218,7 @@ describe('SafeExecutor', () => {
     });
 
     it('should stream stdout', async () => {
-      const streaming = executor.executeStreaming('echo', ['hello']);
+      const streaming = executor.executeStreaming(PRINT, printArgs('hello'));
       const result = await streaming.promise;
       expect(result.stdout.trim()).toBe('hello');
     });
@@ -253,7 +267,7 @@ describe('SafeExecutor', () => {
     it('should NOT use shell for execution', async () => {
       // If shell were enabled, this would be interpreted as command chaining
       // With shell disabled, it's just a string argument
-      const result = await executor.execute('echo', ['hello']);
+      const result = await executor.execute(PRINT, printArgs('hello'));
       expect(result.exitCode).toBe(0);
 
       // This should fail validation before reaching execution

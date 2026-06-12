@@ -218,7 +218,10 @@ export async function searchEntries(options: {
 
   try {
     if (!fs.existsSync(dbPath)) {
-      return { success: false, results: [], searchTime: 0, error: 'Database not found' };
+      // No DB yet = empty corpus. A search over nothing yields zero hits,
+      // which is a successful (empty) search rather than an error — matches
+      // the empty-results path in the `memory search` command (audit W-T1).
+      return { success: true, results: [], searchTime: 0 };
     }
 
     // Ensure schema has all required columns (migration for older DBs)

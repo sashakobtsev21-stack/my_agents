@@ -63,7 +63,10 @@ export async function listEntries(options: {
 
   try {
     if (!fs.existsSync(dbPath)) {
-      return { success: false, entries: [], total: 0, error: 'Database not found' };
+      // No DB yet = nothing stored yet. Listing an empty collection is a
+      // success with zero entries, not an error — consistent with the
+      // empty-results path in the `memory list` command (audit W-T1).
+      return { success: true, entries: [], total: 0 };
     }
 
     // Ensure schema has all required columns (migration for older DBs)

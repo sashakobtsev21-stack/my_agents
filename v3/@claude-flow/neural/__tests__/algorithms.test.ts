@@ -415,7 +415,10 @@ describe('PPO Algorithm', () => {
     smallPPO.update();
     const elapsed = performance.now() - startTime;
 
-    expect(elapsed).toBeLessThan(100); // Allow overhead for PPO complexity
+    // Production target is <10ms (tracked via the console.warn above); this
+    // hard bound only catches gross regressions and stays generous to absorb
+    // CI/parallel-suite CPU contention (audit W-T1).
+    expect(elapsed).toBeLessThan(500);
   });
 
   it('should compute GAE advantages', () => {
@@ -526,7 +529,11 @@ describe('Decision Transformer', () => {
     dt.train();
     const elapsed = performance.now() - startTime;
 
-    expect(elapsed).toBeLessThan(100); // Allow overhead for transformer
+    // Production target is <10ms/batch (tracked via the console.warn above);
+    // this hard bound only catches gross regressions. Kept generous because
+    // the full suite runs test files in parallel and a transformer train step
+    // spikes well past 100ms under CI/parallel CPU contention (audit W-T1).
+    expect(elapsed).toBeLessThan(500);
   });
 
   it('should get action conditioned on target return', () => {

@@ -55,12 +55,25 @@ export const agentdbPatternStore: MCPTool = {
         const { storeEntry } = await import('../../memory/memory-initializer.js');
         const patternId = `pattern-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const value = JSON.stringify({ pattern, type, confidence, _fallback: 'reasoningBank-unavailable' });
-        await storeEntry({
+        const storeResult = await storeEntry({
           key: patternId,
           value,
           namespace: 'pattern',
           tags: [type, 'reasoning-pattern', 'fallback'],
         });
+        // #W-T1: do NOT report success when the fallback write did not actually
+        // persist. Previously the return value of storeEntry was ignored, so a
+        // failed write (e.g. backend unable to open the DB) still reported
+        // success:true — and a subsequent pattern-search found nothing,
+        // breaking the store/search round-trip contract (#2226).
+        if (!storeResult || storeResult.success !== true) {
+          return {
+            success: false,
+            error: 'Pattern store failed: ReasoningBank bridge unavailable and memory_store fallback did not persist',
+            fallbackError: storeResult?.error,
+            recommendation: 'Run agentdb_health to inspect controller registration and check that .swarm/memory.db is writable.',
+          };
+        }
         return {
           success: true,
           patternId,
