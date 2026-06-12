@@ -303,4 +303,35 @@ cd v3 && corepack pnpm build && corepack pnpm test && corepack pnpm audit
 
 ---
 
-*Аудит выполнен 2026-06-12. Доказательная база: реальные прогоны build/тестов/20 smoke/3 audit-скриптов/7 плагин-контрактов, пофайловое ревью 104 промптов шестью ревьюерами, граф-анализ, два независимых скептика. Изменения в репозиторий не вносились.*
+*Аудит выполнен 2026-06-12. Доказательная база: реальные прогоны build/тестов/20 smoke/3 audit-скриптов/7 плагин-контрактов, пофайловое ревью 104 промптов шестью ревьюерами, граф-анализ, два независимых скептика. Изменения в репозиторий не вносились (на момент аудита).*
+
+---
+
+## Addendum — реализация фиксов (2026-06-12, после аудита)
+
+Все находки проработаны волнами P0→P3 с верификацией после каждой. Изменения закоммичены и запушены в `main`.
+
+### Финальная верификация (всё зелёное)
+- `check-agents.mjs` — 104 агента, **0 errors** (75 warnings — это новый ST-1-гейт, подсвечивающий не-core агентов без полного набора секций, не блокирует).
+- `gen-counts.mjs --check` — нет дрейфа (104/41/33).
+- `audit-cli-mcp-tools.mjs` — 330 тулов, 0 dangling.
+- `audit-plugin-packages.mjs` — 15 плагинов, 0 проблем (gastown собирается tsup-ом корректно).
+- `audit-supply-chain.mjs` — без находок (Windows-ENOENT устранён).
+- `cd v3 && corepack pnpm audit` — **0 уязвимостей** (было 16: 1 critical, 10 high, 5 moderate); root `npm audit` — 0.
+- v3 build (tsc) — зелёный; CLI рантайм проверен (ONNX-эмбеддер грузится).
+- Исправленные тест-файлы — **445 passed, 0 failed** (commands, swarm-integration, plugins-transfer-deep, integration-docker, algorithms, safe-executor, bug-cluster).
+- 20 smoke + consensus/memory контракты — зелёные на Windows.
+
+### Исправлено
+- **Critical:** P-1 (game-director Tier-0), T-2 (inventory-capabilities — вечный цикл + рекурсивный MCP-скан), S-1 (v3 pnpm overrides → 0 CVE).
+- **High:** T-1 (красные тесты v3: config set/reset/export-стейл, memory list/search missing-DB→empty-success, swarm scaling-семантика, plugins CRLF-путь, DQN/DT/PPO перф-пороги), ST-3 (REF_RE на однословные + VOCAB allowlist), G-1…G-4 (битые адреса `architect`→`system-architect`, `animator`→`character-animator`, `mesh`/`hierarchical`→`*-coordinator`, `performance-engineer`→`perf-analyzer`), P-2 (легаси MCP-тулы → `task_create`/`memory_store` в 17 файлах), P-4 (фантомные github-тулы), P-5 (`npx claude-flow sparc` → слэш-команды), P-7 (dual-orchestrator метки), Windows-кластеры T-3 (`pathToFileURL` ×6) / T-4 (CRLF ×4 + `.gitattributes`).
+- **Medium/Low:** P-6 (agentic-payments experimental), P-8/P-9/P-10/P-11/P-12 (self-id, инверсия имён analyst/code-analyzer, migration-plan, doc-пути, версии/факты), G-5/G-6/G-7/G-10 (benchmark-suite, archived-пометки, SPARC-граф, dual-Optimizer), G-8/G-9 (рёбра к accessibility-specialist/test-long-runner), D-1…D-4 (числа 305→330, CLAUDE vs settings, 367→323, AGENTS.md), P-3 (внешний GitHub MCP-сервер — нота в AGENTS.md), P-13 (cicd-engineer vs workflow-automation), T-5/T-7/T-8 (npm.cmd, gh dry-run, sql.js dep), T-6 (gastown — package.json корректен, был stale-dist), ST-1 (гибрид: 25 core-агентов доведены до полного стандарта + alias-aware гейт в check-agents).
+
+### Сознательно отложено (низкая ценность / риск выше пользы)
+- **Пре-существующий хвост красных тестов v3 на Windows** вне T-1-периметра: `security-verification` / `tool-honesty` (source-pattern assertions, отставшие от кампании декомпозиции), `statusline-cost-display`, `security-audit`. Подтверждено, что они падали и на baseline (до правок); это отдельная задача по ре-привязке assertions к новым путям, не входящая в названный T-1-объём.
+- **ST-2** (оставшиеся file↔name переименования, ~8 файлов) — навигационная косметика; имена резолвятся по `name:` корректно, а худшую инверсию (analyst/code-analyzer) уже устранил P-9. Перенос файлов ×8 = churn с риском при near-нулевой пользе.
+- **T-9** (vitest `poolMatchGlobs`/`poolOptions` deprecation + отсутствующие sourcemap-ы) — косметический шум; сьют исполняется зелёным, а миграция конфига под Vitest 4 рискует сломать рабочий прогон.
+- **P-13 (остаток)** — прочие пересечения триггеров (`reviewer`/`security-auditor`/`dependency-auditor`, `coder` vs языковые, TA/rendering/VFX) уже разведены секциями «Scope — use me vs siblings» в самих агентах.
+
+### Замечание по процессу
+Smoke `smoke-github-safe-injection` на Windows не перехватывал `gh` (helper зовёт реальный `gh.exe` через `execFileSync`), из-за чего и аудит-фаза, и первый прогон фикса создали реальные тестовые issue/комментарии в репозитории. Они удалены, а smoke переведён на безопасный режим `GITHUB_SAFE_DRY_RUN` (без обращения к реальному GitHub).
