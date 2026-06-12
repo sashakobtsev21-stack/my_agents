@@ -6,7 +6,7 @@
  * Extracted from mcp-fixtures.ts (W154, P3.33 cut #2).
  */
 import type {
-  MCPTool, MCPToolResult, MCPResource, MCPPrompt, MCPServerConfig,
+  MCPTool, MCPToolResult, MCPServerConfig,
   MCPError, MCPSessionContext, MCPRequestBase, MCPResponseBase,
   MCPTransportType, MCPTransportConfig,
 } from './types.js';
