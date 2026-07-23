@@ -9,12 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Three web-content agents** (2026-07-23, gap found by external audit for the guidebook-network use case): `astro-specialist` (Astro SSG: content collections, islands, astro:assets, i18n/sitemap), `seo-specialist` (metas/canonical/hreflang, schema.org without dead FAQPage/HowTo, internal-link architecture, EEAT), `web-ui-ux-designer` (web design tokens/palettes with computed WCAG ratios, variant proposals). Agent count 104 → 107; catalog regenerated via `check-agents.mjs`.
+- **`astro-site` project profile** in `scripts/detect-profile.mjs` (+ README/CLAUDE profile tables): Astro projects get the Astro pack. Placed above `web-scraping` because content sites often carry playwright/cheerio as photo/QA devDeps — an astro.config is the stronger identity signal.
 - Configurable statusline cost segment via two environment variables (defaults unchanged):
   - `RUFLO_STATUSLINE_COST_SYMBOL` — override the leading `$` (e.g. `⚡`, `€`, `🌱`); empty string shows the number alone.
   - `RUFLO_STATUSLINE_HIDE_COST` — `1`/`true`/`yes`/`on` hides the segment. `cost.total_cost_usd` is a client-side estimate that may differ from the actual bill and is misleading on subscription plans.
 
 ### Fixed
 
+- **Web profiles routed to the game UI designer** (2026-07-23): `web-frontend` pack (and its README/CLAUDE tables) referenced `ui-ux-designer`, which resolves to the Unity/game agent — web/Astro projects now get `web-ui-ux-designer` instead; the game pack keeps its own designer.
+- **External Project Policy defanged** (2026-07-23, P1 from external audit): the standing instruction to auto-commit+push to the default branch, wholesale-rewrite READMEs, and rewrite LICENSE holder on the user's other repos is replaced with a target-repo-rules-win policy: run the target's own gates + security checks, sync docs per its rules, push only per its stated policy (ask before first default-branch push otherwise), and never touch LICENSE without an explicit instruction — pushing someone's live deploy-on-push production repo or re-attributing forked third-party code is not housekeeping.
 - `ruflo-core` coder agent (`0.2.2` → `0.2.3`): removed the hardcoded `docs/SPEC.md` / `docs/adr/*.md` paths in the "Authoritative project documents" section. The agent now discovers the spec wherever it lives (root `SPEC.md`/`CLAUDE.md` → `docs/SPEC.md`) and treats a missing ADR directory as a no-op instead of silently reading nothing — fixes portability for projects that keep their spec at the repo root.
 
 ## [3.5.0] - 2026-02-27

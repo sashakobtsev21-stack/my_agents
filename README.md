@@ -6,7 +6,7 @@
 
 [![version](https://img.shields.io/badge/version-3.10.42-6366f1?style=for-the-badge)](package.json)
 [![license](https://img.shields.io/badge/license-MIT-yellow?style=for-the-badge)](LICENSE)
-[![agents](https://img.shields.io/badge/agents-104-10b981?style=for-the-badge)](.claude/agents/)
+[![agents](https://img.shields.io/badge/agents-107-10b981?style=for-the-badge)](.claude/agents/)
 [![plugins](https://img.shields.io/badge/plugins-33-8b5cf6?style=for-the-badge)](.claude-plugin/marketplace.json)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-3c873a?style=for-the-badge&logo=node.js&logoColor=white)](package.json)
 
@@ -16,11 +16,11 @@
 
 ## 🎯 За 30 секунд
 
-Вместо того чтобы в каждом проекте заново объяснять Claude «кем быть» и «как делать», я держу готовую **команду** здесь и подключаю одной командой. После этого за разработку, ревью, тесты, безопасность и автоматизацию берётся не одна модель, а **104 специализированных агента** — Claude сам раскладывает задачу по ролям и работает параллельно.
+Вместо того чтобы в каждом проекте заново объяснять Claude «кем быть» и «как делать», я держу готовую **команду** здесь и подключаю одной командой. После этого за разработку, ревью, тесты, безопасность и автоматизацию берётся не одна модель, а **107 специализированных агентов** — Claude сам раскладывает задачу по ролям и работает параллельно.
 
 | Блок | Кол-во | Что это |
 |---|---:|---|
-| 🤖 **Агенты** | 104 | роли-специалисты (`кто` делает) — [`.claude/agents/`](.claude/agents/) |
+| 🤖 **Агенты** | 107 | роли-специалисты (`кто` делает) — [`.claude/agents/`](.claude/agents/) |
 | 🧩 **Скиллы** | 41 | пошаговые рецепты (`как` делать) — [`.claude/skills/`](.claude/skills/) |
 | ⌨️ **Команды** | 168 | slash-ярлыки (быстрый запуск) — [`.claude/commands/`](.claude/commands/) |
 | 🔌 **Плагины** | 33 | тематические бандлы — [`marketplace.json`](.claude-plugin/marketplace.json) |
@@ -39,7 +39,8 @@
 | 🎮 **Android / Unity игра** | `game-director`, `unity-engine-architect`, `gameplay-programmer`, `physics-programmer`, `rendering-engineer`, `mobile-performance-engineer`, `build-release-engineer`, `game-qa-engineer` |
 | 🕷️ **Веб-скрапинг / краулер** | `web-scraping-specialist` + плагин `ruflo-browser` (Playwright), `backend-dev`, `data-engineer`, `database-specialist`, `debugger`, `incident-responder` |
 | 🔌 **Backend / API** | `backend-dev`, `database-specialist`, `security-auditor`, `devops-engineer`, `cicd-engineer` |
-| 🖥️ **Frontend / SPA** | `frontend-specialist`, `accessibility-specialist`, `ui-ux-designer`, `perf-analyzer` |
+| 🚀 **Astro-сайт (SSG / контент)** | `astro-specialist`, `frontend-specialist`, `seo-specialist`, `accessibility-specialist`, `web-ui-ux-designer`, `perf-analyzer` |
+| 🖥️ **Frontend / SPA** | `frontend-specialist`, `accessibility-specialist`, `web-ui-ux-designer`, `perf-analyzer` |
 | 📊 **Data / ML** | `ml-developer`, `data-engineer`, `data-analyst`, `python-specialist` |
 
 Всегда плюс ядро (`coder`/`reviewer`/`tester`/`planner`/`researcher`/`debugger`/`security-auditor`). Нишевые агенты (консенсус/sublinear/Flow-Nexus) — в «advanced», в обычной работе не мешают.
@@ -112,7 +113,7 @@ AlexKo рисует внизу **лаконичную** панель (скрип
 
 ```
 my_agents/
-├── .claude/          # ядро команды: agents/ (104), skills/ (41), commands/ (168), helpers/
+├── .claude/          # ядро команды: agents/ (107), skills/ (41), commands/ (168), helpers/
 ├── .claude-plugin/   # marketplace.json (33 плагина) + хуки
 ├── plugins/          # 33 плагина ruflo-*
 ├── v3/               # монорепо v3 (CLI, MCP, память, swarm, security) — pnpm-workspace
@@ -127,7 +128,7 @@ my_agents/
 
 - **Сборка:** все 13 ядровых пакетов `v3/@claude-flow/*` → `tsc --noEmit` 0 ошибок. `npm audit` → 0 уязвимостей в корне.
 - **Честность:** непроверенные перф-цифры («150x–12500x», «Flash Attention») вычищены или помечены `unverified`.
-- **Агенты:** 104 агента / 41 скилл — фронтматтер валиден, дублей нет, связность чистая. Счётчики и витрины **авто-обновляются** хуком (`scripts/check-agents.mjs`).
+- **Агенты:** 107 агентов / 41 скилл — фронтматтер валиден, дублей нет, связность чистая. Счётчики и витрины **авто-обновляются** хуком (`scripts/check-agents.mjs`). Веб-пак с 2026-07-23 ведёт `web-ui-ux-designer` (игровой `ui-ux-designer` больше не попадает в web-профили); Astro-проекты получают свой пак (`astro-specialist` + `seo-specialist`).
 - **Тесты:** ~3500+ тестов зелёные (guidance 1331, memory 403, swarm 282, shared 267, claims 203, codex 184, mcp 187, neural 144, hooks 116, integration 42, cli-фокус 507).
 - **CI/witness:** GitHub Actions с гейтами кампании; подписанный witness-манифест 117/117 fix-маркеров на linux/macos/windows.
 - Форк [ruvnet/claude-flow](https://github.com/ruvnet/claude-flow) (MIT); `LICENSE` © ruvnet сохранён.

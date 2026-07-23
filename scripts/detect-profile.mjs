@@ -37,6 +37,13 @@ const PROFILES = [
     pack: ['game-director', 'game-designer', 'unity-engine-architect', 'gameplay-programmer', 'physics-programmer', 'rendering-engineer', 'vfx-artist', '3d-artist', 'character-animator', 'audio-designer', 'mobile-performance-engineer', 'build-release-engineer', 'game-qa-engineer', 'ui-ux-designer'],
   },
   {
+    // Before web-scraping: content sites often carry playwright/cheerio as devDeps
+    // (photo/QA pipelines) — an astro.config is the stronger identity signal.
+    id: 'astro-site', label: '🚀 Astro site (SSG / content)',
+    test: () => /(^|\s)astro(\s|$)/.test(' ' + deps + ' ') || exists('astro.config.mjs') || exists('astro.config.ts'),
+    pack: ['astro-specialist', 'frontend-specialist', 'seo-specialist', 'accessibility-specialist', 'web-ui-ux-designer', 'tester', 'perf-analyzer'],
+  },
+  {
     id: 'web-scraping', label: '🕷️ Web scraping / crawler service',
     test: () => /playwright|puppeteer|cheerio|scrapy|beautifulsoup|bs4|selenium|crawlee|jsdom/.test(hay) || /scrap|crawl|spider/.test(name),
     pack: ['web-scraping-specialist', 'backend-dev', 'data-engineer', 'database-specialist', 'data-analyst', 'debugger', 'incident-responder', 'devops-engineer'],
@@ -49,8 +56,8 @@ const PROFILES = [
   },
   {
     id: 'web-frontend', label: '🖥️ Web frontend / SPA',
-    test: () => /(^|\s)(react|vue|svelte|next|nuxt|angular|solid-js|astro)(\s|$)/.test(' ' + deps + ' '),
-    pack: ['frontend-specialist', 'accessibility-specialist', 'ui-ux-designer', 'tester', 'perf-analyzer'],
+    test: () => /(^|\s)(react|vue|svelte|next|nuxt|angular|solid-js)(\s|$)/.test(' ' + deps + ' '),
+    pack: ['frontend-specialist', 'accessibility-specialist', 'web-ui-ux-designer', 'tester', 'perf-analyzer'],
   },
   {
     id: 'mobile-app', label: '📱 Mobile app (RN / Flutter / native)',

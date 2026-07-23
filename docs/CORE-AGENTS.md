@@ -1,6 +1,6 @@
 # Core Agents — the curated entry point
 
-> **Quality over quantity.** The full roster is **104 agents** ([AGENT-CATALOG.md](AGENT-CATALOG.md)),
+> **Quality over quantity.** The full roster is **107 agents** ([AGENT-CATALOG.md](AGENT-CATALOG.md)),
 > but most work needs ~20. This page is the curated short list to reach for first,
 > tailored to the projects in use, plus an honest map of where the catalog still overlaps.
 >
@@ -27,6 +27,9 @@
 | **Specialists** | `backend-dev` | REST/GraphQL APIs (Controller-Service-Repository) |
 | | `frontend-specialist` | accessible, performant, typed UI |
 | | `accessibility-specialist` | WCAG/keyboard/screen-reader a11y *(new)* |
+| | `astro-specialist` | Astro SSG: collections, islands, i18n, assets *(new 2026-07)* |
+| | `seo-specialist` | technical/on-page SEO for content sites *(new 2026-07)* |
+| | `web-ui-ux-designer` | web visual/UX design: tokens, palettes (WCAG-checked), variants *(new 2026-07)* |
 | | `database-specialist` | schema design, query tuning, migrations |
 | | `data-engineer` / `data-analyst` | pipelines vs. interpreting the data *(analyst new)* |
 | | `typescript-specialist` / `python-specialist` | language-idiomatic work |
@@ -97,6 +100,6 @@ Still-active swarm internals (`load-balancer`, `resource-allocator`, `topology-o
 ## Why this matters
 
 The toolkit's value is reliability, not headcount. A smaller, well-understood core is
-easier to route to correctly and less confusing than 104 thinly-distinct options. Treat
+easier to route to correctly and less confusing than 107 thinly-distinct options. Treat
 the core + your tailored packs as the default; drop into the long tail only when nothing
 in the core fits.

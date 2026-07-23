@@ -1,7 +1,7 @@
 # 🧭 Каталог агентов — my_agents
 
 > Авто-генерируется из `.claude/agents/**/*.md`. Не редактируй вручную — `node scripts/gen-agent-catalog.mjs`.
-> Агентов: **104** · направлений: **25** · руководителей: **18** · модернизировано: **104/104**.
+> Агентов: **107** · направлений: **25** · руководителей: **18** · модернизировано: **107/107**.
 
 ## Как выбрать агента
 
@@ -76,10 +76,11 @@
 | [`sync-coordinator`](../.claude/agents/github/sync-coordinator.md) 🎖 ✓ | 🔵 sonnet | Multi-package alignment coordinator. Use for ongoing alignment between packages/repos — version harmonization, dependency resolution, doc/config sync — and the resulting sync PR. Keeps things consistent over time. |
 | [`workflow-automation`](../.claude/agents/github/workflow-automation.md) ✓ | 🔵 sonnet | GitHub Actions author for the GitHub automation pack (swarm-coordinated repo orchestration). Use to author/maintain CI/CD-as-code (Actions YAML) as part of broader GitHub workflow automation. For standalone build-test-deploy pipeline authoring, prefer cicd-engineer. Produces workflow files, not PRs/releases/issues. |
 
-### Прочие (9)
+### Прочие (12)
 
 | Агент | Тир | Описание |
 |---|---|---|
+| [`astro-specialist`](../.claude/agents/astro-specialist.md) ✓ | 🔵 sonnet | Astro framework specialist — SSG sites with content collections, islands architecture, astro:assets, i18n routing and sitemap/hreflang. Use to build/review Astro pages, layouts, collection schemas, and to fix Astro-specific build, routing, or hydration issues. |
 | [`base-template-generator`](../.claude/agents/base-template-generator.md) ✓ | 🟢 haiku | Use this agent when you need to create foundational templates, boilerplate code, or starter configurations for new projects, components, or features. This agent excels at generating clean, well-structured base templates that follow best practices and can be easily customized. Examples: <example>Context: User needs to start a new React component and wants a solid foundation. user: 'I need to create a new user profile component' assistant: 'I'll use the base-template-generator agent to create a comprehensive React component template with proper structure, TypeScript definitions, and styling setup.' <commentary>Since the user needs a foundational template for a new component, use the base-template-generator agent to create a well-structured starting point.</commentary></example> <example>Context: User is setting up a new API endpoint and needs a template. user: 'Can you help me set up a new REST API endpoint for user management?' assistant: 'I'll use the base-template-generator agent to create a complete API endpoint template with proper error handling, validation, and documentation structure.' <commentary>The user needs a foundational template for an API endpoint, so use the base-template-generator agent to provide a comprehensive starting point.</commentary></example> |
 | [`database-specialist`](../.claude/agents/database-specialist.md) ✓ | 🔵 sonnet | Database design and optimization specialist — schema design, query tuning, indexing, migrations, data integrity. Use for data-model decisions, slow-query diagnosis, and migration safety. |
 | [`dependency-auditor`](../.claude/agents/dependency-auditor.md) ✓ | 🔵 sonnet | Dependency & supply-chain specialist — CVE triage by reachability, lockfile/version hygiene, and safe upgrades. Use for npm-audit triage, dependency upgrades, and supply-chain risk review. |
@@ -88,7 +89,9 @@
 | [`prompt-engineer`](../.claude/agents/prompt-engineer.md) ✓ | 🔵 sonnet | Prompt & agent-definition specialist — writes and optimizes agent prompts, tool descriptions, and instructions for clarity, correct routing, and cost. Use to improve this repo's agent/skill definitions or any LLM prompt. |
 | [`python-specialist`](../.claude/agents/python-specialist.md) ✓ | 🔵 sonnet | Python development specialist — idiomatic, typed, tested Python. Use for writing/reviewing Python services, scripts, and packaging, with async, typing, and performance awareness. |
 | [`security-auditor`](../.claude/agents/security-auditor.md) ✓ | 🟣 opus | Security audit and hardening specialist — finds and remediates vulnerabilities, validates inputs, reviews auth/crypto. Use for security reviews, threat modeling, and CVE triage. |
+| [`seo-specialist`](../.claude/agents/seo-specialist.md) ✓ | 🔵 sonnet | Technical and on-page SEO specialist for content sites — metas, canonical/hreflang, schema.org, sitemaps/robots, internal linking architecture, Core Web Vitals and EEAT signals. Use to review/design SEO wiring, diagnose indexing issues, and plan internal-link structure. |
 | [`typescript-specialist`](../.claude/agents/typescript-specialist.md) ✓ | 🔵 sonnet | TypeScript development specialist — strict typing, sound domain models, modern ESM. Use for writing/reviewing TS, fixing type errors, and designing type-safe APIs. |
+| [`web-ui-ux-designer`](../.claude/agents/web-ui-ux-designer.md) ✓ | 🔵 sonnet | Web UI/UX designer — visual hierarchy, design tokens, layout and interaction quality for websites and web apps. Use to propose design directions/variants, define or review token palettes (WCAG-checked), and audit pages for visual and UX quality. NOT for game UI (see game-dev/ui-ux-designer) or native mobile. |
 
 ### Templates (8)
 

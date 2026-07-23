@@ -1,7 +1,7 @@
 # Claude Code Configuration — my_agents (v3.10.42)
 
 > **my_agents** — reusable AI agent team for Claude Code. Fork of [ruvnet/claude-flow](https://github.com/ruvnet/claude-flow) (MIT).
-> Verified in this checkout: 104 agents, 41 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, 330 MCP tools.
+> Verified in this checkout: 107 agents, 41 skills, 168 command/subcommand entries (26 top-level commands), 33 bundled plugins, 330 MCP tools.
 > Packages: `@claude-flow/cli@3.10.42`, root `my_agents@3.10.42`.
 
 ## Behavioral Rules (Always Enforced)
@@ -18,26 +18,35 @@
 ## External Project Policy (when the user opens THEIR other projects here)
 
 The user opens their own projects in this toolkit by giving a **git URL** (or path).
-When I make changes to such a project, I MUST do all of the following **automatically,
-without being reminded** (this is a standing instruction):
+**The target repo's own rules always win:** if the project has its own `CLAUDE.md` /
+contributing docs, follow THEM (commit conventions, push policy, QA gates, doc-sync
+rules) — this toolkit's defaults apply only where the target repo is silent.
 
-1. **Commit + push to the default branch** (master/main) — no asking, same as the
-   commit-push-to-main policy for this repo. Use the repo's commit convention
-   (Conventional Commits if commitlint/husky is present — e.g. `fix:`/`feat:`/`ci:`).
-   Guardrails still apply: only push work I actually verified; never commit
-   secrets/`.env`; confirm before destructive history ops (force-push, rewrite).
-2. **Rewrite the README** so it stays accurate after the changes.
-3. **Verify the LICENSE** — it must exist and name **Alexandr Kobtsev** as the
-   copyright holder. If missing or wrong, add/fix a `LICENSE` (MIT unless the repo
-   already uses another license) — `Copyright (c) <year> Alexandr Kobtsev`.
-4. **Run the test suite** — and report pass/fail honestly (never claim green I
-   didn't observe; say so if a test couldn't run).
-5. **Run security checks** — dependency audit (`npm`/`pnpm audit` or the ecosystem
-   equivalent) + a secret scan; surface any findings.
+After any edit to an external project, ALWAYS:
 
-The `/analyze-project` skill already does recon/build/test/security; this rule makes
-the **commit + README + license + tests + security** steps mandatory after any edit
-to an external project, every time.
+1. **Run the project's own gates** — its build + test suite (and QA commands from its
+   docs). Report pass/fail honestly (never claim green I didn't observe; say so if a
+   test couldn't run).
+2. **Run security checks** — dependency audit (`npm`/`pnpm audit` or the ecosystem
+   equivalent) + a secret scan; surface any findings. Never commit secrets/`.env`.
+3. **Keep docs in sync per the target repo's rules** — update the docs that repo's own
+   policy requires (changelog, progress notes, affected README sections). Do NOT
+   wholesale-rewrite a README unless the repo's rules or the user ask for it.
+4. **Commit/push per the target repo's policy.** If its docs mandate commit+push
+   (e.g. deploy-on-push repos), follow them with its commit convention (Conventional
+   Commits if commitlint/husky is present). If the repo has no stated policy, prepare
+   the commit and **ask before the first push to a default branch** — a push may
+   deploy to production. Always confirm before destructive history ops (force-push,
+   rewrite, branch deletion).
+
+**Never touch LICENSE files automatically.** Licensing/copyright changes happen only
+on an explicit user instruction naming the repo — forks and repos with third-party
+code keep their original attribution (changing the holder on someone else's code is
+a legal defect, not housekeeping).
+
+The `/analyze-project` skill already does recon/build/test/security; this policy makes
+the **gates + security + doc-sync (+ push only per target-repo policy)** steps standard
+after any edit to an external project.
 
 ## File Organization
 
@@ -84,7 +93,8 @@ node scripts/detect-profile.mjs <path> --json   # machine-readable
 | 🎮 Android / Unity game | `game-director`, `unity-engine-architect`, `gameplay-programmer`, `physics-programmer`, `rendering-engineer`, `mobile-performance-engineer`, `build-release-engineer`, `game-qa-engineer` | — |
 | 🕷️ Web scraping / crawler | `web-scraping-specialist`, `backend-dev`, `data-engineer`, `database-specialist`, `debugger`, `incident-responder` | `ruflo-browser` |
 | 🔌 Web backend / API | `backend-dev`, `database-specialist`, `security-auditor`, `devops-engineer`, `cicd-engineer` | — |
-| 🖥️ Web frontend / SPA | `frontend-specialist`, `accessibility-specialist`, `ui-ux-designer`, `perf-analyzer` | — |
+| 🚀 Astro site (SSG / content) | `astro-specialist`, `frontend-specialist`, `seo-specialist`, `accessibility-specialist`, `web-ui-ux-designer`, `perf-analyzer` | — |
+| 🖥️ Web frontend / SPA | `frontend-specialist`, `accessibility-specialist`, `web-ui-ux-designer`, `perf-analyzer` | — |
 | 📱 Mobile app | `mobile-dev`, `mobile-performance-engineer` | — |
 | 📊 Data / ML | `ml-developer`, `data-engineer`, `data-analyst`, `python-specialist` | — |
 
@@ -538,7 +548,7 @@ claude -p --resume "abc-123" --fork-session "Try approach B: CQRS pattern"
 | `--permission-mode <mode>` | acceptEdits, bypassPermissions, plan, etc. |
 | `--mcp-config <json>` | Load MCP servers from JSON |
 
-## Available Agents (104) — auto-generated catalog
+## Available Agents (107) — auto-generated catalog
 
 > The single source of truth for **all agents** is the auto-generated catalog — do **not** hand-maintain an agent list here (it drifts).
 >
