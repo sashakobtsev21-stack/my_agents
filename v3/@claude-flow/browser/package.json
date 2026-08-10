@@ -22,7 +22,7 @@
     "postinstall": "node -e \"const{execSync}=require('child_process');try{execSync('agent-browser --version',{stdio:'ignore'});}catch{console.log('\\nℹ️  agent-browser not detected. To enable browser automation, install it manually:\\n   npm install -g agent-browser@latest');}\""
   },
   "dependencies": {
-    "agent-browser": "^0.27.0",
+    "agent-browser": "^0.33.2",
     "agentic-flow": "^2.0.13",
     "zod": "^3.22.4"
   },
