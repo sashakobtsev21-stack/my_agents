@@ -4,6 +4,7 @@
 
 **Один репозиторий с готовой командой агентов, скиллов и инструментов, который я подключаю к любому своему проекту.**
 
+[![fork](https://img.shields.io/badge/fork%20of-ruvnet%2Fclaude--flow-important?style=for-the-badge)](https://github.com/ruvnet/claude-flow)
 [![version](https://img.shields.io/badge/version-3.10.42-6366f1?style=for-the-badge)](package.json)
 [![license](https://img.shields.io/badge/license-MIT-yellow?style=for-the-badge)](LICENSE)
 [![agents](https://img.shields.io/badge/agents-107-10b981?style=for-the-badge)](.claude/agents/)
@@ -11,6 +12,22 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D20-3c873a?style=for-the-badge&logo=node.js&logoColor=white)](package.json)
 
 </div>
+
+---
+
+> ### ⚠️ Это форк, а не мой проект целиком / This is a fork, not my own project
+>
+> Репозиторий — форк **[ruvnet/claude-flow](https://github.com/ruvnet/claude-flow)** (MIT).
+> Ядро `v3/@claude-flow/*`, архитектура и подавляющая часть истории — работа
+> [@ruvnet](https://github.com/ruvnet) и контрибьюторов claude-flow; `LICENSE` © ruvnet сохранён.
+> На момент последнего замера моих коммитов здесь **427 из 7097 (6%)**: состав агентов и скиллов
+> под мои задачи, профили типов проектов, веб-контент-пак и правки документации.
+>
+> *This repository is a fork of **[ruvnet/claude-flow](https://github.com/ruvnet/claude-flow)** (MIT).
+> The `v3/@claude-flow/*` core, the architecture and the overwhelming majority of the history are the
+> work of [@ruvnet](https://github.com/ruvnet) and the claude-flow contributors; the original
+> `LICENSE` © ruvnet is kept. My own commits are **427 of 7097 (6%)** — the agent and skill roster
+> for my own work, project-type profiles, a web-content pack and documentation.*
 
 ---
 
