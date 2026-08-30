@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '20'
 
@@ -68,7 +68,7 @@ jobs:
 
       - name: Upload bench artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cost-tracker-bench-result
           path: plugins/ruflo-cost-tracker/docs/benchmarks/runs/latest.json
