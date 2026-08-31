@@ -359,7 +359,7 @@ jobs:
 
       - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: v3-coverage
           path: v3/__tests__/coverage/
@@ -440,7 +440,7 @@ jobs:
           cat bench-result.json | head -c 4000 >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
       - name: Upload bench JSON artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: intelligence-bench-linux
           path: |
@@ -482,7 +482,7 @@ jobs:
         run: pnpm build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: v3-build-${{ matrix.os }}
           path: v3/@claude-flow/*/dist/
